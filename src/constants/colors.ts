@@ -6,7 +6,9 @@ export const colors = {
   //   text colors
   primaryText: '#000000',
   secondaryText: '#494949',
+  tertiary_text: '#A51255',
   userNmaeText: '#D12765',
+  whiteText: '#ffffff',
 
   //yellow
   primary_yellow: '#EEC900',
@@ -22,4 +24,13 @@ export const colors = {
   secondary_surface: '#FFEBEC',
   secondary_surface_2: '#FCEEED',
   tertiary_surface: '#FFF2DE',
+
+  //card colors
+  primary_card: '#AA1358',
+  primart_card_2: '#F4EBD0',
+  secondary_Card: '#EC504A',
+  tertiary_card: '#FAA347',
+
+  // border color
+  primary_border: '#A51255',
 };

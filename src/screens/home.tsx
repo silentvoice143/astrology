@@ -10,20 +10,37 @@ import {
 import ScreenLayout from '../components/screen-layout';
 import AnimatedSearchInput from '../components/custom-searchbox';
 import CustomButton from '../components/custom-button';
-import ChatIcon from '../assets/icons/ChatIcon';
-import CallIcon from '../assets/icons/CallIcon';
+import ChatIcon from '../assets/icons/chat-icon';
+import CallIcon from '../assets/icons/call-icon';
 import {textStyle} from '../constants/text-style';
-import KundliLogo from '../assets/icons/KundliLogo';
+import KundliLogo from '../assets/icons/kundli-icon';
 import {scale, scaleFont, verticalScale} from '../utils/sizer';
 import {colors} from '../constants/colors';
 import LinearGradient from 'react-native-linear-gradient';
+import SlidingCard from '../components/home/card-carosel';
+import IntroCard from '../components/home/intro-card';
 
 const Home = () => {
   const [search, setSearch] = useState('');
 
+  const [headerBgColor, setHeaderBgColor] = useState('color');
+
+  const handleScroll = event => {
+    const scrollY = event.nativeEvent.contentOffset.y;
+    if (scrollY > verticalScale(240)) {
+      setHeaderBgColor('transparent'); // or any color
+    } else {
+      setHeaderBgColor('color'); // original color
+    }
+  };
+
   return (
-    <ScreenLayout>
-      <ScrollView style={HomeStyle.container}>
+    <ScreenLayout headerBackgroundColor={headerBgColor}>
+      <ScrollView
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
+        style={HomeStyle.container}
+        showsVerticalScrollIndicator={false}>
         {/* Greeting */}
         <LinearGradient
           colors={[
@@ -125,15 +142,48 @@ const Home = () => {
           </View>
 
           {/* Our Astrologer  */}
-          <View>
+          <View style={{}}>
             <Text
               style={[
                 textStyle.fs_mont_20_700,
                 HomeStyle.sectionTitle,
-                {fontWeight: 600, textAlign: 'center'},
+                {
+                  marginBottom: verticalScale(20),
+                  fontWeight: 600,
+                  textAlign: 'center',
+                },
               ]}>
               Our Astrologers
             </Text>
+            <SlidingCard />
+          </View>
+          <View
+            style={{
+              height: 1,
+              width: '80%',
+              alignSelf: 'center',
+              backgroundColor: colors.primary_border,
+              marginVertical: verticalScale(28),
+            }}></View>
+
+          {/* Top astrologer list  */}
+          <View
+            style={{
+              paddingHorizontal: scale(20),
+              marginBottom: verticalScale(40),
+            }}>
+            <Text
+              style={[
+                textStyle.fs_mont_20_700,
+                {
+                  marginBottom: verticalScale(20),
+                  fontWeight: 600,
+                  textAlign: 'center',
+                },
+              ]}>
+              Top Astrologers
+            </Text>
+            <IntroCard />
           </View>
         </View>
       </ScrollView>

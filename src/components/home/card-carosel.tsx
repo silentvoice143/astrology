@@ -1,172 +1,206 @@
+import {View, Text, FlatList, Dimensions, TouchableOpacity} from 'react-native';
 import React from 'react';
-import {
-  View,
-  Text,
-  FlatList,
-  Dimensions,
-  Image,
-  StyleSheet,
-  Pressable,
-} from 'react-native';
-import LinearGradient from 'react-native-linear-gradient';
 import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
   interpolate,
-  Extrapolate,
+  SharedValue,
+  useAnimatedScrollHandler,
+  useAnimatedStyle,
+  useSharedValue,
 } from 'react-native-reanimated';
+import {moderateScale, scale, verticalScale} from '../../utils/sizer';
+import LinearGradient from 'react-native-linear-gradient';
+import {colors} from '../../constants/colors';
+import Avatar from '../avatar';
+import {textStyle} from '../../constants/text-style';
+import ChatIcon from '../../assets/icons/chat-icon';
+import CallIcon from '../../assets/icons/call-icon';
+const DATA = [
+  {
+    id: 1,
+    name: 'Pandit Morya',
+    rate: '8 Rs / Min',
+    avatar: 'https://i.pravatar.cc/300?img=5',
+    specialty: 'Vedic Astrology',
+    colors: ['#FF6B6B', '#4ECDC4'],
+  },
+  {
+    id: 2,
+    name: 'Guru Rajesh',
+    rate: '12 Rs / Min',
+    avatar: 'https://i.pravatar.cc/300?img=6',
+    specialty: 'Love & Relationships',
+    colors: ['#A8E6CF', '#FFD93D'],
+  },
+  {
+    id: 3,
+    name: 'Pandit Sharma',
+    rate: '15 Rs / Min',
+    avatar: 'https://i.pravatar.cc/300?img=7',
+    specialty: 'Career Guidance',
+    colors: ['#FFA500', '#FF0066'],
+  },
+  {
+    id: 4,
+    name: 'Mata Devi',
+    rate: '10 Rs / Min',
+    avatar: 'https://i.pravatar.cc/300?img=8',
+    specialty: 'Spiritual Healing',
+    colors: ['#667eea', '#764ba2'],
+  },
+  {
+    id: 5,
+    name: 'Baba Vishnu',
+    rate: '20 Rs / Min',
+    avatar: 'https://i.pravatar.cc/300?img=9',
+    specialty: 'Numerology',
+    colors: ['#f093fb', '#f5576c'],
+  },
+];
 
-const {width} = Dimensions.get('window');
-const CARD_WIDTH = width * 0.7;
-const SPACING = 20;
-const ITEM_SIZE = CARD_WIDTH + SPACING;
+const {width} = Dimensions.get('screen');
+const _cardWidth = width * 0.6;
+const _cardHeight = _cardWidth * 1.4;
+const _spacing = 12;
 
-const DATA = Array.from({length: 5}).map((_, i) => ({
-  id: i,
-  name: `Pandit Morya`,
-  rate: '8 Rs / Min',
-  avatar: 'https://i.pravatar.cc/300?img=' + (i + 5),
-}));
+function Card({
+  item,
+  index,
+  scrollX,
+}: {
+  item: any;
+  index: number;
+  scrollX: SharedValue<number>;
+}) {
+  const stylez = useAnimatedStyle(() => ({
+    transform: [
+      {
+        scale: interpolate(
+          scrollX.value,
+          [index - 1, index, index + 1],
+          [0.7, 1, 0.7],
+        ),
+      },
+    ],
+  }));
+  return (
+    <Animated.View
+      style={[
+        {
+          width: _cardWidth,
+          overflow: 'hidden',
+          borderRadius: 24,
+        },
+        stylez,
+      ]}>
+      <LinearGradient
+        style={{flex: 1, padding: moderateScale(20)}}
+        colors={[
+          colors.tertiary_card,
+          colors.secondary_Card,
+          colors.primary_card,
+        ]}>
+        <View style={{justifyContent: 'center', alignItems: 'center'}}>
+          <Avatar
+            borderColor={colors.glow_shadow}
+            containerStyle={{
+              height: moderateScale(80),
+              width: moderateScale(80),
+            }}
+            image={{uri: item.avatar}}
+            fallbackText={item.name}
+          />
+          <Text
+            style={[
+              textStyle.fs_mont_16_600,
+              {
+                color: colors.whiteText,
+                marginTop: verticalScale(8),
+              },
+            ]}>
+            {item.name}
+          </Text>
+          <Text
+            style={[
+              textStyle.fs_mont_14_400,
+              {
+                color: colors.whiteText,
+                marginTop: verticalScale(8),
+                marginBottom: verticalScale(20),
+                textAlign: 'center',
+              },
+            ]}>
+            This is Pandit raveena tandon specialist in vedic gyan.
+          </Text>
+          <Text
+            style={[
+              textStyle.fs_mont_16_600,
+              {
+                color: colors.whiteText,
+              },
+            ]}>
+            {item.rate}
+          </Text>
+        </View>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            marginTop: verticalScale(24),
+          }}>
+          <TouchableOpacity
+            style={{
+              height: moderateScale(60),
+              width: moderateScale(60),
+              backgroundColor: colors.primary_surface,
+              borderRadius: moderateScale(30),
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <ChatIcon colors={['#000']} height={scale(24)} width={scale(24)} />
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={{
+              height: moderateScale(60),
+              width: moderateScale(60),
+              backgroundColor: colors.primary_surface,
+              borderRadius: moderateScale(30),
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <CallIcon colors={['#000']} height={scale(24)} width={scale(24)} />
+          </TouchableOpacity>
+        </View>
+      </LinearGradient>
+    </Animated.View>
+  );
+}
 
 const SlidingCard = () => {
   const scrollX = useSharedValue(0);
-
-  const renderItem = ({item, index}: any) => {
-    const animatedStyle = useAnimatedStyle(() => {
-      const inputRange = [
-        (index - 1) * ITEM_SIZE,
-        index * ITEM_SIZE,
-        (index + 1) * ITEM_SIZE,
-      ];
-
-      const scale = interpolate(
-        scrollX.value,
-        inputRange,
-        [0.9, 1, 0.9],
-        Extrapolate.CLAMP,
-      );
-
-      const opacity = interpolate(
-        scrollX.value,
-        inputRange,
-        [0.6, 1, 0.6],
-        Extrapolate.CLAMP,
-      );
-
-      return {
-        transform: [{scale}],
-        opacity,
-      };
-    });
-
-    return (
-      <Animated.View style={[styles.card, animatedStyle]}>
-        <LinearGradient
-          colors={['#FFA500', '#FF0066']}
-          style={styles.gradient}
-          start={{x: 0, y: 0}}
-          end={{x: 1, y: 1}}>
-          <View style={styles.avatarContainer}>
-            <Image source={{uri: item.avatar}} style={styles.avatar} />
-            <View style={styles.onlineDot} />
-          </View>
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.rate}>{item.rate}</Text>
-
-          <View style={styles.iconRow}>
-            <Pressable style={styles.iconButton}>
-              <Text style={styles.iconText}>💬</Text>
-            </Pressable>
-            <Pressable style={styles.iconButton}>
-              <Text style={styles.iconText}>📞</Text>
-            </Pressable>
-          </View>
-        </LinearGradient>
-      </Animated.View>
-    );
-  };
-
+  const onScroll = useAnimatedScrollHandler(e => {
+    scrollX.value = e.contentOffset.x / (_cardWidth + _spacing);
+  });
   return (
-    <View style={{flex: 1, justifyContent: 'center'}}>
-      <FlatList
-        data={DATA}
-        keyExtractor={item => item.id.toString()}
-        horizontal
+    <View style={{justifyContent: 'center', alignItems: 'center'}}>
+      <Animated.FlatList
         showsHorizontalScrollIndicator={false}
+        data={DATA}
+        keyExtractor={item => String(item.id)}
+        horizontal
+        snapToInterval={_cardWidth + _spacing}
+        decelerationRate={'fast'}
         contentContainerStyle={{
-          paddingHorizontal: (width - CARD_WIDTH) / 2,
+          gap: _spacing,
+          paddingHorizontal: (width - _cardWidth) / 2,
         }}
-        snapToInterval={ITEM_SIZE}
-        decelerationRate="fast"
-        onScroll={Animated.event(
-          [{nativeEvent: {contentOffset: {x: scrollX}}}],
-          {useNativeDriver: true},
+        renderItem={({item, index}) => (
+          <Card item={item} index={index} scrollX={scrollX} />
         )}
-        scrollEventThrottle={16}
-        renderItem={renderItem}
+        onScroll={onScroll}
+        scrollEventThrottle={1000 / 60}
       />
     </View>
   );
 };
-
-const styles = StyleSheet.create({
-  card: {
-    width: CARD_WIDTH,
-    marginRight: SPACING,
-    borderRadius: 20,
-    overflow: 'hidden',
-  },
-  gradient: {
-    flex: 1,
-    borderRadius: 20,
-    padding: 16,
-    justifyContent: 'space-between',
-    alignItems: 'center',
-  },
-  avatarContainer: {
-    position: 'relative',
-    marginBottom: 10,
-  },
-  avatar: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    borderWidth: 2,
-    borderColor: '#FFD700',
-  },
-  onlineDot: {
-    position: 'absolute',
-    bottom: 4,
-    right: 4,
-    backgroundColor: 'limegreen',
-    borderRadius: 6,
-    width: 12,
-    height: 12,
-    borderWidth: 2,
-    borderColor: '#fff',
-  },
-  name: {
-    fontSize: 16,
-    color: '#fff',
-    fontWeight: '600',
-  },
-  rate: {
-    fontSize: 14,
-    color: '#fff',
-    marginBottom: 12,
-  },
-  iconRow: {
-    flexDirection: 'row',
-    gap: 12,
-  },
-  iconButton: {
-    backgroundColor: '#fff',
-    padding: 12,
-    borderRadius: 50,
-  },
-  iconText: {
-    fontSize: 18,
-  },
-});
 
 export default SlidingCard;

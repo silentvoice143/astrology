@@ -1,16 +1,31 @@
-import {View, Text, Pressable, StyleSheet, Image} from 'react-native';
-import React from 'react';
+import React, {useEffect, useRef} from 'react';
+import {View, Text, Pressable, StyleSheet, Image, Animated} from 'react-native';
 import MenuIcon from '../assets/icons/menu-icon';
 import {scale, verticalScale} from '../utils/sizer';
 import {colors} from '../constants/colors';
 
-const Header = () => {
+const Header = ({headerBackgroundColor}: {headerBackgroundColor: string}) => {
+  const animatedBg = useRef(new Animated.Value(0)).current;
+
+  useEffect(() => {
+    Animated.timing(animatedBg, {
+      toValue: headerBackgroundColor === 'transparent' ? 0 : 1,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  }, [headerBackgroundColor]);
+
+  const backgroundColor = animatedBg.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['#FFFFFF', colors.secondary_surface], // or your solid bg
+  });
+
   return (
-    <View style={styles.container}>
-      {/* Background Image positioned absolutely and centered */}
+    <Animated.View style={[styles.container, {backgroundColor}]}>
+      {/* Background Image */}
       <Image
         source={require('../assets/imgs/bg-img.png')}
-        style={styles.bgImage}
+        style={[styles.bgImage]}
         resizeMode="contain"
       />
 
@@ -18,30 +33,17 @@ const Header = () => {
       <Pressable>
         <MenuIcon />
       </Pressable>
-      <Pressable
-        style={{
-          height: 60,
-          width: 60,
-          borderRadius: 30,
-          backgroundColor: 'white',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flexDirection: 'row',
-        }}>
+      <Pressable style={styles.avatar}>
         <Text>SK</Text>
       </Pressable>
-    </View>
+    </Animated.View>
   );
 };
 
 export default Header;
 
-const IMAGE_WIDTH = scale(216); // adjust this to your desired width
-const IMAGE_HEIGHT = verticalScale(80); // adjust this to your desired height
-
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: colors.secondary_surface,
     paddingHorizontal: scale(24),
     paddingVertical: verticalScale(24),
     justifyContent: 'space-between',
@@ -52,9 +54,18 @@ const styles = StyleSheet.create({
     position: 'absolute',
     top: 0,
     left: '60%',
-    width: IMAGE_WIDTH,
-    height: IMAGE_HEIGHT,
-    transform: [{translateX: -IMAGE_WIDTH / 2}],
-    zIndex: 3, // send behind other elements
+    width: scale(216),
+    height: verticalScale(80),
+    transform: [{translateX: -scale(216) / 2}],
+    zIndex: 3,
+  },
+  avatar: {
+    height: 60,
+    width: 60,
+    borderRadius: 30,
+    backgroundColor: 'white',
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
   },
 });
