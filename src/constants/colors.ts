@@ -6,4 +6,5 @@ export const colors = {
   //   text colors
   primaryText: '#000000',
   secondaryText: '#494949',
+  userNmaeText:'#D12765',
 };

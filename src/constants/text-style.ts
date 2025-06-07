@@ -84,7 +84,7 @@ export function generateMontserratStyles(
     styles[key] = {
       fontSize: scaleFont(size),
       fontFamily: `Montserrat-${fontFamilySuffix}`,
-      fontWeight: weight,
+      fontWeight: weight.toString() as TextStyle['fontWeight'],
     };
   });
 
