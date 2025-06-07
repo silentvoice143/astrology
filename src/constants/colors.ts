@@ -8,6 +8,11 @@ export const colors = {
   secondaryText: '#494949',
   userNmaeText: '#D12765',
 
+  //yellow
+  primary_yellow: '#EEC900',
+  secondary_yellow: '#FFE038',
+  tertiary_yellow: '#D4AF37',
+
   //shadow
 
   glow_shadow: '#FFE038',
