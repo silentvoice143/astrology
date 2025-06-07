@@ -28,6 +28,7 @@ const Otp = () => {
           Verify your otp sent to +91 1234567890
         </Text>
         <OtpInput
+          containerStyle={{marginTop: verticalScale(64)}}
           onOtpChange={text => {
             console.log(text);
           }}

@@ -6,7 +6,11 @@ const Stack = createNativeStackNavigator();
 
 export default function PrivateRoutes() {
   return (
-    <Stack.Navigator>
+    <Stack.Navigator
+      screenOptions={{
+        headerShown: false,
+        animation: 'none',
+      }}>
       <Stack.Screen name="Home" component={Home} />
     </Stack.Navigator>
   );

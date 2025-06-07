@@ -8,12 +8,13 @@ const Stack = createNativeStackNavigator();
 export default function PublicRoutes() {
   return (
     <Stack.Navigator
+      initialRouteName="Login"
       screenOptions={{
         headerShown: false,
         animation: 'none', // disables animation
       }}>
-      <Stack.Screen name="Otp" component={Otp} />
       <Stack.Screen name="Login" component={Login} />
+      <Stack.Screen name="Otp" component={Otp} />
     </Stack.Navigator>
   );
 }

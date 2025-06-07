@@ -5,8 +5,10 @@ import {moderateScale, scale, verticalScale} from '../utils/sizer';
 import {textStyle} from '../constants/text-style';
 import CustomButton from '../components/custom-button';
 import {colors} from '../constants/colors';
+import {useNavigation} from '@react-navigation/native';
 
 const Login = () => {
+  const navigation = useNavigation();
   const [phone, setPhone] = useState('');
   return (
     <View style={styles.mainContainer}>
@@ -40,7 +42,7 @@ const Login = () => {
             backgroundColor: colors.primarybtn,
           }}
           textStyle={{color: colors.primaryText}}
-          onPress={() => {}}
+          onPress={() => navigation.navigate('Home')}
           title="Login"
         />
       </View>

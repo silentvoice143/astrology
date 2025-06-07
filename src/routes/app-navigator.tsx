@@ -8,11 +8,11 @@ import PrivateRoutes from './private-route';
 const checkAuth = () => {
   // return true if logged in, false if not
   // e.g., check token in AsyncStorage or Context
-  return false;
+  return true;
 };
 
 export default function AppNavigator() {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(true);
 
   useEffect(() => {
     const auth = checkAuth();
