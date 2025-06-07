@@ -4,12 +4,16 @@ import Header from './header';
 
 interface ScreenLayoutProps {
   children: ReactNode;
+  headerBackgroundColor: string;
 }
 
-const ScreenLayout: React.FC<ScreenLayoutProps> = ({children}) => {
+const ScreenLayout: React.FC<ScreenLayoutProps> = ({
+  children,
+  headerBackgroundColor,
+}) => {
   return (
     <View style={{flex: 1}}>
-      <Header />
+      <Header headerBackgroundColor={headerBackgroundColor} />
       <View style={{flex: 1}}>{children}</View>
     </View>
   );
