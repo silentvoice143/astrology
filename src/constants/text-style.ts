@@ -6,52 +6,42 @@ export const textStyle = {
   fs_abyss_10_400: {
     fontSize: scaleFont(10),
     fontFamily: 'AbyssinicaSIL-Regular',
-    fontWeight: 400,
   },
   fs_abyss_12_400: {
     fontSize: scaleFont(12),
     fontFamily: 'AbyssinicaSIL-Regular',
-    fontWeight: 400,
   },
   fs_abyss_14_400: {
     fontSize: scaleFont(14),
     fontFamily: 'AbyssinicaSIL-Regular',
-    fontWeight: 400,
   },
   fs_abyss_16_400: {
     fontSize: scaleFont(16),
     fontFamily: 'AbyssinicaSIL-Regular',
-    fontWeight: 400,
   },
   fs_abyss_18_400: {
     fontSize: scaleFont(18),
     fontFamily: 'AbyssinicaSIL-Regular',
-    fontWeight: 400,
   },
   fs_abyss_20_400: {
     fontSize: scaleFont(20),
     fontFamily: 'AbyssinicaSIL-Regular',
-    fontWeight: 400,
   },
   fs_abyss_24_400: {
     fontSize: scaleFont(24),
     fontFamily: 'AbyssinicaSIL-Regular',
-    fontWeight: 400,
   },
   fs_abyss_28_400: {
     fontSize: scaleFont(28),
     fontFamily: 'AbyssinicaSIL-Regular',
-    fontWeight: 400,
   },
   fs_abyss_32_400: {
     fontSize: scaleFont(32),
     fontFamily: 'AbyssinicaSIL-Regular',
-    fontWeight: 400,
   },
   fs_abyss_36_400: {
     fontSize: scaleFont(36),
     fontFamily: 'AbyssinicaSIL-Regular',
-    fontWeight: 400,
   },
 
   // Montserrat - 400 (Regular)
@@ -84,7 +74,7 @@ export function generateMontserratStyles(
     styles[key] = {
       fontSize: scaleFont(size),
       fontFamily: `Montserrat-${fontFamilySuffix}`,
-      fontWeight: weight,
+      fontWeight: weight.toString() as TextStyle['fontWeight'],
     };
   });
 

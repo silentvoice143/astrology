@@ -75,7 +75,7 @@ const AnimatedSearchInput: React.FC<AnimatedSearchInputProps> = ({
       Animated.timing(scaleValue, {
         toValue: 1.02,
         duration: animationDuration,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
     ]).start();
 
@@ -95,7 +95,7 @@ const AnimatedSearchInput: React.FC<AnimatedSearchInputProps> = ({
       Animated.timing(scaleValue, {
         toValue: 1,
         duration: animationDuration,
-        useNativeDriver: true,
+        useNativeDriver: false,
       }),
     ]).start();
 

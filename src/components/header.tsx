@@ -2,6 +2,7 @@ import {View, Text, Pressable, StyleSheet, Image} from 'react-native';
 import React from 'react';
 import MenuIcon from '../assets/icons/menu-icon';
 import {scale, verticalScale} from '../utils/sizer';
+import {colors} from '../constants/colors';
 
 const Header = () => {
   return (
@@ -40,7 +41,7 @@ const IMAGE_HEIGHT = verticalScale(80); // adjust this to your desired height
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: 'white',
+    backgroundColor: colors.secondary_surface,
     paddingHorizontal: scale(24),
     paddingVertical: verticalScale(24),
     justifyContent: 'space-between',

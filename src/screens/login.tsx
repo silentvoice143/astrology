@@ -8,13 +8,13 @@ import {colors} from '../constants/colors';
 import {useNavigation} from '@react-navigation/native';
 
 const Login = () => {
-  const navigation = useNavigation();
+  const navigation = useNavigation<any>();
   const [phone, setPhone] = useState('');
   return (
     <View style={styles.mainContainer}>
       <View
         style={{
-          marginTop: verticalScale(40),
+          marginTop: (40),
           flexDirection: 'row',
           justifyContent: 'center',
         }}>
