@@ -4,8 +4,11 @@ import {getTokenFromStore} from '../utils/get-token';
 import Toast from 'react-native-toast-message';
 import skipAuthPaths from './skip-path';
 
+const baseUrl =
+  process.env.BASE_URL || 'https://quagga-driving-socially.ngrok-free.app';
+
 const api = axios.create({
-  baseURL: 'https://your-api.com/api',
+  baseURL: baseUrl,
   timeout: 10000,
   headers: {
     'Content-Type': 'application/json',
@@ -15,6 +18,7 @@ const api = axios.create({
 api.interceptors.request.use(
   async config => {
     const urlPath = config.url || '';
+
     const shouldSkip = skipAuthPaths.some((path: string) =>
       urlPath.startsWith(path),
     );

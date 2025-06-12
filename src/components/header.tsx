@@ -4,7 +4,13 @@ import MenuIcon from '../assets/icons/menu-icon';
 import {scale, verticalScale} from '../utils/sizer';
 import {colors} from '../constants/colors';
 
-const Header = ({headerBackgroundColor}: {headerBackgroundColor: string}) => {
+const Header = ({
+  headerBackgroundColor,
+  onMenuClick,
+}: {
+  headerBackgroundColor: string;
+  onMenuClick: () => void;
+}) => {
   const animatedBg = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -30,7 +36,11 @@ const Header = ({headerBackgroundColor}: {headerBackgroundColor: string}) => {
       />
 
       {/* Foreground content */}
-      <Pressable>
+      <Pressable
+        onPress={() => {
+          onMenuClick();
+          console.log('opening sidebar');
+        }}>
         <MenuIcon />
       </Pressable>
       <Pressable style={styles.avatar}>

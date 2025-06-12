@@ -10,11 +10,19 @@ import {
   ViewStyle,
   GestureResponderEvent,
 } from 'react-native';
+import {scale} from '../utils/sizer';
+import {textStyle} from '../constants/text-style';
+import {colors} from '../constants/colors';
+type HeaderObject = {
+  title: string | React.ReactNode;
+  description?: string;
+};
 
+type HeaderContent = React.ReactNode | HeaderObject;
 type CustomModalProps = {
   visible: boolean;
   onClose: (e?: GestureResponderEvent) => void;
-  header?: React.ReactNode;
+  header?: HeaderContent;
   footer?: React.ReactNode;
   children: React.ReactNode;
 
@@ -45,29 +53,70 @@ const CustomModal: React.FC<CustomModalProps> = ({
   showCloseButton = true,
   closeOnBackdropPress = true,
 }) => {
+  function isHeaderObject(header: HeaderContent): header is HeaderObject {
+    return typeof header === 'object' && header !== null && 'title' in header;
+  }
+  const renderHeader = () => {
+    if (!header && !showCloseButton) return null;
+
+    if (React.isValidElement(header)) {
+      return (
+        <View style={[styles.header, headerStyle]}>
+          <View style={styles.headerContent}>
+            {header}
+            {showCloseButton && (
+              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                <Text style={styles.closeText}>×</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      );
+    }
+
+    if (isHeaderObject(header)) {
+      return (
+        <View style={[styles.header, headerStyle]}>
+          <View style={styles.headerContent}>
+            <View style={{flex: 1}}>
+              {typeof header.title === 'string' ? (
+                <>
+                  <Text style={[textStyle.fs_mont_18_700]}>{header.title}</Text>
+                  {header.description && (
+                    <Text style={styles.descriptionText}>
+                      {header.description}
+                    </Text>
+                  )}
+                </>
+              ) : (
+                header.title
+              )}
+            </View>
+            {showCloseButton && (
+              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+                <Text style={styles.closeText}>×</Text>
+              </TouchableOpacity>
+            )}
+          </View>
+        </View>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <TouchableWithoutFeedback
-        onPress={closeOnBackdropPress ? onClose : undefined}>
-        <View style={[styles.backdrop, backdropStyle]} />
-      </TouchableWithoutFeedback>
+      <View>
+        <TouchableWithoutFeedback
+          onPress={closeOnBackdropPress ? onClose : undefined}>
+          <View style={[styles.backdrop, backdropStyle]} />
+        </TouchableWithoutFeedback>
+      </View>
 
       <View style={[styles.container, containerStyle]}>
         <View style={[styles.modal, modalStyle]}>
-          {(header || showCloseButton) && (
-            <View style={[styles.header, headerStyle]}>
-              <View style={styles.headerContent}>
-                {header}
-                {showCloseButton && (
-                  <TouchableOpacity
-                    onPress={onClose}
-                    style={styles.closeButton}>
-                    <Text style={styles.closeText}>×</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-            </View>
-          )}
+          {renderHeader()}
 
           <View style={[styles.content, contentStyle]}>{children}</View>
 
@@ -93,32 +142,44 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   modal: {
+    borderWidth: 1,
+    borderColor: colors.primary_border,
     width: '85%',
     backgroundColor: '#fff',
-    borderRadius: 10,
+    borderRadius: 12,
     overflow: 'hidden',
   },
   header: {
-    padding: 16,
+    padding: scale(12),
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#ddd',
   },
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+  },
+  titleText: {
+    fontWeight: 700,
+    color: '#222',
+  },
+  descriptionText: {
+    fontSize: 14,
+    color: '#666',
+    marginTop: 4,
   },
   closeButton: {
     paddingHorizontal: 8,
     paddingVertical: 4,
   },
   closeText: {
-    fontSize: 24,
+    fontSize: 20,
     fontWeight: '600',
     color: '#999',
   },
   content: {
-    padding: 16,
+    paddingHorizontal: scale(12),
+    paddingVertical: scale(0),
   },
   footer: {
     padding: 12,

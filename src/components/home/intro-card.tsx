@@ -4,27 +4,42 @@ import {scale, verticalScale} from '../../utils/sizer';
 import {colors} from '../../constants/colors';
 import Avatar from '../avatar';
 import {textStyle} from '../../constants/text-style';
-import CustomButton from '../custom-button';
 import LinearGradient from 'react-native-linear-gradient';
 
-const IntroCard = () => {
+type IntroCardProps = {
+  name: string;
+  rate: string;
+  avatar: string;
+  specialty: string;
+  cardWidth: number;
+};
+
+const IntroCard = ({
+  name,
+  rate,
+  avatar,
+  specialty,
+  cardWidth,
+}: IntroCardProps) => {
   return (
     <View
       style={{
+        width: cardWidth,
         padding: scale(24),
         backgroundColor: colors.primart_card_2,
         borderRadius: scale(20),
         flexDirection: 'row',
         gap: scale(20),
       }}>
-      <Avatar
-        image={{uri: 'https://i.pravatar.cc/300?img=9'}}
-        fallbackText="SK"
-      />
+      <Avatar image={{uri: avatar}} fallbackText={name[0]} />
       <View
-        style={{flex: 1, justifyContent: 'flex-start', gap: verticalScale(12)}}>
+        style={{
+          flex: 1,
+          justifyContent: 'flex-start',
+          gap: verticalScale(12),
+        }}>
         <Text style={[textStyle.fs_mont_16_700, {color: colors.tertiary_text}]}>
-          Pt. Raveena Tandon
+          {name}
         </Text>
         <Text
           style={[
@@ -34,24 +49,28 @@ const IntroCard = () => {
               width: '100%',
             },
           ]}>
-          This is Pandit Raveena Tandon, specialist in Vedic Gyan.
+          {specialty}
         </Text>
-        <LinearGradient
-          colors={[
-            colors.primary_card,
-            colors.secondary_Card,
-            colors.tertiary_card,
-          ]}
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            width: 'auto',
-            height: verticalScale(40),
-            borderRadius: scale(20),
-          }}>
-          <Text style={{color: colors.whiteText}}>10 Rs / Min</Text>
-        </LinearGradient>
+        <View
+          style={{flex: 1, alignItems: 'flex-end', justifyContent: 'flex-end'}}>
+          <LinearGradient
+            colors={[
+              colors.primary_card,
+              colors.secondary_Card,
+              colors.tertiary_card,
+            ]}
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'center',
+              alignItems: 'center',
+              width: 120,
+              height: verticalScale(40),
+              borderRadius: scale(20),
+              paddingHorizontal: scale(12),
+            }}>
+            <Text style={{color: colors.whiteText}}>{rate}</Text>
+          </LinearGradient>
+        </View>
       </View>
     </View>
   );

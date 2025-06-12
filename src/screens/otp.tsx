@@ -6,11 +6,37 @@ import {textStyle} from '../constants/text-style';
 import CustomButton from '../components/custom-button';
 import {colors} from '../constants/colors';
 import OtpInput from '../components/otp-input';
+import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
+import {verifyOtp} from '../store/reducer/auth';
 
 const Otp = () => {
-  const [phone, setPhone] = useState('');
+  const {otp, mobile} = useAppSelector((state: any) => state.auth);
+  const dispatch = useAppDispatch();
+  const [otpInput, setOtpInput] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleVerify = async () => {
+    setLoading(true);
+    try {
+      const payload = await dispatch(
+        verifyOtp({mobile: mobile, otp: otpInput}),
+      );
+      console.log(payload, '---otp verify');
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <View style={styles.mainContainer}>
+      <Text
+        style={[
+          {position: 'absolute', top: 20, left: 40},
+          textStyle.fs_abyss_24_400,
+        ]}>
+        {otp}
+      </Text>
       <View
         style={{
           marginTop: verticalScale(40),
@@ -30,16 +56,20 @@ const Otp = () => {
         <OtpInput
           containerStyle={{marginTop: verticalScale(64)}}
           onOtpChange={text => {
-            console.log(text);
+            setOtpInput(text);
           }}
         />
         <CustomButton
+          loaderColor={colors.primaryText}
+          loading={loading}
           style={{
             marginTop: verticalScale(40),
             backgroundColor: colors.primarybtn,
           }}
           textStyle={{color: colors.primaryText}}
-          onPress={() => {}}
+          onPress={() => {
+            handleVerify();
+          }}
           title="Verify"
         />
       </View>
