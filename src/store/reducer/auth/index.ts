@@ -1,16 +1,22 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {loginUserThunk} from './actions';
+import {loginUser, verifyOtp} from './action';
 
 interface AuthState {
   token: string | null;
-  loading: boolean;
-  error: string | null;
+  mobile: string | null;
+  otp: string;
+  role: string;
+  walletBalance: number;
+  name: string;
 }
 
 const initialState: AuthState = {
   token: null,
-  loading: false,
-  error: null,
+  mobile: null,
+  otp: '',
+  role: '',
+  name: '',
+  walletBalance: 0,
 };
 
 const authSlice = createSlice({
@@ -18,28 +24,43 @@ const authSlice = createSlice({
   initialState,
   reducers: {
     logout(state) {
-      state.token = null;
+      return initialState;
+    },
+    setMobile(state, action) {
+      state.mobile = action.payload.mobile;
     },
   },
   extraReducers: builder => {
     builder
-      .addCase(loginUserThunk.pending, state => {
-        state.loading = true;
-        state.error = null;
+      .addCase(loginUser.fulfilled, (state, {payload}) => {
+        if (payload?.success) {
+          state.otp = payload.otp;
+        }
       })
       .addCase(
-        loginUserThunk.fulfilled,
-        (state, action: PayloadAction<{token: string}>) => {
-          state.loading = false;
+        verifyOtp.fulfilled,
+        (
+          state,
+          action: PayloadAction<{
+            token: string;
+            user: {
+              name: string;
+              mobile: string;
+              role: string;
+              walletBalance: number;
+            };
+          }>,
+        ) => {
           state.token = action.payload.token;
+          state.name = action.payload.user.name;
+          state.mobile = action.payload.user.mobile;
+          state.role = action.payload.user.role;
+          state.walletBalance = action.payload.user.walletBalance;
         },
-      )
-      .addCase(loginUserThunk.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      });
+      );
   },
 });
 
-export const {logout} = authSlice.actions;
+export const {logout, setMobile} = authSlice.actions;
+export {loginUser, verifyOtp};
 export default authSlice.reducer;

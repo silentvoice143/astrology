@@ -2,6 +2,7 @@ export const colors = {
   // button colors
   primarybtn: '#EEC900',
   secondarybtn: '#A51255',
+  tertiary_btn: '#19A360',
 
   //   text colors
   primaryText: '#000000',

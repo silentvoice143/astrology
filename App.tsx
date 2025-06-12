@@ -1,16 +1,19 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
-
 import React from 'react';
-import {StyleSheet, Text, View} from 'react-native';
+import {StyleSheet} from 'react-native';
+import {Provider} from 'react-redux'; // Import Provider
 import AppNavigator from './src/routes/app-navigator';
+import {store} from './src/store'; // Import your Redux store
+import Toast from 'react-native-toast-message';
 
 function App(): React.JSX.Element {
-  return <AppNavigator />;
+  return (
+    <Provider store={store}>
+      <>
+        <AppNavigator />
+        <Toast />
+      </>
+    </Provider>
+  );
 }
 
 const styles = StyleSheet.create({

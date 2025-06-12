@@ -19,11 +19,16 @@ import {colors} from '../constants/colors';
 import LinearGradient from 'react-native-linear-gradient';
 import SlidingCard from '../components/home/card-carosel';
 import IntroCard from '../components/home/intro-card';
+import AstrologerCarosel from '../components/home/top-astrologer-carosel';
+import Carousel from '../components/carosel';
+import PersonalDetailModal from '../components/home/personal-detail-modal';
 
 const Home = () => {
   const [search, setSearch] = useState('');
 
   const [headerBgColor, setHeaderBgColor] = useState('color');
+  const [isPersonalDetailModalOpen, setIsPersonalDetailModalOpen] =
+    useState(true);
 
   const handleScroll = event => {
     const scrollY = event.nativeEvent.contentOffset.y;
@@ -36,6 +41,10 @@ const Home = () => {
 
   return (
     <ScreenLayout headerBackgroundColor={headerBgColor}>
+      <PersonalDetailModal
+        isOpen={isPersonalDetailModalOpen}
+        onClose={() => setIsPersonalDetailModalOpen(false)}
+      />
       <ScrollView
         onScroll={handleScroll}
         scrollEventThrottle={16}
@@ -93,6 +102,8 @@ const Home = () => {
                 width: '100%',
               }}>
               <AnimatedSearchInput
+                shadowColor={colors.glow_shadow}
+                iconColor={colors.primarybtn}
                 enableShadow={true}
                 placeholder="Search here for pandits"
                 value={search}
@@ -170,7 +181,7 @@ const Home = () => {
           <View
             style={{
               paddingHorizontal: scale(20),
-              marginBottom: verticalScale(40),
+              marginBottom: verticalScale(80),
             }}>
             <Text
               style={[
@@ -183,15 +194,76 @@ const Home = () => {
               ]}>
               Top Astrologers
             </Text>
-            <IntroCard />
+            <Carousel
+              data={introCardData}
+              pagination={true}
+              cardWidthScale={0.9}
+              CardComponent={AstrologerCarosel}
+            />
           </View>
         </View>
       </ScrollView>
+      <CustomButton
+        style={{
+          width: scale(140),
+          position: 'absolute',
+          bottom: 20,
+          left: 20,
+          backgroundColor: colors.primarybtn,
+        }}
+        leftIcon={<CallIcon colors={['#000000']} height={20} width={20} />}
+        textStyle={{color: colors.primaryText}}
+        onPress={() => {}}
+        title={'Call Now'}
+      />
+      <CustomButton
+        style={{
+          width: scale(140),
+          position: 'absolute',
+          bottom: 20,
+          right: 20,
+          backgroundColor: colors.tertiary_btn,
+        }}
+        leftIcon={<ChatIcon colors={['#ffffff']} height={20} width={20} />}
+        onPress={() => {}}
+        title={'Chat Now'}
+      />
     </ScreenLayout>
   );
 };
 
 export default Home;
+
+const introCardData = [
+  {
+    id: 1,
+    name: 'Pt. Raveena Tandon',
+    rate: '10 Rs / Min',
+    avatar: 'https://i.pravatar.cc/300?img=9',
+    specialty: 'Specialist in Vedic Gyan',
+  },
+  {
+    id: 2,
+    name: 'Acharya Ved Prakash',
+    rate: '12 Rs / Min',
+    avatar: 'https://i.pravatar.cc/300?img=8',
+    specialty: 'Expert in Love & Marriage Solutions',
+  },
+  {
+    id: 3,
+    name: 'Guru Anand Joshi',
+    rate: '15 Rs / Min',
+    avatar: 'https://i.pravatar.cc/300?img=7',
+    specialty: 'Career & Finance Consultant',
+  },
+  {
+    id: 4,
+    name: 'Mata Sushila Devi',
+    rate: '8 Rs / Min',
+    avatar: 'https://i.pravatar.cc/300?img=6',
+    specialty: 'Spiritual & Reiki Healer',
+  },
+];
 
 const HomeStyle = StyleSheet.create({
   container: {

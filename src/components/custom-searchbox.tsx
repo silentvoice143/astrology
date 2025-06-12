@@ -127,7 +127,7 @@ const AnimatedSearchInput: React.FC<AnimatedSearchInputProps> = ({
 
   const renderIcon = () => (
     <View style={[styles.icon, iconStyle]}>
-      <SearchIcon />
+      <SearchIcon color={iconColor} />
     </View>
   );
 
@@ -140,6 +140,7 @@ const AnimatedSearchInput: React.FC<AnimatedSearchInputProps> = ({
             borderColor: animatedBorderColor,
             borderWidth: animatedBorderWidth,
             shadowOpacity: animatedShadowOpacity,
+            shadowColor: finalShadowColor,
             elevation: animatedElevation,
             transform: [{scale: scaleValue}],
           },
