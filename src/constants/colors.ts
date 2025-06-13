@@ -34,4 +34,12 @@ export const colors = {
 
   // border color
   primary_border: '#A51255',
+
+  // blue color
+  blue: '#011996',
+  primary_orange: '#F38A00',
+  background: '#FFFFFF',
+  starGold: '#FFD700',
+  grey300: '#E0E0E0',
+  backgroundLight: '#f8f9fa',
 };
