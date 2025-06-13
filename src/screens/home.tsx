@@ -22,15 +22,16 @@ import IntroCard from '../components/home/intro-card';
 import AstrologerCarosel from '../components/home/top-astrologer-carosel';
 import Carousel from '../components/carosel';
 import PersonalDetailModal from '../components/home/personal-detail-modal';
+import { useNavigation } from '@react-navigation/native';
 
 const Home = () => {
   const [search, setSearch] = useState('');
-
+  const navigation = useNavigation<any>()
   const [headerBgColor, setHeaderBgColor] = useState('color');
   const [isPersonalDetailModalOpen, setIsPersonalDetailModalOpen] =
     useState(true);
 
-  const handleScroll = event => {
+  const handleScroll = (event:any) => {
     const scrollY = event.nativeEvent.contentOffset.y;
     if (scrollY > verticalScale(240)) {
       setHeaderBgColor('transparent'); // or any color
@@ -66,7 +67,9 @@ const Home = () => {
             {/* Horoscope Button */}
             <CustomButton
               title="Today's horoscope"
-              onPress={() => {}}
+              onPress={() => {
+                navigation.push('DetailsProfile');
+              }}
               style={HomeStyle.horoscopeButton}
               textStyle={[textStyle.fs_mont_14_500, HomeStyle.horoscopeText]}
             />
