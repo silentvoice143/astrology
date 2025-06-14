@@ -31,12 +31,12 @@ const ChatHistoryCard: React.FC<ChatHistoryCardProps> = ({
 
         <View style={styles.textContainer}>
           <Text style={[styles.name, textStyle.fs_abyss_16_400]}>{name}</Text>
-          <Text style={[styles.message, textStyle.fs_mont_16_400]}>
+          <Text style={[styles.message, textStyle.fs_mont_14_400]}>
             {message}
           </Text>
         </View>
       </View>
-      <Text style={[styles.time, textStyle.fs_mont_16_400]}>{time}</Text>
+      <Text style={[styles.time, textStyle.fs_mont_12_400]}>{time}</Text>
     </View>
   );
 };

@@ -9,16 +9,21 @@ import {
   StyleProp,
   ViewStyle,
   GestureResponderEvent,
+  KeyboardAvoidingView,
+  ScrollView,
+  Platform,
 } from 'react-native';
-import {scale} from '../utils/sizer';
+import {moderateScale, scale} from '../utils/sizer';
 import {textStyle} from '../constants/text-style';
 import {colors} from '../constants/colors';
+
 type HeaderObject = {
   title: string | React.ReactNode;
   description?: string;
 };
 
 type HeaderContent = React.ReactNode | HeaderObject;
+
 type CustomModalProps = {
   visible: boolean;
   onClose: (e?: GestureResponderEvent) => void;
@@ -36,6 +41,12 @@ type CustomModalProps = {
 
   showCloseButton?: boolean;
   closeOnBackdropPress?: boolean;
+
+  // Keyboard and scroll options
+  enableKeyboardAvoiding?: boolean;
+  enableScrollView?: boolean;
+  keyboardVerticalOffset?: number;
+  scrollViewProps?: any;
 };
 
 const CustomModal: React.FC<CustomModalProps> = ({
@@ -52,10 +63,15 @@ const CustomModal: React.FC<CustomModalProps> = ({
   footerStyle,
   showCloseButton = true,
   closeOnBackdropPress = true,
+  enableKeyboardAvoiding = true,
+  enableScrollView = true,
+  keyboardVerticalOffset = 0,
+  scrollViewProps = {},
 }) => {
   function isHeaderObject(header: HeaderContent): header is HeaderObject {
     return typeof header === 'object' && header !== null && 'title' in header;
   }
+
   const renderHeader = () => {
     if (!header && !showCloseButton) return null;
 
@@ -105,23 +121,59 @@ const CustomModal: React.FC<CustomModalProps> = ({
     return null;
   };
 
-  return (
-    <Modal visible={visible} transparent animationType="fade">
-      <View>
-        <TouchableWithoutFeedback
-          onPress={closeOnBackdropPress ? onClose : undefined}>
-          <View style={[styles.backdrop, backdropStyle]} />
-        </TouchableWithoutFeedback>
-      </View>
+  const renderContent = () => {
+    const content = (
+      <View style={[styles.content, contentStyle]}>{children}</View>
+    );
 
-      <View style={[styles.container, containerStyle]}>
+    if (enableScrollView) {
+      return (
+        <ScrollView
+          nestedScrollEnabled={true}
+          style={styles.scrollView}
+          contentContainerStyle={styles.scrollContentContainer}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+          {...scrollViewProps}>
+          {content}
+        </ScrollView>
+      );
+    }
+
+    return content;
+  };
+
+  const renderModal = () => (
+    <View style={[styles.container, containerStyle]}>
+      <TouchableWithoutFeedback onPress={() => {}}>
         <View style={[styles.modal, modalStyle]}>
           {renderHeader()}
-
-          <View style={[styles.content, contentStyle]}>{children}</View>
-
+          {renderContent()}
           {footer && <View style={[styles.footer, footerStyle]}>{footer}</View>}
         </View>
+      </TouchableWithoutFeedback>
+    </View>
+  );
+
+  const modalContent = enableKeyboardAvoiding ? (
+    <KeyboardAvoidingView
+      style={styles.keyboardAvoidingView}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={keyboardVerticalOffset}>
+      {renderModal()}
+    </KeyboardAvoidingView>
+  ) : (
+    renderModal()
+  );
+
+  return (
+    <Modal visible={visible} transparent animationType="fade">
+      <View style={[styles.backdrop, backdropStyle]}>
+        <TouchableWithoutFeedback
+          onPress={closeOnBackdropPress ? onClose : undefined}>
+          <View style={styles.backdropTouchable} />
+        </TouchableWithoutFeedback>
+        {modalContent}
       </View>
     </Modal>
   );
@@ -130,24 +182,35 @@ const CustomModal: React.FC<CustomModalProps> = ({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
-  container: {
+  backdropTouchable: {
     position: 'absolute',
     top: 0,
     left: 0,
     right: 0,
     bottom: 0,
+  },
+  keyboardAvoidingView: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    width: '100%',
+  },
+  container: {
+    maxWidth: '90%',
+    maxHeight: '80%',
+    width: '85%',
   },
   modal: {
+    backgroundColor: '#fff',
+    borderRadius: moderateScale(20),
+    overflow: 'hidden',
     borderWidth: 1,
     borderColor: colors.primary_border,
-    width: '85%',
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    overflow: 'hidden',
+    maxHeight: '100%',
   },
   header: {
     padding: scale(12),
@@ -160,7 +223,7 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
   },
   titleText: {
-    fontWeight: 700,
+    fontWeight: '700',
     color: '#222',
   },
   descriptionText: {
@@ -177,9 +240,15 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#999',
   },
+  scrollView: {
+    flexGrow: 1,
+  },
+  scrollContentContainer: {
+    flexGrow: 1,
+  },
   content: {
     paddingHorizontal: scale(12),
-    paddingVertical: scale(0),
+    paddingVertical: scale(12),
   },
   footer: {
     padding: 12,

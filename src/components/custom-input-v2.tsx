@@ -9,7 +9,7 @@ import {
   StyleProp,
   TouchableOpacity,
 } from 'react-native';
-import {verticalScale} from '../utils/sizer';
+import {scale, scaleFont, verticalScale} from '../utils/sizer';
 
 type CustomInputProps = {
   label?: string;
@@ -25,6 +25,7 @@ type CustomInputProps = {
   showError?: boolean;
   errorMessage?: string;
   placeholder?: string;
+  editable?: boolean; // ✅ New prop
 };
 
 const CustomInput: React.FC<CustomInputProps> = ({
@@ -41,6 +42,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
   showError = false,
   errorMessage,
   placeholder,
+  editable = true, // ✅ Default true
 }) => {
   const [focused, setFocused] = useState(false);
   const [secure, setSecure] = useState(secureToggle);
@@ -77,6 +79,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
           onBlur={handleBlur}
           secureTextEntry={secure}
           placeholder={placeholder}
+          editable={editable} // ✅ Used here
           style={[styles.input, inputStyle]}
         />
 
@@ -103,14 +106,14 @@ const styles = StyleSheet.create({
     marginVertical: 12,
   },
   label: {
-    fontSize: 14,
+    fontSize: scaleFont(14),
     marginBottom: 6,
     fontWeight: '500',
   },
   inputWrapper: {
     borderWidth: 1,
     borderRadius: 8,
-    paddingHorizontal: 12,
+    paddingHorizontal: scale(12),
     paddingVertical: verticalScale(4),
     flexDirection: 'row',
     alignItems: 'center',
@@ -118,7 +121,7 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    fontSize: 16,
+    fontSize: scaleFont(16),
     color: '#000',
   },
   icon: {

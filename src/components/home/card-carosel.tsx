@@ -1,4 +1,11 @@
-import {View, Text, FlatList, Dimensions, TouchableOpacity} from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  Dimensions,
+  TouchableOpacity,
+  Pressable,
+} from 'react-native';
 import React from 'react';
 import Animated, {
   interpolate,
@@ -14,6 +21,7 @@ import Avatar from '../avatar';
 import {textStyle} from '../../constants/text-style';
 import ChatIcon from '../../assets/icons/chat-icon';
 import CallIcon from '../../assets/icons/call-icon';
+import {useNavigation} from '@react-navigation/native';
 const DATA = [
   {
     id: 1,
@@ -180,6 +188,7 @@ const SlidingCard = () => {
   const onScroll = useAnimatedScrollHandler(e => {
     scrollX.value = e.contentOffset.x / (_cardWidth + _spacing);
   });
+  const navigation = useNavigation<any>();
   return (
     <View style={{justifyContent: 'center', alignItems: 'center'}}>
       <Animated.FlatList
@@ -194,7 +203,9 @@ const SlidingCard = () => {
           paddingHorizontal: (width - _cardWidth) / 2,
         }}
         renderItem={({item, index}) => (
-          <Card item={item} index={index} scrollX={scrollX} />
+          <Pressable onPress={() => navigation.navigate('DetailsProfile')}>
+            <Card item={item} index={index} scrollX={scrollX} />
+          </Pressable>
         )}
         onScroll={onScroll}
         scrollEventThrottle={1000 / 60}
