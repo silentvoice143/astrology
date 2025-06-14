@@ -8,6 +8,7 @@ import {colors} from '../constants/colors';
 import {textStyle} from '../constants/text-style';
 import AnimatedSearchInput from '../components/custom-searchbox';
 import Tab from '../components/tab';
+import {useNavigation} from '@react-navigation/native';
 
 // Define types for better TypeScript support
 interface MessageItem {
@@ -108,24 +109,28 @@ const ChatHistory = () => {
   const [search, setSearch] = useState('');
   const [headerBgColor] = useState(colors.background);
   const [activeTab, setActiveTab] = useState('chat'); // 'messages' or 'calls'
-
+  const navigation = useNavigation<any>();
   const renderMessageItem = ({item}: {item: MessageItem}) => (
-    <ChatHistoryCard
-      name={item.name}
-      message={item.message}
-      time={item.time}
-      avatar={item.avatar}
-    />
+    <TouchableOpacity onPress={() => navigation.navigate('chat-screen')}>
+      <ChatHistoryCard
+        name={item.name}
+        message={item.message}
+        time={item.time}
+        avatar={item.avatar}
+      />
+    </TouchableOpacity>
   );
 
   const renderCallItem = ({item}: {item: CallItem}) => (
-    <CallHistoryCard
-      name={item.name}
-      callType={item.callType}
-      duration={item.duration}
-      time={item.time}
-      avatar={item.avatar}
-    />
+    <TouchableOpacity>
+      <CallHistoryCard
+        name={item.name}
+        callType={item.callType}
+        duration={item.duration}
+        time={item.time}
+        avatar={item.avatar}
+      />
+    </TouchableOpacity>
   );
 
   const getPlaceholderText = () => {

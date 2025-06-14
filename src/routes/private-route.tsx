@@ -6,6 +6,7 @@ import Kundli from '../screens/kundli';
 import DetailsProfile from '../screens/DetailsProfile';
 import ChatHistory from '../screens/ChatHistory';
 import Wallet from '../screens/wallet';
+import ChatScreen from '../screens/chat-screen';
 
 const Stack = createNativeStackNavigator();
 
@@ -22,6 +23,7 @@ export default function PrivateRoutes() {
       <Stack.Screen name="DetailsProfile" component={DetailsProfile} />
       <Stack.Screen name="ChatHistory" component={ChatHistory} />
       <Stack.Screen name="Wallet" component={Wallet} />
+      <Stack.Screen name="chat-screen" component={ChatScreen} />
     </Stack.Navigator>
   );
 }
