@@ -1,80 +1,89 @@
 import React, {useState} from 'react';
 import {
   View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
   FlatList,
   KeyboardAvoidingView,
   Platform,
+  StyleSheet,
+  SafeAreaView,
 } from 'react-native';
-import {colors} from '../constants/colors';
-import ScreenLayout from '../components/screen-layout';
+import Messages from '../components/chat/messages';
+import ChatInput from '../components/chat/chat-input';
+import {scale, verticalScale, scaleFont} from '../utils/sizer';
+import ChatHeader from '../components/chat/chat-header';
 
 interface Message {
   id: string;
   text: string;
-  sender: 'user' | 'other';
+  type: 'send' | 'reply';
+  time?: string;
 }
 
 const ChatScreen = () => {
-  const [headerBgColor] = useState(colors.background);
   const [messages, setMessages] = useState<Message[]>([
-    {id: '1', text: 'Hello Kitty 😍', sender: 'other'},
-    {id: '2', text: 'HOW ARE YOU_', sender: 'user'},
-    {id: '3', text: 'I AM FINE', sender: 'other'},
+    {id: '1', text: 'Hello Kitty 😍', type: 'reply', time: '11:20 AM'},
+    {id: '2', text: 'HOW ARE YOU_', type: 'send', time: '11:30 AM'},
+    {id: '3', text: 'I AM FINE', type: 'reply', time: '11:35 AM'},
   ]);
+
   const [inputText, setInputText] = useState('');
 
   const sendMessage = () => {
-    if (inputText.trim() === '') return;
+    if (!inputText.trim()) return;
     const newMessage: Message = {
       id: Date.now().toString(),
-      text: inputText,
-      sender: 'user',
+      text: inputText.trim(),
+      type: 'send',
+      time: new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
     };
-    setMessages(prevMessages => [newMessage, ...prevMessages]);
+    setMessages(prev => [newMessage, ...prev]);
     setInputText('');
   };
 
-  const renderItem = ({item}: {item: Message}) => (
-    <View
-      style={[
-        styles.messageContainer,
-        item.sender === 'user' ? styles.userMessage : styles.otherMessage,
-      ]}>
-      <Text style={styles.messageText}>{item.text}</Text>
-    </View>
-  );
-
   return (
-    <ScreenLayout headerBackgroundColor={headerBgColor}>
+    <SafeAreaView style={{flex: 1}}>
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={90}>
+        keyboardVerticalOffset={verticalScale(90)}>
+        <ChatHeader
+          name="Jhon Doe"
+          profileImage={{
+            uri: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=80&h=80',
+          }} // or use URI
+          onBackPress={() => console.log('Back')}
+          onMenuPress={() => console.log('Menu')}
+        />
         <FlatList
           data={messages}
           keyExtractor={item => item.id}
-          renderItem={renderItem}
+          renderItem={({item}) => (
+            <Messages type={item.type} message={item.text} time={item.time} />
+          )}
           contentContainerStyle={styles.flatListContent}
-          inverted={true} // 👈 Important
+          inverted
         />
-
         <View style={styles.inputContainer}>
-          <TextInput
-            value={inputText}
-            onChangeText={setInputText}
-            placeholder="Type a message..."
-            style={styles.input}
+          <ChatInput
+            onSend={text => {
+              const newMessage: Message = {
+                id: Date.now().toString(),
+                text,
+                type: 'send',
+                time: new Date().toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit',
+                }),
+              };
+              setMessages(prev => [newMessage, ...prev]);
+            }}
           />
-          <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
-            <Text style={{color: 'white', fontWeight: 'bold'}}>Send</Text>
-          </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
-    </ScreenLayout>
+    </SafeAreaView>
   );
 };
 
@@ -88,47 +97,30 @@ const styles = StyleSheet.create({
   flatListContent: {
     flexGrow: 1,
     justifyContent: 'flex-end',
-    padding: 10,
-  },
-  messageContainer: {
-    padding: 10,
-    borderRadius: 12,
-    marginVertical: 5,
-    maxWidth: '80%',
-  },
-  userMessage: {
-    backgroundColor: '#DCF8C6',
-    alignSelf: 'flex-end',
-  },
-  otherMessage: {
-    backgroundColor: '#FCE4EC',
-    alignSelf: 'flex-start',
-  },
-  messageText: {
-    fontSize: 16,
-    color: '#000',
+    padding: scale(10),
   },
   inputContainer: {
-    flexDirection: 'row',
-    padding: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
-    backgroundColor: '#fff',
+    // additional padding if needed
   },
   input: {
     flex: 1,
-    height: 40,
+    height: verticalScale(40),
     backgroundColor: '#f2f2f2',
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    fontSize: 16,
+    borderRadius: scale(20),
+    paddingHorizontal: scale(15),
+    fontSize: scaleFont(16),
   },
   sendButton: {
     backgroundColor: '#007AFF',
-    marginLeft: 10,
-    borderRadius: 20,
-    paddingHorizontal: 15,
+    paddingHorizontal: scale(15),
+    borderRadius: scale(20),
     justifyContent: 'center',
     alignItems: 'center',
+    marginLeft: scale(10),
+  },
+  sendText: {
+    color: '#fff',
+    fontWeight: 'bold',
+    fontSize: scaleFont(14),
   },
 });
