@@ -19,7 +19,7 @@ export default function PrivateRoutes() {
       <Stack.Screen name="Astrologers" component={Astrologers} />
       <Stack.Screen name="Kundli" component={Kundli} />
       <Stack.Screen name="DetailsProfile" component={DetailsProfile} />
-      <Stack.Screen name="chatHistory" component={ChatHistory} />
+      <Stack.Screen name="ChatHistory" component={ChatHistory} />
     </Stack.Navigator>
   );
 }

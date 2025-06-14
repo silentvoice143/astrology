@@ -1,7 +1,7 @@
 import {View, Text} from 'react-native';
 import React, {useState} from 'react';
 import ScreenLayout from '../components/screen-layout';
-import TabBar from '../components/tab';
+import TabBar from '../components/horizontal-tab';
 import {colors} from '../constants/colors';
 import BasicDetails from '../components/kundli/basic-detail';
 import ChartPage from '../components/kundli/chart';

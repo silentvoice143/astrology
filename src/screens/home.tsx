@@ -18,7 +18,6 @@ import {scale, scaleFont, verticalScale} from '../utils/sizer';
 import {colors} from '../constants/colors';
 import LinearGradient from 'react-native-linear-gradient';
 import SlidingCard from '../components/home/card-carosel';
-import IntroCard from '../components/home/intro-card';
 import AstrologerCarosel from '../components/home/top-astrologer-carosel';
 import Carousel from '../components/carosel';
 import PersonalDetailModal from '../components/personal-detail-modal';
@@ -29,16 +28,16 @@ const Home = () => {
   const navigation = useNavigation<any>();
   const [headerBgColor, setHeaderBgColor] = useState('color');
   const [isPersonalDetailModalOpen, setIsPersonalDetailModalOpen] =
-    useState(true);
+    useState(false);
 
-  const handleScroll = (event: any) => {
-    const scrollY = event.nativeEvent.contentOffset.y;
-    if (scrollY > verticalScale(240)) {
-      setHeaderBgColor('transparent'); // or any color
-    } else {
-      setHeaderBgColor('color'); // original color
-    }
-  };
+  // const handleScroll = (event: any) => {
+  //   const scrollY = event.nativeEvent.contentOffset.y;
+  //   if (scrollY > verticalScale(240)) {
+  //     setHeaderBgColor('transparent'); // or any color
+  //   } else {
+  //     setHeaderBgColor('transparent'); // original color
+  //   }
+  // };
 
   return (
     <ScreenLayout headerBackgroundColor={headerBgColor}>
@@ -47,7 +46,6 @@ const Home = () => {
         onClose={() => setIsPersonalDetailModalOpen(false)}
       />
       <ScrollView
-        onScroll={handleScroll}
         scrollEventThrottle={16}
         style={HomeStyle.container}
         showsVerticalScrollIndicator={false}>
@@ -120,7 +118,9 @@ const Home = () => {
             {/* Quick Actions */}
             <View style={[HomeStyle.actionsContainer]}>
               <View style={HomeStyle.singleAction}>
-                <TouchableOpacity style={HomeStyle.actionCard}>
+                <TouchableOpacity
+                  style={HomeStyle.actionCard}
+                  onPress={() => navigation.navigate('Astrologers')}>
                   <CallIcon />
                 </TouchableOpacity>
                 <Text
@@ -132,7 +132,9 @@ const Home = () => {
               </View>
 
               <View style={HomeStyle.singleAction}>
-                <TouchableOpacity style={HomeStyle.actionCard}>
+                <TouchableOpacity
+                  style={HomeStyle.actionCard}
+                  onPress={() => navigation.navigate('Astrologers')}>
                   <ChatIcon />
                 </TouchableOpacity>
                 <Text
@@ -147,7 +149,7 @@ const Home = () => {
             {/* View Kundli Button */}
             <TouchableOpacity
               style={[HomeStyle.kundliButton]}
-              onPress={() => {}}>
+              onPress={() => navigation.navigate('Kundli')}>
               <KundliLogo />
               <Text style={[textStyle.fs_mont_20_400, HomeStyle.kundliText]}>
                 View kundli
@@ -216,7 +218,9 @@ const Home = () => {
         }}
         leftIcon={<CallIcon colors={['#000000']} height={20} width={20} />}
         textStyle={{color: colors.primaryText}}
-        onPress={() => {}}
+        onPress={() => {
+          navigation.navigate('Astrologers');
+        }}
         title={'Call Now'}
       />
       <CustomButton
@@ -228,7 +232,9 @@ const Home = () => {
           backgroundColor: colors.tertiary_btn,
         }}
         leftIcon={<ChatIcon colors={['#ffffff']} height={20} width={20} />}
-        onPress={() => {}}
+        onPress={() => {
+          navigation.navigate('Astrologers');
+        }}
         title={'Chat Now'}
       />
     </ScreenLayout>

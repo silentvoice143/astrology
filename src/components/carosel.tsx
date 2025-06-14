@@ -1,4 +1,4 @@
-import {View, Dimensions} from 'react-native';
+import {View, Dimensions, Pressable} from 'react-native';
 import React from 'react';
 import Animated, {
   useSharedValue,
@@ -7,6 +7,7 @@ import Animated, {
   useAnimatedStyle,
   interpolate,
 } from 'react-native-reanimated';
+import {useNavigation} from '@react-navigation/native';
 
 const {width: screenWidth} = Dimensions.get('screen');
 const _spacing = 12;
@@ -29,6 +30,7 @@ function Carousel<T>({
   pagination = false,
   CardComponent,
 }: CarouselProps<T>) {
+  const navigation = useNavigation<any>();
   const scrollX = useSharedValue(0);
   const cardWidth = screenWidth * cardWidthScale;
 
@@ -51,12 +53,17 @@ function Carousel<T>({
           gap: _spacing,
         }}
         renderItem={({item, index}) => (
-          <CardComponent
-            item={item}
-            index={index}
-            scrollX={scrollX}
-            cardWidth={cardWidth}
-          />
+          <Pressable
+            onPress={() => {
+              navigation.navigate('DetailsProfile');
+            }}>
+            <CardComponent
+              item={item}
+              index={index}
+              scrollX={scrollX}
+              cardWidth={cardWidth}
+            />
+          </Pressable>
         )}
         onScroll={onScroll}
         scrollEventThrottle={16}

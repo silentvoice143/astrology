@@ -10,6 +10,7 @@ import {scale, verticalScale} from '../utils/sizer';
 import Avatar from './avatar';
 import {textStyle} from '../constants/text-style';
 import {colors} from '../constants/colors';
+import CallIcon from '../assets/icons/call-icon';
 
 interface CallHistoryCardProps {
   name: string;
@@ -91,7 +92,7 @@ const CallHistoryCard: React.FC<CallHistoryCardProps> = ({
               {getCallTypeText()}
             </Text>
             {callType !== 'missed' && (
-              <Text style={[styles.duration, textStyle.fs_mont_14_400]}>
+              <Text style={[styles.duration, textStyle.fs_mont_12_400]}>
                 • {duration}
               </Text>
             )}
@@ -100,9 +101,9 @@ const CallHistoryCard: React.FC<CallHistoryCardProps> = ({
       </View>
 
       <View style={styles.rightSection}>
-        <Text style={[styles.time, textStyle.fs_mont_14_400]}>{time}</Text>
+        <Text style={[styles.time, textStyle.fs_mont_12_400]}>{time}</Text>
         <TouchableOpacity style={styles.callButton} onPress={onCallPress}>
-          <Text style={styles.callButtonIcon}>📞</Text>
+          <CallIcon colors={['white']} height={16} width={16} />
         </TouchableOpacity>
       </View>
     </View>

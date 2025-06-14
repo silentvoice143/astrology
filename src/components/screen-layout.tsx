@@ -3,6 +3,7 @@ import {View} from 'react-native';
 import Header from './header';
 import Sidebar, {SidebarRef} from './sidebar';
 import {colors} from '../constants/colors';
+import BottomNavigationBar from './bottom-navigation';
 
 interface ScreenLayoutProps {
   children: ReactNode;
@@ -23,6 +24,7 @@ const ScreenLayout: React.FC<ScreenLayoutProps> = ({
         headerBackgroundColor={headerBackgroundColor}
       />
       <View style={{flex: 1}}>{children}</View>
+      <BottomNavigationBar />
     </View>
   );
 };

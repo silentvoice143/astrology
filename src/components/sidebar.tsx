@@ -27,14 +27,15 @@ export type SidebarRef = {
 };
 
 const navItems = [
-  {title: 'Daily Horoscope', href: 'DailyHoroscope'},
-  {title: 'Kundli (Birth Chart)', href: 'Kundli'},
+  {title: 'Home', href: 'Home'},
+  // {title: 'Daily Horoscope', href: 'DailyHoroscope'},
+  {title: 'Kundli', href: 'Kundli'},
   {title: 'Astrologers', href: 'Astrologers'},
   {title: 'Chat History', href: 'ChatHistory', params: {type: 'user'}},
-  {title: 'Ask a Question', href: 'AskQuestion'},
-  {title: 'Reports', href: 'Reports'},
+  // {title: 'Ask a Question', href: 'AskQuestion'},
+  // {title: 'Reports', href: 'Reports'},
   {title: 'Settings', href: 'Settings'},
-  {title: 'Help & Support', href: 'Support'},
+  // {title: 'Help & Support', href: 'Support'},
 ];
 
 const Sidebar = forwardRef<SidebarRef>((_, ref) => {
@@ -95,6 +96,11 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
 
   if (!visible) return null;
 
+  const handleNavigation = (href: string) => {
+    close();
+    navigation.navigate(href);
+  };
+
   return (
     <View style={StyleSheet.absoluteFill}>
       <Animated.View style={[styles.overlay, {opacity: overlayAnim}]}>
@@ -128,8 +134,7 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
                 key={index}
                 style={styles.navItem}
                 onPress={() => {
-                  navigation.navigate(item.href, item.params || {});
-                  close();
+                  handleNavigation(item?.href);
                 }}>
                 <Text style={styles.navText}>{item.title}</Text>
               </TouchableOpacity>

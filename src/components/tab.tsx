@@ -1,95 +1,104 @@
-import React from 'react';
+import React, {useState} from 'react';
 import {
-  ScrollView,
   View,
-  TouchableOpacity,
   Text,
   StyleSheet,
+  TouchableOpacity,
   ViewStyle,
   TextStyle,
 } from 'react-native';
-import {scaleFont} from '../utils/sizer';
+import {scale, verticalScale} from '../utils/sizer';
 import {colors} from '../constants/colors';
-import {textStyle} from '../constants/text-style';
 
-interface TabItem {
+type TabOption = {
   key: string;
   label: string;
-  icon?: React.ReactNode;
-}
+};
 
-interface TabBarProps {
-  tabs: TabItem[];
-  selectedKey: string;
-  onTabPress: (key: string) => void;
+interface TabSwitcherProps {
+  tabs: TabOption[];
+  onTabChange?: (key: string) => void;
+  initialTab?: string;
   containerStyle?: ViewStyle;
-  tabStyle?: ViewStyle;
-  labelStyle?: TextStyle;
-  activeColor?: string;
-  inactiveColor?: string;
+  tabTextStyle?: TextStyle;
 }
 
-const TabBar: React.FC<TabBarProps> = ({
+const TabSwitcher: React.FC<TabSwitcherProps> = ({
   tabs,
-  selectedKey,
-  onTabPress,
+  onTabChange,
+  initialTab,
   containerStyle,
-  tabStyle,
-  labelStyle,
-  activeColor = colors.tertiary_text,
-  inactiveColor = colors.secondaryText,
+  tabTextStyle,
 }) => {
-  return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      contentContainerStyle={[styles.container, containerStyle]}>
-      {tabs.map(tab => {
-        const isActive = selectedKey === tab.key;
+  const [activeTab, setActiveTab] = useState(initialTab || tabs[0].key);
 
-        return (
-          <TouchableOpacity
-            key={tab.key}
-            onPress={() => onTabPress(tab.key)}
+  const handleTabPress = (key: string) => {
+    setActiveTab(key);
+    onTabChange?.(key);
+  };
+
+  return (
+    <View style={[styles.tabContainer, containerStyle]}>
+      {tabs.map(tab => (
+        <TouchableOpacity
+          key={tab.key}
+          style={[styles.tab, activeTab === tab.key && styles.activeTab]}
+          onPress={() => handleTabPress(tab.key)}
+          activeOpacity={0.8}>
+          <Text
             style={[
-              styles.tab,
-              tabStyle,
-              isActive && {borderBottomColor: activeColor},
+              styles.tabText,
+              tabTextStyle,
+              activeTab === tab.key && styles.activeTabText,
             ]}>
-            {tab.icon && <View style={[styles.icon]}>{tab.icon}</View>}
-            <Text
-              style={[
-                styles.label,
-                labelStyle,
-                {color: isActive ? activeColor : inactiveColor},
-              ]}>
-              {tab.label}
-            </Text>
-          </TouchableOpacity>
-        );
-      })}
-    </ScrollView>
+            {tab.label}
+          </Text>
+        </TouchableOpacity>
+      ))}
+    </View>
   );
 };
 
-export default TabBar;
+export default TabSwitcher;
 
 const styles = StyleSheet.create({
-  container: {
-    paddingHorizontal: 12,
+  tabContainer: {
+    flexDirection: 'row',
+    gap: scale(8),
+    marginTop: verticalScale(20),
+    marginHorizontal: scale(16),
+    backgroundColor: '#f0f0f0',
+    borderRadius: scale(30),
+    padding: scale(4),
+    elevation: 4, // Android shadow
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 2}, // iOS shadow
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
   tab: {
-    flexDirection: 'column',
+    flex: 1,
+    paddingVertical: verticalScale(12),
     alignItems: 'center',
-    marginHorizontal: 10,
-    paddingVertical: 8,
-    borderBottomWidth: 2,
-    borderBottomColor: 'transparent',
+    borderRadius: scale(20),
+    backgroundColor: '#fff',
   },
-  icon: {
-    marginBottom: 4,
+  activeTab: {
+    backgroundColor: colors.secondarybtn, // You can define this as '#ff9800' or something attractive
+    shadowColor: colors.secondarybtn,
+    shadowOffset: {width: 0, height: 1},
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    elevation: 2,
   },
-  label: {
-    ...textStyle.fs_abyss_14_400,
+  tabText: {
+    color: '#555',
+    fontSize: scale(14),
+    fontWeight: '500',
+  },
+  activeTabText: {
+    color: '#fff',
+    fontWeight: '700',
+    fontSize: scale(15),
   },
 });

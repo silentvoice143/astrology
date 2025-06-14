@@ -7,6 +7,7 @@ import {scale, verticalScale} from '../utils/sizer';
 import {colors} from '../constants/colors';
 import {textStyle} from '../constants/text-style';
 import AnimatedSearchInput from '../components/custom-searchbox';
+import Tab from '../components/tab';
 
 // Define types for better TypeScript support
 interface MessageItem {
@@ -135,51 +136,40 @@ const ChatHistory = () => {
 
   return (
     <ScreenLayout headerBackgroundColor={headerBgColor}>
-      <View style={styles.searchContainer}>
-        <AnimatedSearchInput
-          shadowColor={colors.glow_shadow}
-          iconColor={colors.primarybtn}
-          enableShadow={true}
-          placeholder={getPlaceholderText()}
-          value={search}
-          onChangeText={setSearch}
-          iconPosition="left"
-          containerStyle={{width: '100%'}}
-          inputContainerStyle={styles.searchInput}
-        />
+      <View
+        style={{
+          paddingTop: verticalScale(20),
+        }}>
+        <View
+          style={{
+            height: 50,
+            width: '100%',
+            backgroundColor: colors.secondary_surface,
+            position: 'absolute',
+            top: 0,
+            borderBottomEndRadius: 20,
+            borderStartEndRadius: 20,
+          }}></View>
+        <View style={{paddingHorizontal: scale(24)}}>
+          <AnimatedSearchInput
+            unfocusedBorderColor={colors.primary_border}
+            enableShadow={true}
+            focusedBorderColor={colors.primary_border}
+          />
+        </View>
       </View>
 
-      {/* Tab Navigation */}
-      <View style={styles.tabContainer}>
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'messages' && styles.activeTab]}
-          onPress={() => setActiveTab('messages')}>
-          <Text
-            style={[
-              styles.tabText,
-              textStyle.fs_mont_16_400,
-              activeTab === 'messages' && styles.activeTabText,
-            ]}>
-            Messages
-          </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity
-          style={[styles.tab, activeTab === 'calls' && styles.activeTab]}
-          onPress={() => setActiveTab('calls')}>
-          <Text
-            style={[
-              styles.tabText,
-              textStyle.fs_mont_16_400,
-              activeTab === 'calls' && styles.activeTabText,
-            ]}>
-            Calls
-          </Text>
-        </TouchableOpacity>
-      </View>
+      {/* tab  */}
+      <Tab
+        tabs={[
+          {key: 'chat', label: 'Chat'},
+          {key: 'call', label: 'Call'},
+        ]}
+        onTabChange={tab => setActiveTab(tab)}
+      />
 
       {/* Content based on active tab */}
-      {activeTab === 'messages' ? (
+      {activeTab === 'chat' ? (
         <FlatList
           data={dummyMessageData}
           renderItem={renderMessageItem}
@@ -218,25 +208,9 @@ const styles = StyleSheet.create({
     paddingVertical: verticalScale(12),
     backgroundColor: colors.background,
   },
-  tabContainer: {
-    flexDirection: 'row',
-    marginTop: verticalScale(40),
-    marginHorizontal: scale(16),
-    backgroundColor: '#D3D3D3',
-    borderRadius: scale(25),
-    padding: scale(4),
-  },
-  tab: {
-    flex: 1,
-    paddingVertical: verticalScale(12),
-    alignItems: 'center',
-    borderRadius: scale(20),
-  },
-  activeTab: {
-    backgroundColor: colors.secondarybtn,
-  },
+
   tabText: {
-    color: "#000",
+    color: '#000',
     // color: colors.secondaryText,
   },
   activeTabText: {
