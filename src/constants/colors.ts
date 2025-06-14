@@ -1,8 +1,12 @@
 export const colors = {
+  //like & dislike
+  like_color: '#FA476B',
+
   // button colors
   primarybtn: '#EEC900',
   secondarybtn: '#A51255',
   tertiary_btn: '#19A360',
+  cancel_btn: 'red',
 
   //   text colors
   primaryText: '#000000',
@@ -15,6 +19,9 @@ export const colors = {
   primary_yellow: '#EEC900',
   secondary_yellow: '#FFE038',
   tertiary_yellow: '#D4AF37',
+
+  //pink
+  primary_pink: '#FA476B',
 
   //shadow
 

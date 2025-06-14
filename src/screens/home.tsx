@@ -21,7 +21,7 @@ import SlidingCard from '../components/home/card-carosel';
 import IntroCard from '../components/home/intro-card';
 import AstrologerCarosel from '../components/home/top-astrologer-carosel';
 import Carousel from '../components/carosel';
-import PersonalDetailModal from '../components/home/personal-detail-modal';
+import PersonalDetailModal from '../components/personal-detail-modal';
 
 const Home = () => {
   const [search, setSearch] = useState('');

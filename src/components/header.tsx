@@ -8,7 +8,7 @@ const Header = ({
   headerBackgroundColor,
   onMenuClick,
 }: {
-  headerBackgroundColor: string;
+  headerBackgroundColor?: string;
   onMenuClick: () => void;
 }) => {
   const animatedBg = useRef(new Animated.Value(0)).current;
@@ -43,9 +43,9 @@ const Header = ({
         }}>
         <MenuIcon />
       </Pressable>
-      <Pressable style={styles.avatar}>
+      {/* <Pressable style={styles.avatar}>
         <Text>SK</Text>
-      </Pressable>
+      </Pressable> */}
     </Animated.View>
   );
 };
