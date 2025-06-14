@@ -75,14 +75,14 @@ const Home = () => {
             </Text>
 
             {/* Horoscope Button */}
-            <CustomButton
+            {/* <CustomButton
               title="Today's horoscope"
               onPress={() => {
                 navigation.push('DetailsProfile');
               }}
               style={HomeStyle.horoscopeButton}
               textStyle={[textStyle.fs_mont_14_500, HomeStyle.horoscopeText]}
-            />
+            /> */}
           </View>
         </LinearGradient>
         <View style={{position: 'relative'}}>

@@ -107,7 +107,7 @@ const dummyCallData: CallItem[] = [
 const ChatHistory = () => {
   const [search, setSearch] = useState('');
   const [headerBgColor] = useState(colors.background);
-  const [activeTab, setActiveTab] = useState('messages'); // 'messages' or 'calls'
+  const [activeTab, setActiveTab] = useState('chat'); // 'messages' or 'calls'
 
   const renderMessageItem = ({item}: {item: MessageItem}) => (
     <ChatHistoryCard
@@ -152,6 +152,7 @@ const ChatHistory = () => {
           }}></View>
         <View style={{paddingHorizontal: scale(24)}}>
           <AnimatedSearchInput
+            placeholder={getPlaceholderText()}
             unfocusedBorderColor={colors.primary_border}
             enableShadow={true}
             focusedBorderColor={colors.primary_border}
@@ -166,6 +167,7 @@ const ChatHistory = () => {
           {key: 'call', label: 'Call'},
         ]}
         onTabChange={tab => setActiveTab(tab)}
+        initialTab="chat"
       />
 
       {/* Content based on active tab */}
