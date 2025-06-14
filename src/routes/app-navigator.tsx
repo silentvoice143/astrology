@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-import {NavigationContainer} from '@react-navigation/native';
+import {NavigationContainer, useNavigation} from '@react-navigation/native';
 
 import PublicRoutes from './public-route';
 import PrivateRoutes from './private-route';

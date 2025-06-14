@@ -22,13 +22,19 @@ import AstrologerCarosel from '../components/home/top-astrologer-carosel';
 import Carousel from '../components/carosel';
 import PersonalDetailModal from '../components/personal-detail-modal';
 import {useNavigation} from '@react-navigation/native';
+import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
+import {setFirstTime} from '../store/reducer/auth';
 
 const Home = () => {
   const [search, setSearch] = useState('');
   const navigation = useNavigation<any>();
   const [headerBgColor, setHeaderBgColor] = useState('color');
-  const [isPersonalDetailModalOpen, setIsPersonalDetailModalOpen] =
-    useState(false);
+  const {firstTime} = useAppSelector(state => state.auth);
+
+  const [isPersonalDetailModalOpen, setIsPersonalDetailModalOpen] = useState(
+    firstTime ? true : false,
+  );
+  const dispatch = useAppDispatch();
 
   // const handleScroll = (event: any) => {
   //   const scrollY = event.nativeEvent.contentOffset.y;
@@ -43,8 +49,14 @@ const Home = () => {
     <ScreenLayout headerBackgroundColor={headerBgColor}>
       <PersonalDetailModal
         isOpen={isPersonalDetailModalOpen}
-        onClose={() => setIsPersonalDetailModalOpen(false)}
+        onClose={() => {
+          if (firstTime) {
+            dispatch(setFirstTime());
+          }
+          setIsPersonalDetailModalOpen(false);
+        }}
       />
+
       <ScrollView
         scrollEventThrottle={16}
         style={HomeStyle.container}
@@ -63,14 +75,14 @@ const Home = () => {
             </Text>
 
             {/* Horoscope Button */}
-            <CustomButton
+            {/* <CustomButton
               title="Today's horoscope"
               onPress={() => {
                 navigation.push('DetailsProfile');
               }}
               style={HomeStyle.horoscopeButton}
               textStyle={[textStyle.fs_mont_14_500, HomeStyle.horoscopeText]}
-            />
+            /> */}
           </View>
         </LinearGradient>
         <View style={{position: 'relative'}}>
