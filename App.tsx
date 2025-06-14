@@ -2,16 +2,19 @@ import React from 'react';
 import {StyleSheet} from 'react-native';
 import {Provider} from 'react-redux'; // Import Provider
 import AppNavigator from './src/routes/app-navigator';
-import {store} from './src/store'; // Import your Redux store
+import {persistor, store} from './src/store'; // Import your Redux store
 import Toast from 'react-native-toast-message';
+import {PersistGate} from 'redux-persist/integration/react';
 
 function App(): React.JSX.Element {
   return (
     <Provider store={store}>
-      <>
-        <AppNavigator />
-        <Toast />
-      </>
+      <PersistGate loading={null} persistor={persistor}>
+        <>
+          <AppNavigator />
+          <Toast />
+        </>
+      </PersistGate>
     </Provider>
   );
 }

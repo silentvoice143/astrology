@@ -8,6 +8,7 @@ interface AuthState {
   role: string;
   walletBalance: number;
   name: string;
+  firstTime: boolean;
 }
 
 const initialState: AuthState = {
@@ -17,6 +18,7 @@ const initialState: AuthState = {
   role: '',
   name: '',
   walletBalance: 0,
+  firstTime: true,
 };
 
 const authSlice = createSlice({
@@ -28,6 +30,9 @@ const authSlice = createSlice({
     },
     setMobile(state, action) {
       state.mobile = action.payload.mobile;
+    },
+    setFirstTime(state) {
+      state.firstTime = false;
     },
   },
   extraReducers: builder => {
@@ -61,6 +66,6 @@ const authSlice = createSlice({
   },
 });
 
-export const {logout, setMobile} = authSlice.actions;
+export const {logout, setMobile, setFirstTime} = authSlice.actions;
 export {loginUser, verifyOtp};
 export default authSlice.reducer;
