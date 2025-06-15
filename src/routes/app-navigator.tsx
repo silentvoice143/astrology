@@ -51,7 +51,7 @@ export default function AppNavigator() {
 
   return (
     <NavigationContainer>
-      {true ? <PrivateRoutes /> : <PublicRoutes />}
+      {isAuthenticated ? <PrivateRoutes /> : <PublicRoutes />}
     </NavigationContainer>
   );
 }

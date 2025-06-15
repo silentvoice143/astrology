@@ -1,11 +1,14 @@
-import {View, Text, ScrollView} from 'react-native';
-import React, {useState} from 'react';
+import {View, Text, ScrollView, Pressable} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import AstrologerCard from '../components/astrologers/astrologer-card';
 import {colors} from '../constants/colors';
 import ScreenLayout from '../components/screen-layout';
 import TagSelector from '../components/tag-selector';
 import AnimatedSearchInput from '../components/custom-searchbox';
 import {scale, verticalScale} from '../utils/sizer';
+import {useAppDispatch} from '../hooks/redux-hook';
+import {getAllAstrologers} from '../store/reducer/astrologers';
+import {useTypedNavigation} from '../hooks/navigation';
 
 const astrologers = [
   {
@@ -46,8 +49,53 @@ const tags = [
   },
 ];
 
+interface Astrologers {
+  id: string;
+  name: string;
+  chatRate: string;
+  rating: number;
+  experience: string;
+  languages: string;
+  imageUri: string;
+  callRate: string;
+  videCallRate: string;
+}
+
 const Astrologers = () => {
   const [selected, setSelected] = useState<string[]>(['all']);
+  const [astrologersData, setAstrologersData] = useState<Astrologers[]>([]);
+  const dispatch = useAppDispatch();
+  const navigation = useTypedNavigation();
+  const fetchAstrologersData = async () => {
+    try {
+      const payload = await dispatch(getAllAstrologers()).unwrap();
+      console.log(payload, 'payload----------------- fetchAstrologersData');
+      if (payload.success) {
+        const customAstro = payload?.astrologers?.map((astro: any) => {
+          return {
+            id: astro?.id,
+            name: astro?.user?.name,
+            chatRate: `${astro?.pricePerMinuteChat}/min`,
+            callRate: `${astro?.pricePerMinuteVoice}/min`,
+            videCallRate: `${astro?.pricePerMinuteVideo}/min`,
+            rating: astro?.rating || null,
+            experience: `${astro?.experienceYears} Years`,
+            languages: astro?.languages,
+            imageUri:
+              astro?.imgUri ||
+              'https://img.freepik.com/free-vector/young-man-orange-hoodie_1308-175788.jpg?ga=GA1.1.1570607994.1749976697&semt=ais_hybrid&w=740',
+          };
+        });
+        setAstrologersData(customAstro);
+      }
+    } catch (error) {
+      console.log('fetchAstrologersData Error : ', error);
+    }
+  };
+  useEffect(() => {
+    fetchAstrologersData();
+  }, []);
+
   return (
     <ScreenLayout>
       <View
@@ -101,19 +149,24 @@ const Astrologers = () => {
             paddingHorizontal: scale(12),
             marginBottom: verticalScale(20),
           }}>
-          {astrologers.map((item, idx) => (
-            <AstrologerCard
-              key={`card-astrologer-${idx}`}
-              name={item?.name}
-              rate={item?.rate}
-              rating={item?.rating}
-              experience={item?.experience}
-              languages={item?.languages}
-              imageUri={item?.imageUri}
-              onCallPress={() => console.log('Calling')}
-              onVideoPress={() => console.log('Video')}
-              onChatPress={() => console.log('Chat')}
-            />
+          {astrologersData.map((item, idx) => (
+            <Pressable
+              onPress={() =>
+                navigation.navigate('DetailsProfile', {id: item.id})
+              } key={`card-astrologer-${item.id}`}>
+              <AstrologerCard
+                key={`card-astrologer-${idx}`}
+                name={item?.name}
+                rate={item?.chatRate}
+                rating={item?.rating}
+                experience={item?.experience}
+                languages={item?.languages}
+                imageUri={item?.imageUri}
+                onCallPress={() => console.log('Calling')}
+                onVideoPress={() => console.log('Video')}
+                onChatPress={() => console.log('Chat')}
+              />
+            </Pressable>
           ))}
         </View>
       </ScrollView>

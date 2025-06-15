@@ -1,5 +1,5 @@
 // screens/DetailsProfile.tsx
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -24,15 +24,73 @@ import Avatar from '../components/avatar';
 // import ReviewItem from '../components/Profile/ReviewItem';
 
 // Import interfaces for data types
-import {Review, AstrologerData} from '../utils/types';
+import {Review} from '../utils/types';
 import {colors} from '../constants/colors';
 import ProfileSectionItem from '../components/Profile/ProfileSectionItem';
+import {RouteProp, useRoute} from '@react-navigation/native';
+import {RootStackParamList} from '../hooks/navigation';
+import {getAllAstrologerById} from '../store/reducer/astrologers';
+import {useAppDispatch} from '../hooks/redux-hook';
 
+export interface AstrologerUser {
+  id: string;
+  name: string;
+  mobile: string;
+  gender: 'MALE' | 'FEMALE' | 'OTHER';
+  birthDate: string; // ISO date format: YYYY-MM-DD
+  birthTime: string; // HH:mm:ss
+  birthPlace: string;
+  latitude: number;
+  longitude: number;
+  role: 'ASTROLOGER' | string; // add more roles if needed
+  walletBalance: number;
+  createdAt: string; // ISO timestamp
+  updatedAt: string; // ISO timestamp
+}
+
+export interface AstrologerProfile {
+  id: string;
+  user: AstrologerUser;
+  about: string | null;
+  expertise: string;
+  experienceYears: number;
+  languages: string | null;
+  imgUri: string | null;
+  pricePerMinuteChat: number;
+  pricePerMinuteVoice: number;
+  pricePerMinuteVideo: number;
+  blocked: boolean;
+}
+
+type DetailsProfileRouteProp = RouteProp<RootStackParamList, 'DetailsProfile'>;
 const DetailsProfile: React.FC = () => {
+  const route = useRoute<DetailsProfileRouteProp>();
+  const id = route.params?.id;
+
   // State to manage the expansion of the 'About Astrologer' section
   const [expandedAbout, setExpandedAbout] = useState<boolean>(false);
+  const [data, setData] = useState<AstrologerProfile>();
+  const dispatch = useAppDispatch();
 
-  const astrologerData: AstrologerData = {
+  const fetchAstrologersDataById = async (id: string) => {
+    if (id) {
+      try {
+        const payload = await dispatch(getAllAstrologerById({id})).unwrap();
+        console.log(payload, 'fetchAstrologersDataById-----');
+        if (payload.success) {
+          setData(payload.astrologer);
+        }
+      } catch (error) {
+        console.log('fetchAstrologersDataById Error : ', error);
+      }
+    }
+  };
+
+  useEffect(() => {
+    fetchAstrologersDataById(id);
+  }, [id]);
+
+  const astrologerData = {
     name: 'Acharya Vishnukant P',
     languages: ['Vedic', 'English, Hindi'],
     experience: '2 years of Experience',
@@ -94,59 +152,71 @@ const DetailsProfile: React.FC = () => {
     // ScreenLayout provides a consistent layout structure for the screen
     <ScreenLayout headerBackgroundColor="transparent">
       {/* ScrollView allows the content to be scrollable if it exceeds screen height */}
-      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        {/* Header Section with a Linear Gradient background for a visually appealing top area */}
-        <LinearGradient
-          colors={['#1a1a1a', '#2d2d2d', '#3d3d3d']}
-          style={styles.headerGradient}>
-          {/* Top Navigation Bar containing the astrologer's name and a share button */}
-          <View style={styles.topNavBar}>
-            <View style={styles.profileTitleContainer}>
-              <Text style={[styles.profileTitle, textStyle.fs_mont_20_700]}>
-                {astrologerData.name}
-              </Text>
-              {/* Verified badge for verified astrologers */}
-              {astrologerData.isVerified && (
-                <View style={styles.verifiedBadge}>
-                  <Text
-                    style={[styles.verifiedCheck, textStyle.fs_mont_12_700]}>
-                    ✓
-                  </Text>
-                </View>
-              )}
-            </View>
-            {/* Share button (ellipsis icon) */}
-            <TouchableOpacity style={styles.shareButton}>
-              <Text style={styles.shareIcon}>⋯</Text>
-            </TouchableOpacity>
-          </View>
-
-          {/* Profile Card section displaying avatar and key information */}
-          <View style={styles.profileCardContainer}>
-            <View style={styles.profileImageContainer}>
-              {/* Avatar component for the astrologer's profile picture */}
-              <Avatar
-                image={{uri: astrologerData.avatar}}
-                fallbackText="AV"
-                size={scale(100)}
-                borderColor="#ffffff"
-                borderWidth={3}
-              />
-              {/* Active status indicator (green dot) */}
-              {astrologerData.isOnline && (
-                <View style={styles.activeStatus}></View>
-              )}
-            </View>
-            <View style={styles.profileCard}>
-              <View style={styles.profileInfoSection}>
-                {/* Dynamically render language/expertise items */}
-                {astrologerData.languages.map((lang, index) =>
-                  renderLanguageItem(lang, index === 0 ? '🔮' : '🌐'),
+      {data && (
+        <ScrollView
+          style={styles.container}
+          showsVerticalScrollIndicator={false}>
+          {/* Header Section with a Linear Gradient background for a visually appealing top area */}
+          <LinearGradient
+            colors={['#1a1a1a', '#2d2d2d', '#3d3d3d']}
+            style={styles.headerGradient}>
+            {/* Top Navigation Bar containing the astrologer's name and a share button */}
+            <View style={styles.topNavBar}>
+              <View style={styles.profileTitleContainer}>
+                <Text style={[styles.profileTitle, textStyle.fs_mont_20_700]}>
+                  {data.user.name}
+                </Text>
+                {/* Verified badge for verified astrologers */}
+                {astrologerData.isVerified && (
+                  <View style={styles.verifiedBadge}>
+                    <Text
+                      style={[styles.verifiedCheck, textStyle.fs_mont_12_700]}>
+                      ✓
+                    </Text>
+                    
+                  </View>
                 )}
-                {renderLanguageItem(astrologerData.experience, '🎯')}
+              </View>
+              {/* Share button (ellipsis icon) */}
+              <TouchableOpacity style={styles.shareButton}>
+                <Text style={styles.shareIcon}>⋯</Text>
+              </TouchableOpacity>
+            </View>
 
-                {/* Follow Section (commented out as per original provided code) */}
-                {/* <View style={styles.followSection}>
+            {/* Profile Card section displaying avatar and key information */}
+            <View style={styles.profileCardContainer}>
+              <View style={styles.profileImageContainer}>
+                {/* Avatar component for the astrologer's profile picture */}
+                <Avatar
+                  image={{
+                    uri: data.imgUri
+                      ? data.imgUri
+                      : 'https://cdn-icons-png.flaticon.com/512/6596/6596121.png',
+                  }}
+                  fallbackText="AV"
+                  size={scale(100)}
+                  borderColor="#ffffff"
+                  borderWidth={3}
+                />
+                {/* Active status indicator (green dot) */}
+                {astrologerData.isOnline && (
+                  <View style={styles.activeStatus}></View>
+                )}
+              </View>
+              <View style={styles.profileCard}>
+                <View style={styles.profileInfoSection}>
+                  {renderLanguageItem(data.expertise, '🔮')}
+                  {renderLanguageItem(
+                    data.languages ? data.languages : '-',
+                    '🌐',
+                  )}
+                  {renderLanguageItem(
+                    `${data.experienceYears} years of experience`,
+                    '🎯',
+                  )}
+
+                  {/* Follow Section (commented out as per original provided code) */}
+                  {/* <View style={styles.followSection}>
                   <TouchableOpacity style={styles.followButton}>
                     <Text style={styles.followButtonText}>Follow</Text>
                   </TouchableOpacity>
@@ -154,82 +224,84 @@ const DetailsProfile: React.FC = () => {
                     {astrologerData.followers} Followers
                   </Text>
                 </View> */}
+                </View>
               </View>
             </View>
-          </View>
-        </LinearGradient>
+          </LinearGradient>
 
-        {/* Consultation Charges Section */}
-        <View style={styles.consultationSection}>
-          <View style={styles.consultationLeft}>
-            <Text style={[styles.consultationTitle, textStyle.fs_mont_16_500]}>
-              Consultation Charges
-            </Text>
-            <View style={styles.priceContainer}>
-              <Text style={[styles.priceText, textStyle.fs_mont_14_700]}>
-                {astrologerData.consultationCharge}
+          {/* Consultation Charges Section */}
+          <View style={styles.consultationSection}>
+            <View style={styles.consultationLeft}>
+              <Text
+                style={[styles.consultationTitle, textStyle.fs_mont_16_500]}>
+                Consultation Charges
               </Text>
-              {/* Offer badge */}
-              <View style={styles.offerBadge}>
-                <Text style={[styles.offerText, textStyle.fs_mont_10_600]}>
-                  30% OFFER
+              <View style={styles.priceContainer}>
+                <Text style={[styles.priceText, textStyle.fs_mont_14_700]}>
+                  Chat : ₹{data.pricePerMinuteChat}/min |
                 </Text>
+                <Text style={[styles.priceText, textStyle.fs_mont_14_700]}>
+                  Voice Call : ₹{data.pricePerMinuteVoice}/min |
+                </Text>
+                <Text style={[styles.priceText, textStyle.fs_mont_14_700]}>
+                  Video Call : ₹{data.pricePerMinuteVideo}/min
+                </Text>
+                {/* Offer badge */}
+                {/* <View style={styles.offerBadge}>
+                  <Text style={[styles.offerText, textStyle.fs_mont_10_600]}>
+                    30% OFFER
+                  </Text>
+                </View> */}
               </View>
             </View>
-          </View>
-          {/* CircularRating component for overall astrologer rating */}
-          {/* <View style={styles.ratingBox}>
+            {/* CircularRating component for overall astrologer rating */}
+            {/* <View style={styles.ratingBox}>
             <CircularRating rating={astrologerData.rating} size={70} />
           </View> */}
-        </View>
-
-        {/* Main Content Area */}
-        <View style={styles.mainContent}>
-          {/* About Section for astrologer's biography */}
-          <View style={styles.aboutSection}>
-            <View style={styles.sectionHeader}>
-              <Text style={[styles.sectionTitle, textStyle.fs_mont_16_700]}>
-                About Astrologer
-              </Text>
-              {/* Info icon (commented out as per original provided code) */}
-              {/* <View style={styles.orangeInfoIcon}>
-                <Text style={styles.orangeInfoIconText}>ⓘ</Text>
-              </View> */}
-            </View>
-            <View style={styles.aboutContent}>
-              <Text
-                style={[styles.aboutText, textStyle.fs_abyss_14_400]}
-                numberOfLines={expandedAbout ? undefined : 4}>
-                {astrologerData.about}
-              </Text>
-              {expandedAbout && (
-                <View>
-                  <ProfileSectionItem
-                    icon={require('../assets/imgs/experience.jpg')}
-                    title="Expertise"
-                    description="Vedic, Nadi"
-                  />
-                  <ProfileSectionItem
-                    icon={require('../assets/imgs/image.png')}
-                    title="Education"
-                     description="Vedic, Nadi"
-                  />
-                </View>
-              )}
-              {/* "Read More/Read Less" toggle button */}
-              <TouchableOpacity
-                onPress={() => setExpandedAbout(!expandedAbout)}
-                style={styles.readMoreButton}>
-                <Text style={[styles.readMoreText, textStyle.fs_mont_14_700]}>
-                  {expandedAbout ? 'Read Less' : 'Read More'}
-                </Text>
-              </TouchableOpacity>
-            </View>
           </View>
 
-          {/* Ratings and Reviews Section */}
-          <View style={styles.reviewsSection}>
-            {/* <View style={styles.reviewsHeader}>
+          {/* Main Content Area */}
+          <View style={styles.mainContent}>
+            {/* About Section for astrologer's biography */}
+            <View style={styles.aboutSection}>
+              <View style={styles.sectionHeader}>
+                <Text style={[styles.sectionTitle, textStyle.fs_mont_16_700]}>
+                  About Astrologer
+                </Text>
+                {/* Info icon (commented out as per original provided code) */}
+                {/* <View style={styles.orangeInfoIcon}>
+                <Text style={styles.orangeInfoIconText}>ⓘ</Text>
+              </View> */}
+              </View>
+              <View style={styles.aboutContent}>
+                <Text
+                  style={[styles.aboutText, textStyle.fs_abyss_14_400]}
+                  numberOfLines={expandedAbout ? undefined : 4}>
+                  {data.about}
+                </Text>
+                {expandedAbout && (
+                  <View>
+                    <ProfileSectionItem
+                      icon={require('../assets/imgs/experience.jpg')}
+                      title="Expertise"
+                      description={data.expertise}
+                    />
+                  </View>
+                )}
+                {/* "Read More/Read Less" toggle button */}
+                <TouchableOpacity
+                  onPress={() => setExpandedAbout(!expandedAbout)}
+                  style={styles.readMoreButton}>
+                  <Text style={[styles.readMoreText, textStyle.fs_mont_14_700]}>
+                    {expandedAbout ? 'Read Less' : 'Read More'}
+                  </Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+
+            {/* Ratings and Reviews Section */}
+            <View style={styles.reviewsSection}>
+              {/* <View style={styles.reviewsHeader}>
               <Text style={[styles.sectionTitle, textStyle.fs_abyss_12_400]}>
                 Ratings and reviews
               </Text>
@@ -246,8 +318,8 @@ const DetailsProfile: React.FC = () => {
               (Only verified purchase ratings are used for final calculation)
             </Text> */}
 
-            {/* Map through the reviews data and render each using the new ReviewItem component */}
-            {/* <View style={styles.reviewsList}>
+              {/* Map through the reviews data and render each using the new ReviewItem component */}
+              {/* <View style={styles.reviewsList}>
               {astrologerData.reviews.map(review => (
                 <ReviewItem
                   key={review.id}
@@ -256,13 +328,14 @@ const DetailsProfile: React.FC = () => {
                 />
               ))}
             </View> */}
-            {/* Button to see all reviews */}
-            {/* <TouchableOpacity style={styles.seeAllButton}>
+              {/* Button to see all reviews */}
+              {/* <TouchableOpacity style={styles.seeAllButton}>
               <Text style={[styles.seeAllText,textStyle.fs_mont_14_700]}>See all reviews</Text>
             </TouchableOpacity> */}
+            </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+      )}
 
       {/* Bottom Action Buttons for Call and Chat */}
       <View style={styles.bottomActions}>
