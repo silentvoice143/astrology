@@ -9,17 +9,17 @@ import ChartPage from '../components/kundli/chart';
 export const kundliTabs = [
   {key: 'basic', label: 'Basic Details'},
   {key: 'lagnaChart', label: 'Lagna Chart'},
-  {key: 'navamsaChart', label: 'Navamsa Chart'},
-  {key: 'planetaryInfo', label: 'Planetary Info'},
-  {key: 'dasha', label: 'Dasha'},
-  {key: 'bhavPhal', label: 'Bhav Phal'},
-  {key: 'ashtakvarga', label: 'Ashtakvarga'},
-  {key: 'yogas', label: 'Yogas'},
-  {key: 'mangalDosha', label: 'Mangal Dosha'},
-  {key: 'kpChart', label: 'KP Chart'},
-  {key: 'transit', label: 'Transit (Gochar)'},
-  {key: 'numerology', label: 'Numerology'},
-  {key: 'remedies', label: 'Remedies'},
+  // {key: 'navamsaChart', label: 'Navamsa Chart'},
+  // {key: 'planetaryInfo', label: 'Planetary Info'},
+  // {key: 'dasha', label: 'Dasha'},
+  // {key: 'bhavPhal', label: 'Bhav Phal'},
+  // {key: 'ashtakvarga', label: 'Ashtakvarga'},
+  // {key: 'yogas', label: 'Yogas'},
+  // {key: 'mangalDosha', label: 'Mangal Dosha'},
+  // {key: 'kpChart', label: 'KP Chart'},
+  // {key: 'transit', label: 'Transit (Gochar)'},
+  // {key: 'numerology', label: 'Numerology'},
+  // {key: 'remedies', label: 'Remedies'},
 ];
 
 const Kundli = () => {

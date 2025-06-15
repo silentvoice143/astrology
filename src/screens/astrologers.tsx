@@ -90,6 +90,7 @@ const Astrologers = () => {
         selectedTags={selected}
         onChange={tags => setSelected(tags)}
         removable={true}
+        multiSelect={false}
       />
 
       <ScrollView showsVerticalScrollIndicator={false}>
