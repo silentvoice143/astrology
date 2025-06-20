@@ -1,80 +1,100 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
   FlatList,
   KeyboardAvoidingView,
   Platform,
+  StyleSheet,
+  SafeAreaView,
 } from 'react-native';
-import {colors} from '../constants/colors';
-import ScreenLayout from '../components/screen-layout';
+import Messages from '../components/chat/messages';
+import ChatInput from '../components/chat/chat-input';
+import {scale, verticalScale, scaleFont} from '../utils/sizer';
+import ChatHeader from '../components/chat/chat-header';
+import StompService from '../services/StompService';
+import {useSelector} from 'react-redux';
+import {useAppSelector} from '../hooks/redux-hook';
 
 interface Message {
   id: string;
   text: string;
-  sender: 'user' | 'other';
+  type: 'send' | 'reply';
+  time?: string;
 }
 
 const ChatScreen = () => {
-  const [headerBgColor] = useState(colors.background);
-  const [messages, setMessages] = useState<Message[]>([
-    {id: '1', text: 'Hello Kitty 😍', sender: 'other'},
-    {id: '2', text: 'HOW ARE YOU_', sender: 'user'},
-    {id: '3', text: 'I AM FINE', sender: 'other'},
-  ]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [inputText, setInputText] = useState('');
 
-  const sendMessage = () => {
-    if (inputText.trim() === '') return;
+  useEffect(() => {
+    StompService.connect(receiverId, (msg: string) => {
+      const parsed = JSON.parse(msg);
+      const newMessage: Message = {
+        id: Date.now().toString(),
+        text: parsed.content,
+        type: 'reply',
+        time: new Date().toLocaleTimeString([], {
+          hour: '2-digit',
+          minute: '2-digit',
+        }),
+      };
+      setMessages(prev => [newMessage, ...prev]);
+    });
+
+    return () => {
+      StompService.disconnect();
+    };
+  }, []);
+
+  const senderId = useAppSelector(state => state.auth.userId);
+  const receiverId = '7b59997b-8bb6-4c8f-ac8a-92a4a4879a9e';
+  const handleSend = (text: string) => {
     const newMessage: Message = {
       id: Date.now().toString(),
-      text: inputText,
-      sender: 'user',
+      text,
+      type: 'send',
+      time: new Date().toLocaleTimeString([], {
+        hour: '2-digit',
+        minute: '2-digit',
+      }),
     };
-    setMessages(prevMessages => [newMessage, ...prevMessages]);
-    setInputText('');
+
+    // Show immediately
+    setMessages(prev => [newMessage, ...prev]);
+
+    // Send to server
+
+    StompService.sendMessage(text, senderId, receiverId);
   };
 
-  const renderItem = ({item}: {item: Message}) => (
-    <View
-      style={[
-        styles.messageContainer,
-        item.sender === 'user' ? styles.userMessage : styles.otherMessage,
-      ]}>
-      <Text style={styles.messageText}>{item.text}</Text>
-    </View>
-  );
-
   return (
-    <ScreenLayout headerBackgroundColor={headerBgColor}>
+    <SafeAreaView style={{flex: 1}}>
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-        keyboardVerticalOffset={90}>
+        keyboardVerticalOffset={verticalScale(90)}>
+        <ChatHeader
+          name="John Doe"
+          profileImage={{
+            uri: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=80&h=80',
+          }}
+          onBackPress={() => console.log('Back')}
+          onMenuPress={() => console.log('Menu')}
+        />
         <FlatList
           data={messages}
           keyExtractor={item => item.id}
-          renderItem={renderItem}
+          renderItem={({item}) => (
+            <Messages type={item.type} message={item.text} time={item.time} />
+          )}
           contentContainerStyle={styles.flatListContent}
-          inverted={true} // 👈 Important
+          inverted
         />
-
         <View style={styles.inputContainer}>
-          <TextInput
-            value={inputText}
-            onChangeText={setInputText}
-            placeholder="Type a message..."
-            style={styles.input}
-          />
-          <TouchableOpacity onPress={sendMessage} style={styles.sendButton}>
-            <Text style={{color: 'white', fontWeight: 'bold'}}>Send</Text>
-          </TouchableOpacity>
+          <ChatInput onSend={handleSend} />
         </View>
       </KeyboardAvoidingView>
-    </ScreenLayout>
+    </SafeAreaView>
   );
 };
 
@@ -88,47 +108,7 @@ const styles = StyleSheet.create({
   flatListContent: {
     flexGrow: 1,
     justifyContent: 'flex-end',
-    padding: 10,
+    padding: scale(10),
   },
-  messageContainer: {
-    padding: 10,
-    borderRadius: 12,
-    marginVertical: 5,
-    maxWidth: '80%',
-  },
-  userMessage: {
-    backgroundColor: '#DCF8C6',
-    alignSelf: 'flex-end',
-  },
-  otherMessage: {
-    backgroundColor: '#FCE4EC',
-    alignSelf: 'flex-start',
-  },
-  messageText: {
-    fontSize: 16,
-    color: '#000',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    padding: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
-    backgroundColor: '#fff',
-  },
-  input: {
-    flex: 1,
-    height: 40,
-    backgroundColor: '#f2f2f2',
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    fontSize: 16,
-  },
-  sendButton: {
-    backgroundColor: '#007AFF',
-    marginLeft: 10,
-    borderRadius: 20,
-    paddingHorizontal: 15,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
+  inputContainer: {},
 });

@@ -43,22 +43,34 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
             <LikeIcon />
           </View>
 
-          <View style={styles.rateTag}>
-            <Text style={styles.rateText}>{rate}</Text>
-          </View>
+          {rate && (
+            <View style={styles.rateTag}>
+              <Text style={styles.rateText}>{rate}</Text>
+            </View>
+          )}
 
-          <View style={styles.ratingRow}>
-            <StarIcon color={colors.glow_shadow} />
-            <Text style={styles.ratingText}>{rating} / 5</Text>
-          </View>
+          {rating && (
+            <View style={styles.ratingRow}>
+              <StarIcon color={colors.glow_shadow} />
+              <Text style={styles.ratingText}>{rating} / 5</Text>
+            </View>
+          )}
         </View>
       </View>
 
       <View style={styles.detailsSection}>
-        <Text style={styles.detailLabel}>Experience</Text>
-        <Text style={styles.detailValue}>{experience}</Text>
-        <Text style={styles.detailLabel}>Language</Text>
-        <Text style={styles.detailValue}>{languages}</Text>
+        {experience && (
+          <View>
+            <Text style={styles.detailLabel}>Experience</Text>
+            <Text style={styles.detailValue}>{experience}</Text>
+          </View>
+        )}
+        {languages && (
+          <View>
+            <Text style={styles.detailLabel}>Language</Text>
+            <Text style={styles.detailValue}>{languages}</Text>
+          </View>
+        )}
       </View>
 
       <View style={styles.actions}>

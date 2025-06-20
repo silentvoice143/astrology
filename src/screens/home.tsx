@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -24,13 +24,13 @@ import PersonalDetailModal from '../components/personal-detail-modal';
 import {useNavigation} from '@react-navigation/native';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {setFirstTime} from '../store/reducer/auth';
+import {getAllAstrologers} from '../store/reducer/astrologers';
 
 const Home = () => {
   const [search, setSearch] = useState('');
   const navigation = useNavigation<any>();
   const [headerBgColor, setHeaderBgColor] = useState('color');
   const {firstTime} = useAppSelector(state => state.auth);
-
   const [isPersonalDetailModalOpen, setIsPersonalDetailModalOpen] = useState(
     firstTime ? true : false,
   );
@@ -44,6 +44,8 @@ const Home = () => {
   //     setHeaderBgColor('transparent'); // original color
   //   }
   // };
+
+ 
 
   return (
     <ScreenLayout headerBackgroundColor={headerBgColor}>

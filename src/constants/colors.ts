@@ -49,4 +49,8 @@ export const colors = {
   starGold: '#FFD700',
   grey300: '#E0E0E0',
   backgroundLight: '#f8f9fa',
+
+
+  messageSend:'#DCF8C6',
+  messageReceived:'#FCE4EC',
 };
