@@ -9,6 +9,7 @@ interface AuthState {
   walletBalance: number;
   name: string;
   firstTime: boolean;
+  userId: string;
 }
 
 const initialState: AuthState = {
@@ -19,6 +20,7 @@ const initialState: AuthState = {
   name: '',
   walletBalance: 0,
   firstTime: true,
+  userId: '',
 };
 
 const authSlice = createSlice({
@@ -53,6 +55,7 @@ const authSlice = createSlice({
               mobile: string;
               role: string;
               walletBalance: number;
+              id: string;
             };
           }>,
         ) => {
@@ -61,6 +64,7 @@ const authSlice = createSlice({
           state.mobile = action.payload.user.mobile;
           state.role = action.payload.user.role;
           state.walletBalance = action.payload.user.walletBalance;
+          state.userId = action.payload.user.id;
         },
       );
   },

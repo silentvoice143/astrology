@@ -1,11 +1,16 @@
-import React, { useState } from 'react';
-import { View, Text, Pressable, StyleSheet } from 'react-native';
-import AnimatedSearchInput from '../custom-searchbox';
+import React, {useState} from 'react';
+import {View, Text, Pressable, StyleSheet} from 'react-native';
+import SendSvg from '../../assets/icons/send-svg';
+import DocumentSvg from '../../assets/icons/document-svg';
+import CustomInput from '../custom-input-v2';
+import {textStyle} from '../../constants/text-style';
+import {colors} from '../../constants/colors';
+import {scale, verticalScale, scaleFont} from '../../utils/sizer';
 interface Props {
   onSend: (text: string) => void;
 }
 
-const ChatInput: React.FC<Props> = ({ onSend }) => {
+const ChatInput: React.FC<Props> = ({onSend}) => {
   const [text, setText] = useState('');
 
   const handleSend = () => {
@@ -18,25 +23,18 @@ const ChatInput: React.FC<Props> = ({ onSend }) => {
   return (
     <View style={styles.inputRow}>
       <View style={styles.inputWrapper}>
-        <AnimatedSearchInput
-          placeholder="Type a message..."
+        <CustomInput
           value={text}
           onChangeText={setText}
-          iconPosition="left"
-          focusedBorderColor="#007AFF"
-          unfocusedBorderColor="#ddd"
-          enableShadow={false}
-          inputContainerStyle={{
-            backgroundColor: '#f9f9f9',
-            paddingVertical: 10,
-            paddingHorizontal: 16,
-          }}
-          inputStyle={{ fontSize: 16 }}
+          placeholder="Message"
+          inputStyle={[styles.inputText, textStyle.fs_abyss_16_400]}
         />
       </View>
 
-      <Pressable onPress={handleSend} style={styles.sendButton}>
-        <Text style={styles.sendText}>Send</Text>
+      <Pressable
+        onPress={handleSend}
+        style={text ? styles.sendButton : styles.kundliButton}>
+        {text ? <SendSvg /> : <DocumentSvg />}
       </Pressable>
     </View>
   );
@@ -48,23 +46,35 @@ const styles = StyleSheet.create({
   inputRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 10,
+    padding: scale(10),
     borderTopWidth: 1,
     borderColor: '#ccc',
     backgroundColor: '#fff',
   },
   inputWrapper: {
     flex: 1,
-    marginRight: 10,
+    marginRight: scale(10),
+    borderRadius: scale(25),
+  },
+  inputText: {
+    color: colors.primaryText,
+    paddingVertical: verticalScale(6),
   },
   sendButton: {
     backgroundColor: '#007AFF',
-    paddingVertical: 10,
-    paddingHorizontal: 16,
-    borderRadius: 20,
+    paddingVertical: verticalScale(10),
+    paddingHorizontal: scale(16),
+    borderRadius: scale(20),
+  },
+  kundliButton: {
+    backgroundColor: '#B5C7EB',
+    paddingVertical: verticalScale(10),
+    paddingHorizontal: scale(16),
+    borderRadius: scale(20),
   },
   sendText: {
     color: '#fff',
     fontWeight: 'bold',
+    fontSize: scaleFont(14),
   },
 });
