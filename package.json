@@ -27,7 +27,8 @@
     "react-native-toast-message": "^2.3.0",
     "react-redux": "^9.2.0",
     "redux-persist": "^6.0.0",
-    "sockjs-client": "^1.6.1"
+    "sockjs-client": "^1.6.1",
+    "text-encoding": "^0.7.0"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
