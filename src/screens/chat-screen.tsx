@@ -7,13 +7,12 @@ import {
   StyleSheet,
   SafeAreaView,
 } from 'react-native';
-import Messages from '../components/chat/messages';
-import ChatInput from '../components/chat/chat-input';
-import {scale, verticalScale, scaleFont} from '../utils/sizer';
 import ChatHeader from '../components/chat/chat-header';
+import ChatInput from '../components/chat/chat-input';
+import Messages from '../components/chat/messages';
 import StompService from '../services/StompService';
-import {useSelector} from 'react-redux';
 import {useAppSelector} from '../hooks/redux-hook';
+import {scale, verticalScale} from '../utils/sizer';
 
 interface Message {
   id: string;
@@ -24,16 +23,19 @@ interface Message {
 
 const ChatScreen = () => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [inputText, setInputText] = useState('');
+  const [connected, setConnected] = useState(false);
+
+  const senderId = useAppSelector(state => state.auth.userId);
+  const receiverId = '7b59997b-8bb6-4c8f-ac8a-92a4a4879a9e'; // example
+  const sessionId = 'c28009e3-7404-4855-b1f9-a08786968033'; // chat session ID
 
   useEffect(() => {
-    StompService.connect(receiverId, (msg: string) => {
-      const parsed = JSON.parse(msg);
+    StompService.connect(senderId, (msg: any) => {
       const newMessage: Message = {
         id: Date.now().toString(),
-        text: parsed.content,
+        text: msg.message,
         type: 'reply',
-        time: new Date().toLocaleTimeString([], {
+        time: new Date(msg.timestamp || Date.now()).toLocaleTimeString([], {
           hour: '2-digit',
           minute: '2-digit',
         }),
@@ -44,10 +46,8 @@ const ChatScreen = () => {
     return () => {
       StompService.disconnect();
     };
-  }, []);
+  }, [senderId]);
 
-  const senderId = useAppSelector(state => state.auth.userId);
-  const receiverId = '7b59997b-8bb6-4c8f-ac8a-92a4a4879a9e';
   const handleSend = (text: string) => {
     const newMessage: Message = {
       id: Date.now().toString(),
@@ -59,12 +59,11 @@ const ChatScreen = () => {
       }),
     };
 
-    // Show immediately
     setMessages(prev => [newMessage, ...prev]);
 
-    // Send to server
-
-    StompService.sendMessage(text, senderId, receiverId);
+    if (connected) {
+      StompService.sendMessage('Hello world', senderId, receiverId, sessionId);
+    }
   };
 
   return (
@@ -81,6 +80,7 @@ const ChatScreen = () => {
           onBackPress={() => console.log('Back')}
           onMenuPress={() => console.log('Menu')}
         />
+
         <FlatList
           data={messages}
           keyExtractor={item => item.id}
@@ -90,6 +90,7 @@ const ChatScreen = () => {
           contentContainerStyle={styles.flatListContent}
           inverted
         />
+
         <View style={styles.inputContainer}>
           <ChatInput onSend={handleSend} />
         </View>
