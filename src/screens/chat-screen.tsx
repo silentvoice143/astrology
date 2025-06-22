@@ -533,23 +533,23 @@ const ChatScreen = () => {
   const receiverId = '7b59997b-8bb6-4c8f-ac8a-92a4a4879a9e'; // demo
   const sessionId = 'c28009e3-7404-4855-b1f9-a08786968033';
 
-  // const userId = senderId; // must match the backend header
+  const userId = senderId; // must match the backend header
 
-  // useEffect(() => {
-  //   SocketService.connect(userId, () => {
-  //     SocketService.subscribeToMessages(msg => {
-  //       console.log('Received message', msg);
-  //     });
+  useEffect(() => {
+    SocketService.connect(userId, () => {
+      SocketService.subscribeToMessages(msg => {
+        console.log('Received message', msg);
+      });
 
-  //     SocketService.subscribeToTyping(typing => {
-  //       console.log('Typing indicator:', typing);
-  //     });
-  //   });
+      SocketService.subscribeToTyping(typing => {
+        console.log('Typing indicator:', typing);
+      });
+    });
 
-  //   return () => {
-  //     SocketService.disconnect();
-  //   };
-  // }, []);
+    return () => {
+      SocketService.disconnect();
+    };
+  }, []);
 
   const handleNewMessage = (message: ChatMessage) => {
     const newMessage: Message = {
@@ -606,15 +606,15 @@ const ChatScreen = () => {
     }
   };
 
-  useEffect(() => {
-    connectWebSocket();
-    return () => {
-      WebSocketService.disconnect();
-      if (typingTimeoutRef.current) {
-        clearTimeout(typingTimeoutRef.current);
-      }
-    };
-  }, [senderId]);
+  // useEffect(() => {
+  //   connectWebSocket();
+  //   return () => {
+  //     WebSocketService.disconnect();
+  //     if (typingTimeoutRef.current) {
+  //       clearTimeout(typingTimeoutRef.current);
+  //     }
+  //   };
+  // }, [senderId]);
 
   const handleSend = (text: string) => {
     if (!WebSocketService.isWebSocketConnected() || !text.trim()) {

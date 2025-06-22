@@ -1,79 +1,90 @@
-import { Client, StompSubscription } from '@stomp/stompjs';
+import {Client, StompSubscription} from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
-import { Platform } from 'react-native';
- 
-const SOCKET_URL = 'http://<YOUR_SERVER_URL>/ws-chat'; // Replace with your actual backend URL
- 
+import {Platform} from 'react-native';
+
+const SOCKET_URL = 'https://quagga-driving-socially.ngrok-free.app/ws-chat';
+
 class SocketService {
   private client: Client | null = null;
   private userId: string = '';
-  private subscriptions: { [key: string]: StompSubscription } = {};
- 
-  connect(userId: string, onConnectCallback?: () => void, onErrorCallback?: (error: string) => void) {
+  private subscriptions: {[key: string]: StompSubscription} = {};
+
+  connect(
+    userId: string,
+    onConnectCallback?: () => void,
+    onErrorCallback?: (error: string) => void,
+  ) {
     this.userId = userId;
- 
+
     this.client = new Client({
-      webSocketFactory: () => new SockJS(`${SOCKET_URL}?user-id=${userId}`),
+      webSocketFactory: () => new SockJS(SOCKET_URL),
       connectHeaders: {
         'user-id': userId,
       },
-      debug: (str) => {
-        console.log('[STOMP DEBUG]', str);
-      },
+      debug: str => console.log('[STOMP DEBUG]', str),
       reconnectDelay: 5000,
       onConnect: () => {
         console.log('✅ Connected to WebSocket');
         onConnectCallback?.();
       },
-      onStompError: (frame) => {
-        console.error('STOMP Error', frame);
+      onStompError: frame => {
+        console.error('❌ STOMP error:', frame);
         onErrorCallback?.(frame.body);
       },
-      onWebSocketClose: (event) => {
+      onWebSocketClose: event => {
         console.warn('🔌 WebSocket closed', event);
       },
+      onWebSocketError: event => {
+        console.error('❌ WebSocket error:', event);
+      },
     });
- 
+
     this.client.activate();
   }
- 
+
   disconnect() {
     if (this.client && this.client.active) {
-      Object.values(this.subscriptions).forEach((sub) => sub.unsubscribe());
+      Object.values(this.subscriptions).forEach(sub => sub.unsubscribe());
       this.subscriptions = {};
       this.client.deactivate();
       console.log('👋 Disconnected from WebSocket');
     }
   }
- 
+
   subscribeToMessages(onMessage: (message: any) => void) {
     if (!this.client || !this.client.connected) return;
- 
+
     const destination = `/user/${this.userId}/topic/messages`;
     if (this.subscriptions['messages']) {
       this.subscriptions['messages'].unsubscribe();
     }
- 
-    this.subscriptions['messages'] = this.client.subscribe(destination, (message) => {
-      const body = JSON.parse(message.body);
-      onMessage(body);
-    });
+
+    this.subscriptions['messages'] = this.client.subscribe(
+      destination,
+      message => {
+        const body = JSON.parse(message.body);
+        onMessage(body);
+      },
+    );
   }
- 
+
   subscribeToTyping(onTyping: (typing: any) => void) {
     if (!this.client || !this.client.connected) return;
- 
+
     const destination = `/user/${this.userId}/topic/typing`;
     if (this.subscriptions['typing']) {
       this.subscriptions['typing'].unsubscribe();
     }
- 
-    this.subscriptions['typing'] = this.client.subscribe(destination, (message) => {
-      const body = JSON.parse(message.body);
-      onTyping(body);
-    });
+
+    this.subscriptions['typing'] = this.client.subscribe(
+      destination,
+      message => {
+        const body = JSON.parse(message.body);
+        onTyping(body);
+      },
+    );
   }
- 
+
   sendMessage(payload: {
     senderId: string;
     receiverId: string;
@@ -87,8 +98,8 @@ class SocketService {
       body: JSON.stringify(payload),
     });
   }
- 
-  sendTyping(payload: { senderId: string; receiverId: string; typing: boolean }) {
+
+  sendTyping(payload: {senderId: string; receiverId: string; typing: boolean}) {
     if (!this.client || !this.client.connected) return;
     this.client.publish({
       destination: '/app/chat.typing',
@@ -96,6 +107,5 @@ class SocketService {
     });
   }
 }
- 
+
 export default new SocketService();
- 
