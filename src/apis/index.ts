@@ -6,7 +6,7 @@ import skipAuthPaths from './skip-path';
 
 const baseUrl =
   process.env.BASE_URL ||
-  'https://8316-2409-40e4-11ee-3410-c9e4-a358-fa34-96ef.ngrok-free.app';
+  'https://9efd-2401-4900-1c37-1a7e-84a5-5ef9-5fab-be16.ngrok-free.app';
 
 const api = axios.create({
   baseURL: baseUrl,

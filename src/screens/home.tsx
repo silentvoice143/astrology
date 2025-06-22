@@ -23,16 +23,19 @@ import Carousel from '../components/carosel';
 import PersonalDetailModal from '../components/personal-detail-modal';
 import {useNavigation} from '@react-navigation/native';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
-import {setFirstTime} from '../store/reducer/auth';
+import {setFirstTime, setUser} from '../store/reducer/auth';
 import {getAllAstrologers} from '../store/reducer/astrologers';
+import {postUserDetail} from '../store/reducer/user';
+import {UserPersonalDetail} from '../utils/types';
 
 const Home = () => {
   const [search, setSearch] = useState('');
   const navigation = useNavigation<any>();
   const [headerBgColor, setHeaderBgColor] = useState('color');
-  const {firstTime} = useAppSelector(state => state.auth);
+  const {isProfileComplete} = useAppSelector(state => state.auth);
+
   const [isPersonalDetailModalOpen, setIsPersonalDetailModalOpen] = useState(
-    firstTime ? true : false,
+    isProfileComplete ? false : true,
   );
   const dispatch = useAppDispatch();
 
@@ -45,18 +48,27 @@ const Home = () => {
   //   }
   // };
 
- 
+  const handlePostUserData = async (user: UserPersonalDetail) => {
+    try {
+      const payload = await dispatch(postUserDetail(user)).unwrap();
+
+      if (payload?.success) {
+        setIsPersonalDetailModalOpen(false);
+        dispatch(setUser(payload.user));
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   return (
     <ScreenLayout headerBackgroundColor={headerBgColor}>
       <PersonalDetailModal
         isOpen={isPersonalDetailModalOpen}
         onClose={() => {
-          if (firstTime) {
-            dispatch(setFirstTime());
-          }
           setIsPersonalDetailModalOpen(false);
         }}
+        onSubmit={handlePostUserData}
       />
 
       <ScrollView
@@ -67,7 +79,7 @@ const Home = () => {
         <LinearGradient
           colors={[
             colors.secondary_surface,
-            colors.secondary_surface_2,
+            // colors.secondary_surface_2,
             colors.tertiary_surface,
           ]}>
           <View style={HomeStyle.greetingContainer}>
@@ -161,14 +173,51 @@ const Home = () => {
             </View>
 
             {/* View Kundli Button */}
-            <TouchableOpacity
-              style={[HomeStyle.kundliButton]}
-              onPress={() => navigation.navigate('Kundli')}>
-              <KundliLogo />
-              <Text style={[textStyle.fs_mont_20_400, HomeStyle.kundliText]}>
-                View kundli
-              </Text>
-            </TouchableOpacity>
+            <LinearGradient
+              colors={[colors.primary_card, colors.secondary_Card]}
+              style={{
+                height: verticalScale(100),
+                marginVertical: verticalScale(20),
+                flexDirection: 'row',
+                position: 'relative',
+                justifyContent: 'flex-end',
+                alignItems: 'center',
+                paddingHorizontal: scale(20),
+              }}>
+              <View style={{position: 'absolute', bottom: 0, left: 20}}>
+                <KundliLogo />
+              </View>
+              <CustomButton
+                title="View Kundli"
+                style={{
+                  backgroundColor: colors.primary_surface,
+                  width: '50%',
+                  height: 40,
+                }}
+                textStyle={{color: colors.primaryText, lineHeight: 20}}
+                onPress={() => {
+                  navigation.navigate('Kundli');
+                }}
+              />
+              {/* <
+                style={[
+                  HomeStyle.kundliButton,
+                  {
+                    height: verticalScale(48),
+                    backgroundColor: colors.primary_surface,
+                  },
+                ]}
+                onPress={() => navigation.navigate('Kundli')}>
+                <Text
+                  style={[
+                    textStyle.fs_mont_20_700,
+                    HomeStyle.kundliText,
+                    {color: colors.primaryText},
+                  ]}>
+                  View kundli
+                </Text>
+              </TouchableOpacity> */}
+            </LinearGradient>
           </View>
 
           {/* Our Astrologer  */}

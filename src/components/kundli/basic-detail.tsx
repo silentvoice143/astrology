@@ -2,21 +2,28 @@ import React, {useState} from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import PersonalDetailModal from '../personal-detail-modal';
 import {scale} from '../../utils/sizer';
-import {colors} from '../../constants/colors'; // Optional: use your theme/colors
+import {colors} from '../../constants/colors';
+import {useAppSelector, useAppDispatch} from '../../hooks/redux-hook';
+import {setKundliPerson, resetToDefaultUser} from '../../store/reducer/kundli';
+import CustomButton from '../custom-button';
+import {UserPersonalDetail} from '../../utils/types';
+import GradientButton from '../gradient-button';
 
 const BasicDetails = () => {
+  const dispatch = useAppDispatch();
+  const defaultUser = useAppSelector(state => state.kundli.defaultUser);
+  const kundliPerson = useAppSelector(state => state.kundli.kundliPerson);
+  console.log(kundliPerson, '-----kundliperson');
+
   const [showModal, setShowModal] = useState(false);
 
-  const [details, setDetails] = useState({
-    fullName: 'John Doe',
-    gender: 'Male',
-    dateOfBirth: '1995-05-15',
-    timeOfBirth: '08:30 AM',
-    placeOfBirth: 'New Delhi, India',
-  });
+  const isDefaultUser =
+    kundliPerson.name === defaultUser.name &&
+    kundliPerson.birthDate === defaultUser.birthDate &&
+    kundliPerson.birthTime === defaultUser.birthTime;
 
-  const handleUpdate = (updatedDetails: typeof details) => {
-    setDetails(updatedDetails);
+  const handleUpdate = (updatedDetails: UserPersonalDetail) => {
+    dispatch(setKundliPerson(updatedDetails));
     setShowModal(false);
   };
 
@@ -32,17 +39,57 @@ const BasicDetails = () => {
 
         <View style={styles.divider} />
 
-        <DetailRow label="Full Name" value={details.fullName} />
-        <DetailRow label="Gender" value={details.gender} />
-        <DetailRow label="Date of Birth" value={details.dateOfBirth} />
-        <DetailRow label="Time of Birth" value={details.timeOfBirth} />
-        <DetailRow label="Place of Birth" value={details.placeOfBirth} />
+        <DetailRow label="Full Name" value={kundliPerson.name || '-'} />
+        <DetailRow label="Gender" value={kundliPerson.gender || '-'} />
+        <DetailRow
+          label="Date of Birth"
+          value={kundliPerson.birthDate || '-'}
+        />
+        <DetailRow
+          label="Time of Birth"
+          value={kundliPerson.birthTime || '-'}
+        />
+        <DetailRow
+          label="Place of Birth"
+          value={kundliPerson.birthPlace || '-'}
+        />
+      </View>
+
+      <View style={styles.buttonRow}>
+        {!isDefaultUser && (
+          <GradientButton
+            colors={[colors.primary_card, colors.secondary_Card]}
+            style={{backgroundColor: colors.secondarybtn}}
+            title="Back to Me"
+            onPress={() => dispatch(resetToDefaultUser())}
+          />
+        )}
+
+        <GradientButton
+          colors={[colors.primary_card, colors.secondary_Card]}
+          title="Other Person's Kundli"
+          style={{backgroundColor: colors.secondarybtn}}
+          onPress={() => {
+            dispatch(
+              setKundliPerson({
+                name: '',
+                gender: '',
+                birthDate: new Date().toISOString().split('T')[0],
+                birthTime: new Date().toTimeString().split(' ')[0],
+                birthPlace: '',
+                latitude: null,
+                longitude: null,
+              }),
+            );
+            setShowModal(true);
+          }}
+        />
       </View>
 
       <PersonalDetailModal
         isOpen={showModal}
         onClose={() => setShowModal(false)}
-        existingDetails={details}
+        existingDetails={kundliPerson}
         onSubmit={handleUpdate}
       />
     </View>
@@ -83,7 +130,7 @@ const styles = StyleSheet.create({
   },
   editText: {
     fontSize: 14,
-    color: colors.primary ?? '#007bff',
+    color: colors.primaryText ?? '#007bff',
     fontWeight: '600',
   },
   divider: {
@@ -107,6 +154,11 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     maxWidth: '60%',
     textAlign: 'right',
+  },
+  buttonRow: {
+    marginTop: scale(16),
+    flexDirection: 'column',
+    gap: scale(8),
   },
 });
 

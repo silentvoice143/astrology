@@ -14,6 +14,7 @@ import {moderateScale, scale, verticalScale} from '../utils/sizer';
 import {colors} from '../constants/colors';
 import {textStyle} from '../constants/text-style';
 import BackIcon from '../assets/icons/back-icon';
+import LinearGradient from 'react-native-linear-gradient';
 
 const headerTitle = [
   {title: 'Home', href: 'Home'},
@@ -56,38 +57,40 @@ const Header = ({
   // });
 
   return (
-    <Animated.View style={[styles.container]}>
-      {/* Background Image */}
-      <Image
-        source={require('../assets/imgs/bg-img.png')}
-        style={[styles.bgImage]}
-        resizeMode="contain"
-      />
-      {/* Left: Menu Button */}
-      <View>
-        <TouchableOpacity
-          style={{
-            height: moderateScale(40),
-            width: moderateScale(40),
-            // backgroundColor: 'white',
-            borderRadius: 12,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-          onPress={() => {
-            {
-              showMenuIcon ? navigation.goBack() : onMenuClick();
-            }
-            console.log('opening sidebar');
-          }}>
-          {showMenuIcon ? <BackIcon /> : <MenuIcon />}
-        </TouchableOpacity>
-      </View>
-      {/* Center: Route Title (if not Home) */}
-      <View style={{zIndex: 10, marginTop: moderateScale(8)}}>
-        {showRouteTitle && <Text style={styles.title}>{headerText}</Text>}
-      </View>
-    </Animated.View>
+    <LinearGradient colors={[colors.primary_surface, colors.secondary_surface]}>
+      <Animated.View style={[styles.container]}>
+        {/* Background Image */}
+        <Image
+          source={require('../assets/imgs/bg-img.png')}
+          style={[styles.bgImage]}
+          resizeMode="contain"
+        />
+        {/* Left: Menu Button */}
+        <View>
+          <TouchableOpacity
+            style={{
+              height: moderateScale(40),
+              width: moderateScale(40),
+              // backgroundColor: 'white',
+              borderRadius: 12,
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
+            onPress={() => {
+              {
+                showMenuIcon ? navigation.goBack() : onMenuClick();
+              }
+              console.log('opening sidebar');
+            }}>
+            {showMenuIcon ? <BackIcon /> : <MenuIcon />}
+          </TouchableOpacity>
+        </View>
+        {/* Center: Route Title (if not Home) */}
+        <View style={{zIndex: 10, marginTop: moderateScale(8)}}>
+          {showRouteTitle && <Text style={styles.title}>{headerText}</Text>}
+        </View>
+      </Animated.View>
+    </LinearGradient>
   );
 };
 
@@ -104,7 +107,7 @@ const styles = StyleSheet.create({
   container: {
     paddingHorizontal: scale(24),
     paddingVertical: verticalScale(24),
-    backgroundColor: colors.secondary_surface,
+    // backgroundColor: colors.secondary_surface,
     gap: scale(8),
     alignItems: 'center',
     flexDirection: 'row',

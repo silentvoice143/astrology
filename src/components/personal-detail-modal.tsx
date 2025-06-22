@@ -1,38 +1,71 @@
 import {View, Text} from 'react-native';
-import React, {useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import CustomModal from './modal';
 import CustomInputV2 from './custom-input-v2';
 import CustomDateTimePicker from './custom-date-time-picker';
 import CustomButton from './custom-button';
-import {scale, verticalScale} from '../utils/sizer';
+import {scale} from '../utils/sizer';
 import {colors} from '../constants/colors';
 import LocationAutoComplete from './location-input-modal-based';
+import {UserPersonalDetail} from '../utils/types';
+import ControlledTagSelector from './controlled-tag-selector';
 
 interface PersonalDetialModalProps {
   isOpen: boolean;
   onClose: () => void;
-  existingDetails?: {
-    fullName: string;
-    gender: string;
-    dateOfBirth: string;
-    timeOfBirth: string;
-    placeOfBirth: string;
-  };
-  onSubmit?: (details: any) => void;
+  existingDetails?: UserPersonalDetail;
+  onSubmit: (details: UserPersonalDetail) => void;
 }
 
-const PersonalDetailModal = ({isOpen, onClose}: PersonalDetialModalProps) => {
-  const [personalDetail, setPersonalDetail] = useState({name: ''});
+const genderTags = [
+  {id: 'MALE', label: 'Male'},
+  {id: 'FEMALE', label: 'Female'},
+  {id: 'OTHER', label: 'Other'},
+];
+
+const PersonalDetailModal = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  existingDetails,
+}: PersonalDetialModalProps) => {
   const [date, setDate] = useState(new Date());
   const [time, setTime] = useState(new Date());
-  const [mode, setMode] = useState('date');
-  const [show, setShow] = useState(false);
-  const handleChange = ({key, value}: {key: string; value: any}) => {
-    setPersonalDetail({...personalDetail, [key]: value});
-  };
+  const now = new Date();
+  const [personalDetail, setPersonalDetail] = useState<UserPersonalDetail>({
+    name: '',
+    gender: '',
+    birthDate: now.toISOString().split('T')[0],
+    birthTime: now.toTimeString().split(' ')[0],
+    birthPlace: '',
+    latitude: null,
+    longitude: null,
+  });
 
-  const handleLocation = (location: any) => {
-    console.log(location, '----------location');
+  // 🔁 Populate state from existingDetails on modal open
+  useEffect(() => {
+    if (isOpen && existingDetails) {
+      const {name, gender, birthDate, birthTime, birthPlace} = existingDetails;
+
+      const parsedDate = new Date(birthDate);
+      const parsedTime = new Date(`1970-01-01T${birthTime}`);
+
+      setDate(parsedDate);
+      setTime(parsedTime);
+
+      setPersonalDetail(prev => ({
+        ...prev,
+        name: name,
+        gender: gender?.toUpperCase(),
+        birthDate: birthDate,
+        birthTime: birthTime,
+        birthPlace: birthPlace,
+      }));
+    }
+  }, [isOpen, existingDetails]);
+
+  const handleChange = ({key, value}: {key: string; value: any}) => {
+    setPersonalDetail(prev => ({...prev, [key]: value}));
   };
 
   return (
@@ -40,7 +73,16 @@ const PersonalDetailModal = ({isOpen, onClose}: PersonalDetialModalProps) => {
       showCloseButton={false}
       footer={
         <View style={{gap: scale(4)}}>
-          <CustomButton title="Submit" onPress={() => {}} />
+          <CustomButton
+            title="Submit"
+            onPress={() => {
+              const formattedDetails = {
+                ...personalDetail,
+                gender: personalDetail.gender?.toUpperCase() || '',
+              };
+              onSubmit(formattedDetails);
+            }}
+          />
         </View>
       }
       header={{
@@ -55,32 +97,61 @@ const PersonalDetailModal = ({isOpen, onClose}: PersonalDetialModalProps) => {
         value={personalDetail.name}
         onChangeText={val => handleChange({key: 'name', value: val})}
       />
+
       <CustomDateTimePicker
         label="Date of Birth"
         value={date}
-        onChange={setDate}
+        onChange={newDate => {
+          setDate(newDate);
+          handleChange({
+            key: 'birthDate',
+            value: newDate.toISOString().split('T')[0],
+          });
+        }}
         mode="date"
         placeholder="Choose date"
         showError={!date}
         errorMessage="Please select a date"
       />
+
       <CustomDateTimePicker
         label="Select Time"
         value={time}
         mode="time"
-        onChange={setTime}
+        onChange={newTime => {
+          setTime(newTime);
+          handleChange({
+            key: 'birthTime',
+            value: newTime.toTimeString().split(' ')[0],
+          });
+        }}
         placeholder="Pick time"
-        // This picker supports seconds on iOS out of the box
       />
-      {/* <CustomInputV2
-        label="Place of birth"
-        placeholder="Enter place"
-        value={personalDetail.name}
-        onChangeText={val => handleChange({key: 'name', value: val})}
-      /> */}
+
+      <ControlledTagSelector
+        label="Gender"
+        tags={genderTags}
+        selectedTags={personalDetail.gender ? [personalDetail.gender] : []}
+        onChange={(selectedIds: string[]) => {
+          const selectedId = selectedIds[0] || '';
+          handleChange({key: 'gender', value: selectedId});
+        }}
+        valueType="id"
+        multiSelect={false}
+        contentContainerStyle={{paddingHorizontal: 0}}
+      />
+
       <LocationAutoComplete
         label="Place of Birth"
-        onSelectLocation={handleLocation}
+        value={personalDetail?.birthPlace}
+        onSelectLocation={location => {
+          setPersonalDetail(prev => ({
+            ...prev,
+            birthPlace: location.name,
+            latitude: Number(location.lat),
+            longitude: Number(location.lon),
+          }));
+        }}
       />
     </CustomModal>
   );

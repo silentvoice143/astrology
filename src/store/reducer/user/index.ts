@@ -1,28 +1,25 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {userDetail} from './action';
+import {postUserDetail, userDetail} from './action';
+import {UserDetail, UserPersonalDetail} from '../../../utils/types';
 
-export interface UserState {
-  id: string;
-  name: string | null;
-  mobile: string;
-  role: 'USER' | 'ASTROLOGER';
-  walletBalance: number;
-  createdAt: string;
-  updatedAt: string;
-}
-
-const initialState: UserState = {
+const initialState: UserDetail = {
   id: '',
   name: '',
+  gender: 'MALE',
+  birthDate: new Date().toISOString().split('T')[0], // e.g., "2025-06-21"
+  birthTime: new Date().toTimeString().split(' ')[0], // e.g., "13:42:42"
+  birthPlace: '',
+  latitude: 0,
+  longitude: 0,
   mobile: '',
   role: 'USER',
   walletBalance: 0,
-  createdAt: '',
-  updatedAt: '',
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
 };
 
 const userSlice = createSlice({
-  name: 'auth',
+  name: 'user',
   initialState,
   reducers: {
     setInitialUserData: () => {
@@ -30,14 +27,12 @@ const userSlice = createSlice({
     },
   },
   extraReducers: builder => {
-    builder.addCase(userDetail.fulfilled, (state, {payload}) => {
-      if (payload?.success) {
-        return payload.data;
-      }
-    });
+    builder
+      .addCase(userDetail.fulfilled, (state, {payload}) => {})
+      .addCase(postUserDetail.fulfilled, (state, {payload}) => {});
   },
 });
 
 export const {setInitialUserData} = userSlice.actions;
-export {userDetail};
+export {userDetail, postUserDetail};
 export default userSlice.reducer;

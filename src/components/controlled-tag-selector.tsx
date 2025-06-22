@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React from 'react';
 import {
   FlatList,
   TouchableOpacity,
@@ -12,16 +12,18 @@ import {
 import {colors} from '../constants/colors';
 import {scaleFont} from '../utils/sizer';
 
-type TagItem = {
+export type TagItem = {
   id: string;
   label: string;
-  icon?: string; // can be emoji or image URI
+  icon?: string;
 };
 
-type AdvancedTagSelectorProps = {
+type ValueType = 'id' | 'object';
+
+type ControlledTagSelectorProps<T extends ValueType> = {
   tags: TagItem[];
-  selectedTags?: string[]; // persist selection
-  onChange?: (selected: string[]) => void;
+  selectedTags: T extends 'id' ? string[] : TagItem[];
+  onChange?: (selected: T extends 'id' ? string[] : TagItem[]) => void;
   multiSelect?: boolean;
   removable?: boolean;
   containerStyle?: ViewStyle;
@@ -32,11 +34,12 @@ type AdvancedTagSelectorProps = {
   label?: string;
   labelStyle?: TextStyle;
   contentContainerStyle?: ViewStyle;
+  valueType?: T;
 };
 
-const TagSelector: React.FC<AdvancedTagSelectorProps> = ({
+function ControlledTagSelector<T extends ValueType = 'id'>({
   tags,
-  selectedTags = [],
+  selectedTags,
   onChange,
   multiSelect = true,
   removable = false,
@@ -48,45 +51,52 @@ const TagSelector: React.FC<AdvancedTagSelectorProps> = ({
   label,
   labelStyle,
   contentContainerStyle,
-}) => {
-  const [selected, setSelected] = useState<string[]>(selectedTags);
+  valueType = 'id' as T,
+}: ControlledTagSelectorProps<T>) {
+  const selectedIds =
+    valueType === 'object'
+      ? (selectedTags as TagItem[]).map(t => t.id)
+      : (selectedTags as string[]);
 
-  useEffect(() => {
-    setSelected(selectedTags);
-  }, [selectedTags]);
+  const getReturnValue = (
+    ids: string[],
+  ): T extends 'id' ? string[] : TagItem[] => {
+    return (
+      valueType === 'object' ? tags.filter(tag => ids.includes(tag.id)) : ids
+    ) as any;
+  };
 
   const toggleSelect = (id: string) => {
-    let updated: string[] = [];
+    let updated: string[];
 
     if (multiSelect) {
-      if (selected.includes(id)) {
-        updated = selected.filter(tagId => tagId !== id);
-      } else {
-        updated = [...selected, id];
-      }
+      updated = selectedIds.includes(id)
+        ? selectedIds.filter(tagId => tagId !== id)
+        : [...selectedIds, id];
     } else {
-      updated = selected.includes(id) ? [] : [id];
+      updated = selectedIds.includes(id) ? [] : [id];
     }
 
-    setSelected(updated);
-    onChange?.(updated);
+    onChange?.(getReturnValue(updated));
   };
 
   const handleRemove = (id: string) => {
-    const updated = selected.filter(tagId => tagId !== id);
-    setSelected(updated);
-    onChange?.(updated);
+    const updated = selectedIds.filter(tagId => tagId !== id);
+    onChange?.(getReturnValue(updated));
   };
-  console.log(selected, '---selected');
-  const labelColor = selected.length > 0 ? '#007BFF' : '#000'; // Blue if selected, black otherwise
 
   return (
     <View style={[styles.container, containerStyle]}>
-      {label ? (
-        <Text style={[styles.label, {color: labelColor}, labelStyle]}>
+      {label && (
+        <Text
+          style={[
+            styles.label,
+            {color: selectedIds.length ? '#007BFF' : '#000'},
+            labelStyle,
+          ]}>
           {label}
         </Text>
-      ) : null}
+      )}
 
       <FlatList
         data={tags}
@@ -95,7 +105,7 @@ const TagSelector: React.FC<AdvancedTagSelectorProps> = ({
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={[styles.listContent, contentContainerStyle]}
         renderItem={({item}) => {
-          const isSelected = selected.includes(item.id);
+          const isSelected = selectedIds.includes(item.id);
           return (
             <TouchableOpacity
               style={[
@@ -133,9 +143,9 @@ const TagSelector: React.FC<AdvancedTagSelectorProps> = ({
       />
     </View>
   );
-};
+}
 
-export default TagSelector;
+export default ControlledTagSelector;
 
 const styles = StyleSheet.create({
   container: {

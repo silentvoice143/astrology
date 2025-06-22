@@ -5,9 +5,11 @@ import PublicRoutes from './public-route';
 import PrivateRoutes from './private-route';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {userDetail} from '../store/reducer/user';
-import {logout} from '../store/reducer/auth';
+import {logout, setUser} from '../store/reducer/auth';
 
 import {Text, View} from 'react-native';
+import {setDefaultUser, setKundliPerson} from '../store/reducer/kundli';
+import {UserPersonalDetail} from '../utils/types';
 
 export default function AppNavigator() {
   const {token} = useAppSelector((state: any) => state.auth);
@@ -22,6 +24,21 @@ export default function AppNavigator() {
           const {payload} = await dispatch(userDetail());
           if (payload?.success) {
             setIsAuthenticated(true);
+            dispatch(setUser(payload?.user));
+            console.log(payload, '----on checkauth');
+            const user = payload?.user;
+            const personalDetail: UserPersonalDetail = {
+              name: user.name,
+              gender: user.gender,
+              birthDate: user.birthDate,
+              birthTime: user.birthTime,
+              birthPlace: user.birthPlace,
+              latitude: user.latitude,
+              longitude: user.longitude,
+            };
+
+            dispatch(setDefaultUser(personalDetail));
+            dispatch(setKundliPerson(personalDetail));
           } else {
             dispatch(logout());
             setIsAuthenticated(false);
