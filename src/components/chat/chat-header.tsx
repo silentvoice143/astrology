@@ -1,22 +1,23 @@
+// components/chat/chat-header.tsx
 import React from 'react';
 import {
   View,
   Text,
-  StyleSheet,
   TouchableOpacity,
+  Image,
+  StyleSheet,
   ImageSourcePropType,
 } from 'react-native';
-import Avatar from '../avatar';
-import {scale, verticalScale} from '../../utils/sizer';
-import BackIcon from '../../assets/icons/back-icon';
-import {colors} from '../../constants/colors';
-import { textStyle } from '../../constants/text-style';
+import { scale, verticalScale } from '../../utils/sizer';
 
 interface ChatHeaderProps {
   name: string;
   profileImage: ImageSourcePropType;
-  onBackPress?: () => void;
-  onMenuPress?: () => void;
+  onBackPress: () => void;
+  onMenuPress: () => void;
+  subtitle?: string;
+  showOnlineStatus?: boolean;
+  isOnline?: boolean;
 }
 
 const ChatHeader: React.FC<ChatHeaderProps> = ({
@@ -24,54 +25,130 @@ const ChatHeader: React.FC<ChatHeaderProps> = ({
   profileImage,
   onBackPress,
   onMenuPress,
+  subtitle,
+  showOnlineStatus = false,
+  isOnline = false,
 }) => {
   return (
     <View style={styles.container}>
-      <TouchableOpacity onPress={onBackPress}>
-        <BackIcon color="#000" />
+      <TouchableOpacity onPress={onBackPress} style={styles.backButton}>
+        <Text style={styles.backIcon}>←</Text>
       </TouchableOpacity>
 
-      <View style={styles.profileSection}>
-        <Avatar image={profileImage} size={scale(40)} />
-        <Text style={[styles.nameText,textStyle.fs_mont_16_500]}>{name}</Text>
+      <View style={styles.profileContainer}>
+        <View style={styles.imageContainer}>
+          <Image source={profileImage} style={styles.profileImage} />
+          {showOnlineStatus && (
+            <View style={[
+              styles.onlineIndicator,
+              isOnline ? styles.online : styles.offline
+            ]} />
+          )}
+        </View>
+        
+        <View style={styles.nameContainer}>
+          <Text style={styles.name} numberOfLines={1}>
+            {name}
+          </Text>
+          {subtitle && (
+            <Text style={[
+              styles.subtitle,
+              subtitle === 'typing...' && styles.typingText
+            ]} numberOfLines={1}>
+              {subtitle}
+            </Text>
+          )}
+        </View>
       </View>
 
-      <View style={styles.actionIcons}>
-        {/* <TouchableOpacity onPress={onMenuPress} style={styles.iconSpacing}>
-          <Text>...</Text>
-        </TouchableOpacity> */}
-      </View>
+      <TouchableOpacity onPress={onMenuPress} style={styles.menuButton}>
+        <Text style={styles.menuIcon}>⋮</Text>
+      </TouchableOpacity>
     </View>
   );
 };
-
-export default ChatHeader;
 
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: scale(10),
-    paddingVertical: verticalScale(12),
-    backgroundColor: colors.messageReceived,
-    justifyContent: 'space-between',
-    elevation:3
+    backgroundColor: '#007AFF',
+    paddingHorizontal: scale(16),
+    paddingVertical: scale(12),
+    paddingTop: verticalScale(50), // Account for status bar
+    elevation: 4,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
   },
-  profileSection: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  backButton: {
+    padding: scale(8),
+    marginRight: scale(8),
+  },
+  backIcon: {
+    fontSize: scale(24),
+    color: 'white',
+    fontWeight: 'bold',
+  },
+  profileContainer: {
     flex: 1,
-    marginLeft: scale(10),
-  },
-  nameText: {
-    color: '#000',
-    marginLeft: scale(10),
-  },
-  actionIcons: {
     flexDirection: 'row',
     alignItems: 'center',
   },
-  iconSpacing: {
-    marginLeft: scale(16),
+  imageContainer: {
+    position: 'relative',
+    marginRight: scale(12),
+  },
+  profileImage: {
+    width: scale(40),
+    height: scale(40),
+    borderRadius: scale(20),
+    borderWidth: 2,
+    borderColor: 'white',
+  },
+  onlineIndicator: {
+    position: 'absolute',
+    bottom: 2,
+    right: 2,
+    width: scale(12),
+    height: scale(12),
+    borderRadius: scale(6),
+    borderWidth: 2,
+    borderColor: 'white',
+  },
+  online: {
+    backgroundColor: '#4CAF50',
+  },
+  offline: {
+    backgroundColor: '#757575',
+  },
+  nameContainer: {
+    flex: 1,
+  },
+  name: {
+    fontSize: scale(18),
+    fontWeight: 'bold',
+    color: 'white',
+  },
+  subtitle: {
+    fontSize: scale(12),
+    color: 'rgba(255, 255, 255, 0.8)',
+    marginTop: scale(2),
+  },
+  typingText: {
+    fontStyle: 'italic',
+    color: '#FFE082',
+  },
+  menuButton: {
+    padding: scale(8),
+    marginLeft: scale(8),
+  },
+  menuIcon: {
+    fontSize: scale(20),
+    color: 'white',
+    fontWeight: 'bold',
   },
 });
+
+export default ChatHeader;

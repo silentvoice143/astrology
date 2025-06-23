@@ -1,63 +1,111 @@
-// services/SocketService.ts
+import {Client, StompSubscription} from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
+import {Platform} from 'react-native';
+
+const SOCKET_URL = 'https://quagga-driving-socially.ngrok-free.app/ws-chat';
 
 class SocketService {
-  private static instance: SocketService;
-  private socket: WebSocket | null = null;
-  private readonly SERVER_URL =
-    'https://quagga-driving-socially.ngrok-free.app';
-  private connected: boolean = false;
+  private client: Client | null = null;
+  private userId: string = '';
+  private subscriptions: {[key: string]: StompSubscription} = {};
 
-  private constructor() {}
+  connect(
+    userId: string,
+    onConnectCallback?: () => void,
+    onErrorCallback?: (error: string) => void,
+  ) {
+    this.userId = userId;
 
-  static getInstance(): SocketService {
-    if (!SocketService.instance) {
-      SocketService.instance = new SocketService();
-    }
-    return SocketService.instance;
+    this.client = new Client({
+      webSocketFactory: () => new SockJS(SOCKET_URL),
+      connectHeaders: {
+        'user-id': userId,
+      },
+      debug: str => console.log('[STOMP DEBUG]', str),
+      reconnectDelay: 5000,
+      onConnect: () => {
+        console.log('✅ Connected to WebSocket');
+        onConnectCallback?.();
+      },
+      onStompError: frame => {
+        console.error('❌ STOMP error:', frame);
+        onErrorCallback?.(frame.body);
+      },
+      onWebSocketClose: event => {
+        console.warn('🔌 WebSocket closed', event);
+      },
+      onWebSocketError: event => {
+        console.error('❌ WebSocket error:', event);
+      },
+    });
+
+    this.client.activate();
   }
 
-  connect(onMessage: (message: string) => void): void {
-    if (this.connected) return;
-
-    this.socket = new SockJS(this.SERVER_URL);
-
-    this.socket.onopen = () => {
-      console.log('[SocketService] Connected');
-      this.connected = true;
-    };
-
-    this.socket.onmessage = e => {
-      console.log('[SocketService] Received:', e.data);
-      onMessage(e.data);
-    };
-
-    this.socket.onclose = () => {
-      console.log('[SocketService] Disconnected');
-      this.connected = false;
-    };
-
-    this.socket.onerror = err => {
-      console.error('[SocketService] Error:', err);
-    };
-  }
-
-  sendMessage(message: string): void {
-    if (this.socket && this.connected) {
-      this.socket.send(message);
-    } else {
-      console.warn('[SocketService] Cannot send message, not connected.');
+  disconnect() {
+    if (this.client && this.client.active) {
+      Object.values(this.subscriptions).forEach(sub => sub.unsubscribe());
+      this.subscriptions = {};
+      this.client.deactivate();
+      console.log('👋 Disconnected from WebSocket');
     }
   }
 
-  disconnect(): void {
-    if (this.socket) {
-      this.socket.close();
-      this.socket = null;
-      this.connected = false;
-      console.log('[SocketService] Connection closed');
+  subscribeToMessages(onMessage: (message: any) => void) {
+    if (!this.client || !this.client.connected) return;
+
+    const destination = `/user/${this.userId}/topic/messages`;
+    if (this.subscriptions['messages']) {
+      this.subscriptions['messages'].unsubscribe();
     }
+
+    this.subscriptions['messages'] = this.client.subscribe(
+      destination,
+      message => {
+        const body = JSON.parse(message.body);
+        onMessage(body);
+      },
+    );
+  }
+
+  subscribeToTyping(onTyping: (typing: any) => void) {
+    if (!this.client || !this.client.connected) return;
+
+    const destination = `/user/${this.userId}/topic/typing`;
+    if (this.subscriptions['typing']) {
+      this.subscriptions['typing'].unsubscribe();
+    }
+
+    this.subscriptions['typing'] = this.client.subscribe(
+      destination,
+      message => {
+        const body = JSON.parse(message.body);
+        onTyping(body);
+      },
+    );
+  }
+
+  sendMessage(payload: {
+    senderId: string;
+    receiverId: string;
+    sessionId: string;
+    message: string;
+    type: 'TEXT' | 'IMAGE';
+  }) {
+    if (!this.client || !this.client.connected) return;
+    this.client.publish({
+      destination: '/app/chat.send',
+      body: JSON.stringify(payload),
+    });
+  }
+
+  sendTyping(payload: {senderId: string; receiverId: string; typing: boolean}) {
+    if (!this.client || !this.client.connected) return;
+    this.client.publish({
+      destination: '/app/chat.typing',
+      body: JSON.stringify(payload),
+    });
   }
 }
 
-export default SocketService.getInstance();
+export default new SocketService();

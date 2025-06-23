@@ -1,55 +1,82 @@
-// services/StompService.ts
 import { Client, IMessage } from '@stomp/stompjs';
 import SockJS from 'sockjs-client';
 
 class StompService {
-  private client: Client;
-  private readonly WS_URL = 'https://quagga-driving-socially.ngrok-free.app/ws-chat'; // Add `/ws-chat` endpoint
-  private receiverId: string | null = null;
+  private client: Client | null = null;
+  private isConnected = false;
+  private isActivating = false;
 
-  constructor() {
+  private readonly WS_URL = 'https://quagga-driving-socially.ngrok-free.app/ws-chat';
+
+  async connect(userId: string, onMessage: (msg: any) => void) {
+    if (this.client && (this.isConnected || this.isActivating)) {
+      console.warn('[STOMP] Already connected or connecting. Skipping...');
+      return;
+    }
+
     this.client = new Client({
       webSocketFactory: () => new SockJS(this.WS_URL),
-      reconnectDelay: 5000,
+      connectHeaders: {
+        'user-id': userId,
+      },
       debug: str => console.log('[STOMP]', str),
+      reconnectDelay: 0,
     });
-  }
-
-  connect(receiverId: string, onMessage: (msg: any) => void): void {
-    this.receiverId = receiverId;
 
     this.client.onConnect = () => {
+      this.isConnected = true;
+      this.isActivating = false;
       console.log('[STOMP] Connected');
-      this.client.subscribe(`/user/${receiverId}/topic/messages`, (message: IMessage) => {
-        const body = JSON.parse(message.body);
-        onMessage(body);
+
+      this.client?.subscribe(`/user/${userId}/topic/messages`, (message: IMessage) => {
+        console.log('[STOMP] Received:', message.body);
+        onMessage(JSON.parse(message.body));
       });
+    };
+
+    this.client.onDisconnect = () => {
+      console.log('[STOMP] Disconnected');
+      this.isConnected = false;
     };
 
     this.client.onStompError = frame => {
       console.error('[STOMP] Broker error', frame.headers['message'], frame.body);
     };
 
+    this.isActivating = true;
     this.client.activate();
   }
 
-  sendMessage(content: string, senderId: string, receiverId: string): void {
-    if (this.client.connected) {
-      const payload = {
-        content,
-        senderId,
-        receiverId,
-      };
-
-      this.client.publish({
-        destination: '/app/chat.send', // your backend @MessageMapping
-        body: JSON.stringify(payload),
-      });
+  sendMessage(message: string, senderId: string, receiverId: string, sessionId?: string) {
+    if (!this.client || !this.isConnected) {
+      console.warn('[STOMP] Cannot send, not connected');
+      return;
     }
+
+    const payload = {
+      message,
+      senderId,
+      receiverId,
+      sessionId,
+      type: 'TEXT',
+      timestamp: new Date().toISOString(),
+    };
+
+    this.client.publish({
+      destination: '/app/chat.send',
+      body: JSON.stringify(payload),
+    });
+
+    console.log('[STOMP] Sent:', payload);
   }
 
-  disconnect(): void {
-    this.client.deactivate();
+  async disconnect() {
+    if (this.client && this.isConnected) {
+      console.log('[STOMP] Disconnecting...');
+      await this.client.deactivate();
+      this.isConnected = false;
+      this.client = null;
+    }
   }
 }
 
