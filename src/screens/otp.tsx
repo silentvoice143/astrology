@@ -44,7 +44,7 @@ const Otp = () => {
           justifyContent: 'center',
         }}>
         <Image
-          style={{height: moderateScale(110), width: moderateScale(158)}}
+          style={{height: moderateScale(160), width: moderateScale(158)}}
           source={require('../assets/imgs/logo.png')}
         />
       </View>
