@@ -38,13 +38,13 @@ const Login = () => {
           justifyContent: 'center',
         }}>
         <Image
-          style={{height: moderateScale(110), width: moderateScale(158)}}
+          style={{height: moderateScale(160), width: moderateScale(158)}}
           source={require('../assets/imgs/logo.png')}
         />
       </View>
       <View style={styles.formWrapper}>
         <Text style={[textStyle.fs_mont_36_700]}>Login</Text>
-        <Text style={[textStyle.fs_mont_16_400]}>Welcome to Astrologer</Text>
+        <Text style={[textStyle.fs_mont_16_400]}>Welcome to Astrosevaa</Text>
 
         <CustomInputV1
           preText="+91"
