@@ -1,6 +1,12 @@
-import React from 'react';
-import {View, Text, StyleSheet, ScrollView} from 'react-native';
-import NorthIndianChart from './charts/lagna-chart';
+import React, {use, useEffect, useState} from 'react';
+import {View, Text, StyleSheet, ScrollView, Dimensions} from 'react-native';
+
+import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
+import {kundliChart} from '../../store/reducer/kundli';
+import {SvgXml} from 'react-native-svg';
+import {customizeSVG} from '../../utils/customize-svg';
+
+const {width} = Dimensions.get('screen');
 
 const ChartPage = () => {
   const tags = [
@@ -17,37 +23,51 @@ const ChartPage = () => {
     {planet: 'Moon', symbol: 'Mo', position: '21°42\'55"'},
   ];
 
+  const {kundliPerson} = useAppSelector(state => state.kundli);
+  const [chartSvg, setChartSvg] = useState<string | null>(null);
+  const dispatch = useAppDispatch();
+
+  const getKundliChartData = async () => {
+    try {
+      const body = {
+        ...kundliPerson,
+        birthPlace: 'Varanasi',
+        latitude: 25.317645,
+        longitude: 82.973915,
+      };
+      console.log('api body', body);
+      const payload = await dispatch(
+        // getPersonKundliDetail({
+        //   name: 'Ravi Sharma',
+        //   gender: 'MALE',
+        //   birthDate: '1990-08-15',
+        //   birthTime: '06:30:00',
+        //   birthPlace: 'Varanasi',
+        //   latitude: 25.317645,
+        //   longitude: 82.973915,
+        // }),
+        kundliChart({
+          body: body,
+          query: {chartType: 'lagna', chartStyle: 'east-indian'},
+        }),
+      ).unwrap();
+      console.log(payload, '----kundli chart data');
+      setChartSvg(customizeSVG(payload));
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
+  useEffect(() => {
+    getKundliChartData();
+  }, []);
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       {/* Kundli Chart */}
-
-      {/* Astrology Tags */}
-      <View style={styles.tagContainer}>
-        {tags.map((tag, idx) => (
-          <View key={idx} style={styles.tag}>
-            <Text style={styles.tagText}>
-              {tag.symbol} {tag.label}
-            </Text>
-          </View>
-        ))}
-      </View>
-
-      {/* Planetary Table */}
-      <View style={styles.tableContainer}>
-        <View style={styles.tableHeader}>
-          <Text style={styles.headerCell}>Planet</Text>
-          <Text style={styles.headerCell}>Symbol</Text>
-          <Text style={styles.headerCell}>Position</Text>
-        </View>
-
-        {planetData.map((row, index) => (
-          <View key={index} style={styles.tableRow}>
-            <Text style={styles.cell}>{row.planet}</Text>
-            <Text style={styles.cell}>{row.symbol}</Text>
-            <Text style={styles.cell}>{row.position}</Text>
-          </View>
-        ))}
-      </View>
+      {chartSvg ? (
+        <SvgXml xml={chartSvg} height={width - 28} width={width - 28} />
+      ) : null}
     </ScrollView>
   );
 };

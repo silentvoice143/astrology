@@ -10,10 +10,10 @@ import {UserPersonalDetail} from '../../utils/types';
 import GradientButton from '../gradient-button';
 
 const BasicDetails = () => {
+  const [openedForOther, setOpenedForOther] = useState(false);
   const dispatch = useAppDispatch();
   const defaultUser = useAppSelector(state => state.kundli.defaultUser);
   const kundliPerson = useAppSelector(state => state.kundli.kundliPerson);
-  console.log(kundliPerson, '-----kundliperson');
 
   const [showModal, setShowModal] = useState(false);
 
@@ -32,7 +32,11 @@ const BasicDetails = () => {
       <View style={styles.card}>
         <View style={styles.headerRow}>
           <Text style={styles.title}>Basic Details</Text>
-          <TouchableOpacity onPress={() => setShowModal(true)}>
+          <TouchableOpacity
+            onPress={() => {
+              setOpenedForOther(false); // ← This is the fix
+              setShowModal(true);
+            }}>
             <Text style={styles.editText}>Edit</Text>
           </TouchableOpacity>
         </View>
@@ -81,6 +85,7 @@ const BasicDetails = () => {
                 longitude: null,
               }),
             );
+            setOpenedForOther(true); // track it's from Other Person
             setShowModal(true);
           }}
         />
@@ -88,7 +93,13 @@ const BasicDetails = () => {
 
       <PersonalDetailModal
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
+        onClose={() => {
+          if (openedForOther) {
+            dispatch(resetToDefaultUser());
+            setOpenedForOther(false);
+          }
+          setShowModal(false);
+        }}
         existingDetails={kundliPerson}
         onSubmit={handleUpdate}
       />

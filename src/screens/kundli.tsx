@@ -5,21 +5,15 @@ import TabBar from '../components/horizontal-tab';
 import {colors} from '../constants/colors';
 import BasicDetails from '../components/kundli/basic-detail';
 import ChartPage from '../components/kundli/chart';
+import Nakshatra from '../components/kundli/nakshatra';
+import Yogas from '../components/kundli/yogas';
+import NakshatraAndDosha from '../components/kundli/nakshatra';
 
 export const kundliTabs = [
   {key: 'basic', label: 'Basic Details'},
   {key: 'lagnaChart', label: 'Lagna Chart'},
-  // {key: 'navamsaChart', label: 'Navamsa Chart'},
-  // {key: 'planetaryInfo', label: 'Planetary Info'},
-  // {key: 'dasha', label: 'Dasha'},
-  // {key: 'bhavPhal', label: 'Bhav Phal'},
-  // {key: 'ashtakvarga', label: 'Ashtakvarga'},
+  {key: 'nakshatra', label: 'Nakshatra'},
   // {key: 'yogas', label: 'Yogas'},
-  // {key: 'mangalDosha', label: 'Mangal Dosha'},
-  // {key: 'kpChart', label: 'KP Chart'},
-  // {key: 'transit', label: 'Transit (Gochar)'},
-  // {key: 'numerology', label: 'Numerology'},
-  // {key: 'remedies', label: 'Remedies'},
 ];
 
 const Kundli = () => {
@@ -34,9 +28,11 @@ const Kundli = () => {
           onTabPress={key => setSelectedTab(key)}
         />
       </View>
-      <View style={{backgroundColor: colors.primary_surface}}>
+      <View style={{flex: 1, backgroundColor: colors.primary_surface}}>
         {selectedTab === 'basic' && <BasicDetails />}
         {selectedTab === 'lagnaChart' && <ChartPage />}
+        {selectedTab === 'nakshatra' && <NakshatraAndDosha />}
+        {/* {selectedTab === 'yogas' && <Yogas />} */}
       </View>
     </ScreenLayout>
   );

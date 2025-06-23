@@ -67,3 +67,64 @@ export interface CircularRatingProps {
   rating: number;
   size?: number;
 }
+
+//kundli
+
+export interface KundliDetailResponse {
+  nakshatra_details: {
+    nakshatra: {
+      id: number;
+      name: string;
+      pada: number;
+      lord: {
+        id: number;
+        name: string;
+        vedic_name: string;
+      };
+    };
+    chandra_rasi: {
+      id: number;
+      name: string;
+      lord: {
+        id: number;
+        name: string;
+        vedic_name: string;
+      };
+    };
+    soorya_rasi: {
+      id: number;
+      name: string;
+      lord: {
+        id: number;
+        name: string;
+        vedic_name: string;
+      };
+    };
+    zodiac: {
+      id: number;
+      name: string;
+    };
+    additional_info: {
+      deity: string;
+      ganam: string;
+      symbol: string;
+      animal_sign: string;
+      nadi: string;
+      color: string;
+      best_direction: string;
+      syllables: string;
+      birth_stone: string;
+      gender: string;
+      planet: string;
+      enemy_yoni: string;
+    };
+  };
+  mangal_dosha: {
+    has_dosha: boolean;
+    description: string;
+  };
+  yoga_details: {
+    name: string;
+    description: string;
+  }[];
+}
