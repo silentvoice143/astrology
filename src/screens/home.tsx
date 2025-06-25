@@ -28,6 +28,9 @@ import {getAllAstrologers} from '../store/reducer/astrologers';
 import {postUserDetail} from '../store/reducer/user';
 import {UserPersonalDetail} from '../utils/types';
 import {setKundliPerson} from '../store/reducer/kundli';
+import {Client} from '@stomp/stompjs';
+import SockJS from 'sockjs-client';
+import {useWebSocket} from '../hooks/use-socket';
 
 const Home = () => {
   const [search, setSearch] = useState('');
@@ -62,6 +65,10 @@ const Home = () => {
       console.log(err);
     }
   };
+
+  const userId = useAppSelector(state => state.auth.user.id);
+
+  const {connect, disconnect, subscribe, send} = useWebSocket(userId);
 
   return (
     <ScreenLayout headerBackgroundColor={headerBgColor}>

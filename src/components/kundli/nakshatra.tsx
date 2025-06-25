@@ -380,7 +380,7 @@ const NakshatraAndDosha = ({active}: {active: number}) => {
   };
   useEffect(() => {
     fetchKundliDetails();
-  }, [dispatch]);
+  }, [dispatch, kundliPerson]);
 
   const nakshatra_details = kundliDetail?.nakshatra_details;
   const yoga_details = kundliDetail?.yoga_details;

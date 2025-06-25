@@ -33,6 +33,7 @@ const navItems = [
   {title: 'Astrologers', href: 'Astrologers'},
   {title: 'Chat History', href: 'ChatHistory', params: {type: 'user'}},
   {title: 'Wallet', href: 'Wallet', params: {type: 'user'}},
+  {title: 'chat', href: 'chat'},
 ];
 
 const Sidebar = forwardRef<SidebarRef>((_, ref) => {

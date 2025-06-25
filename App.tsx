@@ -5,6 +5,8 @@ import AppNavigator from './src/routes/app-navigator';
 import {persistor, store} from './src/store'; // Import your Redux store
 import Toast from 'react-native-toast-message';
 import {PersistGate} from 'redux-persist/integration/react';
+import * as encoding from 'text-encoding';
+Object.assign(global, encoding);
 
 function App(): React.JSX.Element {
   return (

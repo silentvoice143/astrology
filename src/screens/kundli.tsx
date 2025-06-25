@@ -20,6 +20,7 @@ export const kundliTabs = [
 
 const Kundli = () => {
   const [selectedTab, setSelectedTab] = useState<number>(0);
+
   return (
     <ScreenLayout>
       {/* <View style={{backgroundColor: colors.secondary_surface}}>

@@ -72,7 +72,7 @@ const ChartPage = ({active}: {active: number}) => {
 
   useEffect(() => {
     getKundliChartData();
-  }, [dispatch]);
+  }, [dispatch, kundliPerson]);
 
   if (loading) {
     return (
