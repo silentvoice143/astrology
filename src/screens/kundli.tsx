@@ -8,6 +8,8 @@ import ChartPage from '../components/kundli/chart';
 import Nakshatra from '../components/kundli/nakshatra';
 import Yogas from '../components/kundli/yogas';
 import NakshatraAndDosha from '../components/kundli/nakshatra';
+import Carousel from '../components/carosel';
+import KundliPage from '../components/kundli/kundli-page';
 
 export const kundliTabs = [
   {key: 'basic', label: 'Basic Details'},
@@ -17,10 +19,10 @@ export const kundliTabs = [
 ];
 
 const Kundli = () => {
-  const [selectedTab, setSelectedTab] = useState('basic');
+  const [selectedTab, setSelectedTab] = useState<number>(0);
   return (
     <ScreenLayout>
-      <View style={{backgroundColor: colors.secondary_surface}}>
+      {/* <View style={{backgroundColor: colors.secondary_surface}}>
         <TabBar
           containerStyle={{}}
           tabs={kundliTabs}
@@ -32,8 +34,29 @@ const Kundli = () => {
         {selectedTab === 'basic' && <BasicDetails />}
         {selectedTab === 'lagnaChart' && <ChartPage />}
         {selectedTab === 'nakshatra' && <NakshatraAndDosha />}
-        {/* {selectedTab === 'yogas' && <Yogas />} */}
-      </View>
+        
+      </View> */}
+
+      <Carousel
+        data={[
+          {id: 1, screen: 'Chart', data: <ChartPage active={selectedTab} />},
+          {
+            id: 2,
+            screen: 'Basic details',
+            data: <BasicDetails active={selectedTab} />,
+          },
+          {
+            id: 3,
+            screen: 'Nakshatra',
+            data: <NakshatraAndDosha active={selectedTab} />,
+          },
+        ]}
+        pagination={false}
+        cardWidthScale={1}
+        CardComponent={KundliPage}
+        showTabs={true}
+        onChange={(index: number) => setSelectedTab(index)}
+      />
     </ScreenLayout>
   );
 };

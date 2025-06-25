@@ -27,6 +27,7 @@ import {setFirstTime, setUser} from '../store/reducer/auth';
 import {getAllAstrologers} from '../store/reducer/astrologers';
 import {postUserDetail} from '../store/reducer/user';
 import {UserPersonalDetail} from '../utils/types';
+import {setKundliPerson} from '../store/reducer/kundli';
 
 const Home = () => {
   const [search, setSearch] = useState('');
@@ -37,6 +38,7 @@ const Home = () => {
   const [isPersonalDetailModalOpen, setIsPersonalDetailModalOpen] = useState(
     isProfileComplete ? false : true,
   );
+  const [forKundli, setForKundli] = useState(false);
   const dispatch = useAppDispatch();
 
   // const handleScroll = (event: any) => {
@@ -68,7 +70,14 @@ const Home = () => {
         onClose={() => {
           setIsPersonalDetailModalOpen(false);
         }}
-        onSubmit={handlePostUserData}
+        onSubmit={data => {
+          if (forKundli) {
+            dispatch(setKundliPerson(data));
+            navigation.navigate('Kundli');
+          } else {
+            handlePostUserData(data);
+          }
+        }}
       />
 
       <ScrollView
@@ -196,7 +205,8 @@ const Home = () => {
                 }}
                 textStyle={{color: colors.primaryText, lineHeight: 20}}
                 onPress={() => {
-                  navigation.navigate('Kundli');
+                  setForKundli(true);
+                  setIsPersonalDetailModalOpen(true);
                 }}
               />
               {/* <

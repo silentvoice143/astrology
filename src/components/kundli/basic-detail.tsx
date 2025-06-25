@@ -5,11 +5,9 @@ import {scale} from '../../utils/sizer';
 import {colors} from '../../constants/colors';
 import {useAppSelector, useAppDispatch} from '../../hooks/redux-hook';
 import {setKundliPerson, resetToDefaultUser} from '../../store/reducer/kundli';
-import CustomButton from '../custom-button';
 import {UserPersonalDetail} from '../../utils/types';
-import GradientButton from '../gradient-button';
 
-const BasicDetails = () => {
+const BasicDetails = ({active}: {active: number}) => {
   const [openedForOther, setOpenedForOther] = useState(false);
   const dispatch = useAppDispatch();
   const defaultUser = useAppSelector(state => state.kundli.defaultUser);
@@ -56,38 +54,6 @@ const BasicDetails = () => {
         <DetailRow
           label="Place of Birth"
           value={kundliPerson.birthPlace || '-'}
-        />
-      </View>
-
-      <View style={styles.buttonRow}>
-        {!isDefaultUser && (
-          <GradientButton
-            colors={[colors.primary_card, colors.secondary_Card]}
-            style={{backgroundColor: colors.secondarybtn}}
-            title="Back to Me"
-            onPress={() => dispatch(resetToDefaultUser())}
-          />
-        )}
-
-        <GradientButton
-          colors={[colors.primary_card, colors.secondary_Card]}
-          title="Other Person's Kundli"
-          style={{backgroundColor: colors.secondarybtn}}
-          onPress={() => {
-            dispatch(
-              setKundliPerson({
-                name: '',
-                gender: '',
-                birthDate: new Date().toISOString().split('T')[0],
-                birthTime: new Date().toTimeString().split(' ')[0],
-                birthPlace: '',
-                latitude: null,
-                longitude: null,
-              }),
-            );
-            setOpenedForOther(true); // track it's from Other Person
-            setShowModal(true);
-          }}
         />
       </View>
 

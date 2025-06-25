@@ -1,6 +1,8 @@
 import React from 'react';
 import {SharedValue} from 'react-native-reanimated';
 import IntroCard from './intro-card';
+import {Pressable} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
 
 type CardProps = {
   item: any;
@@ -15,14 +17,20 @@ const AstrologerCarosel: React.FC<CardProps> = ({
   scrollX,
   cardWidth,
 }) => {
+  const navigation = useNavigation<any>();
   return (
-    <IntroCard
-      cardWidth={cardWidth}
-      name={item.name}
-      rate={item.rate}
-      avatar={item.avatar}
-      specialty={item.specialty}
-    />
+    <Pressable
+      onPress={() => {
+        navigation.navigate('DetailsProfile');
+      }}>
+      <IntroCard
+        cardWidth={cardWidth}
+        name={item.name}
+        rate={item.rate}
+        avatar={item.avatar}
+        specialty={item.specialty}
+      />
+    </Pressable>
   );
 };
 

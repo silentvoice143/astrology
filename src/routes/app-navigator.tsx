@@ -36,9 +36,6 @@ export default function AppNavigator() {
               latitude: user.latitude,
               longitude: user.longitude,
             };
-
-            dispatch(setDefaultUser(personalDetail));
-            dispatch(setKundliPerson(personalDetail));
           } else {
             dispatch(logout());
             setIsAuthenticated(false);

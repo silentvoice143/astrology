@@ -50,39 +50,15 @@ const kundliSlice = createSlice({
   },
   extraReducers: builder => {
     builder
-      .addCase(getPersonKundliDetail.pending, state => {
-        state.isLoading = true;
-        state.error = null;
-      })
-      .addCase(getPersonKundliDetail.fulfilled, (state, {payload}) => {
-        state.isLoading = false;
-        if (payload.success) {
-          state.kundliDetail = payload.data.data;
-        } else {
-          state.error = 'Failed to load kundli details';
-        }
-      })
-      .addCase(getPersonKundliDetail.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.error.message || 'Something went wrong';
-      })
+      .addCase(getPersonKundliDetail.pending, state => {})
+      .addCase(getPersonKundliDetail.fulfilled, (state, {payload}) => {})
+      .addCase(getPersonKundliDetail.rejected, (state, action) => {})
       .addCase(kundliChart.pending, state => {
         state.isLoading = true;
         state.error = null;
       })
-      .addCase(kundliChart.fulfilled, (state, {payload}) => {
-        state.isLoading = false;
-
-        if (payload.success) {
-          state.kundliDetail = payload.data.data;
-        } else {
-          state.error = 'Failed to load kundli chart';
-        }
-      })
-      .addCase(kundliChart.rejected, (state, action) => {
-        state.isLoading = false;
-        state.error = action.error.message || 'Something went wrong';
-      });
+      .addCase(kundliChart.fulfilled, (state, {payload}) => {})
+      .addCase(kundliChart.rejected, (state, action) => {});
   },
 });
 

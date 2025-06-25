@@ -5,7 +5,8 @@ import Toast from 'react-native-toast-message';
 import skipAuthPaths from './skip-path';
 
 const baseUrl =
-  process.env.BASE_URL || 'https://quagga-driving-socially.ngrok-free.app';
+  process.env.BASE_URL ||
+  'https://4b3c-2409-40e4-2057-ec56-5dc0-68f5-6cf1-7a9.ngrok-free.app';
 
 const api = axios.create({
   baseURL: baseUrl,

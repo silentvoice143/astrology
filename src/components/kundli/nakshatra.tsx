@@ -321,7 +321,7 @@
 //   },
 // });
 
-import React, {useEffect} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -330,7 +330,10 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
-import {getPersonKundliDetail} from '../../store/reducer/kundli';
+import {
+  getPersonKundliDetail,
+  setKundliPerson,
+} from '../../store/reducer/kundli';
 
 const SimpleCard = ({
   title,
@@ -345,24 +348,39 @@ const SimpleCard = ({
   </View>
 );
 
-const NakshatraAndDosha = () => {
+const NakshatraAndDosha = ({active}: {active: number}) => {
   const dispatch = useAppDispatch();
   const {kundliPerson, isLoading} = useAppSelector(state => state.kundli);
+  console.log(kundliPerson, '-----kundliperson');
+  const [kundliDetail, setKundliDetail] = useState<any>();
+  const [loading, setLoading] = useState(false);
+  const fetchKundliDetails = async () => {
+    setLoading(true);
+    console.log('fetching kundli data');
+    try {
+      const payload = await dispatch(
+        getPersonKundliDetail({
+          ...kundliPerson,
+          birthPlace: 'Varanasi',
+          latitude: 25.317645,
+          longitude: 82.973915,
+        }),
+      ).unwrap();
+      console.log(payload, '-----paylaod');
 
+      if (payload.success) {
+        setKundliDetail(payload.data.data);
+        console.log(payload.data.data, '-----paylaod');
+      }
+    } catch (err) {
+      console.error('Error fetching kundli details:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
   useEffect(() => {
-    dispatch(
-      getPersonKundliDetail({
-        ...kundliPerson,
-        birthPlace: 'Varanasi',
-        latitude: 25.317645,
-        longitude: 82.973915,
-      }),
-    );
-  }, []);
-
-  const kundliDetail = useAppSelector(
-    (state: any) => state.kundli.kundliDetail,
-  );
+    fetchKundliDetails();
+  }, [dispatch]);
 
   const nakshatra_details = kundliDetail?.nakshatra_details;
   const yoga_details = kundliDetail?.yoga_details;
@@ -373,7 +391,7 @@ const NakshatraAndDosha = () => {
 
   const mangal_dosha = kundliDetail?.mangal_dosha;
 
-  if (isLoading || !kundliDetail) {
+  if (loading) {
     return (
       <View style={styles.loader}>
         <ActivityIndicator size={20} />

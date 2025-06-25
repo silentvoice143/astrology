@@ -1,14 +1,21 @@
 import React, {use, useEffect, useState} from 'react';
-import {View, Text, StyleSheet, ScrollView, Dimensions} from 'react-native';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Dimensions,
+  ActivityIndicator,
+} from 'react-native';
 
 import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
 import {kundliChart} from '../../store/reducer/kundli';
 import {SvgXml} from 'react-native-svg';
 import {customizeSVG} from '../../utils/customize-svg';
+import {scale, verticalScale} from '../../utils/sizer';
 
-const {width} = Dimensions.get('screen');
-
-const ChartPage = () => {
+const ChartPage = ({active}: {active: number}) => {
+  const [width, setWidth] = useState(Dimensions.get('screen').width);
   const tags = [
     {label: 'Retrograde', symbol: '⭒'},
     {label: 'Exalted', symbol: '+'},
@@ -25,10 +32,12 @@ const ChartPage = () => {
 
   const {kundliPerson} = useAppSelector(state => state.kundli);
   const [chartSvg, setChartSvg] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
 
   const getKundliChartData = async () => {
     try {
+      setLoading(true);
       const body = {
         ...kundliPerson,
         birthPlace: 'Varanasi',
@@ -37,15 +46,6 @@ const ChartPage = () => {
       };
       console.log('api body', body);
       const payload = await dispatch(
-        // getPersonKundliDetail({
-        //   name: 'Ravi Sharma',
-        //   gender: 'MALE',
-        //   birthDate: '1990-08-15',
-        //   birthTime: '06:30:00',
-        //   birthPlace: 'Varanasi',
-        //   latitude: 25.317645,
-        //   longitude: 82.973915,
-        // }),
         kundliChart({
           body: body,
           query: {chartType: 'lagna', chartStyle: 'east-indian'},
@@ -55,12 +55,32 @@ const ChartPage = () => {
       setChartSvg(customizeSVG(payload));
     } catch (err) {
       console.log(err);
+    } finally {
+      setLoading(false);
     }
   };
 
   useEffect(() => {
-    getKundliChartData();
+    const onChange = ({screen}: {screen: {width: number}}) => {
+      setWidth(screen.width);
+    };
+
+    const subscription = Dimensions.addEventListener('change', onChange);
+
+    return () => subscription.remove();
   }, []);
+
+  useEffect(() => {
+    getKundliChartData();
+  }, [dispatch]);
+
+  if (loading) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size={20} />
+      </View>
+    );
+  }
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -74,9 +94,15 @@ const ChartPage = () => {
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
     backgroundColor: '#fefefe',
     gap: 20,
+    paddingHorizontal: scale(16),
+    paddingVertical: verticalScale(20),
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   kundliContainer: {
     aspectRatio: 1,

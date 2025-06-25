@@ -34,9 +34,6 @@ const Otp = () => {
           latitude: user.latitude,
           longitude: user.longitude,
         };
-
-        dispatch(setDefaultUser(personalDetail));
-        dispatch(setKundliPerson(personalDetail));
       }
     } catch (err) {
       console.log(err);
