@@ -57,7 +57,14 @@ const Header = ({
   // });
 
   return (
-    <LinearGradient colors={[colors.primary_surface, colors.secondary_surface]}>
+    <LinearGradient
+      colors={[
+        colors.primary_surface,
+        route.name === 'Kundli'
+          ? colors.primary_surface
+          : colors.secondary_surface_2,
+      ]}
+      style={{borderBottomWidth: 1, borderColor: colors.backgroundLight}}>
       <Animated.View style={[styles.container]}>
         {/* Background Image */}
         <Image

@@ -6,6 +6,7 @@ import {
   ScrollView,
   Dimensions,
   ActivityIndicator,
+  Pressable,
 } from 'react-native';
 
 import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
@@ -13,6 +14,11 @@ import {kundliChart} from '../../store/reducer/kundli';
 import {SvgXml} from 'react-native-svg';
 import {customizeSVG} from '../../utils/customize-svg';
 import {scale, verticalScale} from '../../utils/sizer';
+import {textStyle} from '../../constants/text-style';
+import {colors} from '../../constants/colors';
+import ChangeIcon from '../../assets/icons/change-icon';
+import EditIcon from '../../assets/icons/edit-icon';
+import DocumentDownloadIcon from '../../assets/icons/download-file-icon';
 
 const ChartPage = ({active}: {active: number}) => {
   const [width, setWidth] = useState(Dimensions.get('screen').width);
@@ -84,10 +90,56 @@ const ChartPage = ({active}: {active: number}) => {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      <View style={{display: 'flex', flexDirection: 'row', gap: scale(8)}}>
+        <View
+          style={{
+            borderColor: colors.primary_surface_2,
+            borderWidth: 1,
+            flex: 1,
+            paddingVertical: verticalScale(12),
+            paddingHorizontal: scale(8),
+            borderRadius: scale(24),
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <Text style={[textStyle.fs_abyss_16_400]}>East-Indian Style</Text>
+        </View>
+        <Pressable
+          style={{
+            height: verticalScale(40),
+            width: verticalScale(40),
+            backgroundColor: colors.primary_surface_2,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: scale(20),
+          }}>
+          <ChangeIcon size={30} color={colors.primary_surface} />
+        </Pressable>
+        <Pressable
+          style={{
+            height: verticalScale(40),
+            width: verticalScale(40),
+            backgroundColor: colors.primary_surface_2,
+            paddingHorizontal: scale(8),
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: scale(20),
+          }}>
+          <DocumentDownloadIcon size={24} color={colors.primary_surface} />
+        </Pressable>
+      </View>
       {/* Kundli Chart */}
       {chartSvg ? (
         <SvgXml xml={chartSvg} height={width - 28} width={width - 28} />
       ) : null}
+      <Text
+        style={[
+          textStyle.fs_abyss_12_400,
+          {textAlign: 'center', color: colors.secondaryText},
+        ]}>
+        You can download this kundli with all the additional details usign the
+        top right button in pdf format
+      </Text>
     </ScrollView>
   );
 };

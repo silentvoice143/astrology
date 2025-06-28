@@ -31,6 +31,7 @@ import {RouteProp, useRoute} from '@react-navigation/native';
 import {RootStackParamList} from '../hooks/navigation';
 import {getAllAstrologerById} from '../store/reducer/astrologers';
 import {useAppDispatch} from '../hooks/redux-hook';
+import {sendSessionRequest} from '../store/reducer/session';
 
 export interface AstrologerUser {
   id: string;
@@ -89,6 +90,17 @@ const DetailsProfile: React.FC = () => {
   useEffect(() => {
     fetchAstrologersDataById(id);
   }, [id]);
+
+  const requestSession = async () => {
+    try {
+      const body = {astrologerId: data?.id, duration: 10};
+      console.log(body, '----body');
+      const payload = await dispatch(sendSessionRequest(body)).unwrap();
+      console.log(payload);
+    } catch (err) {
+      console.log('sendSessionRequest Error : ', err);
+    }
+  };
 
   const astrologerData = {
     name: 'Acharya Vishnukant P',
@@ -173,7 +185,6 @@ const DetailsProfile: React.FC = () => {
                       style={[styles.verifiedCheck, textStyle.fs_mont_12_700]}>
                       ✓
                     </Text>
-                    
                   </View>
                 )}
               </View>
@@ -355,6 +366,7 @@ const DetailsProfile: React.FC = () => {
           textStyle={textStyle.fs_mont_14_700}
           onPress={() => {
             // Handle chat action
+            requestSession();
             console.log('Chat button pressed');
           }}
           title={'Chat'}

@@ -128,3 +128,23 @@ export interface KundliDetailResponse {
     description: string;
   }[];
 }
+
+//session
+
+export interface ChatSession {
+  id: string;
+  userId: string;
+  astrologerId: string;
+  startedAt: string;
+  endedAt?: string | null;
+  totalCost: number;
+  totalMinutes: number;
+  status: 'ACTIVE' | 'ENDED';
+}
+
+export interface SessionState {
+  session: ChatSession | null;
+  isLoading: boolean;
+  error: string | null;
+  queueMessage: string | null;
+}

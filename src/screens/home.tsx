@@ -24,18 +24,22 @@ import PersonalDetailModal from '../components/personal-detail-modal';
 import {useNavigation} from '@react-navigation/native';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {setFirstTime, setUser} from '../store/reducer/auth';
-import {getAllAstrologers} from '../store/reducer/astrologers';
 import {postUserDetail} from '../store/reducer/user';
 import {UserPersonalDetail} from '../utils/types';
 import {setKundliPerson} from '../store/reducer/kundli';
-import {Client} from '@stomp/stompjs';
-import SockJS from 'sockjs-client';
-import {useWebSocket} from '../hooks/use-socket';
+
+import {useUserRole} from '../hooks/use-role';
 
 const Home = () => {
   const [search, setSearch] = useState('');
   const navigation = useNavigation<any>();
   const [headerBgColor, setHeaderBgColor] = useState('color');
+
+  const user = useAppSelector(state => state.auth.user);
+  const astrologer_detail = useAppSelector(
+    state => state.auth.astrologer_detail,
+  );
+  const userRole = useUserRole();
   const {isProfileComplete} = useAppSelector(state => state.auth);
 
   const [isPersonalDetailModalOpen, setIsPersonalDetailModalOpen] = useState(
@@ -66,13 +70,18 @@ const Home = () => {
     }
   };
 
-  const userId = useAppSelector(state => state.auth.user.id);
-
-  const {connect, disconnect, subscribe, send} = useWebSocket(userId);
-
   return (
     <ScreenLayout headerBackgroundColor={headerBgColor}>
       <PersonalDetailModal
+        existingDetails={{
+          name: userRole === 'ASTROLOGER' ? user.name : '',
+          gender: '',
+          birthDate: new Date().toISOString().split('T')[0],
+          birthTime: new Date().toTimeString().split(' ')[0],
+          birthPlace: '',
+          latitude: null,
+          longitude: null,
+        }}
         isOpen={isPersonalDetailModalOpen}
         onClose={() => {
           setIsPersonalDetailModalOpen(false);

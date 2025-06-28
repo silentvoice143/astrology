@@ -23,7 +23,7 @@ export class WebSocketService {
     });
 
     this.client.onConnect = frame => {
-      console.log('Connected!', frame);
+      console.log('Connected!');
     };
 
     this.client.onStompError = frame => {

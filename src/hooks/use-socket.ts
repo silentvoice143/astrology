@@ -14,8 +14,7 @@ export const useWebSocket = (
     if (!serviceRef.current) {
       serviceRef.current = new WebSocketService(
         userId,
-        (socketUrl =
-          'https://7a9d-2401-4900-1caa-6f84-44bc-87d8-111f-b9c0.ngrok-free.app/ws-chat'),
+        (socketUrl = 'https://quagga-driving-socially.ngrok-free.app/ws-chat'),
       );
     }
   }, [userId, socketUrl]);

@@ -14,6 +14,7 @@ export const colors = {
   tertiary_text: '#A51255',
   userNmaeText: '#D12765',
   whiteText: '#ffffff',
+  gray_text: '#A8A8A8',
 
   //yellow
   primary_yellow: '#EEC900',
@@ -29,13 +30,14 @@ export const colors = {
 
   //surface color
   primary_surface: '#fff',
+  primary_surface_2: '#EC504A',
   secondary_surface: '#FFEBEC',
   secondary_surface_2: '#FCEEED',
   tertiary_surface: '#FFF2DE',
 
   //card colors
   primary_card: '#AA1358',
-  primart_card_2: '#F4EBD0',
+  primary_card_2: '#FAF7ED',
   secondary_Card: '#EC504A',
   tertiary_card: '#FAA347',
 
@@ -50,7 +52,6 @@ export const colors = {
   grey300: '#E0E0E0',
   backgroundLight: '#f8f9fa',
 
-
-  messageSend:'#DCF8C6',
-  messageReceived:'#FCE4EC',
+  messageSend: '#DCF8C6',
+  messageReceived: '#FCE4EC',
 };

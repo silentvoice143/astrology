@@ -16,6 +16,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import {useNavigation} from '@react-navigation/native';
+import {colors} from '../constants/colors';
 
 const _spacing = 12;
 
@@ -137,7 +138,7 @@ function Carousel<T>({
                     position: 'absolute',
                     bottom: 0,
                     height: 3,
-                    backgroundColor: '#333',
+                    backgroundColor: colors.primary_surface_2,
                   },
                   underlineStyle,
                 ]}
