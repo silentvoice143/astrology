@@ -1,36 +1,37 @@
 // hooks/useWebSocket.ts
-import {useCallback, useEffect, useRef, useState} from 'react';
+import {useCallback, useEffect, useState} from 'react';
 import {WebSocketService} from '../services/socket-service';
 import {IMessage, StompSubscription} from '@stomp/stompjs';
+
+// 🔹 Module-level singleton reference (global across your app)
+let singletonService: WebSocketService | null = null;
 
 export const useWebSocket = (
   userId: string,
   socketUrl?: string,
   autoConnect: boolean = true,
 ) => {
-  const serviceRef = useRef<WebSocketService | null>(null);
   const [connected, setConnected] = useState(false);
 
   const initService = useCallback(() => {
-    if (!serviceRef.current) {
-      serviceRef.current = new WebSocketService(
+    if (!singletonService) {
+      singletonService = new WebSocketService(
         userId,
-        socketUrl || 'https://gorilla-fitting-feline.ngrok-free.app/ws-chat',
+        socketUrl || 'https://quagga-driving-socially.ngrok-free.app/ws-chat',
       );
 
-      // 🔹 Set connection state callbacks
-      serviceRef.current.setOnConnect(() => setConnected(true));
-      serviceRef.current.setOnDisconnect(() => setConnected(false));
+      singletonService.setOnConnect(() => setConnected(true));
+      singletonService.setOnDisconnect(() => setConnected(false));
     }
   }, [userId, socketUrl]);
 
   const connect = useCallback(() => {
     initService();
-    serviceRef.current?.connect();
+    singletonService?.connect();
   }, [initService]);
 
   const disconnect = useCallback(() => {
-    serviceRef.current?.disconnect();
+    singletonService?.disconnect();
   }, []);
 
   const subscribe = useCallback(
@@ -38,8 +39,11 @@ export const useWebSocket = (
       destination: string,
       callback: (message: IMessage) => void,
     ): StompSubscription | undefined => {
-      console.log(`[useWebSocket] Subscribing to ${destination}`);
-      return serviceRef.current?.subscribe(destination, callback);
+      if (!singletonService) {
+        console.warn('[useWebSocket] Tried to subscribe before initializing.');
+        return undefined;
+      }
+      return singletonService.subscribe(destination, callback);
     },
     [],
   );
@@ -50,23 +54,20 @@ export const useWebSocket = (
       headers: Record<string, string> = {},
       body: string = '',
     ) => {
-      serviceRef.current?.send(destination, headers, body);
+      if (!singletonService) {
+        console.warn('[useWebSocket] Tried to send before initializing.');
+        return;
+      }
+      singletonService.send(destination, headers, body);
     },
     [],
   );
-
-  useEffect(() => {
-    if (autoConnect) {
-      connect();
-      return () => disconnect();
-    }
-  }, [autoConnect, connect, disconnect]);
 
   return {
     connect,
     disconnect,
     subscribe,
     send,
-    isConnected: () => connected, // 🔥 Now exposes live connection state
+    isConnected: () => connected,
   };
 };

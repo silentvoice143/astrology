@@ -41,6 +41,8 @@ const sessionSlice = createSlice({
       state.session = null;
       state.queueMessage = null;
       state.error = null;
+      state.otherUserId = '';
+      state.userId = '';
     },
     setSessionError(state, action: PayloadAction<string>) {
       state.error = action.payload;

@@ -10,10 +10,15 @@ import ChatScreen from '../screens/chat-screen';
 import ExampleScreen, {ChatScreenDemo} from '../screens/chat.';
 import RequestScreen from '../screens/request';
 import KundliForm from '../screens/kundli-form';
+import {useSessionEvents} from '../hooks/use-session-events';
+import {useAppSelector} from '../hooks/redux-hook';
 
 const Stack = createNativeStackNavigator();
 
 export default function PrivateRoutes() {
+  const {user, isAuthenticated} = useAppSelector((state: any) => state.auth);
+
+  useSessionEvents(user?.id, isAuthenticated);
   return (
     <Stack.Navigator
       screenOptions={{

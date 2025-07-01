@@ -6,3 +6,16 @@ export function shuffleArray<T>(array: T[]): T[] {
   }
   return result;
 }
+
+export function decodeMessageBody(message: any): string {
+  if (message.isBinaryBody && message._binaryBody) {
+    const byteArray = Object.values(message._binaryBody) as number[];
+    const uint8Arr = new Uint8Array(byteArray);
+    return new TextDecoder('utf-8').decode(uint8Arr);
+  } else if (typeof message.body === 'string') {
+    return message.body;
+  } else {
+    console.warn('Unknown message format:', message);
+    return '';
+  }
+}

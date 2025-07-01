@@ -13,6 +13,7 @@ const isProfileComplete = (user: UserDetail): boolean => {
   );
 };
 interface AuthState {
+  isAuthenticated: boolean;
   astrologer_id?: string;
   astrologer_detail?: AstrologerProfile;
   name: string;
@@ -40,6 +41,7 @@ export interface AstrologerProfile {
 
 const initialState: AuthState = {
   name: '',
+  isAuthenticated: false,
   astrologer_detail: {
     id: '',
     about: null,
@@ -102,6 +104,9 @@ const authSlice = createSlice({
     setAstrologer(state, action) {
       state.astrologer_detail = {...action.payload};
     },
+    setAuthentication(state, action) {
+      state.isAuthenticated = action.payload;
+    },
   },
   extraReducers: builder => {
     builder
@@ -129,6 +134,7 @@ export const {
   setUser,
   setAstrologer,
   setProfileModelToggle,
+  setAuthentication,
 } = authSlice.actions;
 export {loginUser, verifyOtp};
 export default authSlice.reducer;

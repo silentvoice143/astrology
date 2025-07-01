@@ -1,25 +1,21 @@
 import {useEffect} from 'react';
 import {useWebSocket} from './use-socket';
-
-function decodeMessageBody(message: any): string {
-  if (message.isBinaryBody && message._binaryBody) {
-    const byteArray = Object.values(message._binaryBody) as number[];
-    const uint8Arr = new Uint8Array(byteArray);
-    return new TextDecoder('utf-8').decode(uint8Arr);
-  } else if (typeof message.body === 'string') {
-    return message.body;
-  } else {
-    console.warn('Unknown message format:', message);
-    return '';
-  }
-}
+import {clearSession, setSession} from '../store/reducer/session';
+import {useAppDispatch, useAppSelector} from './redux-hook';
+import {decodeMessageBody} from '../utils/utils';
+import {useNavigation} from '@react-navigation/native';
+import {useUserRole} from './use-role';
 
 export const useSessionEvents = (
   userId: string = '',
   active: boolean = false,
 ) => {
   const {subscribe} = useWebSocket(userId);
+  const dispatch = useAppDispatch();
+  const navigation = useNavigation<any>();
   console.log(userId, 'Subscribing to session events...');
+  const session = useAppSelector(state => state.session.session);
+  const role = useUserRole();
 
   useEffect(() => {
     if (!active || !userId) return;
@@ -36,16 +32,58 @@ export const useSessionEvents = (
 
     const chatSub = subscribe(`/topic/chat/${userId}/chatId`, msg => {
       try {
-        // const data = msg;
+        const data = JSON.parse(decodeMessageBody(msg));
+        dispatch(setSession(data));
+
+        console.log(JSON.parse(decodeMessageBody(msg)));
+      } catch (err) {
+        console.error('Failed to parse chat id:', err);
+      }
+    });
+
+    const chatMessage = subscribe(`/topic/chat/${userId}/messages`, msg => {
+      try {
+        const data = JSON.parse(decodeMessageBody(msg));
+
         console.log(JSON.parse(decodeMessageBody(msg)));
       } catch (err) {
         console.error('Failed to parse chat message:', err);
       }
     });
 
+    const typingMessage = subscribe(`/topic/chat/${userId}/typing`, msg => {
+      try {
+        const data = JSON.parse(decodeMessageBody(msg));
+        console.log(JSON.parse(decodeMessageBody(msg)));
+      } catch (err) {
+        console.error('Failed to parse chat typing:', err);
+      }
+    });
+
     return () => {
+      typingMessage?.unsubscribe();
+      chatMessage?.unsubscribe();
       queueSub?.unsubscribe();
       chatSub?.unsubscribe();
     };
   }, [subscribe, userId, active]);
+
+  useEffect(() => {
+    if (!session) return;
+    const chatEnd = subscribe(`/topic/chat/${session.id}`, msg => {
+      try {
+        const data = JSON.parse(decodeMessageBody(msg));
+        console.log(JSON.parse(decodeMessageBody(msg)));
+        if (data.status === 'ended') {
+          dispatch(clearSession());
+          role === 'USER'
+            ? navigation.navigate('Astrologers')
+            : navigation.navigate('session-request');
+        }
+      } catch (err) {
+        console.error('Failed to parse chat message:', err);
+      }
+    });
+    return () => chatEnd?.unsubscribe();
+  }, [session, subscribe]);
 };

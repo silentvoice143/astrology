@@ -25,8 +25,8 @@ export class WebSocketService {
     this.client = new Client({
       webSocketFactory: () => new SockJS(this.url),
       connectHeaders: {'user-id': this.userId},
-      debug: (msg: string) => console.log('[STOMP DEBUG]:', msg),
-      reconnectDelay: 0,
+      debug: (msg: string) => {},
+      reconnectDelay: 5000,
       heartbeatIncoming: 10000,
       heartbeatOutgoing: 10000,
     });
@@ -78,6 +78,7 @@ export class WebSocketService {
     if (this.client) {
       this.subscriptions.forEach(sub => sub.unsubscribe());
       this.subscriptions = [];
+      this.pendingSubscriptions = []; // 🔹 clear pending subs
       this.client.deactivate();
     }
   }
