@@ -40,13 +40,13 @@ const Home = () => {
     state => state.auth.astrologer_detail,
   );
   const userRole = useUserRole();
-  const {isProfileComplete} = useAppSelector(state => state.auth);
+  console.log(user, '-----user detail in redux');
+  // const {isProfileComplete} = useAppSelector(state => state.auth);
 
-  const [isPersonalDetailModalOpen, setIsPersonalDetailModalOpen] = useState(
-    isProfileComplete ? false : true,
-  );
-  const [forKundli, setForKundli] = useState(false);
-  const dispatch = useAppDispatch();
+  // const [isPersonalDetailModalOpen, setIsPersonalDetailModalOpen] =
+  //   useState(false);
+  // const [forKundli, setForKundli] = useState(false);
+  // const dispatch = useAppDispatch();
 
   // const handleScroll = (event: any) => {
   //   const scrollY = event.nativeEvent.contentOffset.y;
@@ -57,22 +57,22 @@ const Home = () => {
   //   }
   // };
 
-  const handlePostUserData = async (user: UserPersonalDetail) => {
-    try {
-      const payload = await dispatch(postUserDetail(user)).unwrap();
+  // const handlePostUserData = async (user: UserPersonalDetail) => {
+  //   try {
+  //     const payload = await dispatch(postUserDetail(user)).unwrap();
 
-      if (payload?.success) {
-        setIsPersonalDetailModalOpen(false);
-        dispatch(setUser(payload.user));
-      }
-    } catch (err) {
-      console.log(err);
-    }
-  };
+  //     if (payload?.success) {
+  //       setIsPersonalDetailModalOpen(false);
+  //       dispatch(setUser(payload.user));
+  //     }
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
 
   return (
     <ScreenLayout headerBackgroundColor={headerBgColor}>
-      <PersonalDetailModal
+      {/* <PersonalDetailModal
         existingDetails={{
           name: userRole === 'ASTROLOGER' ? user.name : '',
           gender: '',
@@ -94,7 +94,7 @@ const Home = () => {
             handlePostUserData(data);
           }
         }}
-      />
+      /> */}
 
       <ScrollView
         scrollEventThrottle={16}
@@ -105,7 +105,7 @@ const Home = () => {
           colors={[
             colors.secondary_surface,
             // colors.secondary_surface_2,
-            colors.tertiary_surface,
+            colors.primary_surface,
           ]}>
           <View style={HomeStyle.greetingContainer}>
             <Text style={[textStyle.fs_abyss_20_400]}>Hello</Text>
@@ -196,54 +196,6 @@ const Home = () => {
                 </Text>
               </View>
             </View>
-
-            {/* View Kundli Button */}
-            <LinearGradient
-              colors={[colors.primary_card, colors.secondary_Card]}
-              style={{
-                height: verticalScale(100),
-                marginVertical: verticalScale(20),
-                flexDirection: 'row',
-                position: 'relative',
-                justifyContent: 'flex-end',
-                alignItems: 'center',
-                paddingHorizontal: scale(20),
-              }}>
-              <View style={{position: 'absolute', bottom: 0, left: 20}}>
-                <KundliLogo />
-              </View>
-              <CustomButton
-                title="View Kundli"
-                style={{
-                  backgroundColor: colors.primary_surface,
-                  width: '50%',
-                  height: 40,
-                }}
-                textStyle={{color: colors.primaryText, lineHeight: 20}}
-                onPress={() => {
-                  setForKundli(true);
-                  setIsPersonalDetailModalOpen(true);
-                }}
-              />
-              {/* <
-                style={[
-                  HomeStyle.kundliButton,
-                  {
-                    height: verticalScale(48),
-                    backgroundColor: colors.primary_surface,
-                  },
-                ]}
-                onPress={() => navigation.navigate('Kundli')}>
-                <Text
-                  style={[
-                    textStyle.fs_mont_20_700,
-                    HomeStyle.kundliText,
-                    {color: colors.primaryText},
-                  ]}>
-                  View kundli
-                </Text>
-              </TouchableOpacity> */}
-            </LinearGradient>
           </View>
 
           {/* Our Astrologer  */}

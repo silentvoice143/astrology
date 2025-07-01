@@ -1,4 +1,10 @@
-import {View, Text, ScrollView, Pressable} from 'react-native';
+import {
+  View,
+  Text,
+  ScrollView,
+  Pressable,
+  ActivityIndicator,
+} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import AstrologerCard from '../components/astrologers/astrologer-card';
 import {colors} from '../constants/colors';
@@ -6,9 +12,13 @@ import ScreenLayout from '../components/screen-layout';
 import TagSelector from '../components/tag-selector';
 import AnimatedSearchInput from '../components/custom-searchbox';
 import {scale, verticalScale} from '../utils/sizer';
-import {useAppDispatch} from '../hooks/redux-hook';
+import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {getAllAstrologers} from '../store/reducer/astrologers';
 import {useTypedNavigation} from '../hooks/navigation';
+import {setProfileModelToggle} from '../store/reducer/auth';
+import RequestSessionModal from '../components/session/modals/request-session-modal';
+import {shuffleArray} from '../utils/utils';
+import {textStyle} from '../constants/text-style';
 
 const astrologers = [
   {
@@ -51,6 +61,7 @@ const tags = [
 
 interface Astrologers {
   id: string;
+  userId: string;
   name: string;
   chatRate: string;
   rating: number;
@@ -59,15 +70,26 @@ interface Astrologers {
   imageUri: string;
   callRate: string;
   videCallRate: string;
+  pricePerMinuteChat: number;
+  pricePerMinuteVideo: number;
+  pricePerMinuteVoice: number;
+  expertise: string;
 }
 
 const Astrologers = () => {
   const [selected, setSelected] = useState<string[]>(['all']);
+  const [selectedAstrologer, setSelectedAstrologer] = useState<string | null>(
+    null,
+  );
   const [astrologersData, setAstrologersData] = useState<Astrologers[]>([]);
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const {isProfileComplete} = useAppSelector(state => state.auth);
   const dispatch = useAppDispatch();
   const navigation = useTypedNavigation();
   const fetchAstrologersData = async () => {
     try {
+      setLoading(true);
       const payload = await dispatch(getAllAstrologers()).unwrap();
       console.log(payload, 'payload----------------- fetchAstrologersData');
       if (payload.success) {
@@ -75,9 +97,11 @@ const Astrologers = () => {
           return {
             id: astro?.id,
             name: astro?.user?.name,
-            chatRate: `${astro?.pricePerMinuteChat}/min`,
-            callRate: `${astro?.pricePerMinuteVoice}/min`,
-            videCallRate: `${astro?.pricePerMinuteVideo}/min`,
+            userId: astro?.user?.id,
+            expertise: astro?.expertise,
+            pricePerMinuteChat: `${astro?.pricePerMinuteChat} ₹/min`,
+            pricePerMinuteVoice: `${astro?.pricePerMinuteVoice} ₹/min`,
+            pricePerMinuteVideo: `${astro?.pricePerMinuteVideo} ₹/min`,
             rating: astro?.rating || null,
             experience: `${astro?.experienceYears} Years`,
             languages: astro?.languages,
@@ -90,11 +114,31 @@ const Astrologers = () => {
       }
     } catch (error) {
       console.log('fetchAstrologersData Error : ', error);
+    } finally {
+      setLoading(false);
     }
   };
   useEffect(() => {
     fetchAstrologersData();
   }, []);
+
+  const handleSessionStart = (astrologerId: string) => {
+    if (isProfileComplete) {
+      setSelectedAstrologer(astrologerId);
+      setIsRequestModalOpen(true);
+    } else {
+      dispatch(setProfileModelToggle());
+    }
+  };
+
+  useEffect(() => {
+    setLoading(true);
+    const shuffledData = shuffleArray(astrologersData);
+    setAstrologersData(shuffledData);
+    setTimeout(() => {
+      setLoading(false);
+    }, 1000);
+  }, [selected]);
 
   return (
     <ScreenLayout>
@@ -137,39 +181,72 @@ const Astrologers = () => {
         tags={tags}
         selectedTags={selected}
         onChange={tags => setSelected(tags)}
-        removable={true}
+        removable={false}
         multiSelect={false}
       />
 
-      <ScrollView showsVerticalScrollIndicator={false}>
-        <View
-          style={{
-            backgroundColor: colors.primary_surface,
-            flex: 1,
-            paddingHorizontal: scale(12),
-            marginBottom: verticalScale(20),
-          }}>
-          {astrologersData.map((item, idx) => (
-            <Pressable
-              onPress={() =>
-                navigation.navigate('DetailsProfile', {id: item.id})
-              } key={`card-astrologer-${item.id}`}>
-              <AstrologerCard
-                key={`card-astrologer-${idx}`}
-                name={item?.name}
-                rate={item?.chatRate}
-                rating={item?.rating}
-                experience={item?.experience}
-                languages={item?.languages}
-                imageUri={item?.imageUri}
-                onCallPress={() => console.log('Calling')}
-                onVideoPress={() => console.log('Video')}
-                onChatPress={() => console.log('Chat')}
-              />
-            </Pressable>
-          ))}
+      {loading ? (
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <ActivityIndicator />
+          <Text style={[textStyle.fs_mont_12_400]}>
+            Loading Astrologer data...
+          </Text>
         </View>
-      </ScrollView>
+      ) : (
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View
+            style={{
+              backgroundColor: colors.primary_surface,
+              flex: 1,
+              paddingHorizontal: scale(12),
+              marginBottom: verticalScale(20),
+            }}>
+            {astrologersData.map((item, idx) => (
+              <Pressable
+                onPress={() =>
+                  navigation.navigate('DetailsProfile', {id: item.id})
+                }
+                key={`card-astrologer-${item.id}`}>
+                <AstrologerCard
+                  id={item.id}
+                  pricePerMinuteChat={item.pricePerMinuteChat}
+                  pricePerMinuteVideo={item.pricePerMinuteVideo}
+                  pricePerMinuteVoice={item.pricePerMinuteVoice}
+                  expertise={item.expertise}
+                  key={`card-astrologer-${idx}`}
+                  name={item?.name}
+                  rate={item?.chatRate}
+                  rating={item?.rating}
+                  experience={item?.experience}
+                  languages={item?.languages}
+                  imageUri={item?.imageUri}
+                  onCallPress={() => {
+                    console.log('Calling');
+
+                    handleSessionStart(item?.userId);
+                  }}
+                  onVideoPress={() => {
+                    console.log('Video');
+                    handleSessionStart(item?.userId);
+                  }}
+                  onChatPress={() => {
+                    console.log('Chat');
+                    handleSessionStart(item?.userId);
+                  }}
+                />
+              </Pressable>
+            ))}
+          </View>
+        </ScrollView>
+      )}
+      <RequestSessionModal
+        isOpen={isRequestModalOpen}
+        onClose={() => {
+          setIsRequestModalOpen(false);
+          setSelectedAstrologer(null);
+        }}
+        astrologerId={selectedAstrologer}
+      />
     </ScreenLayout>
   );
 };

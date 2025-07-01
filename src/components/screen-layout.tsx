@@ -4,6 +4,11 @@ import Header from './header';
 import Sidebar, {SidebarRef} from './sidebar';
 import {colors} from '../constants/colors';
 import BottomNavigationBar from './bottom-navigation';
+import PersonalDetailModal from './personal-detail-modal';
+import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
+import {postUserDetail} from '../store/reducer/user';
+import {UserPersonalDetail} from '../utils/types';
+import {setProfileModelToggle, setUser} from '../store/reducer/auth';
 
 interface ScreenLayoutProps {
   children: ReactNode;
@@ -15,6 +20,22 @@ const ScreenLayout: React.FC<ScreenLayoutProps> = ({
   headerBackgroundColor,
 }) => {
   const sidebarRef = useRef<SidebarRef>(null);
+  const {isProfileModalOpen} = useAppSelector(state => state.auth);
+
+  const dispatch = useAppDispatch();
+
+  const handlePostUserData = async (user: UserPersonalDetail) => {
+    try {
+      const payload = await dispatch(postUserDetail(user)).unwrap();
+
+      if (payload?.success) {
+        dispatch(setUser(payload.user));
+        dispatch(setProfileModelToggle());
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
   return (
     <View style={{flex: 1, backgroundColor: colors.primary_surface}}>
       {/* Global Sidebar */}
@@ -23,8 +44,21 @@ const ScreenLayout: React.FC<ScreenLayoutProps> = ({
         onMenuClick={() => sidebarRef.current?.open()}
         headerBackgroundColor={headerBackgroundColor}
       />
-      <View style={{flex: 1}}>{children}</View>
+      <View style={{flex: 1, backgroundColor: colors.primary_surface}}>
+        {children}
+      </View>
       <BottomNavigationBar />
+      <PersonalDetailModal
+        isOpen={isProfileModalOpen}
+        onClose={() => {
+          if (isProfileModalOpen) {
+            dispatch(setProfileModelToggle());
+          }
+        }}
+        onSubmit={data => {
+          handlePostUserData(data);
+        }}
+      />
     </View>
   );
 };

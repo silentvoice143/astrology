@@ -1,4 +1,16 @@
 export const colors = {
+  success: {
+    base: '#28A745',
+    light: '#D4EDDA',
+  },
+  error: {
+    base: '#DC3545',
+    light: '#F8D7DA',
+  },
+  warning: {
+    base: '#FFC107',
+    light: '#FFF3CD',
+  },
   //like & dislike
   like_color: '#FA476B',
 
@@ -12,6 +24,7 @@ export const colors = {
   primaryText: '#000000',
   secondaryText: '#494949',
   tertiary_text: '#A51255',
+  highlight_text: '#EC504A',
   userNmaeText: '#D12765',
   whiteText: '#ffffff',
   gray_text: '#A8A8A8',

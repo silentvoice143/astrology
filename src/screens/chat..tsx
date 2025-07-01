@@ -9,7 +9,8 @@ import {
   Platform,
   StyleSheet,
 } from 'react-native';
-import {useSocket} from '../hooks/use-socket';
+import {useWebSocket} from '../hooks/use-socket';
+import {useAppSelector} from '../hooks/redux-hook';
 
 interface Message {
   senderId: string;
@@ -20,75 +21,86 @@ interface Message {
   timestamp: string;
 }
 
-interface ChatScreenProps {
-  userId: string;
-  otherUserId: string;
-  sessionId: string;
-}
+export const ChatScreenDemo = () => {
+  const userId = useAppSelector(state => state.auth.user.id);
+  const otherUserId = useAppSelector(state => state.session.otherUserId);
+  const sessionId = useAppSelector(state => state.session.chatId);
 
-export const ChatScreenDemo = ({}) => {
-  const userId = 'user-1';
-  const otherUserId = 'user-2';
-  const sessionId = 'session-abc';
-  const {isConnected, subscribe, unsubscribe, sendMessage, sendTyping} =
-    useSocket(userId);
+  const {subscribe, send, connect, disconnect} = useWebSocket(userId);
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
-  const [isTyping, setIsTyping] = useState(false);
   const [otherUserTyping, setOtherUserTyping] = useState(false);
 
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const flatListRef = useRef<FlatList<Message>>(null);
 
-  // Subscribe to WebSocket topics
-  useEffect(() => {
-    const msgTopic = `/user/${userId}/topic/messages`;
-    const typeTopic = `/user/${userId}/topic/typing`;
+  // Connect once on mount
+  // useEffect(() => {
+  //   connect();
+  //   return () => disconnect();
+  // }, [connect, disconnect]);
 
-    subscribe('chat-msgs', msgTopic, (data: Message) => {
+  // Subscribe to messages and typing events
+  useEffect(() => {
+    if (!sessionId) return;
+
+    const msgSub = subscribe(`/${userId}/topic/messages`, message => {
+      console.log(message, '---chat message');
+      const data: Message = JSON.parse(message.body);
       if (data.sessionId === sessionId) {
         setMessages(prev => [...prev, data]);
       }
     });
 
-    subscribe(
-      'chat-typing',
-      typeTopic,
-      (data: {senderId: string; typing: boolean}) => {
-        if (data.senderId === otherUserId) {
-          setOtherUserTyping(data.typing);
-        }
-      },
-    );
+    const typingSub = subscribe(`/${userId}/topic/typing`, message => {
+      const data: {senderId: string; typing: boolean} = JSON.parse(
+        message.body,
+      );
+      if (data.senderId === otherUserId) {
+        setOtherUserTyping(data.typing);
+      }
+    });
 
     return () => {
-      unsubscribe('chat-msgs');
-      unsubscribe('chat-typing');
+      msgSub?.unsubscribe();
+      typingSub?.unsubscribe();
     };
-  }, [subscribe, unsubscribe, userId, sessionId, otherUserId]);
+  }, [subscribe, userId, sessionId, otherUserId]);
 
-  // Auto-scroll to bottom on new message
+  // Scroll to bottom on new message
   useEffect(() => {
     flatListRef.current?.scrollToEnd({animated: true});
   }, [messages]);
 
-  // Handle input + typing indicator
+  // Handle text input + typing event
   const handleInputChange = (text: string) => {
     setInput(text);
 
-    if (!isTyping) {
-      sendTyping({senderId: userId, receiverId: otherUserId, typing: true});
-      setIsTyping(true);
-    }
+    send(
+      `/app/chat.typing`,
+      {},
+      JSON.stringify({
+        senderId: userId,
+        receiverId: otherUserId,
+        typing: true,
+      }),
+    );
 
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
     }
 
     typingTimeoutRef.current = setTimeout(() => {
-      sendTyping({senderId: userId, receiverId: otherUserId, typing: false});
-      setIsTyping(false);
+      send(
+        `/app/chat.typing`,
+        {},
+        JSON.stringify({
+          senderId: userId,
+          receiverId: otherUserId,
+          typing: false,
+        }),
+      );
       typingTimeoutRef.current = null;
     }, 1500);
   };
@@ -105,17 +117,23 @@ export const ChatScreenDemo = ({}) => {
       timestamp: new Date().toISOString(),
     };
 
-    sendMessage(newMsg);
+    send(`/app/chat.send`, {}, JSON.stringify(newMsg));
     setMessages(prev => [...prev, newMsg]);
     setInput('');
 
-    // Cleanup typing status
     if (typingTimeoutRef.current) {
       clearTimeout(typingTimeoutRef.current);
       typingTimeoutRef.current = null;
     }
-    sendTyping({senderId: userId, receiverId: otherUserId, typing: false});
-    setIsTyping(false);
+    send(
+      `/app/chat.typing`,
+      {},
+      JSON.stringify({
+        senderId: userId,
+        receiverId: otherUserId,
+        typing: false,
+      }),
+    );
   };
 
   const renderMessage = ({item}: {item: Message}) => {
@@ -138,79 +156,66 @@ export const ChatScreenDemo = ({}) => {
     <KeyboardAvoidingView
       style={styles.container}
       behavior={Platform.select({ios: 'padding', android: undefined})}>
-      <View style={styles.header}>
-        <Text>
-          Chat with {otherUserId} –{' '}
-          <Text style={{color: isConnected() ? 'green' : 'red'}}>
-            {isConnected() ? 'Online' : 'Offline'}
+      {!sessionId ? (
+        <View style={styles.waitingContainer}>
+          <Text style={styles.waitingText}>
+            Waiting for session to start...
           </Text>
-        </Text>
-        {otherUserTyping && <Text style={styles.typing}>Typing...</Text>}
-      </View>
+        </View>
+      ) : (
+        <>
+          <View style={styles.header}>
+            <Text>Chat with {otherUserId}</Text>
+            {otherUserTyping && <Text style={styles.typing}>Typing...</Text>}
+          </View>
 
-      <FlatList
-        ref={flatListRef}
-        data={messages}
-        keyExtractor={(item, index) => `${item.timestamp}-${index}`}
-        renderItem={renderMessage}
-        contentContainerStyle={styles.messagesArea}
-      />
+          <FlatList
+            ref={flatListRef}
+            data={messages}
+            keyExtractor={(item, index) => `${item.timestamp}-${index}`}
+            renderItem={renderMessage}
+            contentContainerStyle={styles.messagesArea}
+          />
 
-      <View style={styles.inputArea}>
-        <TextInput
-          style={styles.input}
-          value={input}
-          onChangeText={handleInputChange}
-          placeholder="Type a message..."
-          onSubmitEditing={handleSend}
-          returnKeyType="send"
-        />
-        <Button title="Send" onPress={handleSend} />
-      </View>
+          <View style={styles.inputArea}>
+            <TextInput
+              style={styles.input}
+              value={input}
+              onChangeText={handleInputChange}
+              placeholder="Type a message..."
+              onSubmitEditing={handleSend}
+              returnKeyType="send"
+              editable={!!sessionId} // disables input if sessionId missing
+            />
+            <Button title="Send" onPress={handleSend} disabled={!sessionId} />
+          </View>
+        </>
+      )}
     </KeyboardAvoidingView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
+  container: {flex: 1, backgroundColor: '#EFEFEF'},
+  waitingContainer: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
     backgroundColor: '#EFEFEF',
   },
+  waitingText: {fontSize: 16, color: '#666'},
   header: {
     padding: 12,
     backgroundColor: '#FFF',
     borderBottomWidth: 1,
     borderColor: '#DDD',
   },
-  typing: {
-    marginTop: 4,
-    fontStyle: 'italic',
-    color: '#666',
-  },
-  messagesArea: {
-    padding: 10,
-    flexGrow: 1,
-  },
-  message: {
-    padding: 10,
-    marginVertical: 4,
-    borderRadius: 10,
-    maxWidth: '75%',
-  },
-  myMessage: {
-    alignSelf: 'flex-end',
-    backgroundColor: '#DCF8C6',
-  },
-  otherMessage: {
-    alignSelf: 'flex-start',
-    backgroundColor: '#FFF',
-  },
-  timestamp: {
-    fontSize: 10,
-    color: '#555',
-    marginTop: 4,
-    textAlign: 'right',
-  },
+  typing: {marginTop: 4, fontStyle: 'italic', color: '#666'},
+  messagesArea: {padding: 10, flexGrow: 1},
+  message: {padding: 10, marginVertical: 4, borderRadius: 10, maxWidth: '75%'},
+  myMessage: {alignSelf: 'flex-end', backgroundColor: '#DCF8C6'},
+  otherMessage: {alignSelf: 'flex-start', backgroundColor: '#FFF'},
+  timestamp: {fontSize: 10, color: '#555', marginTop: 4, textAlign: 'right'},
   inputArea: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -227,3 +232,5 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
 });
+
+export default ChatScreenDemo;

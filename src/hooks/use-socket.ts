@@ -1,5 +1,5 @@
 // hooks/useWebSocket.ts
-import {useCallback, useEffect, useRef} from 'react';
+import {useCallback, useEffect, useRef, useState} from 'react';
 import {WebSocketService} from '../services/socket-service';
 import {IMessage, StompSubscription} from '@stomp/stompjs';
 
@@ -9,13 +9,18 @@ export const useWebSocket = (
   autoConnect: boolean = true,
 ) => {
   const serviceRef = useRef<WebSocketService | null>(null);
+  const [connected, setConnected] = useState(false);
 
   const initService = useCallback(() => {
     if (!serviceRef.current) {
       serviceRef.current = new WebSocketService(
         userId,
-        (socketUrl = 'https://quagga-driving-socially.ngrok-free.app/ws-chat'),
+        socketUrl || 'https://gorilla-fitting-feline.ngrok-free.app/ws-chat',
       );
+
+      // 🔹 Set connection state callbacks
+      serviceRef.current.setOnConnect(() => setConnected(true));
+      serviceRef.current.setOnDisconnect(() => setConnected(false));
     }
   }, [userId, socketUrl]);
 
@@ -33,6 +38,7 @@ export const useWebSocket = (
       destination: string,
       callback: (message: IMessage) => void,
     ): StompSubscription | undefined => {
+      console.log(`[useWebSocket] Subscribing to ${destination}`);
       return serviceRef.current?.subscribe(destination, callback);
     },
     [],
@@ -61,5 +67,6 @@ export const useWebSocket = (
     disconnect,
     subscribe,
     send,
+    isConnected: () => connected, // 🔥 Now exposes live connection state
   };
 };

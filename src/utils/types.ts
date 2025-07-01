@@ -147,4 +147,7 @@ export interface SessionState {
   isLoading: boolean;
   error: string | null;
   queueMessage: string | null;
+  userId: string;
+  chatId: string;
+  otherUserId: string;
 }

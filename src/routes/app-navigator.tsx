@@ -20,13 +20,13 @@ export default function AppNavigator() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const {connect} = useWebSocket(user.id);
 
-  useEffect(() => {
-    if (user.id) {
-      connect(); // ✅ Connect socket
-    }
-  }, [user.id]);
-
-  useSessionEvents(user.id);
+  // useEffect(() => {
+  //   if (user.id) {
+  //     connect(); // ✅ Connect socket
+  //   }
+  // }, [user.id]);
+  // console.log(user.id);
+  // useSessionEvents(user.id);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -56,6 +56,7 @@ export default function AppNavigator() {
             setIsAuthenticated(true);
             dispatch(setUser(userDetail));
             if (astrologer_detail) dispatch(setAstrologer(astrologer_detail));
+            connect();
           } else {
             dispatch(logout());
             setIsAuthenticated(false);
@@ -74,6 +75,8 @@ export default function AppNavigator() {
 
     checkAuth();
   }, [token, dispatch]);
+
+  useSessionEvents(user.id, isAuthenticated);
 
   if (loading) {
     return (

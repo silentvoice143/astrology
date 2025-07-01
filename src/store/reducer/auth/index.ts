@@ -22,6 +22,7 @@ interface AuthState {
   otp: string;
   user: UserDetail;
   isProfileComplete: boolean;
+  isProfileModalOpen: boolean;
 }
 
 export interface AstrologerProfile {
@@ -71,6 +72,7 @@ const initialState: AuthState = {
     updatedAt: new Date().toISOString(),
   },
   isProfileComplete: false,
+  isProfileModalOpen: false,
 };
 
 const authSlice = createSlice({
@@ -89,6 +91,13 @@ const authSlice = createSlice({
     setUser(state, action) {
       state.user = {...action.payload};
       state.isProfileComplete = isProfileComplete(action.payload);
+    },
+    setProfileModelToggle(state) {
+      if (!state.isProfileModalOpen && !state.isProfileComplete) {
+        state.isProfileModalOpen = true;
+      } else {
+        state.isProfileModalOpen = false;
+      }
     },
     setAstrologer(state, action) {
       state.astrologer_detail = {...action.payload};
@@ -113,7 +122,13 @@ const authSlice = createSlice({
   },
 });
 
-export const {logout, setMobile, setFirstTime, setUser, setAstrologer} =
-  authSlice.actions;
+export const {
+  logout,
+  setMobile,
+  setFirstTime,
+  setUser,
+  setAstrologer,
+  setProfileModelToggle,
+} = authSlice.actions;
 export {loginUser, verifyOtp};
 export default authSlice.reducer;
