@@ -148,6 +148,16 @@ export interface SessionState {
   error: string | null;
   queueMessage: string | null;
   userId: string;
-  chatId: string;
   otherUserId: string;
+  sessionEnded: boolean;
+  messages: Message[];
+}
+
+export interface Message {
+  senderId: string;
+  receiverId: string;
+  sessionId: string;
+  message: string;
+  type: 'TEXT' | 'IMAGE';
+  timestamp: string;
 }

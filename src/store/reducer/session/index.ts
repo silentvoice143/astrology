@@ -1,3 +1,4 @@
+import {Message} from './../../../utils/types';
 // store/slices/sessionSlice.ts
 
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
@@ -14,8 +15,9 @@ const initialState: SessionState = {
   error: null,
   queueMessage: null,
   userId: '',
-  chatId: '',
   otherUserId: '',
+  sessionEnded: true,
+  messages: [],
 };
 
 const sessionSlice = createSlice({
@@ -26,12 +28,12 @@ const sessionSlice = createSlice({
       state.session = action.payload;
       state.queueMessage = null;
       state.error = null;
+      state.sessionEnded = false;
     },
     setQueueMessage(state, action: PayloadAction<string>) {
       state.queueMessage = action.payload;
     },
     setChatUser(state, action) {
-      console.log(action.payload, '-------setting user id');
       state.userId = action.payload;
     },
     setOtherUser(state, action: PayloadAction<string>) {
@@ -43,12 +45,18 @@ const sessionSlice = createSlice({
       state.error = null;
       state.otherUserId = '';
       state.userId = '';
+      state.sessionEnded = true;
+      state.messages = [];
     },
     setSessionError(state, action: PayloadAction<string>) {
       state.error = action.payload;
     },
     setSessionLoading(state, action: PayloadAction<boolean>) {
       state.isLoading = action.payload;
+    },
+
+    addMessage(state, action: PayloadAction<any>) {
+      state.messages.push(action.payload);
     },
   },
   extraReducers: builder => {
@@ -66,6 +74,7 @@ export const {
   setSessionLoading,
   setChatUser,
   setOtherUser,
+  addMessage,
 } = sessionSlice.actions;
 
 export {sendSessionRequest, getQueueRequest};

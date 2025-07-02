@@ -14,8 +14,8 @@ import {
 
 import {Text, View} from 'react-native';
 
-import {useSessionEvents} from '../hooks/use-session-events';
 import {useWebSocket} from '../hooks/use-socket';
+import {useSessionEvents} from '../hooks/use-session-events';
 
 export default function AppNavigator() {
   const {token, user} = useAppSelector((state: any) => state.auth);

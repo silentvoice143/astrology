@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Home from '../screens/home';
 import Astrologers from '../screens/astrologers';
@@ -7,18 +7,30 @@ import DetailsProfile from '../screens/DetailsProfile';
 import ChatHistory from '../screens/ChatHistory';
 import Wallet from '../screens/wallet';
 import ChatScreen from '../screens/chat-screen';
-import ExampleScreen, {ChatScreenDemo} from '../screens/chat.';
+import {ChatScreenDemo} from '../screens/chat.';
 import RequestScreen from '../screens/request';
 import KundliForm from '../screens/kundli-form';
-import {useSessionEvents} from '../hooks/use-session-events';
 import {useAppSelector} from '../hooks/redux-hook';
+import {useNavigation} from '@react-navigation/native';
+import {useUserRole} from '../hooks/use-role';
+import {useSessionEvents} from '../hooks/use-session-events';
 
 const Stack = createNativeStackNavigator();
 
 export default function PrivateRoutes() {
   const {user, isAuthenticated} = useAppSelector((state: any) => state.auth);
-
+  const navigation = useNavigation<any>();
+  const role = useUserRole();
+  const sessionEnded = useAppSelector(state => state.session.sessionEnded);
+  useEffect(() => {
+    if (sessionEnded) {
+      role === 'USER'
+        ? navigation.navigate('Astrologers')
+        : navigation.navigate('session-request');
+    }
+  }, [sessionEnded]);
   useSessionEvents(user?.id, isAuthenticated);
+  console.log('calling private route ------');
   return (
     <Stack.Navigator
       screenOptions={{

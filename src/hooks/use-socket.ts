@@ -17,7 +17,7 @@ export const useWebSocket = (
     if (!singletonService) {
       singletonService = new WebSocketService(
         userId,
-        socketUrl || 'https://quagga-driving-socially.ngrok-free.app/ws-chat',
+        socketUrl || 'https://gorilla-fitting-feline.ngrok-free.app/ws-chat',
       );
 
       singletonService.setOnConnect(() => setConnected(true));
@@ -68,6 +68,6 @@ export const useWebSocket = (
     disconnect,
     subscribe,
     send,
-    isConnected: () => connected,
+    isConnected: connected,
   };
 };

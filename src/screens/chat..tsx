@@ -10,17 +10,10 @@ import {
   StyleSheet,
 } from 'react-native';
 import {useWebSocket} from '../hooks/use-socket';
-import {useAppSelector} from '../hooks/redux-hook';
+import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {decodeMessageBody} from '../utils/utils';
-
-interface Message {
-  senderId: string;
-  receiverId: string;
-  sessionId: string;
-  message: string;
-  type: 'TEXT' | 'IMAGE';
-  timestamp: string;
-}
+import {Message} from '../utils/types';
+import {addMessage} from '../store/reducer/session';
 
 export const ChatScreenDemo = () => {
   const userId = useAppSelector(state => state.auth.user.id);
@@ -29,38 +22,61 @@ export const ChatScreenDemo = () => {
   const {subscribe, send} = useWebSocket(userId);
 
   const [timer, setTimer] = useState<string>('');
-  const [messages, setMessages] = useState<Message[]>([]);
+  // const [messages, setMessages] = useState<Message[]>([]);
+  const {messages} = useAppSelector(state => state.session);
   const [input, setInput] = useState('');
   const [otherUserTyping, setOtherUserTyping] = useState(false);
 
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const flatListRef = useRef<FlatList<Message>>(null);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (!session) return;
 
-    const msgSub = subscribe(`/topic/${userId}/messages`, message => {
-      console.log(message, decodeMessageBody(message), '---chat message');
-      const data: Message = JSON.parse(decodeMessageBody(message));
-      if (data.sessionId === session.id) {
-        setMessages(prev => [...prev, data]);
+    // const msgSub = subscribe(`/topic/${userId}/messages`, message => {
+    //   console.log(message, decodeMessageBody(message), '---chat message');
+    //   const data: Message = JSON.parse(decodeMessageBody(message));
+    //   if (data.sessionId === session.id) {
+    //     dispatch(setMessages([...messages, data]));
+    //   }
+    // });
+
+    // const typingSub = subscribe(`/topic/${userId}/typing`, message => {
+    //   console.log(message, decodeMessageBody(message), '-----typing');
+    //   const data: {senderId: string; typing: boolean} = JSON.parse(
+    //     decodeMessageBody(message),
+    //   );
+
+    //   if (data.senderId === otherUserId) {
+    //     setOtherUserTyping(data.typing);
+    //   }
+    // });
+    const chatMessage = subscribe(`/topic/chat/${userId}/messages`, msg => {
+      try {
+        const data = JSON.parse(decodeMessageBody(msg));
+        console.log(data);
+        dispatch(addMessage(data));
+        // You may want to dispatch(addMessage(data)) here if needed
+      } catch (err) {
+        console.error('Failed to parse chat message:', err);
       }
     });
-
-    const typingSub = subscribe(`/topic/${userId}/typing`, message => {
-      console.log(message, decodeMessageBody(message), '-----typing');
-      const data: {senderId: string; typing: boolean} = JSON.parse(
-        decodeMessageBody(message),
-      );
-
-      if (data.senderId === otherUserId) {
-        setOtherUserTyping(data.typing);
+    const typingSub = subscribe(`/topic/chat/${userId}/typing`, msg => {
+      try {
+        const data = JSON.parse(decodeMessageBody(msg));
+        if (data.senderId === otherUserId) {
+          setOtherUserTyping(data.typing);
+        }
+        console.log(JSON.parse(decodeMessageBody(msg)));
+      } catch (err) {
+        console.error('Failed to parse chat typing:', err);
       }
     });
 
     return () => {
-      msgSub?.unsubscribe();
       typingSub?.unsubscribe();
+      // chatMessage?.unsubscribe();
     };
   }, [subscribe, userId, session, otherUserId]);
 
@@ -131,7 +147,7 @@ export const ChatScreenDemo = () => {
     };
 
     send(`/app/chat.send`, {}, JSON.stringify(newMsg));
-    setMessages(prev => [...prev, newMsg]);
+    dispatch(addMessage(newMsg));
     setInput('');
 
     if (typingTimeoutRef.current) {

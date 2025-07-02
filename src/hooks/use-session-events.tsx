@@ -1,10 +1,13 @@
 import {useEffect} from 'react';
 import {useWebSocket} from './use-socket';
-import {clearSession, setSession} from '../store/reducer/session';
+import {addMessage, clearSession, setSession} from '../store/reducer/session';
 import {useAppDispatch, useAppSelector} from './redux-hook';
 import {decodeMessageBody} from '../utils/utils';
-import {useNavigation} from '@react-navigation/native';
+
 import {useUserRole} from './use-role';
+import Toast from 'react-native-toast-message';
+
+let hasSubscribed = false;
 
 export const useSessionEvents = (
   userId: string = '',
@@ -12,19 +15,24 @@ export const useSessionEvents = (
 ) => {
   const {subscribe} = useWebSocket(userId);
   const dispatch = useAppDispatch();
-  const navigation = useNavigation<any>();
-  console.log(userId, 'Subscribing to session events...');
-  const session = useAppSelector(state => state.session.session);
+  const {session} = useAppSelector(state => state.session);
   const role = useUserRole();
 
   useEffect(() => {
-    if (!active || !userId) return;
+    // Guard: If already subscribed, don't do it again
+    if (!active || !userId || hasSubscribed) return;
+
+    console.log('[useSessionEvents] Subscribing globally...');
+    hasSubscribed = true; // mark as subscribed
 
     const queueSub = subscribe(`/topic/queue/${userId}`, msg => {
       try {
         console.log(decodeMessageBody(msg));
-        // const data = JSON.parse(msg.body);
-        // console.log('Queue message:', data);
+        Toast.show({
+          type: 'success',
+          text1: 'Session',
+          text2: decodeMessageBody(msg),
+        });
       } catch (err) {
         console.error('Failed to parse queue message:', err);
       }
@@ -34,56 +42,50 @@ export const useSessionEvents = (
       try {
         const data = JSON.parse(decodeMessageBody(msg));
         dispatch(setSession(data));
-
-        console.log(JSON.parse(decodeMessageBody(msg)));
+        Toast.show({
+          type: 'success',
+          text1: role === 'USER' ? 'Request Accepted' : 'Request Accepted',
+          text2:
+            role === 'USER'
+              ? 'Request accepted by the astrologer'
+              : 'Session will start soon',
+        });
+        console.log(data);
       } catch (err) {
         console.error('Failed to parse chat id:', err);
       }
     });
 
-    const chatMessage = subscribe(`/topic/chat/${userId}/messages`, msg => {
-      try {
-        const data = JSON.parse(decodeMessageBody(msg));
-
-        console.log(JSON.parse(decodeMessageBody(msg)));
-      } catch (err) {
-        console.error('Failed to parse chat message:', err);
-      }
-    });
-
-    const typingMessage = subscribe(`/topic/chat/${userId}/typing`, msg => {
-      try {
-        const data = JSON.parse(decodeMessageBody(msg));
-        console.log(JSON.parse(decodeMessageBody(msg)));
-      } catch (err) {
-        console.error('Failed to parse chat typing:', err);
-      }
-    });
-
     return () => {
-      typingMessage?.unsubscribe();
-      chatMessage?.unsubscribe();
+      console.log('[useSessionEvents] Cleaning up global subscriptions...');
       queueSub?.unsubscribe();
       chatSub?.unsubscribe();
+
+      hasSubscribed = false; // allow re-subscription if needed on remount
     };
   }, [subscribe, userId, active]);
 
   useEffect(() => {
     if (!session) return;
+
     const chatEnd = subscribe(`/topic/chat/${session.id}`, msg => {
       try {
         const data = JSON.parse(decodeMessageBody(msg));
-        console.log(JSON.parse(decodeMessageBody(msg)));
+        console.log(data);
         if (data.status === 'ended') {
           dispatch(clearSession());
-          role === 'USER'
-            ? navigation.navigate('Astrologers')
-            : navigation.navigate('session-request');
+          Toast.show({
+            type: 'info',
+            text1: 'Session Ended',
+          });
         }
       } catch (err) {
-        console.error('Failed to parse chat message:', err);
+        console.error('Failed to parse chat end message:', err);
       }
     });
-    return () => chatEnd?.unsubscribe();
-  }, [session, subscribe]);
+
+    return () => {
+      chatEnd?.unsubscribe();
+    };
+  }, [session, subscribe, userId]);
 };
