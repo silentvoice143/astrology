@@ -73,7 +73,12 @@ export const useSessionEvents = (
         const data = JSON.parse(decodeMessageBody(msg));
         console.log(data);
         if (data.status === 'ended') {
-          dispatch(clearSession());
+          dispatch(
+            setSession({
+              ...session,
+              status: data.status === 'ended' ? 'ENDED' : 'ACTIVE',
+            }),
+          );
           Toast.show({
             type: 'info',
             text1: 'Session Ended',

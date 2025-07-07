@@ -19,6 +19,7 @@ import {setProfileModelToggle} from '../store/reducer/auth';
 import RequestSessionModal from '../components/session/modals/request-session-modal';
 import {shuffleArray} from '../utils/utils';
 import {textStyle} from '../constants/text-style';
+import {Astrologers as AstrologersType, UserDetail} from '../utils/types';
 
 const astrologers = [
   {
@@ -59,29 +60,11 @@ const tags = [
   },
 ];
 
-interface Astrologers {
-  id: string;
-  userId: string;
-  name: string;
-  chatRate: string;
-  rating: number;
-  experience: string;
-  languages: string;
-  imageUri: string;
-  callRate: string;
-  videCallRate: string;
-  pricePerMinuteChat: number;
-  pricePerMinuteVideo: number;
-  pricePerMinuteVoice: number;
-  expertise: string;
-}
-
 const Astrologers = () => {
   const [selected, setSelected] = useState<string[]>(['all']);
-  const [selectedAstrologer, setSelectedAstrologer] = useState<string | null>(
-    null,
-  );
-  const [astrologersData, setAstrologersData] = useState<Astrologers[]>([]);
+  const [selectedAstrologer, setSelectedAstrologer] =
+    useState<UserDetail | null>(null);
+  const [astrologersData, setAstrologersData] = useState<AstrologersType[]>([]);
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const {isProfileComplete} = useAppSelector(state => state.auth);
@@ -95,9 +78,11 @@ const Astrologers = () => {
       if (payload.success) {
         const customAstro = payload?.astrologers?.map((astro: any) => {
           return {
+            online: astro?.online,
             id: astro?.id,
             name: astro?.user?.name,
             userId: astro?.user?.id,
+            user: astro?.user,
             expertise: astro?.expertise,
             pricePerMinuteChat: `${astro?.pricePerMinuteChat} ₹/min`,
             pricePerMinuteVoice: `${astro?.pricePerMinuteVoice} ₹/min`,
@@ -122,9 +107,11 @@ const Astrologers = () => {
     fetchAstrologersData();
   }, []);
 
-  const handleSessionStart = (astrologerId: string) => {
+  const handleSessionStart = (astrologer: UserDetail) => {
     if (isProfileComplete) {
-      setSelectedAstrologer(astrologerId);
+      console.log('handling session');
+
+      setSelectedAstrologer(astrologer);
       setIsRequestModalOpen(true);
     } else {
       dispatch(setProfileModelToggle());
@@ -209,6 +196,7 @@ const Astrologers = () => {
                 key={`card-astrologer-${item.id}`}>
                 <AstrologerCard
                   id={item.id}
+                  online={item.online}
                   pricePerMinuteChat={item.pricePerMinuteChat}
                   pricePerMinuteVideo={item.pricePerMinuteVideo}
                   pricePerMinuteVoice={item.pricePerMinuteVoice}
@@ -223,15 +211,15 @@ const Astrologers = () => {
                   onCallPress={() => {
                     console.log('Calling');
 
-                    handleSessionStart(item?.userId);
+                    handleSessionStart(item.user);
                   }}
                   onVideoPress={() => {
                     console.log('Video');
-                    handleSessionStart(item?.userId);
+                    handleSessionStart(item.user);
                   }}
                   onChatPress={() => {
                     console.log('Chat');
-                    handleSessionStart(item?.userId);
+                    handleSessionStart(item.user);
                   }}
                 />
               </Pressable>
@@ -245,7 +233,7 @@ const Astrologers = () => {
           setIsRequestModalOpen(false);
           setSelectedAstrologer(null);
         }}
-        astrologerId={selectedAstrologer}
+        astrologer={selectedAstrologer}
       />
     </ScreenLayout>
   );

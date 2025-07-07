@@ -48,6 +48,8 @@ const Header = ({
     switch (name) {
       case 'KundliForm':
         return 'Kundli Form';
+      case 'about':
+        return 'About Us';
       default:
         return name;
     }
@@ -57,7 +59,7 @@ const Header = ({
     <LinearGradient
       colors={[
         colors.primary_surface,
-        route.name === 'Kundli'
+        route.name === 'Kundli' || route.name === 'Wallet'
           ? colors.primary_surface
           : colors.secondary_surface,
       ]}

@@ -8,19 +8,16 @@ import {setKundliPerson, resetToDefaultUser} from '../../store/reducer/kundli';
 import {UserPersonalDetail} from '../../utils/types';
 import EditIcon from '../../assets/icons/edit-icon';
 import {textStyle} from '../../constants/text-style';
+import {useRoute} from '@react-navigation/native';
 
 const BasicDetails = ({active}: {active: number}) => {
   const [openedForOther, setOpenedForOther] = useState(false);
   const dispatch = useAppDispatch();
-  const defaultUser = useAppSelector(state => state.kundli.defaultUser);
+
   const kundliPerson = useAppSelector(state => state.kundli.kundliPerson);
 
   const [showModal, setShowModal] = useState(false);
-
-  const isDefaultUser =
-    kundliPerson.name === defaultUser.name &&
-    kundliPerson.birthDate === defaultUser.birthDate &&
-    kundliPerson.birthTime === defaultUser.birthTime;
+  const route = useRoute();
 
   const handleUpdate = (updatedDetails: UserPersonalDetail) => {
     dispatch(setKundliPerson(updatedDetails));
@@ -34,16 +31,18 @@ const BasicDetails = ({active}: {active: number}) => {
           <Text style={styles.title}>{kundliPerson.name}</Text>
         </View>
 
-        <View style={styles.headerRow}>
-          <Text style={[textStyle.fs_mont_20_500]}>Details</Text>
-          <TouchableOpacity
-            onPress={() => {
-              setOpenedForOther(false); // ← This is the fix
-              setShowModal(true);
-            }}>
-            <EditIcon size={18} />
-          </TouchableOpacity>
-        </View>
+        {route.name === 'chat' && (
+          <View style={styles.headerRow}>
+            <Text style={[textStyle.fs_mont_20_500]}>Details</Text>
+            <TouchableOpacity
+              onPress={() => {
+                setOpenedForOther(false); // ← This is the fix
+                setShowModal(true);
+              }}>
+              <EditIcon size={18} />
+            </TouchableOpacity>
+          </View>
+        )}
         <View style={styles.divider} />
 
         <DetailRow label="Full Name" value={kundliPerson.name || '__'} />

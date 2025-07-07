@@ -1,21 +1,25 @@
-import {Message} from './../../../utils/types';
+import {
+  Astrologers,
+  Message,
+  OtherUserType,
+  UserDetail,
+} from './../../../utils/types';
 // store/slices/sessionSlice.ts
 
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {ChatSession, SessionState} from '../../../utils/types';
 import {
   acceptSessionRequest,
+  getChatHistory,
+  getChatMessages,
   getQueueRequest,
   sendSessionRequest,
 } from './action';
 
 const initialState: SessionState = {
   session: null,
-  isLoading: false,
-  error: null,
-  queueMessage: null,
-  userId: '',
-  otherUserId: '',
+  user: null,
+  otherUser: null,
   sessionEnded: true,
   messages: [],
 };
@@ -26,57 +30,55 @@ const sessionSlice = createSlice({
   reducers: {
     setSession(state, action: PayloadAction<ChatSession>) {
       state.session = action.payload;
-      state.queueMessage = null;
-      state.error = null;
-      state.sessionEnded = false;
     },
-    setQueueMessage(state, action: PayloadAction<string>) {
-      state.queueMessage = action.payload;
-    },
+
     setChatUser(state, action) {
-      state.userId = action.payload;
+      state.user = action.payload;
     },
-    setOtherUser(state, action: PayloadAction<string>) {
-      state.otherUserId = action.payload;
+    setOtherUser(state, action: PayloadAction<UserDetail | null>) {
+      state.otherUser = action.payload;
     },
     clearSession(state) {
       state.session = null;
-      state.queueMessage = null;
-      state.error = null;
-      state.otherUserId = '';
-      state.userId = '';
-      state.sessionEnded = true;
       state.messages = [];
     },
-    setSessionError(state, action: PayloadAction<string>) {
-      state.error = action.payload;
-    },
-    setSessionLoading(state, action: PayloadAction<boolean>) {
-      state.isLoading = action.payload;
+
+    setMessage(state, action) {
+      state.messages = action.payload;
     },
 
     addMessage(state, action: PayloadAction<any>) {
-      state.messages.push(action.payload);
+      state.messages = [action.payload, ...state.messages];
+    },
+    prependMessages(state, action: PayloadAction<Message[]>) {
+      state.messages = [...state.messages, ...action.payload]; // older messages at the start
     },
   },
   extraReducers: builder => {
     builder.addCase(sendSessionRequest.fulfilled, state => {});
     builder.addCase(getQueueRequest.fulfilled, state => {});
     builder.addCase(acceptSessionRequest.fulfilled, state => {});
+    builder.addCase(getChatHistory.fulfilled, state => {});
+    builder.addCase(getChatMessages.fulfilled, state => {});
   },
 });
 
 export const {
   setSession,
-  setQueueMessage,
   clearSession,
-  setSessionError,
-  setSessionLoading,
   setChatUser,
   setOtherUser,
   addMessage,
+  prependMessages,
+  setMessage,
 } = sessionSlice.actions;
 
-export {sendSessionRequest, getQueueRequest};
+export {
+  sendSessionRequest,
+  getQueueRequest,
+  getChatHistory,
+  acceptSessionRequest,
+  getChatMessages,
+};
 
 export default sessionSlice.reducer;

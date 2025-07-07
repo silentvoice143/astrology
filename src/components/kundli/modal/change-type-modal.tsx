@@ -1,6 +1,3 @@
-import {View, Text, TouchableOpacity, Touchable, Pressable} from 'react-native';
-import React, {useState} from 'react';
-import CustomModal from '../../modal';
 import ControlledTagSelector from '../../controlled-tag-selector';
 import CustomButton from '../../custom-button';
 import {scale, verticalScale} from '../../../utils/sizer';
@@ -15,67 +12,58 @@ import {
 } from '../../../store/reducer/session';
 import {useNavigation} from '@react-navigation/native';
 import {Astrologers, UserDetail} from '../../../utils/types';
+import {useState} from 'react';
+import CustomModal from '../../modal';
+import {Pressable, Text, View} from 'react-native';
 
-const RequestSessionModal = ({
+const ChangeKundliTypeModal = ({
   isOpen,
   onClose,
-  astrologer,
+  selectedOption,
+  onChange,
 }: {
+  selectedOption: {label: string; id: string; value: string};
   isOpen: boolean;
   onClose: () => void;
-  astrologer: UserDetail | null;
+  onChange: (obj: {label: string; id: string; value: string} | null) => void;
 }) => {
-  console.log('modal open');
   const durationOptions = [
-    {label: '5m', id: '5m', value: 5},
-    {label: '10m', id: '10m', value: 10},
-    {label: '15m', id: '15m', value: 15},
-    {label: '30m', id: '30m', value: 30},
-    {label: '1h', id: '1h', value: 60},
+    {label: 'East-Indian Style', id: 'east_indian_style', value: 'east-indian'},
+    {
+      label: 'South-Indian Style',
+      id: 'south_indian_style',
+      value: 'south-indian',
+    },
+    {
+      label: 'North-Indian Style',
+      id: 'north_indian_style',
+      value: 'north-indian',
+    },
   ];
   const [selected, setSelected] = useState<null | {
     label: string;
     id: string;
-    value: number;
-  }>(null);
+    value: string;
+  }>(selectedOption);
 
-  const dispatch = useAppDispatch();
-  const navigation = useNavigation<any>();
-
-  const requestSession = async () => {
-    try {
-      const body = {astrologerId: astrologer?.id, duration: selected?.value};
-      const payload = await dispatch(sendSessionRequest(body)).unwrap();
-      console.log(body, payload, '----body');
-
-      if (payload.success) {
-        dispatch(setOtherUser(astrologer));
-        navigation.navigate('chat');
-      }
-
-      console.log(payload);
-    } catch (err) {
-      console.log('sendSessionRequest Error : ', err);
-    }
-  };
   return (
     <CustomModal
-      header={{title: 'Start Session', description: 'Choose the options'}}
+      header={{title: 'Chart Type', description: 'Choose the options'}}
       visible={isOpen}
       onClose={onClose}
       footer={
         <CustomButton
-          title="Start Session"
+          title="Submit"
           onPress={() => {
-            requestSession();
+            onChange(selected);
           }}
         />
       }>
       <Text
         style={[textStyle.fs_mont_14_700, {marginBottom: verticalScale(8)}]}>
-        Choose Duration
+        Choose Kundli Type
       </Text>
-      <View style={{flexDirection: 'row', flexWrap: 'wrap', gap: scale(16)}}>
+      <View style={{flexDirection: 'column', gap: scale(16)}}>
         {durationOptions.map(item => (
           <Pressable
             onPress={() => setSelected(item)}
@@ -104,4 +92,4 @@ const RequestSessionModal = ({
   );
 };
 
-export default RequestSessionModal;
+export default ChangeKundliTypeModal;

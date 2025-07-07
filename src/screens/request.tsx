@@ -28,12 +28,12 @@ const RequestScreen = () => {
     }
   };
 
-  const handleAccept = async (id: string) => {
+  const handleAccept = async (user: UserDetail) => {
     try {
-      const payload = await dispatch(acceptSessionRequest(id)).unwrap();
+      const payload = await dispatch(acceptSessionRequest(user.id)).unwrap();
       console.log(payload, '----accepted res');
       if (payload.success) {
-        dispatch(setOtherUser(id));
+        dispatch(setOtherUser(user));
         navigation.navigate('chat');
       }
     } catch (err) {
@@ -57,7 +57,7 @@ const RequestScreen = () => {
               <UserRequestCard
                 data={user}
                 onAccept={() => {
-                  handleAccept(user?.id);
+                  handleAccept(user);
                 }}
                 onSkip={() => {}}
               />

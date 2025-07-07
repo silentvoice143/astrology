@@ -1,10 +1,6 @@
 import React from 'react';
 import {Text, View} from 'react-native';
 import {SharedValue} from 'react-native-reanimated';
-import BasicDetails from './basic-detail';
-import ChartPage from './chart';
-import NakshatraAndDosha from './nakshatra';
-import {colors} from '../../constants/colors';
 
 type CardProps = {
   item: any;
@@ -21,7 +17,6 @@ const KundliPage: React.FC<CardProps> = ({
   cardWidth,
   currentTab,
 }) => {
-  console.log(currentTab, '---screen');
   return (
     <View
       key={index}
@@ -31,7 +26,7 @@ const KundliPage: React.FC<CardProps> = ({
 
         zIndex: 999,
       }}>
-      <View style={{flex: 1, zIndex: 999}}>{item?.data}</View>
+      {item?.data}
     </View>
   );
 };

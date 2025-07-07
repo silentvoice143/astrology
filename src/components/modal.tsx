@@ -182,7 +182,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+    backgroundColor: colors.bg.overlay,
     justifyContent: 'center',
     alignItems: 'center',
   },

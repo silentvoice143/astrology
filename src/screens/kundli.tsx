@@ -8,6 +8,8 @@ import Carousel from '../components/carosel';
 import KundliPage from '../components/kundli/kundli-page';
 import {textStyle} from '../constants/text-style';
 import {colors} from '../constants/colors';
+import LagnaChart from '../components/kundli/charts/lagna-chart';
+import RasiChart from '../components/kundli/charts/rasi-chart';
 export const kundliTabs = [
   {key: 'basic', label: 'Basic Details'},
   {key: 'lagnaChart', label: 'Lagna Chart'},
@@ -22,14 +24,23 @@ const Kundli = () => {
     <ScreenLayout>
       <Carousel
         data={[
-          {id: 1, screen: 'Chart', data: <ChartPage active={selectedTab} />},
+          {
+            id: 1,
+            screen: 'Lagna Chart',
+            data: <LagnaChart active={selectedTab} />,
+          },
           {
             id: 2,
+            screen: 'Rasi Chart',
+            data: <RasiChart active={selectedTab} />,
+          },
+          {
+            id: 3,
             screen: 'Basic details',
             data: <BasicDetails active={selectedTab} />,
           },
           {
-            id: 3,
+            id: 4,
             screen: 'Nakshatra',
             data: <NakshatraAndDosha active={selectedTab} />,
           },

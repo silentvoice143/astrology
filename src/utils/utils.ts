@@ -19,3 +19,48 @@ export function decodeMessageBody(message: any): string {
     return '';
   }
 }
+
+export function formatRelativeDate(isoString: string): string {
+  const inputDate = new Date(isoString);
+  const today = new Date();
+
+  // Normalize both dates to midnight for accurate day difference
+  const normalize = (d: Date) =>
+    new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const input = normalize(inputDate);
+  const now = normalize(today);
+
+  const diffMs = input.getTime() - now.getTime();
+  const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+  if (diffDays === 0) return 'Today';
+  if (diffDays === -1) return 'Yesterday';
+  if (diffDays >= -6 && diffDays <= -2) {
+    // For last 7 days (excluding today & yesterday), show weekday
+    return inputDate.toLocaleDateString(undefined, {weekday: 'long'});
+  }
+
+  // For other dates, format as dd/mm/yyyy
+  const dd = String(inputDate.getDate()).padStart(2, '0');
+  const mm = String(inputDate.getMonth() + 1).padStart(2, '0'); // Months start at 0
+  const yyyy = inputDate.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+}
+
+export function getTimeOnly(
+  isoString: string,
+  use12Hour: boolean = false,
+): string {
+  const dateObj = new Date(isoString);
+  return dateObj.toLocaleTimeString(undefined, {
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: use12Hour,
+  });
+}
+
+export function getDateOnly(isoString: string): string {
+  const datePart = isoString.split('T')[0]; // "yyyy-mm-dd"
+  const [year, month, day] = datePart.split('-');
+  return `${day}/${month}/${year}`; // "dd/mm/yyyy"
+}

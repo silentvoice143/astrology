@@ -47,6 +47,9 @@ export const colors = {
   secondary_surface: '#FFEBEC',
   secondary_surface_2: '#FCEEED',
   tertiary_surface: '#FFF2DE',
+  primary: {
+    light: '#FDEEED',
+  },
 
   //card colors
   primary_card: '#AA1358',
@@ -67,4 +70,9 @@ export const colors = {
 
   messageSend: '#DCF8C6',
   messageReceived: '#FCE4EC',
+
+  disabled: '#C0C0C0',
+  bg: {
+    overlay: 'rgba(0, 0, 0, 0.3)',
+  },
 };

@@ -6,18 +6,16 @@ import {IMessage, StompSubscription} from '@stomp/stompjs';
 // 🔹 Module-level singleton reference (global across your app)
 let singletonService: WebSocketService | null = null;
 
-export const useWebSocket = (
-  userId: string,
-  socketUrl?: string,
-  autoConnect: boolean = true,
-) => {
+export const useWebSocket = (userId: string, socketUrl?: string) => {
   const [connected, setConnected] = useState(false);
 
   const initService = useCallback(() => {
     if (!singletonService) {
       singletonService = new WebSocketService(
         userId,
-        socketUrl || 'https://gorilla-fitting-feline.ngrok-free.app/ws-chat',
+        socketUrl || 'https://astrosevaa.com/ws-chat',
+        // socketUrl || 'https://quagga-driving-socially.ngrok-free.app/ws-chat',
+        // socketUrl || 'https://gorilla-fitting-feline.ngrok-free.app/ws-chat',
       );
 
       singletonService.setOnConnect(() => setConnected(true));

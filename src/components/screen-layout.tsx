@@ -20,7 +20,9 @@ const ScreenLayout: React.FC<ScreenLayoutProps> = ({
   headerBackgroundColor,
 }) => {
   const sidebarRef = useRef<SidebarRef>(null);
-  const {isProfileModalOpen} = useAppSelector(state => state.auth);
+  const {isProfileModalOpen, isProfileComplete} = useAppSelector(
+    state => state.auth,
+  );
 
   const dispatch = useAppDispatch();
 

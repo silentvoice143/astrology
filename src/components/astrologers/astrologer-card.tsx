@@ -24,6 +24,7 @@ type AstrologerCardProps = {
   pricePerMinuteVideo: number;
   pricePerMinuteVoice: number;
   expertise: string;
+  online: boolean;
 };
 
 const AstrologerCard: React.FC<AstrologerCardProps> = ({
@@ -40,11 +41,24 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
   pricePerMinuteChat,
   pricePerMinuteVideo,
   pricePerMinuteVoice,
+  online,
 }) => {
   return (
     <View style={styles.card}>
       <View style={styles.topSection}>
-        <Image source={{uri: imageUri}} style={styles.avatar} />
+        <View>
+          <View
+            style={{
+              position: 'absolute',
+              right: -2,
+              width: 12,
+              height: 12,
+              zIndex: 999,
+              borderRadius: 6,
+              backgroundColor: online ? colors.success.base : colors.error.base,
+            }}></View>
+          <Image source={{uri: imageUri}} style={styles.avatar} />
+        </View>
 
         <View style={{flex: 1, marginLeft: scale(12)}}>
           <View style={styles.nameRow}>

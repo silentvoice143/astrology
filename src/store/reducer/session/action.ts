@@ -40,3 +40,29 @@ export const acceptSessionRequest = createAsyncThunk<
     return rejectWithValue(error.response?.data || error.message);
   }
 });
+
+// ===================Chat history===================
+export const getChatHistory = createAsyncThunk<
+  any, // response type as any
+  any,
+  {rejectValue: any}
+>('chat-history/get', async (payload: any, {rejectWithValue}) => {
+  try {
+    const response = await api.get(`/api/v1/chat/history${payload}`);
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});
+export const getChatMessages = createAsyncThunk<
+  any, // response type as any
+  any,
+  {rejectValue: any}
+>('chat-messages/get', async (payload, {rejectWithValue}) => {
+  try {
+    const response = await api.get(`/api/v1/chat/messages${payload}`);
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});

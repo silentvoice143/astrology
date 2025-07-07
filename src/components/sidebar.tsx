@@ -11,13 +11,14 @@ import {
   ScrollView,
 } from 'react-native';
 import CustomButton from './custom-button';
-import {useAppDispatch} from '../hooks/redux-hook';
+import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {logout} from '../store/reducer/auth';
 import WalletIcon from '../assets/icons/walletIcon';
 import {moderateScale, scale, verticalScale} from '../utils/sizer';
 import {colors} from '../constants/colors';
 import {textStyle} from '../constants/text-style';
 import {useNavigation} from '@react-navigation/native';
+import {clearSession} from '../store/reducer/session';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -33,7 +34,7 @@ const navItems = [
   {title: 'Astrologers', href: 'Astrologers'},
   {title: 'Chat History', href: 'ChatHistory', params: {type: 'user'}},
   {title: 'Wallet', href: 'Wallet', params: {type: 'user'}},
-  {title: 'chat', href: 'chat'},
+  {title: 'About', href: 'about'},
 ];
 
 const Sidebar = forwardRef<SidebarRef>((_, ref) => {
@@ -43,6 +44,7 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
 
   const dispatch = useAppDispatch();
   const navigation = useNavigation<any>();
+  const {user} = useAppSelector(state => state.auth);
 
   useImperativeHandle(ref, () => ({
     open,
@@ -87,6 +89,7 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
   const handleLogout = async () => {
     try {
       await dispatch(logout());
+      dispatch(clearSession());
     } catch (err) {
       console.log(err);
     }
@@ -117,10 +120,12 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
               style={styles.avatar}
             />
             <View style={{flex: 1, justifyContent: 'center'}}>
-              <Text style={styles.username}>John Doe</Text>
+              <Text style={styles.username}>{user?.name}</Text>
               <View style={styles.walletContainer}>
                 <WalletIcon />
-                <Text style={styles.walletText}>₹500</Text>
+                <Text style={styles.walletText}>
+                  ₹ {user?.walletBalance ?? 0}
+                </Text>
               </View>
             </View>
           </View>
@@ -172,15 +177,13 @@ const styles = StyleSheet.create({
     width: SCREEN_WIDTH * 0.8,
     backgroundColor: '#fff',
     zIndex: 11,
-    borderTopRightRadius: 16,
-    borderBottomRightRadius: 16,
     overflow: 'hidden',
   },
   scrollContent: {
     paddingBottom: verticalScale(30),
   },
   userSection: {
-    backgroundColor: colors.secondary_surface,
+    backgroundColor: colors.primary_surface_2,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: scale(20),
@@ -218,7 +221,7 @@ const styles = StyleSheet.create({
   },
   navItem: {
     paddingVertical: 14,
-    borderBottomColor: '#eee',
+    borderBottomColor: colors.secondary_surface_2,
     borderBottomWidth: 1,
   },
   navText: {
@@ -230,7 +233,7 @@ const styles = StyleSheet.create({
     marginTop: verticalScale(20),
   },
   logoutButton: {
-    backgroundColor: colors.secondarybtn, // Replace with your primary color
+    backgroundColor: colors.primary_surface_2, // Replace with your primary color
     borderRadius: 8,
     paddingVertical: 14,
   },

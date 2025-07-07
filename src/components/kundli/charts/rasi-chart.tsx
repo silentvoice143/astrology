@@ -9,19 +9,18 @@ import {
   Pressable,
 } from 'react-native';
 
-import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
-import {kundliChart} from '../../store/reducer/kundli';
+import {useAppDispatch, useAppSelector} from '../../../hooks/redux-hook';
+import {kundliChart} from '../../../store/reducer/kundli';
 import {SvgXml} from 'react-native-svg';
-import {customizeSVG} from '../../utils/customize-svg';
-import {scale, verticalScale} from '../../utils/sizer';
-import {textStyle} from '../../constants/text-style';
-import {colors} from '../../constants/colors';
-import ChangeIcon from '../../assets/icons/change-icon';
-import EditIcon from '../../assets/icons/edit-icon';
-import DocumentDownloadIcon from '../../assets/icons/download-file-icon';
-import ChangeKundliTypeModal from './modal/change-type-modal';
+import {customizeSVG} from '../../../utils/customize-svg';
+import {scale, verticalScale} from '../../../utils/sizer';
+import {textStyle} from '../../../constants/text-style';
+import {colors} from '../../../constants/colors';
+import ChangeIcon from '../../../assets/icons/change-icon';
+import DocumentDownloadIcon from '../../../assets/icons/download-file-icon';
+import ChangeKundliTypeModal from '../modal/change-type-modal';
 
-const ChartPage = ({
+const RasiChart = ({
   active,
   chartWidth,
 }: {
@@ -47,7 +46,7 @@ const ChartPage = ({
   const [changeKundliOpen, setChangeKundliOpen] = useState(false);
   const {kundliPerson} = useAppSelector(state => state.kundli);
   const [chartSvgRasi, setChartSvgRasi] = useState<string | null>(null);
-  const [chartSvgLagna, setChartSvgLagna] = useState<string | null>(null);
+
   const [selectedKundliType, setSelectedKundliType] = useState({
     label: 'East-Indian Style',
     id: 'east_indian_style',
@@ -71,27 +70,18 @@ const ChartPage = ({
       console.log('api body', body);
 
       // call both API requests in parallel:
-      const [rasiPayload, lagnaPayload] = await Promise.all([
+      const [rasiPayload] = await Promise.all([
         dispatch(
           kundliChart({
             body,
             query: {chartType: 'rasi', chartStyle: selectedKundliType.value},
           }),
         ).unwrap(),
-
-        dispatch(
-          kundliChart({
-            body,
-            query: {chartType: 'lagna', chartStyle: selectedKundliType.value},
-          }),
-        ).unwrap(),
       ]);
 
       console.log(rasiPayload, '----kundli chart data (rasi)');
-      console.log(lagnaPayload, '----kundli chart data (lagna)');
 
       setChartSvgRasi(customizeSVG(rasiPayload));
-      setChartSvgLagna(customizeSVG(lagnaPayload));
     } catch (err) {
       console.log(err);
     } finally {
@@ -172,14 +162,14 @@ const ChartPage = ({
           <DocumentDownloadIcon size={24} color={colors.primary_surface} />
         </Pressable>
       </View>
-      <ScrollView contentContainerStyle={styles.container}>
+      <ScrollView
+        style={{marginBottom: verticalScale(20)}}
+        contentContainerStyle={styles.container}>
         {/* Kundli Chart */}
         {chartSvgRasi ? (
           <SvgXml xml={chartSvgRasi} height={width - 28} width={width - 28} />
         ) : null}
-        {chartSvgLagna ? (
-          <SvgXml xml={chartSvgLagna} height={width - 28} width={width - 28} />
-        ) : null}
+
         <Text
           style={[
             textStyle.fs_abyss_12_400,
@@ -291,4 +281,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ChartPage;
+export default RasiChart;

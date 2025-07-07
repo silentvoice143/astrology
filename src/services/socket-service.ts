@@ -6,13 +6,19 @@ interface PendingSubscription {
   callback: (message: IMessage) => void;
 }
 
+// 🔹 NEW: Interface to store subscribed details
+interface ActiveSubscription {
+  destination: string;
+  stompSubscription: StompSubscription;
+}
+
 export class WebSocketService {
   private userId: string;
   private url: string;
   private client: Client | null = null;
   private subscriptions: StompSubscription[] = [];
   private pendingSubscriptions: PendingSubscription[] = []; // 🔹 NEW: pending subs buffer
-
+  private activeSubscriptions: ActiveSubscription[] = [];
   private onConnectCallback?: () => void; // 🔹 Declare callbacks properly
   private onDisconnectCallback?: () => void;
 
@@ -39,11 +45,13 @@ export class WebSocketService {
       this.pendingSubscriptions.forEach(({destination, callback}) => {
         const sub = this.client!.subscribe(destination, callback);
         this.subscriptions.push(sub);
+        this.activeSubscriptions.push({destination, stompSubscription: sub});
         console.log(
           `[WebSocketService] Subscribed to ${destination} (pending)`,
         );
       });
       this.pendingSubscriptions = []; // Clear pending queue
+      this.logAllSubscribedDestinations();
     };
 
     this.client.onDisconnect = frame => {
@@ -90,10 +98,15 @@ export class WebSocketService {
     console.log(`[WebSocketService] subscribe() called for ${destination}`);
     if (this.client && this.client.connected) {
       const subscription = this.client.subscribe(destination, callback);
+      this.activeSubscriptions.push({
+        destination,
+        stompSubscription: subscription,
+      });
       this.subscriptions.push(subscription);
       console.log(
         `[WebSocketService] Subscribed to ${destination} immediately`,
       );
+      this.logAllSubscribedDestinations();
       return subscription;
     } else {
       console.log(
@@ -116,5 +129,22 @@ export class WebSocketService {
         '[WebSocketService] Client not connected. Message not sent.',
       );
     }
+  }
+
+  public logAllSubscribedDestinations(): void {
+    if (this.activeSubscriptions.length === 0) {
+      console.log('[WebSocketService] No active subscriptions.');
+      return;
+    }
+    console.log(
+      '[WebSocketService] Currently subscribed to the following destinations:',
+    );
+    this.activeSubscriptions.forEach((sub, index) => {
+      console.log(
+        `  ${index + 1}. ${sub.destination} (STOMP ID: ${
+          sub.stompSubscription.id
+        })`,
+      );
+    });
   }
 }

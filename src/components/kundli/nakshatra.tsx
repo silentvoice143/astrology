@@ -76,7 +76,7 @@ const RasiCard = ({
         ({title})
       </Text>
     </View>
-    <View
+    {/* <View
       style={{
         zIndex: 10,
         flex: 1,
@@ -89,7 +89,7 @@ const RasiCard = ({
       <Text style={[textStyle.fs_mont_12_400, {color: colors.gray_text}]}>
         (Zodiac Sign)
       </Text>
-    </View>
+    </View> */}
     <Image
       source={require('../../assets/imgs/card-bg.png')}
       style={{
@@ -156,6 +156,7 @@ const NakshatraAndDosha = ({active}: {active: number}) => {
 
   return (
     <ScrollView
+      showsVerticalScrollIndicator={false}
       contentContainerStyle={[styles.container, {gap: verticalScale(16)}]}>
       {/* Nakshatra */}
       {nakshatra && (
@@ -167,7 +168,7 @@ const NakshatraAndDosha = ({active}: {active: number}) => {
             flexDirection: 'row',
             gap: scale(8),
           }}>
-          <View style={{gap: verticalScale(4)}}>
+          <View style={{gap: verticalScale(4), flex: 1}}>
             <Text style={[styles.sub_details]}>Name: {nakshatra.name}</Text>
             <Text style={[styles.sub_details]}>
               Lord: {nakshatra.lord?.name} ({nakshatra.lord?.vedic_name})
@@ -176,7 +177,7 @@ const NakshatraAndDosha = ({active}: {active: number}) => {
             <Text style={[styles.sub_details]}>
               Deity: {additionalInfo.deity}
             </Text>
-            <Text style={[styles.sub_details]}>
+            <Text style={[styles.sub_details, {}]}>
               Symbol: {additionalInfo.symbol}
             </Text>
             <Text style={[styles.sub_details]}>

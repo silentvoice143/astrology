@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react';
+import React, {useEffect, useRef} from 'react';
 import {createNativeStackNavigator} from '@react-navigation/native-stack';
 import Home from '../screens/home';
 import Astrologers from '../screens/astrologers';
@@ -14,6 +14,7 @@ import {useAppSelector} from '../hooks/redux-hook';
 import {useNavigation} from '@react-navigation/native';
 import {useUserRole} from '../hooks/use-role';
 import {useSessionEvents} from '../hooks/use-session-events';
+import About from '../screens/about';
 
 const Stack = createNativeStackNavigator();
 
@@ -22,17 +23,23 @@ export default function PrivateRoutes() {
   const navigation = useNavigation<any>();
   const role = useUserRole();
   const sessionEnded = useAppSelector(state => state.session.sessionEnded);
-  useEffect(() => {
-    if (sessionEnded) {
-      role === 'USER'
-        ? navigation.navigate('Astrologers')
-        : navigation.navigate('session-request');
-    }
-  }, [sessionEnded]);
+
+  // const prevSessionEnded = useRef(sessionEnded);
+
+  // useEffect(() => {
+  //   if (prevSessionEnded.current === false && sessionEnded === true) {
+  //     // session just ended, navigate
+  //     role === 'USER'
+  //       ? navigation.navigate('Astrologers')
+  //       : navigation.navigate('session-request');
+  //   }
+  //   prevSessionEnded.current = sessionEnded; // update ref
+  // }, [sessionEnded]);
   useSessionEvents(user?.id, isAuthenticated);
   console.log('calling private route ------');
   return (
     <Stack.Navigator
+      initialRouteName="Home"
       screenOptions={{
         headerShown: false,
         animation: 'none',
@@ -47,6 +54,7 @@ export default function PrivateRoutes() {
       <Stack.Screen name="chat-screen" component={ChatScreen} />
       <Stack.Screen name="chat" component={ChatScreenDemo} />
       <Stack.Screen name="session-request" component={RequestScreen} />
+      <Stack.Screen name="about" component={About} />
     </Stack.Navigator>
   );
 }
