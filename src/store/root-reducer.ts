@@ -2,10 +2,14 @@
 import {combineReducers} from '@reduxjs/toolkit';
 import authReducer from './reducer/auth';
 import userReducer from './reducer/user';
+import kundliReducer from './reducer/kundli';
+import sessionReducer from './reducer/session';
 
 const rootReducer = combineReducers({
   auth: authReducer,
   user: userReducer,
+  kundli: kundliReducer,
+  session: sessionReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

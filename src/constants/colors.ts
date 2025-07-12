@@ -1,4 +1,16 @@
 export const colors = {
+  success: {
+    base: '#28A745',
+    light: '#D4EDDA',
+  },
+  error: {
+    base: '#DC3545',
+    light: '#F8D7DA',
+  },
+  warning: {
+    base: '#FFC107',
+    light: '#FFF3CD',
+  },
   //like & dislike
   like_color: '#FA476B',
 
@@ -12,8 +24,10 @@ export const colors = {
   primaryText: '#000000',
   secondaryText: '#494949',
   tertiary_text: '#A51255',
+  highlight_text: '#EC504A',
   userNmaeText: '#D12765',
   whiteText: '#ffffff',
+  gray_text: '#A8A8A8',
 
   //yellow
   primary_yellow: '#EEC900',
@@ -29,13 +43,17 @@ export const colors = {
 
   //surface color
   primary_surface: '#fff',
+  primary_surface_2: '#EC504A',
   secondary_surface: '#FFEBEC',
   secondary_surface_2: '#FCEEED',
   tertiary_surface: '#FFF2DE',
+  primary: {
+    light: '#FDEEED',
+  },
 
   //card colors
   primary_card: '#AA1358',
-  primart_card_2: '#F4EBD0',
+  primary_card_2: '#FAF7ED',
   secondary_Card: '#EC504A',
   tertiary_card: '#FAA347',
 
@@ -50,7 +68,11 @@ export const colors = {
   grey300: '#E0E0E0',
   backgroundLight: '#f8f9fa',
 
+  messageSend: '#DCF8C6',
+  messageReceived: '#FCE4EC',
 
-  messageSend:'#DCF8C6',
-  messageReceived:'#FCE4EC',
+  disabled: '#C0C0C0',
+  bg: {
+    overlay: 'rgba(0, 0, 0, 0.3)',
+  },
 };

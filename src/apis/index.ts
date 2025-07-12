@@ -4,8 +4,11 @@ import {getTokenFromStore} from '../utils/get-token';
 import Toast from 'react-native-toast-message';
 import skipAuthPaths from './skip-path';
 
-const baseUrl =
-  process.env.BASE_URL || 'https://quagga-driving-socially.ngrok-free.app';
+// const baseUrl =
+//   process.env.BASE_URL || 'https://quagga-driving-socially.ngrok-free.app';
+const baseUrl = process.env.BASE_URL || 'https://astrosevaa.com';
+// const baseUrl =
+//   process.env.BASE_URL || 'https://gorilla-fitting-feline.ngrok-free.app';
 
 const api = axios.create({
   baseURL: baseUrl,

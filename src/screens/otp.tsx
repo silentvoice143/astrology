@@ -8,6 +8,8 @@ import {colors} from '../constants/colors';
 import OtpInput from '../components/otp-input';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {verifyOtp} from '../store/reducer/auth';
+import {setDefaultUser, setKundliPerson} from '../store/reducer/kundli';
+import {UserPersonalDetail} from '../utils/types';
 
 const Otp = () => {
   const {otp, mobile} = useAppSelector((state: any) => state.auth);
@@ -20,8 +22,19 @@ const Otp = () => {
     try {
       const payload = await dispatch(
         verifyOtp({mobile: mobile, otp: otpInput}),
-      );
-      console.log(payload, '---otp verify');
+      ).unwrap();
+      if (payload?.success) {
+        const user = payload?.user;
+        const personalDetail: UserPersonalDetail = {
+          name: user.name,
+          gender: user.gender,
+          birthDate: user.birthDate,
+          birthTime: user.birthTime,
+          birthPlace: user.birthPlace,
+          latitude: user.latitude,
+          longitude: user.longitude,
+        };
+      }
     } catch (err) {
       console.log(err);
     } finally {

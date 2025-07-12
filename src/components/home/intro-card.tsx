@@ -26,7 +26,7 @@ const IntroCard = ({
       style={{
         width: cardWidth,
         padding: scale(24),
-        backgroundColor: colors.primart_card_2,
+        backgroundColor: colors.primary_card_2,
         borderRadius: scale(20),
         flexDirection: 'row',
         gap: scale(20),

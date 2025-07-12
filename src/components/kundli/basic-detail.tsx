@@ -2,21 +2,25 @@ import React, {useState} from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
 import PersonalDetailModal from '../personal-detail-modal';
 import {scale} from '../../utils/sizer';
-import {colors} from '../../constants/colors'; // Optional: use your theme/colors
+import {colors} from '../../constants/colors';
+import {useAppSelector, useAppDispatch} from '../../hooks/redux-hook';
+import {setKundliPerson, resetToDefaultUser} from '../../store/reducer/kundli';
+import {UserPersonalDetail} from '../../utils/types';
+import EditIcon from '../../assets/icons/edit-icon';
+import {textStyle} from '../../constants/text-style';
+import {useRoute} from '@react-navigation/native';
 
-const BasicDetails = () => {
+const BasicDetails = ({active}: {active: number}) => {
+  const [openedForOther, setOpenedForOther] = useState(false);
+  const dispatch = useAppDispatch();
+
+  const kundliPerson = useAppSelector(state => state.kundli.kundliPerson);
+
   const [showModal, setShowModal] = useState(false);
+  const route = useRoute();
 
-  const [details, setDetails] = useState({
-    fullName: 'John Doe',
-    gender: 'Male',
-    dateOfBirth: '1995-05-15',
-    timeOfBirth: '08:30 AM',
-    placeOfBirth: 'New Delhi, India',
-  });
-
-  const handleUpdate = (updatedDetails: typeof details) => {
-    setDetails(updatedDetails);
+  const handleUpdate = (updatedDetails: UserPersonalDetail) => {
+    dispatch(setKundliPerson(updatedDetails));
     setShowModal(false);
   };
 
@@ -24,25 +28,49 @@ const BasicDetails = () => {
     <View style={styles.container}>
       <View style={styles.card}>
         <View style={styles.headerRow}>
-          <Text style={styles.title}>Basic Details</Text>
-          <TouchableOpacity onPress={() => setShowModal(true)}>
-            <Text style={styles.editText}>Edit</Text>
-          </TouchableOpacity>
+          <Text style={styles.title}>{kundliPerson.name}</Text>
         </View>
 
+        {route.name === 'chat' && (
+          <View style={styles.headerRow}>
+            <Text style={[textStyle.fs_mont_20_500]}>Details</Text>
+            <TouchableOpacity
+              onPress={() => {
+                setOpenedForOther(false); // ← This is the fix
+                setShowModal(true);
+              }}>
+              <EditIcon size={18} />
+            </TouchableOpacity>
+          </View>
+        )}
         <View style={styles.divider} />
 
-        <DetailRow label="Full Name" value={details.fullName} />
-        <DetailRow label="Gender" value={details.gender} />
-        <DetailRow label="Date of Birth" value={details.dateOfBirth} />
-        <DetailRow label="Time of Birth" value={details.timeOfBirth} />
-        <DetailRow label="Place of Birth" value={details.placeOfBirth} />
+        <DetailRow label="Full Name" value={kundliPerson.name || '__'} />
+        <DetailRow label="Gender" value={kundliPerson.gender || '__'} />
+        <DetailRow
+          label="Date of Birth"
+          value={kundliPerson.birthDate || '__'}
+        />
+        <DetailRow
+          label="Time of Birth"
+          value={kundliPerson.birthTime || '__'}
+        />
+        <DetailRow
+          label="Place of Birth"
+          value={kundliPerson.birthPlace || '__'}
+        />
       </View>
 
       <PersonalDetailModal
         isOpen={showModal}
-        onClose={() => setShowModal(false)}
-        existingDetails={details}
+        onClose={() => {
+          if (openedForOther) {
+            dispatch(resetToDefaultUser());
+            setOpenedForOther(false);
+          }
+          setShowModal(false);
+        }}
+        existingDetails={kundliPerson}
         onSubmit={handleUpdate}
       />
     </View>
@@ -61,14 +89,11 @@ const styles = StyleSheet.create({
     padding: scale(16),
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.primary_card_2,
     padding: scale(16),
     borderRadius: scale(12),
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
+
     shadowRadius: 6,
-    shadowOffset: {width: 0, height: 2},
-    elevation: 3,
   },
   headerRow: {
     flexDirection: 'row',
@@ -77,13 +102,12 @@ const styles = StyleSheet.create({
     marginBottom: scale(8),
   },
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.primaryText ?? '#222',
+    ...textStyle.fs_abyss_36_400,
+    color: colors.primary_surface_2 ?? '#222',
   },
   editText: {
     fontSize: 14,
-    color: colors.primary ?? '#007bff',
+    color: colors.primaryText ?? '#007bff',
     fontWeight: '600',
   },
   divider: {
@@ -107,6 +131,11 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     maxWidth: '60%',
     textAlign: 'right',
+  },
+  buttonRow: {
+    marginTop: scale(16),
+    flexDirection: 'column',
+    gap: scale(8),
   },
 });
 

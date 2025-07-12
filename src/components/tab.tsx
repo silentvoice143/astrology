@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   activeTab: {
-    backgroundColor: colors.secondarybtn, // You can define this as '#ff9800' or something attractive
+    backgroundColor: colors.primary_surface_2, // You can define this as '#ff9800' or something attractive
     shadowColor: colors.secondarybtn,
     shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.3,

@@ -1,5 +1,6 @@
 import {createAsyncThunk} from '@reduxjs/toolkit';
 import api from '../../../apis';
+import {UserPersonalDetail} from '../../../utils/types';
 
 type UserResponse = any;
 type ThunkApiConfig = {
@@ -17,3 +18,16 @@ export const userDetail = createAsyncThunk<UserResponse, void, ThunkApiConfig>(
     }
   },
 );
+
+export const postUserDetail = createAsyncThunk<
+  UserResponse,
+  UserPersonalDetail, // Accepts a User object as the payload
+  ThunkApiConfig
+>('post/user-detail', async (payload, {rejectWithValue}) => {
+  try {
+    const response = await api.post('/api/v1/users', payload);
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});

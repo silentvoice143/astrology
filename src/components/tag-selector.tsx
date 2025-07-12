@@ -10,6 +10,7 @@ import {
   Image,
 } from 'react-native';
 import {colors} from '../constants/colors';
+import {scaleFont} from '../utils/sizer';
 
 type TagItem = {
   id: string;
@@ -28,6 +29,9 @@ type AdvancedTagSelectorProps = {
   tagTextStyle?: TextStyle;
   selectedTagStyle?: ViewStyle;
   selectedTagTextStyle?: TextStyle;
+  label?: string;
+  labelStyle?: TextStyle;
+  contentContainerStyle?: ViewStyle;
 };
 
 const TagSelector: React.FC<AdvancedTagSelectorProps> = ({
@@ -41,6 +45,9 @@ const TagSelector: React.FC<AdvancedTagSelectorProps> = ({
   tagTextStyle,
   selectedTagStyle,
   selectedTagTextStyle,
+  label,
+  labelStyle,
+  contentContainerStyle,
 }) => {
   const [selected, setSelected] = useState<string[]>(selectedTags);
 
@@ -70,15 +77,23 @@ const TagSelector: React.FC<AdvancedTagSelectorProps> = ({
     setSelected(updated);
     onChange?.(updated);
   };
+  console.log(selected, '---selected');
+  const labelColor = selected.length > 0 ? '#007BFF' : '#000'; // Blue if selected, black otherwise
 
   return (
     <View style={[styles.container, containerStyle]}>
+      {label ? (
+        <Text style={[styles.label, {color: labelColor}, labelStyle]}>
+          {label}
+        </Text>
+      ) : null}
+
       <FlatList
         data={tags}
         keyExtractor={item => item.id}
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={styles.listContent}
+        contentContainerStyle={[styles.listContent, contentContainerStyle]}
         renderItem={({item}) => {
           const isSelected = selected.includes(item.id);
           return (
@@ -126,6 +141,11 @@ const styles = StyleSheet.create({
   container: {
     paddingVertical: 10,
     backgroundColor: colors.primary_surface,
+  },
+  label: {
+    fontSize: scaleFont(14),
+    marginBottom: 6,
+    fontWeight: '500',
   },
   listContent: {
     paddingHorizontal: 16,

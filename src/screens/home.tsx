@@ -23,18 +23,30 @@ import Carousel from '../components/carosel';
 import PersonalDetailModal from '../components/personal-detail-modal';
 import {useNavigation} from '@react-navigation/native';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
-import {setFirstTime} from '../store/reducer/auth';
-import {getAllAstrologers} from '../store/reducer/astrologers';
+import {setFirstTime, setUser} from '../store/reducer/auth';
+import {postUserDetail} from '../store/reducer/user';
+import {UserPersonalDetail} from '../utils/types';
+import {setKundliPerson} from '../store/reducer/kundli';
+
+import {useUserRole} from '../hooks/use-role';
 
 const Home = () => {
   const [search, setSearch] = useState('');
   const navigation = useNavigation<any>();
   const [headerBgColor, setHeaderBgColor] = useState('color');
-  const {firstTime} = useAppSelector(state => state.auth);
-  const [isPersonalDetailModalOpen, setIsPersonalDetailModalOpen] = useState(
-    firstTime ? true : false,
+
+  const user = useAppSelector(state => state.auth.user);
+  const astrologer_detail = useAppSelector(
+    state => state.auth.astrologer_detail,
   );
-  const dispatch = useAppDispatch();
+  const userRole = useUserRole();
+  console.log(user, '-----user detail in redux');
+  // const {isProfileComplete} = useAppSelector(state => state.auth);
+
+  // const [isPersonalDetailModalOpen, setIsPersonalDetailModalOpen] =
+  //   useState(false);
+  // const [forKundli, setForKundli] = useState(false);
+  // const dispatch = useAppDispatch();
 
   // const handleScroll = (event: any) => {
   //   const scrollY = event.nativeEvent.contentOffset.y;
@@ -45,19 +57,44 @@ const Home = () => {
   //   }
   // };
 
- 
+  // const handlePostUserData = async (user: UserPersonalDetail) => {
+  //   try {
+  //     const payload = await dispatch(postUserDetail(user)).unwrap();
+
+  //     if (payload?.success) {
+  //       setIsPersonalDetailModalOpen(false);
+  //       dispatch(setUser(payload.user));
+  //     }
+  //   } catch (err) {
+  //     console.log(err);
+  //   }
+  // };
 
   return (
     <ScreenLayout headerBackgroundColor={headerBgColor}>
-      <PersonalDetailModal
+      {/* <PersonalDetailModal
+        existingDetails={{
+          name: userRole === 'ASTROLOGER' ? user.name : '',
+          gender: '',
+          birthDate: new Date().toISOString().split('T')[0],
+          birthTime: new Date().toTimeString().split(' ')[0],
+          birthPlace: '',
+          latitude: null,
+          longitude: null,
+        }}
         isOpen={isPersonalDetailModalOpen}
         onClose={() => {
-          if (firstTime) {
-            dispatch(setFirstTime());
-          }
           setIsPersonalDetailModalOpen(false);
         }}
-      />
+        onSubmit={data => {
+          if (forKundli) {
+            dispatch(setKundliPerson(data));
+            navigation.navigate('Kundli');
+          } else {
+            handlePostUserData(data);
+          }
+        }}
+      /> */}
 
       <ScrollView
         scrollEventThrottle={16}
@@ -67,8 +104,8 @@ const Home = () => {
         <LinearGradient
           colors={[
             colors.secondary_surface,
-            colors.secondary_surface_2,
-            colors.tertiary_surface,
+            // colors.secondary_surface_2,
+            colors.primary_surface,
           ]}>
           <View style={HomeStyle.greetingContainer}>
             <Text style={[textStyle.fs_abyss_20_400]}>Hello</Text>
@@ -159,16 +196,6 @@ const Home = () => {
                 </Text>
               </View>
             </View>
-
-            {/* View Kundli Button */}
-            <TouchableOpacity
-              style={[HomeStyle.kundliButton]}
-              onPress={() => navigation.navigate('Kundli')}>
-              <KundliLogo />
-              <Text style={[textStyle.fs_mont_20_400, HomeStyle.kundliText]}>
-                View kundli
-              </Text>
-            </TouchableOpacity>
           </View>
 
           {/* Our Astrologer  */}

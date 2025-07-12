@@ -1,8 +1,36 @@
-import React from 'react';
-import {View, Text, StyleSheet, ScrollView} from 'react-native';
-import NorthIndianChart from './charts/lagna-chart';
+import React, {use, useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Dimensions,
+  ActivityIndicator,
+  Pressable,
+} from 'react-native';
 
-const ChartPage = () => {
+import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
+import {kundliChart} from '../../store/reducer/kundli';
+import {SvgXml} from 'react-native-svg';
+import {customizeSVG} from '../../utils/customize-svg';
+import {scale, verticalScale} from '../../utils/sizer';
+import {textStyle} from '../../constants/text-style';
+import {colors} from '../../constants/colors';
+import ChangeIcon from '../../assets/icons/change-icon';
+import EditIcon from '../../assets/icons/edit-icon';
+import DocumentDownloadIcon from '../../assets/icons/download-file-icon';
+import ChangeKundliTypeModal from './modal/change-type-modal';
+
+const ChartPage = ({
+  active,
+  chartWidth,
+}: {
+  active: number;
+  chartWidth?: number;
+}) => {
+  const [width, setWidth] = useState(
+    chartWidth ? chartWidth : Dimensions.get('screen').width,
+  );
   const tags = [
     {label: 'Retrograde', symbol: '⭒'},
     {label: 'Exalted', symbol: '+'},
@@ -16,47 +44,175 @@ const ChartPage = () => {
     {planet: 'Sun', symbol: 'Su', position: '15°12\'24"'},
     {planet: 'Moon', symbol: 'Mo', position: '21°42\'55"'},
   ];
+  const [changeKundliOpen, setChangeKundliOpen] = useState(false);
+  const {kundliPerson} = useAppSelector(state => state.kundli);
+  const [chartSvgRasi, setChartSvgRasi] = useState<string | null>(null);
+  const [chartSvgLagna, setChartSvgLagna] = useState<string | null>(null);
+  const [selectedKundliType, setSelectedKundliType] = useState({
+    label: 'East-Indian Style',
+    id: 'east_indian_style',
+    value: 'east-indian',
+  });
+
+  const [loading, setLoading] = useState(false);
+  const dispatch = useAppDispatch();
+
+  const getKundliChartData = async () => {
+    try {
+      setLoading(true);
+
+      const body = {
+        ...kundliPerson,
+        birthPlace: 'Varanasi',
+        latitude: 25.317645,
+        longitude: 82.973915,
+      };
+
+      console.log('api body', body);
+
+      // call both API requests in parallel:
+      const [rasiPayload, lagnaPayload] = await Promise.all([
+        dispatch(
+          kundliChart({
+            body,
+            query: {chartType: 'rasi', chartStyle: selectedKundliType.value},
+          }),
+        ).unwrap(),
+
+        dispatch(
+          kundliChart({
+            body,
+            query: {chartType: 'lagna', chartStyle: selectedKundliType.value},
+          }),
+        ).unwrap(),
+      ]);
+
+      console.log(rasiPayload, '----kundli chart data (rasi)');
+      console.log(lagnaPayload, '----kundli chart data (lagna)');
+
+      setChartSvgRasi(customizeSVG(rasiPayload));
+      setChartSvgLagna(customizeSVG(lagnaPayload));
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (chartWidth) return;
+    const onChange = ({screen}: {screen: {width: number}}) => {
+      setWidth(screen.width);
+    };
+
+    const subscription = Dimensions.addEventListener('change', onChange);
+
+    return () => subscription.remove();
+  }, []);
+
+  useEffect(() => {
+    getKundliChartData();
+  }, [dispatch, kundliPerson, selectedKundliType]);
+
+  if (loading) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size={20} />
+      </View>
+    );
+  }
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {/* Kundli Chart */}
-
-      {/* Astrology Tags */}
-      <View style={styles.tagContainer}>
-        {tags.map((tag, idx) => (
-          <View key={idx} style={styles.tag}>
-            <Text style={styles.tagText}>
-              {tag.symbol} {tag.label}
-            </Text>
-          </View>
-        ))}
-      </View>
-
-      {/* Planetary Table */}
-      <View style={styles.tableContainer}>
-        <View style={styles.tableHeader}>
-          <Text style={styles.headerCell}>Planet</Text>
-          <Text style={styles.headerCell}>Symbol</Text>
-          <Text style={styles.headerCell}>Position</Text>
+    <View>
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: scale(8),
+          paddingHorizontal: scale(20),
+          paddingVertical: verticalScale(8),
+        }}>
+        <View
+          style={{
+            borderColor: colors.primary_surface_2,
+            borderWidth: 1,
+            flex: 1,
+            paddingVertical: verticalScale(12),
+            paddingHorizontal: scale(8),
+            borderRadius: scale(24),
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <Text style={[textStyle.fs_abyss_16_400]}>
+            {selectedKundliType.label}
+          </Text>
         </View>
-
-        {planetData.map((row, index) => (
-          <View key={index} style={styles.tableRow}>
-            <Text style={styles.cell}>{row.planet}</Text>
-            <Text style={styles.cell}>{row.symbol}</Text>
-            <Text style={styles.cell}>{row.position}</Text>
-          </View>
-        ))}
+        <Pressable
+          style={{
+            height: verticalScale(40),
+            width: verticalScale(40),
+            backgroundColor: colors.primary_surface_2,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: scale(20),
+          }}
+          onPress={() => setChangeKundliOpen(true)}>
+          <ChangeIcon size={30} color={colors.primary_surface} />
+        </Pressable>
+        <Pressable
+          style={{
+            height: verticalScale(40),
+            width: verticalScale(40),
+            backgroundColor: colors.primary_surface_2,
+            paddingHorizontal: scale(8),
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: scale(20),
+          }}>
+          <DocumentDownloadIcon size={24} color={colors.primary_surface} />
+        </Pressable>
       </View>
-    </ScrollView>
+      <ScrollView contentContainerStyle={styles.container}>
+        {/* Kundli Chart */}
+        {chartSvgRasi ? (
+          <SvgXml xml={chartSvgRasi} height={width - 28} width={width - 28} />
+        ) : null}
+        {chartSvgLagna ? (
+          <SvgXml xml={chartSvgLagna} height={width - 28} width={width - 28} />
+        ) : null}
+        <Text
+          style={[
+            textStyle.fs_abyss_12_400,
+            {textAlign: 'center', color: colors.secondaryText},
+          ]}>
+          You can download this kundli with all the additional details usign the
+          top right button in pdf format
+        </Text>
+        <ChangeKundliTypeModal
+          isOpen={changeKundliOpen}
+          onClose={() => setChangeKundliOpen(false)}
+          selectedOption={selectedKundliType}
+          onChange={kundli => {
+            kundli && setSelectedKundliType(kundli);
+            setChangeKundliOpen(false);
+          }}
+        />
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
-    padding: 16,
     backgroundColor: '#fefefe',
     gap: 20,
+    paddingHorizontal: scale(16),
+    paddingVertical: verticalScale(20),
+  },
+  loader: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   kundliContainer: {
     aspectRatio: 1,

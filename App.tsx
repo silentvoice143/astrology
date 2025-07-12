@@ -1,29 +1,36 @@
 import React from 'react';
-import {StyleSheet} from 'react-native';
-import {Provider} from 'react-redux'; // Import Provider
+import {StatusBar, StyleSheet} from 'react-native';
+import {Provider} from 'react-redux';
 import AppNavigator from './src/routes/app-navigator';
-import {persistor, store} from './src/store'; // Import your Redux store
+import {persistor, store} from './src/store';
 import Toast from 'react-native-toast-message';
 import {PersistGate} from 'redux-persist/integration/react';
+import * as encoding from 'text-encoding';
+import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
+import {colors} from './src/constants/colors';
+
+Object.assign(global, encoding);
 
 function App(): React.JSX.Element {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <>
-          <AppNavigator />
-          <Toast />
-        </>
+        <SafeAreaProvider>
+          <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
+            <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
+            <AppNavigator />
+            <Toast />
+          </SafeAreaView>
+        </SafeAreaProvider>
       </PersistGate>
     </Provider>
   );
 }
 
 const styles = StyleSheet.create({
-  mainContainer: {
-    height: '100%',
-    width: '100%',
-    backgroundColor: 'red',
+  safeArea: {
+    flex: 1,
+    backgroundColor: colors.primary_surface, // set your desired background
   },
 });
 

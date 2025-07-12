@@ -4,25 +4,31 @@ import {scale, verticalScale, scaleFont} from '../utils/sizer';
 import Avatar from './avatar';
 import {textStyle} from '../constants/text-style';
 import {colors} from '../constants/colors';
+import {formatRelativeDate, getTimeOnly} from '../utils/utils';
 
 interface ChatHistoryCardProps {
   name: string;
-  message: string;
   time: string;
   avatar: ImageSourcePropType;
+  active: boolean;
 }
 
 const ChatHistoryCard: React.FC<ChatHistoryCardProps> = ({
   name,
-  message,
   time,
   avatar,
+  active,
 }) => {
   return (
-    <View style={styles.card}>
+    <View
+      style={[
+        styles.card,
+        {borderColor: colors.glow_shadow, borderWidth: active ? 1 : 0},
+      ]}>
       <View style={styles.row}>
         <Avatar
           image={avatar}
+          fallbackText={name.charAt(0)}
           size={55}
           borderColor={colors.secondarybtn}
           borderWidth={2}
@@ -31,19 +37,21 @@ const ChatHistoryCard: React.FC<ChatHistoryCardProps> = ({
 
         <View style={styles.textContainer}>
           <Text style={[styles.name, textStyle.fs_abyss_16_400]}>{name}</Text>
-          <Text style={[styles.message, textStyle.fs_mont_14_400]}>
-            {message}
+          <Text style={[styles.name, textStyle.fs_abyss_12_400]}>
+            {getTimeOnly(time, true)}
           </Text>
         </View>
       </View>
-      <Text style={[styles.time, textStyle.fs_mont_12_400]}>{time}</Text>
+      <Text style={[styles.time, textStyle.fs_mont_12_400]}>
+        {formatRelativeDate(time)}
+      </Text>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.primary_surface,
     borderRadius: scale(16),
     paddingHorizontal: scale(20),
     paddingVertical: verticalScale(12),
