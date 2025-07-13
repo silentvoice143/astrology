@@ -8,7 +8,7 @@ type PlayVideoIconProps = {
 
 const VideoCallIcon: React.FC<PlayVideoIconProps> = ({
   size = 24,
-  colors = ['#FAA347', '#EC504A', '#AA1358'],
+  colors = ['#000'],
 }) => {
   const isGradient = colors.length > 1;
 

@@ -29,25 +29,21 @@ export interface UserDetail {
   walletBalance: number;
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
+  imgUri: string;
 }
 
 export interface Astrologers {
+  about: string | null;
+  blocked: boolean;
+  experienceYears: number;
+  expertise: string;
   id: string;
-  userId: string;
-  name: string;
-  chatRate: string;
-  rating: number;
-  user: UserDetail;
-  experience: string;
   languages: string;
-  imageUri: string;
-  callRate: string;
-  videCallRate: string;
+  online: boolean;
   pricePerMinuteChat: number;
   pricePerMinuteVideo: number;
   pricePerMinuteVoice: number;
-  expertise: string;
-  online: boolean;
+  user: UserDetail;
 }
 
 import {ImageSourcePropType} from 'react-native';

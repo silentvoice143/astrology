@@ -8,6 +8,7 @@ import HistoryIcon from '../assets/icons/history-icon';
 import {useUserRole} from '../hooks/use-role';
 import KundliIcon from '../assets/icons/kundli-icon-2';
 import PeopleIcon from '../assets/icons/people-icon';
+import StoreIcon from '../assets/icons/store-icon';
 
 const BottomNavigationBar = () => {
   const navigation = useNavigation<any>();
@@ -30,6 +31,7 @@ const BottomNavigationBar = () => {
         },
     ,
     {label: 'Consult', route: 'ChatHistory', icon: HistoryIcon},
+    {label: 'Remedies', route: 'remedies', icon: StoreIcon},
   ];
 
   return (
@@ -46,6 +48,7 @@ const BottomNavigationBar = () => {
             {IconComponent && (
               <IconComponent
                 size={20}
+                strokeWidth={2}
                 color={isActive ? colors.primaryText : '#999'}
               />
             )}

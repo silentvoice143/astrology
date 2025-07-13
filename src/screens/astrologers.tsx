@@ -4,8 +4,9 @@ import {
   ScrollView,
   Pressable,
   ActivityIndicator,
+  Keyboard,
 } from 'react-native';
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import AstrologerCard from '../components/astrologers/astrologer-card';
 import {colors} from '../constants/colors';
 import ScreenLayout from '../components/screen-layout';
@@ -20,6 +21,7 @@ import RequestSessionModal from '../components/session/modals/request-session-mo
 import {shuffleArray} from '../utils/utils';
 import {textStyle} from '../constants/text-style';
 import {Astrologers as AstrologersType, UserDetail} from '../utils/types';
+import {RouteProp, useRoute} from '@react-navigation/native';
 
 const astrologers = [
   {
@@ -60,7 +62,22 @@ const tags = [
   },
 ];
 
+// Define the type for the route parameters for the 'Astrologers' screen
+type AstrologersRouteParams = {
+  initialSearch?: string;
+};
+
+// Define the type for the route object using RouteProp
+type AstrologersScreenRouteProp = RouteProp<
+  {Astrologers: AstrologersRouteParams},
+  'Astrologers'
+>;
+
 const Astrologers = () => {
+  const route = useRoute<AstrologersScreenRouteProp>(); // Use useRoute hook to access params
+  const {initialSearch = ''} = route.params || {};
+  const [search, setSearch] = useState(initialSearch); // Initialize search state with initialSearch param
+  const searchInputRef = useRef(null);
   const [selected, setSelected] = useState<string[]>(['all']);
   const [selectedAstrologer, setSelectedAstrologer] =
     useState<UserDetail | null>(null);
@@ -76,26 +93,26 @@ const Astrologers = () => {
       const payload = await dispatch(getAllAstrologers()).unwrap();
       console.log(payload, 'payload----------------- fetchAstrologersData');
       if (payload.success) {
-        const customAstro = payload?.astrologers?.map((astro: any) => {
-          return {
-            online: astro?.online,
-            id: astro?.id,
-            name: astro?.user?.name,
-            userId: astro?.user?.id,
-            user: astro?.user,
-            expertise: astro?.expertise,
-            pricePerMinuteChat: `${astro?.pricePerMinuteChat} ₹/min`,
-            pricePerMinuteVoice: `${astro?.pricePerMinuteVoice} ₹/min`,
-            pricePerMinuteVideo: `${astro?.pricePerMinuteVideo} ₹/min`,
-            rating: astro?.rating || null,
-            experience: `${astro?.experienceYears} Years`,
-            languages: astro?.languages,
-            imageUri:
-              astro?.imgUri ||
-              'https://img.freepik.com/free-vector/young-man-orange-hoodie_1308-175788.jpg?ga=GA1.1.1570607994.1749976697&semt=ais_hybrid&w=740',
-          };
-        });
-        setAstrologersData(customAstro);
+        // const customAstro = payload?.astrologers?.map((astro: any) => {
+        //   return {
+        //     online: astro?.online,
+        //     id: astro?.id,
+        //     name: astro?.user?.name,
+        //     userId: astro?.user?.id,
+        //     user: astro?.user,
+        //     expertise: astro?.expertise,
+        //     pricePerMinuteChat: `${astro?.pricePerMinuteChat} ₹/min`,
+        //     pricePerMinuteVoice: `${astro?.pricePerMinuteVoice} ₹/min`,
+        //     pricePerMinuteVideo: `${astro?.pricePerMinuteVideo} ₹/min`,
+        //     rating: astro?.rating || null,
+        //     experience: `${astro?.experienceYears} Years`,
+        //     languages: astro?.languages,
+        //     imageUri:
+        //       astro?.imgUri ||
+        //       'https://img.freepik.com/free-vector/young-man-orange-hoodie_1308-175788.jpg?ga=GA1.1.1570607994.1749976697&semt=ais_hybrid&w=740',
+        //   };
+        // });
+        setAstrologersData(payload?.astrologers);
       }
     } catch (error) {
       console.log('fetchAstrologersData Error : ', error);
@@ -148,6 +165,10 @@ const Astrologers = () => {
             unfocusedBorderColor={colors.primary_border}
             enableShadow={true}
             focusedBorderColor={colors.primary_border}
+            placeholder="Search for astrologers..." // Updated placeholder for clarity
+            value={search} // Controlled component with search state
+            onChangeText={setSearch} // Update search state on text change
+            onSubmitEditing={() => Keyboard.dismiss()} // Dismiss keyboard on submit
           />
         </View>
       </View>
@@ -202,12 +223,12 @@ const Astrologers = () => {
                   pricePerMinuteVoice={item.pricePerMinuteVoice}
                   expertise={item.expertise}
                   key={`card-astrologer-${idx}`}
-                  name={item?.name}
-                  rate={item?.chatRate}
-                  rating={item?.rating}
-                  experience={item?.experience}
+                  name={item?.user?.name}
+                  rate={''}
+                  rating={4}
+                  experience={item?.experienceYears.toString()}
                   languages={item?.languages}
-                  imageUri={item?.imageUri}
+                  imageUri={item?.user?.imgUri}
                   onCallPress={() => {
                     console.log('Calling');
 

@@ -15,10 +15,17 @@ import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {logout} from '../store/reducer/auth';
 import WalletIcon from '../assets/icons/walletIcon';
 import {moderateScale, scale, verticalScale} from '../utils/sizer';
-import {colors} from '../constants/colors';
+import {colors, themeColors} from '../constants/colors';
 import {textStyle} from '../constants/text-style';
 import {useNavigation} from '@react-navigation/native';
 import {clearSession} from '../store/reducer/session';
+import HomeIcon from '../assets/icons/home-icon';
+import AstrologerIcon from '../assets/icons/astrologer-icon';
+import ChatIcon from '../assets/icons/chat-icon';
+import AboutIcon from '../assets/icons/about-icon';
+import HelpIcon from '../assets/icons/customer-support-icon';
+import SettingIcon from '../assets/icons/setting-icon';
+import KundliBookIcon from '../assets/icons/kundli-book-icon';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -28,13 +35,37 @@ export type SidebarRef = {
 };
 
 const navItems = [
-  {title: 'Home', href: 'Home'},
+  {title: 'Home', href: 'Home', icon: <HomeIcon size={20} />},
   // {title: 'Daily Horoscope', href: 'DailyHoroscope'},
-  {title: 'Kundli', href: 'Kundli'},
-  {title: 'Astrologers', href: 'Astrologers'},
-  {title: 'Chat History', href: 'ChatHistory', params: {type: 'user'}},
-  {title: 'Wallet', href: 'Wallet', params: {type: 'user'}},
-  {title: 'About', href: 'about'},
+  {
+    title: 'Kundli',
+    href: 'KundliForm',
+    icon: <KundliBookIcon strokeWidth={2} size={20} />,
+  },
+  {
+    title: 'Astrologers',
+    href: 'Astrologers',
+    icon: <AstrologerIcon size={20} />,
+  },
+  {
+    title: 'Chat History',
+    href: 'ChatHistory',
+    params: {type: 'user'},
+    icon: <ChatIcon size={20} />,
+  },
+  {
+    title: 'Wallet',
+    href: 'Wallet',
+    params: {type: 'user'},
+    icon: <WalletIcon size={20} />,
+  },
+  {
+    title: 'Customer Support',
+    href: 'customer-support',
+    icon: <HelpIcon size={20} />,
+  },
+  {title: 'Setting', href: 'setting', icon: <SettingIcon size={20} />},
+  {title: 'About', href: 'about', icon: <AboutIcon size={20} />},
 ];
 
 const Sidebar = forwardRef<SidebarRef>((_, ref) => {
@@ -115,11 +146,17 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
           contentContainerStyle={styles.scrollContent}>
           {/* User Info */}
           <View style={styles.userSection}>
-            <Image
-              source={{uri: 'https://i.pravatar.cc/300?img=5'}}
-              style={styles.avatar}
-            />
-            <View style={{flex: 1, justifyContent: 'center'}}>
+            <TouchableOpacity
+              onPress={() => {
+                close();
+                navigation.navigate('Profile');
+              }}>
+              <Image
+                source={{uri: 'https://i.pravatar.cc/300?img=5'}}
+                style={styles.avatar}
+              />
+            </TouchableOpacity>
+            <View style={{justifyContent: 'center'}}>
               <Text style={styles.username}>{user?.name}</Text>
               <View style={styles.walletContainer}>
                 <WalletIcon />
@@ -139,6 +176,7 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
                 onPress={() => {
                   handleNavigation(item?.href);
                 }}>
+                <View>{item?.icon}</View>
                 <Text style={styles.navText}>{item.title}</Text>
               </TouchableOpacity>
             ))}
@@ -190,23 +228,23 @@ const styles = StyleSheet.create({
     paddingVertical: verticalScale(20),
   },
   avatar: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+    width: scale(48),
+    height: scale(48),
+    borderRadius: scale(16),
     marginRight: scale(16),
   },
   username: {
     fontSize: 18,
     fontWeight: '700',
-    color: '#111',
+    color: themeColors.text.light,
     marginBottom: 4,
   },
   walletContainer: {
     backgroundColor: colors.primary_surface,
-    width: scale(100),
+    // width: scale(100),
     paddingHorizontal: scale(8),
     paddingVertical: scale(2),
-    borderRadius: scale(10),
+    borderRadius: scale(16),
     flexDirection: 'row',
     alignItems: 'center',
     gap: moderateScale(6),
@@ -220,6 +258,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: scale(20),
   },
   navItem: {
+    flexDirection: 'row',
+    gap: scale(12),
     paddingVertical: 14,
     borderBottomColor: colors.secondary_surface_2,
     borderBottomWidth: 1,

@@ -64,3 +64,11 @@ export function getDateOnly(isoString: string): string {
   const [year, month, day] = datePart.split('-');
   return `${day}/${month}/${year}`; // "dd/mm/yyyy"
 }
+
+export const formatPrice = (
+  value: number,
+  unit: 'min' | 'hr',
+  symbol: string = '₹',
+): string => {
+  return `${symbol}${value}/${unit}`;
+};

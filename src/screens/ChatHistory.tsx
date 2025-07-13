@@ -128,7 +128,7 @@ const ChatHistory = () => {
           style={{
             height: 50,
             width: '100%',
-            backgroundColor: colors.secondary_surface,
+            // backgroundColor: colors.secondary_surface,
             position: 'absolute',
             top: 0,
             borderBottomEndRadius: 20,

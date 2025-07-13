@@ -8,6 +8,7 @@ import CallIcon from '../../assets/icons/call-icon';
 import VideoCallIcon from '../../assets/icons/video-call-icon';
 import ChatIcon from '../../assets/icons/chat-icon';
 import {textStyle} from '../../constants/text-style';
+import {formatPrice} from '../../utils/utils';
 
 type AstrologerCardProps = {
   id: string;
@@ -63,7 +64,7 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
         <View style={{flex: 1, marginLeft: scale(12)}}>
           <View style={styles.nameRow}>
             <Text style={styles.name}>{name}</Text>
-            <LikeIcon />
+            {/* <LikeIcon /> */}
           </View>
 
           {rate && (
@@ -116,7 +117,9 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
               }}>
               <CallIcon colors={[colors.whiteText]} height={16} width={16} />
             </View>
-            <Text style={styles.buttonText}>{pricePerMinuteVoice}</Text>
+            <Text style={styles.buttonText}>
+              {formatPrice(pricePerMinuteVoice, 'min')}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -134,7 +137,9 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
               <VideoCallIcon size={16} colors={[colors.whiteText]} />
             </View>
 
-            <Text style={styles.buttonText}>{pricePerMinuteVideo}</Text>
+            <Text style={styles.buttonText}>
+              {formatPrice(pricePerMinuteVideo, 'min')}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -149,7 +154,9 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
               <ChatIcon height={16} width={16} colors={[colors.whiteText]} />
             </View>
 
-            <Text style={styles.buttonText}>{pricePerMinuteChat}</Text>
+            <Text style={styles.buttonText}>
+              {formatPrice(pricePerMinuteChat, 'min')}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>

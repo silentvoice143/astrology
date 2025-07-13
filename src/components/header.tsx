@@ -11,7 +11,7 @@ import {
 import {useNavigation, useRoute} from '@react-navigation/native';
 import MenuIcon from '../assets/icons/menu-icon';
 import {moderateScale, scale, verticalScale} from '../utils/sizer';
-import {colors} from '../constants/colors';
+import {colors, themeColors} from '../constants/colors';
 import {textStyle} from '../constants/text-style';
 import BackIcon from '../assets/icons/back-icon';
 import LinearGradient from 'react-native-linear-gradient';
@@ -50,38 +50,42 @@ const Header = ({
         return 'Kundli Form';
       case 'about':
         return 'About Us';
+      case 'remedies':
+        return 'Remedies';
       default:
         return name;
     }
   };
 
+  const exceptionArray = [
+    'Kundli',
+    'KundliForm',
+    'Wallet',
+    'remedies',
+    'ChatHistory',
+    'Profile',
+  ];
+
+  const headerWhite = exceptionArray.includes(route.name);
+
   return (
     <LinearGradient
       colors={[
         colors.primary_surface,
-        route.name === 'Kundli' || route.name === 'Wallet'
-          ? colors.primary_surface
-          : colors.secondary_surface,
+        headerWhite ? colors.primary_surface : colors.secondary_surface,
       ]}
       style={{
-        borderBottomWidth: !showMenuIcon ? 0 : 1,
-        borderColor: colors.backgroundLight,
+        borderBottomWidth: !headerWhite ? 0 : 1,
+        borderColor: themeColors.surface.border,
       }}>
-      <Animated.View style={[styles.container]}>
-        {/* Background Image */}
-        {/* <Image
-          source={require('../assets/imgs/bg-img.png')}
-          style={[styles.bgImage]}
-          resizeMode="contain"
-        /> */}
-
+      <View style={[styles.container]}>
         <View style={{flexDirection: 'row'}}>
           {/* <Text>hello</Text> */}
           <TouchableOpacity
             style={{
               height: moderateScale(40),
               width: moderateScale(40),
-              backgroundColor: 'red',
+              // backgroundColor: 'red',
               borderRadius: 12,
               justifyContent: 'center',
               alignItems: 'center',
@@ -94,9 +98,9 @@ const Header = ({
               console.log('opening sidebar');
             }}>
             {showMenuIcon ? (
-              <BackIcon color={colors.whiteText} />
+              <BackIcon color={themeColors.text.primary} />
             ) : (
-              <MenuIcon color={colors.whiteText} />
+              <MenuIcon color={themeColors.text.primary} />
             )}
           </TouchableOpacity>
 
@@ -107,21 +111,21 @@ const Header = ({
           </View>
         </View>
 
-        <TouchableOpacity style={{padding: scale(4)}}>
+        {/* <TouchableOpacity style={{padding: scale(4)}}>
           <View
             style={{
               zIndex: 999,
               position: 'absolute',
-              right: scale(8),
+              right: scale(4),
               borderRadius: scale(6),
-              top: verticalScale(8),
-              height: moderateScale(10),
-              width: moderateScale(10),
+              top: verticalScale(4),
+              height: moderateScale(8),
+              width: moderateScale(8),
               backgroundColor: colors.success.base,
             }}></View>
-          <NotificationIcon size={32} />
-        </TouchableOpacity>
-      </Animated.View>
+          <NotificationIcon size={20} />
+        </TouchableOpacity> */}
+      </View>
     </LinearGradient>
   );
 };
@@ -157,7 +161,7 @@ const styles = StyleSheet.create({
     height: 60,
     width: 60,
     borderRadius: 30,
-    backgroundColor: 'white',
+    backgroundColor: themeColors.surface.background,
     justifyContent: 'center',
     alignItems: 'center',
     flexDirection: 'row',

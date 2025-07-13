@@ -5,18 +5,24 @@ interface CallIconProps {
   width?: number;
   height?: number;
   colors?: string[]; // single color = solid, multiple = gradient
+  size?: number;
 }
 
 const CallIcon: React.FC<CallIconProps> = ({
   width = 40,
   height = 40,
-  colors = ['#FAA347', '#EC504A', '#AA1358'],
+  colors = ['#000'],
+  size,
 }) => {
   const useSolidColor = colors.length === 1;
   const gradientId = 'gradientFill';
 
   return (
-    <Svg width={width} height={height} viewBox="0 0 40 40" fill="none">
+    <Svg
+      width={size ? size : width}
+      height={size ? size : height}
+      viewBox="0 0 40 40"
+      fill="none">
       <Defs>
         {!useSolidColor && (
           <LinearGradient
