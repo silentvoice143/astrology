@@ -13,6 +13,9 @@ const isProfileComplete = (user: UserDetail): boolean => {
   );
 };
 interface AuthState {
+  isAuthenticated: boolean;
+  astrologer_id?: string;
+  astrologer_detail?: AstrologerProfile;
   name: string;
   token: string | null;
   mobile: string | null;
@@ -20,10 +23,37 @@ interface AuthState {
   otp: string;
   user: UserDetail;
   isProfileComplete: boolean;
+  isProfileModalOpen: boolean;
+}
+
+export interface AstrologerProfile {
+  id: string;
+  about: string | null;
+  blocked: boolean;
+  experienceYears: number;
+  expertise: string;
+  imgUri: string;
+  languages: string; // You can convert this to string[] if needed
+  pricePerMinuteChat: number;
+  pricePerMinuteVoice: number;
+  pricePerMinuteVideo: number;
 }
 
 const initialState: AuthState = {
   name: '',
+  isAuthenticated: false,
+  astrologer_detail: {
+    id: '',
+    about: null,
+    blocked: false,
+    experienceYears: 0,
+    expertise: '',
+    imgUri: '',
+    languages: '',
+    pricePerMinuteChat: 0,
+    pricePerMinuteVoice: 0,
+    pricePerMinuteVideo: 0,
+  },
   token: null,
   mobile: null,
   firstTime: true,
@@ -44,6 +74,7 @@ const initialState: AuthState = {
     updatedAt: new Date().toISOString(),
   },
   isProfileComplete: false,
+  isProfileModalOpen: false,
 };
 
 const authSlice = createSlice({
@@ -60,8 +91,21 @@ const authSlice = createSlice({
       state.firstTime = false;
     },
     setUser(state, action) {
-      state.user = action.payload;
+      state.user = {...action.payload};
       state.isProfileComplete = isProfileComplete(action.payload);
+    },
+    setProfileModelToggle(state) {
+      if (!state.isProfileModalOpen && !state.isProfileComplete) {
+        state.isProfileModalOpen = true;
+      } else {
+        state.isProfileModalOpen = false;
+      }
+    },
+    setAstrologer(state, action) {
+      state.astrologer_detail = {...action.payload};
+    },
+    setAuthentication(state, action) {
+      state.isAuthenticated = action.payload;
     },
   },
   extraReducers: builder => {
@@ -74,15 +118,23 @@ const authSlice = createSlice({
       .addCase(verifyOtp.fulfilled, (state, {payload}) => {
         if (payload?.success) {
           state.token = payload.token;
-          state.mobile = payload.user.mobile;
-          state.user = {...payload.user};
-          state.name = payload.user.name;
+          state.mobile = payload?.user?.mobile;
+          state.user = {...payload?.user};
+          state.name = payload?.user?.name;
           state.isProfileComplete = isProfileComplete(payload.user);
         }
       });
   },
 });
 
-export const {logout, setMobile, setFirstTime, setUser} = authSlice.actions;
+export const {
+  logout,
+  setMobile,
+  setFirstTime,
+  setUser,
+  setAstrologer,
+  setProfileModelToggle,
+  setAuthentication,
+} = authSlice.actions;
 export {loginUser, verifyOtp};
 export default authSlice.reducer;

@@ -1,219 +1,283 @@
-import React from 'react';
-import {StyleSheet, View, Text, Dimensions} from 'react-native';
+import React, {use, useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  ScrollView,
+  Dimensions,
+  ActivityIndicator,
+  Pressable,
+} from 'react-native';
 
-const {width} = Dimensions.get('window');
-const chartSize = width * 0.85; // 85% of screen width for charts
+import {useAppDispatch, useAppSelector} from '../../../hooks/redux-hook';
+import {kundliChart} from '../../../store/reducer/kundli';
+import {SvgXml} from 'react-native-svg';
+import {customizeSVG} from '../../../utils/customize-svg';
+import {scale, verticalScale} from '../../../utils/sizer';
+import {textStyle} from '../../../constants/text-style';
+import {colors} from '../../../constants/colors';
+import ChangeIcon from '../../../assets/icons/change-icon';
+import DocumentDownloadIcon from '../../../assets/icons/download-file-icon';
+import ChangeKundliTypeModal from '../modal/change-type-modal';
 
-// --- Helper Data ---
-const zodiacSigns = {
-  1: 'Aries',
-  2: 'Taurus',
-  3: 'Gemini',
-  4: 'Cancer',
-  5: 'Leo',
-  6: 'Virgo',
-  7: 'Libra',
-  8: 'Scorpio',
-  9: 'Sagittarius',
-  10: 'Capricorn',
-  11: 'Aquarius',
-  12: 'Pisces',
-};
-
-const getPlanetDisplay = planets => {
-  return planets.map(p => p.planet).join(', ');
-};
-
-// --- Generic Chart House Cell Component ---
-// This component renders a single house, showing its details.
-const ChartHouseCell = ({houseNum, zodiacRashi, planets, isLagna, style}) => (
-  <View style={[styles.houseCell, style, isLagna && styles.lagnaHouse]}>
-    {houseNum && <Text style={styles.houseLabel}>H{houseNum}</Text>}
-    {zodiacRashi && <Text style={styles.zodiacText}>{zodiacRashi}</Text>}
-    {planets && <Text style={styles.planetsText}>{planets}</Text>}
-    {isLagna && <Text style={styles.lagnaIndicator}>L</Text>}
-  </View>
-);
-
-// --- North Indian Style Lagna Chart ---
-// Houses are fixed, zodiac signs and planets move. Lagna (H1) is at the top-middle.
-const NorthIndianChart = ({lagnaSign, planetPositions}) => {
-  const houseData = {}; // Stores { sign, planets } for each logical house number (1-12)
-
-  // 1. Determine which Zodiac Sign falls into each FIXED House position.
-  // In North Indian style, House 1 (Lagna House) always contains the lagnaSign.
-  // Houses proceed anti-clockwise.
-  for (let i = 0; i < 12; i++) {
-    const currentHouseNum = i + 1; // Logical house number (1 to 12)
-    // Calculate the zodiac sign that occupies this fixed house.
-    // Example: if Lagna (H1) is Leo (5), then H2 (anti-clockwise) is Virgo (6), H12 is Cancer (4).
-    const signInThisHouse = ((lagnaSign - 1 + i) % 12) + 1;
-    houseData[currentHouseNum] = {
-      sign: signInThisHouse,
-      planets: [],
-    };
-  }
-
-  // 2. Distribute Planets to their respective Houses based on their zodiac sign placement.
-  planetPositions.forEach(planet => {
-    // Find the house that contains this planet's sign.
-    const houseNumContainingSign = Object.keys(houseData).find(
-      hNum => houseData[hNum].sign === planet.sign,
-    );
-    if (houseNumContainingSign) {
-      houseData[houseNumContainingSign].planets.push(planet);
-    }
-  });
-
-  // 3. Define the visual grid order for rendering North Indian chart.
-  // This array maps logical house numbers to their positions in a 4x4 grid.
-  // 'null' represents empty visual cells for spacing/layout.
-  const NORTH_GRID_VISUAL_ORDER = [
-    12,
-    1,
-    2,
-    3, // Row 1: H12 (top-left), H1 (top-center/Lagna), H2 (top-right), H3 (far right)
-    11,
-    null,
-    null,
-    4, // Row 2: H11 (mid-left), empty, empty, H4 (mid-right)
-    10,
-    null,
-    null,
-    5, // Row 3: H10 (bottom-left), empty, empty, H5 (bottom-right)
-    9,
-    8,
-    7,
-    6, // Row 4: H9 (far left), H8 (bottom-mid-left), H7 (bottom-mid-right), H6 (far right)
+const LagnaChart = ({
+  active,
+  chartWidth,
+}: {
+  active: number;
+  chartWidth?: number;
+}) => {
+  const [width, setWidth] = useState(
+    chartWidth ? chartWidth : Dimensions.get('screen').width,
+  );
+  const tags = [
+    {label: 'Retrograde', symbol: '⭒'},
+    {label: 'Exalted', symbol: '+'},
+    {label: 'Debilitated', symbol: '⬇'},
+    {label: 'Combust', symbol: '^'},
+    {label: 'Vargottama', symbol: '¤'},
   ];
 
-  return (
-    <View style={styles.chartContainer}>
-      <Text style={styles.chartTitle}>North Indian Style</Text>
-      <View style={styles.northChartWrapper}>
-        <View style={styles.northChartGrid}>
-          {NORTH_GRID_VISUAL_ORDER.map((houseNumber, index) => {
-            if (houseNumber === null) {
-              return (
-                <View
-                  key={`empty-${index}`}
-                  style={styles.northGridCellEmpty}
-                />
-              );
-            }
-            const data = houseData[houseNumber];
-            const isLagnaHouse = houseNumber === 1; // H1 is always the Lagna house in North style
-            return (
-              <ChartHouseCell
-                key={index}
-                houseNum={houseNumber}
-                zodiacRashi={zodiacSigns[data.sign]}
-                planets={getPlanetDisplay(data.planets)}
-                isLagna={isLagnaHouse}
-                style={styles.northGridCell}
-              />
-            );
-          })}
-        </View>
+  const planetData = [
+    {planet: 'Lagna', symbol: 'La', position: '08°31\'06"'},
+    {planet: 'Sun', symbol: 'Su', position: '15°12\'24"'},
+    {planet: 'Moon', symbol: 'Mo', position: '21°42\'55"'},
+  ];
+  const [changeKundliOpen, setChangeKundliOpen] = useState(false);
+  const {kundliPerson} = useAppSelector(state => state.kundli);
+  const [chartSvgLagna, setChartSvgLagna] = useState<string | null>(null);
+
+  const [selectedKundliType, setSelectedKundliType] = useState({
+    label: 'East-Indian Style',
+    id: 'east_indian_style',
+    value: 'east-indian',
+  });
+
+  const [loading, setLoading] = useState(false);
+  const dispatch = useAppDispatch();
+
+  const getKundliChartData = async () => {
+    try {
+      setLoading(true);
+
+      const body = {
+        ...kundliPerson,
+        birthPlace: 'Varanasi',
+        latitude: 25.317645,
+        longitude: 82.973915,
+      };
+
+      console.log('api body', body);
+
+      // call both API requests in parallel:
+      const [lagnaPayload] = await Promise.all([
+        dispatch(
+          kundliChart({
+            body,
+            query: {chartType: 'lagna', chartStyle: selectedKundliType.value},
+          }),
+        ).unwrap(),
+      ]);
+
+      console.log(lagnaPayload, '----kundli chart data (lagna)');
+
+      setChartSvgLagna(customizeSVG(lagnaPayload));
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    if (chartWidth) return;
+    const onChange = ({screen}: {screen: {width: number}}) => {
+      setWidth(screen.width);
+    };
+
+    const subscription = Dimensions.addEventListener('change', onChange);
+
+    return () => subscription.remove();
+  }, []);
+
+  useEffect(() => {
+    getKundliChartData();
+  }, [dispatch, kundliPerson, selectedKundliType]);
+
+  if (loading) {
+    return (
+      <View style={styles.loader}>
+        <ActivityIndicator size={20} />
       </View>
+    );
+  }
+
+  return (
+    <View>
+      <View
+        style={{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: scale(8),
+          paddingHorizontal: scale(20),
+          paddingVertical: verticalScale(8),
+        }}>
+        <View
+          style={{
+            borderColor: colors.primary_surface_2,
+            borderWidth: 1,
+            flex: 1,
+            paddingVertical: verticalScale(12),
+            paddingHorizontal: scale(8),
+            borderRadius: scale(24),
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <Text style={[textStyle.fs_abyss_16_400]}>
+            {selectedKundliType.label}
+          </Text>
+        </View>
+        <Pressable
+          style={{
+            height: verticalScale(40),
+            width: verticalScale(40),
+            backgroundColor: colors.primary_surface_2,
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: scale(20),
+          }}
+          onPress={() => setChangeKundliOpen(true)}>
+          <ChangeIcon size={30} color={colors.primary_surface} />
+        </Pressable>
+        <Pressable
+          style={{
+            height: verticalScale(40),
+            width: verticalScale(40),
+            backgroundColor: colors.primary_surface_2,
+            paddingHorizontal: scale(8),
+            justifyContent: 'center',
+            alignItems: 'center',
+            borderRadius: scale(20),
+          }}>
+          <DocumentDownloadIcon size={24} color={colors.primary_surface} />
+        </Pressable>
+      </View>
+      <ScrollView
+        style={{marginBottom: verticalScale(20)}}
+        contentContainerStyle={styles.container}>
+        {/* Kundli Chart */}
+        {chartSvgLagna ? (
+          <SvgXml xml={chartSvgLagna} height={width - 28} width={width - 28} />
+        ) : null}
+
+        <Text
+          style={[
+            textStyle.fs_abyss_12_400,
+            {textAlign: 'center', color: colors.secondaryText},
+          ]}>
+          You can download this kundli with all the additional details usign the
+          top right button in pdf format
+        </Text>
+        <ChangeKundliTypeModal
+          isOpen={changeKundliOpen}
+          onClose={() => setChangeKundliOpen(false)}
+          selectedOption={selectedKundliType}
+          onChange={kundli => {
+            kundli && setSelectedKundliType(kundli);
+            setChangeKundliOpen(false);
+          }}
+        />
+      </ScrollView>
     </View>
   );
 };
 
-export default NorthIndianChart;
-
-// --- Stylesheet ---
 const styles = StyleSheet.create({
-  chartContainer: {
-    width: chartSize,
-    padding: 15,
-    marginVertical: 20,
-    backgroundColor: '#FFFFFF',
-    borderRadius: 15,
-    elevation: 8, // Android shadow
-    shadowColor: '#000', // iOS shadow
-    shadowOffset: {width: 0, height: 4},
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: '#E0E0E0',
+  container: {
+    backgroundColor: '#fefefe',
+    gap: 20,
+    paddingHorizontal: scale(16),
+    paddingVertical: verticalScale(20),
   },
-  chartTitle: {
-    fontSize: 22,
-    fontWeight: '600',
-    marginBottom: 15,
-    color: '#34495E',
-  },
-  // --- Common House Cell Styling ---
-  houseCell: {
-    borderWidth: 1,
-    borderColor: '#BDC3C7',
-    borderRadius: 8,
-    padding: 4,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#ECF0F1',
-    margin: 2, // Small margin between cells
-  },
-  lagnaHouse: {
-    backgroundColor: '#D6EAF8', // Light blue for Lagna house
-    borderColor: '#2980B9',
-    borderWidth: 2,
-  },
-  houseLabel: {
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#555',
-  },
-  zodiacText: {
-    fontSize: 12,
-    fontWeight: 'bold',
-    color: '#2C3E50',
-    textAlign: 'center',
-  },
-  planetsText: {
-    fontSize: 9,
-    color: '#666',
-    marginTop: 2,
-    textAlign: 'center',
-  },
-  lagnaIndicator: {
-    position: 'absolute',
-    top: 2,
-    right: 5,
-    fontSize: 10,
-    fontWeight: 'bold',
-    color: '#E74C3C', // Red 'L'
-  },
-
-  // --- North Indian Specific Styles ---
-  northChartWrapper: {
-    width: chartSize * 0.9,
-    height: chartSize * 0.9,
+  loader: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    overflow: 'hidden',
-    // Apply diamond rotation to the wrapper
-    transform: [{rotate: '45deg'}],
   },
-  northChartGrid: {
-    width: '100%', // Take full width of rotated wrapper
-    height: '100%', // Take full height of rotated wrapper
+  kundliContainer: {
+    aspectRatio: 1,
+    width: '100%',
+    maxWidth: 320,
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'space-between', // Distribute cells evenly
-    // Counter-rotate the grid itself to keep content within cells upright
-    transform: [{rotate: '-45deg'}],
+    alignSelf: 'center',
+    borderRadius: 12,
+    backgroundColor: '#fff6c2',
+    borderWidth: 1,
+    borderColor: '#e3b800',
+    overflow: 'hidden',
+    shadowColor: '#000',
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    shadowOffset: {width: 0, height: 4},
+    elevation: 3,
   },
-  northGridCell: {
-    flexBasis: '23%', // Use flexBasis for more robust sizing for 4 cells in a row (23% + margins)
-    height: '25%', // 4 rows
-    aspectRatio: 1, // Maintain square shape
+  kundliBox: {
+    width: '33.33%',
+    height: '33.33%',
+    borderWidth: 0.5,
+    borderColor: '#e3b800',
   },
-  northGridCellEmpty: {
-    flexBasis: '23%',
-    height: '25%',
-    aspectRatio: 1,
+  tagContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 10,
+    justifyContent: 'center',
+  },
+  tag: {
+    backgroundColor: '#f3f3f3',
+    borderRadius: 20,
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: '#ddd',
+  },
+  tagText: {
+    fontSize: 13,
+    color: '#444',
+  },
+  tableContainer: {
+    marginTop: 10,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#fff',
+    borderWidth: 1,
+    borderColor: '#eee',
+  },
+  tableHeader: {
+    flexDirection: 'row',
+    backgroundColor: '#ff8c00',
+    justifyContent: 'space-between',
+    paddingVertical: 10,
+  },
+  headerCell: {
+    flex: 1,
+    textAlign: 'center',
+    fontWeight: 'bold',
+    color: '#fff',
+  },
+  tableRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    borderBottomWidth: 1,
+    borderColor: '#f0f0f0',
+  },
+  cell: {
+    flex: 1,
+    textAlign: 'center',
+    color: '#333',
+    fontSize: 14,
   },
 });
+
+export default LagnaChart;

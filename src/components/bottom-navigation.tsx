@@ -5,34 +5,55 @@ import {colors} from '../constants/colors';
 import HomeIcon from '../assets/icons/home-icon';
 import AstrologerIcon from '../assets/icons/astrologer-icon';
 import HistoryIcon from '../assets/icons/history-icon';
-
-const navItems = [
-  {label: 'Home', route: 'Home', icon: HomeIcon},
-  {label: 'Astrologers', route: 'Astrologers', icon: AstrologerIcon},
-  {label: 'Consult', route: 'ChatHistory', icon: HistoryIcon},
-];
+import {useUserRole} from '../hooks/use-role';
+import KundliIcon from '../assets/icons/kundli-icon-2';
+import PeopleIcon from '../assets/icons/people-icon';
+import StoreIcon from '../assets/icons/store-icon';
 
 const BottomNavigationBar = () => {
   const navigation = useNavigation<any>();
   const route = useRoute();
+  const role = useUserRole();
+  const navItems = [
+    {label: 'Home', route: 'Home', icon: HomeIcon},
+    // {label: 'Kundli', route: 'Kundli', icon: KundliIcon},
+    {label: 'Kundli', route: 'KundliForm', icon: KundliIcon},
+    role === 'USER'
+      ? {
+          label: 'Astrologers',
+          route: 'Astrologers',
+          icon: AstrologerIcon,
+        }
+      : {
+          label: 'Requests',
+          route: 'session-request',
+          icon: PeopleIcon,
+        },
+    ,
+    {label: 'Consult', route: 'ChatHistory', icon: HistoryIcon},
+    {label: 'Remedies', route: 'remedies', icon: StoreIcon},
+  ];
 
   return (
     <View style={styles.container}>
       {navItems.map(item => {
-        const isActive = route.name === item.route;
-        const IconComponent = item.icon;
+        const isActive = route.name === item?.route;
+        const IconComponent = item?.icon ?? null;
 
         return (
           <TouchableOpacity
-            key={item.route}
-            onPress={() => navigation.navigate(item.route)}
+            key={item?.route}
+            onPress={() => navigation.navigate(item?.route)}
             style={styles.tabItem}>
-            <IconComponent
-              size={22}
-              color={isActive ? colors.primaryText : '#999'}
-            />
+            {IconComponent && (
+              <IconComponent
+                size={20}
+                strokeWidth={2}
+                color={isActive ? colors.primaryText : '#999'}
+              />
+            )}
             <Text style={[styles.label, isActive && styles.activeText]}>
-              {item.label}
+              {item?.label}
             </Text>
           </TouchableOpacity>
         );

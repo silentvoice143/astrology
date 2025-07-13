@@ -43,7 +43,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: scale(12),
     backgroundColor: colors.background,
     borderRadius: scale(12),
-    marginBottom: verticalScale(16),
     shadowColor: '#000',
     shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.05,

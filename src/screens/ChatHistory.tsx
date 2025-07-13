@@ -1,5 +1,12 @@
-import {StyleSheet, Text, View, FlatList, TouchableOpacity} from 'react-native';
-import React, {useState} from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  FlatList,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import ScreenLayout from '../components/screen-layout';
 import ChatHistoryCard from '../components/ChatHistoryCard';
 import CallHistoryCard from '../components/CallHistoryCard';
@@ -9,17 +16,14 @@ import {textStyle} from '../constants/text-style';
 import AnimatedSearchInput from '../components/custom-searchbox';
 import Tab from '../components/tab';
 import {useNavigation} from '@react-navigation/native';
-
-// Define types for better TypeScript support
-interface MessageItem {
-  id: string;
-  name: string;
-  message: string;
-  time: string;
-  avatar: {
-    uri: string;
-  };
-}
+import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
+import {
+  getChatHistory,
+  setOtherUser,
+  setSession,
+} from '../store/reducer/session';
+import {useUserRole} from '../hooks/use-role';
+import {ChatSession, UserDetail} from '../utils/types';
 
 interface CallItem {
   id: string;
@@ -32,94 +36,69 @@ interface CallItem {
   };
 }
 
-const dummyMessageData: MessageItem[] = [
-  {
-    id: '1',
-    name: 'Ayesha Sharma',
-    message: 'Hii, I am good to go',
-    time: '3:39 PM',
-    avatar: {
-      uri: 'https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=crop&w=80&h=80',
-    },
-  },
-  {
-    id: '2',
-    name: 'Rajesh Kumar',
-    message: 'Thanks for the session!',
-    time: 'Yesterday',
-    avatar: {
-      uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&h=80',
-    },
-  },
-  {
-    id: '3',
-    name: 'Priya Singh',
-    message: 'When is my next reading?',
-    time: 'Yesterday',
-    avatar: {
-      uri: 'https://images.unsplash.com/photo-1494790108755-2616b612d7c5?auto=format&fit=crop&w=80&h=80',
-    },
-  },
-];
-
-const dummyCallData: CallItem[] = [
-  {
-    id: '1',
-    name: 'Ayesha Sharma',
-    callType: 'incoming',
-    duration: '15:30',
-    time: '2:45 PM',
-    avatar: {
-      uri: 'https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=crop&w=80&h=80',
-    },
-  },
-  {
-    id: '2',
-    name: 'Rajesh Kumar',
-    callType: 'outgoing',
-    duration: '8:45',
-    time: 'Yesterday',
-    avatar: {
-      uri: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=80&h=80',
-    },
-  },
-  {
-    id: '3',
-    name: 'Priya Singh',
-    callType: 'missed',
-    duration: '0:00',
-    time: 'Yesterday',
-    avatar: {
-      uri: 'https://images.unsplash.com/photo-1494790108755-2616b612d7c5?auto=format&fit=crop&w=80&h=80',
-    },
-  },
-  {
-    id: '4',
-    name: 'Amit Patel',
-    callType: 'incoming',
-    duration: '22:15',
-    time: '2 days ago',
-    avatar: {
-      uri: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=80&h=80',
-    },
-  },
-];
-
 const ChatHistory = () => {
   const [search, setSearch] = useState('');
   const [headerBgColor] = useState(colors.background);
   const [activeTab, setActiveTab] = useState('chat'); // 'messages' or 'calls'
   const navigation = useNavigation<any>();
-  const renderMessageItem = ({item}: {item: MessageItem}) => (
-    <TouchableOpacity onPress={() => navigation.navigate('chat-screen')}>
-      <ChatHistoryCard
-        name={item.name}
-        message={item.message}
-        time={item.time}
-        avatar={item.avatar}
-      />
-    </TouchableOpacity>
-  );
+  const [messageItems, setMessageItems] = useState<ChatSession[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
+  const role = useUserRole();
+  const activeSessionId = useAppSelector(state => state.session.session?.id);
+  const dispatch = useAppDispatch();
+
+  //api calling for fetching the chat history
+
+  const getChatHistoryDetail = async (page: number) => {
+    if (loading || !hasMore) return;
+    try {
+      setLoading(true);
+      const payload = await dispatch(getChatHistory(`?page=${page}`)).unwrap();
+      console.log(payload, '----payload');
+      if (payload.success) {
+        setMessageItems(prev => [...prev, ...payload.chatHistory]);
+        setCurrentPage(payload.currentPage);
+        setHasMore(!payload.isLastPage);
+      } else {
+        setMessageItems([]);
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (activeTab === 'chat') {
+      getChatHistoryDetail(1);
+    }
+  }, [activeTab]);
+  const renderMessageItem = ({item}: {item: ChatSession}) => {
+    const data: UserDetail = role === 'USER' ? item.astrologer : item.user;
+    return (
+      <TouchableOpacity
+        onPress={() => {
+          if (role === 'USER') {
+            dispatch(setOtherUser(item.astrologer));
+          } else {
+            dispatch(setOtherUser(item.user));
+          }
+          console.log(item, '-------session thing');
+          dispatch(setSession(item));
+          navigation.navigate('chat');
+        }}>
+        <ChatHistoryCard
+          name={data.name}
+          time={item.startedAt}
+          avatar={{uri: ''}}
+          active={activeSessionId === item.id}
+        />
+      </TouchableOpacity>
+    );
+  };
 
   const renderCallItem = ({item}: {item: CallItem}) => (
     <TouchableOpacity>
@@ -149,7 +128,7 @@ const ChatHistory = () => {
           style={{
             height: 50,
             width: '100%',
-            backgroundColor: colors.secondary_surface,
+            // backgroundColor: colors.secondary_surface,
             position: 'absolute',
             top: 0,
             borderBottomEndRadius: 20,
@@ -178,15 +157,26 @@ const ChatHistory = () => {
       {/* Content based on active tab */}
       {activeTab === 'chat' ? (
         <FlatList
-          data={dummyMessageData}
+          data={messageItems}
           renderItem={renderMessageItem}
-          keyExtractor={item => item.id}
+          keyExtractor={(item, index) =>
+            `${item.id}-${item.startedAt}-${index}`
+          }
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          onEndReached={info => {
+            getChatHistoryDetail(currentPage + 1);
+          }}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            loading ? (
+              <ActivityIndicator size="small" style={{marginVertical: 10}} />
+            ) : null
+          }
         />
       ) : (
         <FlatList
-          data={dummyCallData}
+          data={[]}
           renderItem={renderCallItem}
           keyExtractor={item => item.id}
           contentContainerStyle={styles.listContent}

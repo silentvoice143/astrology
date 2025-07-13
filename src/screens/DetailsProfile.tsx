@@ -16,7 +16,7 @@ import CustomButton from '../components/custom-button';
 import ChatIcon from '../assets/icons/chat-icon';
 import CallIcon from '../assets/icons/call-icon';
 import {textStyle} from '../constants/text-style';
-import {scale, scaleFont, verticalScale} from '../utils/sizer';
+import {moderateScale, scale, scaleFont, verticalScale} from '../utils/sizer';
 import LinearGradient from 'react-native-linear-gradient';
 import Avatar from '../components/avatar';
 // import ReviewAvatar from '../components/Profile/ReviewAvatar';
@@ -30,7 +30,11 @@ import ProfileSectionItem from '../components/Profile/ProfileSectionItem';
 import {RouteProp, useRoute} from '@react-navigation/native';
 import {RootStackParamList} from '../hooks/navigation';
 import {getAllAstrologerById} from '../store/reducer/astrologers';
-import {useAppDispatch} from '../hooks/redux-hook';
+import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
+import {sendSessionRequest, setChatUser} from '../store/reducer/session';
+import VideoCallIcon from '../assets/icons/video-call-icon';
+import {setProfileModelToggle} from '../store/reducer/auth';
+import RequestSessionModal from '../components/session/modals/request-session-modal';
 
 export interface AstrologerUser {
   id: string;
@@ -70,6 +74,11 @@ const DetailsProfile: React.FC = () => {
   // State to manage the expansion of the 'About Astrologer' section
   const [expandedAbout, setExpandedAbout] = useState<boolean>(false);
   const [data, setData] = useState<AstrologerProfile>();
+  const [selectedAstrologer, setSelectedAstrologer] = useState<string | null>(
+    null,
+  );
+  const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+  const {isProfileComplete} = useAppSelector(state => state.auth);
   const dispatch = useAppDispatch();
 
   const fetchAstrologersDataById = async (id: string) => {
@@ -90,54 +99,44 @@ const DetailsProfile: React.FC = () => {
     fetchAstrologersDataById(id);
   }, [id]);
 
-  const astrologerData = {
-    name: 'Acharya Vishnukant P',
-    languages: ['Vedic', 'English, Hindi'],
-    experience: '2 years of Experience',
-    followers: 64,
-    rating: 4.8,
-    consultationCharge: '₹30/min | 5/min',
-    avatar:
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&h=150&fit=crop&crop=face',
-    isOnline: true, // Indicates if the astrologer is currently online
-    isVerified: true, // Indicates if the astrologer's profile is verified
-    about:
-      "Acharya Vishnukant is a highly esteemed astrologer, known for his profound knowledge and years of experience in Vedic Astrology. With a deep-rooted understanding of celestial movements and their impact on planetary science, he has guided individuals through life's complexities with wisdom, precision and compassion.",
-    reviews: [
-      {
-        id: 1,
-        phoneNumber: '918078*****',
-        date: '7 Jun 2025',
-        rating: 5,
-        isFreeRating: true,
-      },
-      {
-        id: 2,
-        phoneNumber: '918134*****',
-        date: '6 Jun 2025',
-        rating: 5,
-        isFreeRating: true,
-      },
-    ],
-    totalReviews: 11,
+  const handleSessionStart = (astrologerId: string) => {
+    if (isProfileComplete) {
+      setSelectedAstrologer(astrologerId);
+      setIsRequestModalOpen(true);
+    } else {
+      dispatch(setProfileModelToggle());
+    }
   };
 
-  const renderStars = (rating: number) => {
-    const stars = [];
-    for (let i = 0; i < 5; i++) {
-      stars.push(
-        <Text
-          key={i} // Unique key for each star in the list
-          style={[
-            styles.star, // Base style for all stars
-            i < rating ? styles.filledStar : styles.emptyStar, // Conditional styling
-          ]}>
-          ★
-        </Text>,
-      );
-    }
-    return stars;
-  };
+  // const requestSession = async () => {
+  //   try {
+  //     const body = {astrologerId: data?.user?.id, duration: 6};
+  //     console.log(body, '----body');
+  //     const payload = await dispatch(sendSessionRequest(body)).unwrap();
+  //     dispatch(setChatUser(data?.user?.id));
+
+  //     console.log(payload);
+  //   } catch (err) {
+  //     console.log('sendSessionRequest Error : ', err);
+  //   }
+  // };
+
+  // const renderStars = (rating: number) => {
+  //   const stars = [];
+  //   for (let i = 0; i < 5; i++) {
+  //     stars.push(
+  //       <Text
+  //         key={i} // Unique key for each star in the list
+  //         style={[
+  //           styles.star, // Base style for all stars
+  //           i < rating ? styles.filledStar : styles.emptyStar, // Conditional styling
+  //         ]}>
+  //         ★
+  //       </Text>,
+  //     );
+  //   }
+  //   return stars;
+  // };
 
   const renderLanguageItem = (text: string, icon: string) => (
     <View style={styles.languageItem}>
@@ -158,7 +157,7 @@ const DetailsProfile: React.FC = () => {
           showsVerticalScrollIndicator={false}>
           {/* Header Section with a Linear Gradient background for a visually appealing top area */}
           <LinearGradient
-            colors={['#1a1a1a', '#2d2d2d', '#3d3d3d']}
+            colors={['#fff', '#fff', '#fff']}
             style={styles.headerGradient}>
             {/* Top Navigation Bar containing the astrologer's name and a share button */}
             <View style={styles.topNavBar}>
@@ -167,15 +166,6 @@ const DetailsProfile: React.FC = () => {
                   {data.user.name}
                 </Text>
                 {/* Verified badge for verified astrologers */}
-                {astrologerData.isVerified && (
-                  <View style={styles.verifiedBadge}>
-                    <Text
-                      style={[styles.verifiedCheck, textStyle.fs_mont_12_700]}>
-                      ✓
-                    </Text>
-                    
-                  </View>
-                )}
               </View>
               {/* Share button (ellipsis icon) */}
               <TouchableOpacity style={styles.shareButton}>
@@ -195,13 +185,10 @@ const DetailsProfile: React.FC = () => {
                   }}
                   fallbackText="AV"
                   size={scale(100)}
-                  borderColor="#ffffff"
+                  borderColor={colors.secondary_Card}
                   borderWidth={3}
                 />
                 {/* Active status indicator (green dot) */}
-                {astrologerData.isOnline && (
-                  <View style={styles.activeStatus}></View>
-                )}
               </View>
               <View style={styles.profileCard}>
                 <View style={styles.profileInfoSection}>
@@ -214,16 +201,6 @@ const DetailsProfile: React.FC = () => {
                     `${data.experienceYears} years of experience`,
                     '🎯',
                   )}
-
-                  {/* Follow Section (commented out as per original provided code) */}
-                  {/* <View style={styles.followSection}>
-                  <TouchableOpacity style={styles.followButton}>
-                    <Text style={styles.followButtonText}>Follow</Text>
-                  </TouchableOpacity>
-                  <Text style={styles.followersText}>
-                    {astrologerData.followers} Followers
-                  </Text>
-                </View> */}
                 </View>
               </View>
             </View>
@@ -233,31 +210,73 @@ const DetailsProfile: React.FC = () => {
           <View style={styles.consultationSection}>
             <View style={styles.consultationLeft}>
               <Text
-                style={[styles.consultationTitle, textStyle.fs_mont_16_500]}>
+                style={[styles.consultationTitle, textStyle.fs_mont_16_700]}>
                 Consultation Charges
               </Text>
+
               <View style={styles.priceContainer}>
-                <Text style={[styles.priceText, textStyle.fs_mont_14_700]}>
-                  Chat : ₹{data.pricePerMinuteChat}/min |
-                </Text>
-                <Text style={[styles.priceText, textStyle.fs_mont_14_700]}>
-                  Voice Call : ₹{data.pricePerMinuteVoice}/min |
-                </Text>
-                <Text style={[styles.priceText, textStyle.fs_mont_14_700]}>
-                  Video Call : ₹{data.pricePerMinuteVideo}/min
-                </Text>
-                {/* Offer badge */}
-                {/* <View style={styles.offerBadge}>
-                  <Text style={[styles.offerText, textStyle.fs_mont_10_600]}>
-                    30% OFFER
+                <View style={[styles.priceWrapper]}>
+                  <Text style={[styles.priceText, textStyle.fs_mont_14_400]}>
+                    Chat :
                   </Text>
-                </View> */}
+                  <View
+                    style={{
+                      backgroundColor: colors.secondary_Card,
+                      paddingVertical: scale(2),
+                      paddingHorizontal: scale(6),
+                      borderRadius: scale(12),
+                    }}>
+                    <Text
+                      style={[
+                        {color: colors.whiteText},
+                        textStyle.fs_mont_14_700,
+                      ]}>
+                      ₹{data.pricePerMinuteChat}/min
+                    </Text>
+                  </View>
+                </View>
+                <View style={[styles.priceWrapper]}>
+                  <Text style={[styles.priceText, textStyle.fs_mont_14_400]}>
+                    Voice Call :
+                  </Text>
+                  <View
+                    style={{
+                      backgroundColor: colors.secondary_Card,
+                      paddingVertical: scale(2),
+                      paddingHorizontal: scale(6),
+                      borderRadius: scale(12),
+                    }}>
+                    <Text
+                      style={[
+                        {color: colors.whiteText},
+                        textStyle.fs_mont_14_700,
+                      ]}>
+                      ₹{data.pricePerMinuteVoice}/min
+                    </Text>
+                  </View>
+                </View>
+                <View style={[styles.priceWrapper]}>
+                  <Text style={[styles.priceText, textStyle.fs_mont_14_400]}>
+                    Video Call :
+                  </Text>
+                  <View
+                    style={{
+                      backgroundColor: colors.secondary_Card,
+                      paddingVertical: scale(2),
+                      paddingHorizontal: scale(6),
+                      borderRadius: scale(12),
+                    }}>
+                    <Text
+                      style={[
+                        {color: colors.whiteText},
+                        textStyle.fs_mont_14_700,
+                      ]}>
+                      ₹{data.pricePerMinuteVideo}/min
+                    </Text>
+                  </View>
+                </View>
               </View>
             </View>
-            {/* CircularRating component for overall astrologer rating */}
-            {/* <View style={styles.ratingBox}>
-            <CircularRating rating={astrologerData.rating} size={70} />
-          </View> */}
           </View>
 
           {/* Main Content Area */}
@@ -274,64 +293,36 @@ const DetailsProfile: React.FC = () => {
               </View> */}
               </View>
               <View style={styles.aboutContent}>
-                <Text
-                  style={[styles.aboutText, textStyle.fs_abyss_14_400]}
-                  numberOfLines={expandedAbout ? undefined : 4}>
-                  {data.about}
-                </Text>
-                {expandedAbout && (
-                  <View>
-                    <ProfileSectionItem
-                      icon={require('../assets/imgs/experience.jpg')}
-                      title="Expertise"
-                      description={data.expertise}
-                    />
-                  </View>
-                )}
-                {/* "Read More/Read Less" toggle button */}
-                <TouchableOpacity
-                  onPress={() => setExpandedAbout(!expandedAbout)}
-                  style={styles.readMoreButton}>
-                  <Text style={[styles.readMoreText, textStyle.fs_mont_14_700]}>
-                    {expandedAbout ? 'Read Less' : 'Read More'}
-                  </Text>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            {/* Ratings and Reviews Section */}
-            <View style={styles.reviewsSection}>
-              {/* <View style={styles.reviewsHeader}>
-              <Text style={[styles.sectionTitle, textStyle.fs_abyss_12_400]}>
-                Ratings and reviews
-              </Text>
-              <View style={styles.reviewCountContainer}>
-                <View style={styles.infoIcon}>
-                  <Text style={styles.infoIconText}>ⓘ</Text>
+                <View>
+                  <ProfileSectionItem
+                    icon={require('../assets/imgs/experience.jpg')}
+                    title="Expertise"
+                    description={data.expertise}
+                  />
                 </View>
-                <Text style={[styles.reviewCount, textStyle.fs_abyss_12_400]}>
-                  ({astrologerData.totalReviews})
-                </Text>
-              </View>
-            </View>
-            <Text style={[styles.reviewSubtext, textStyle.fs_abyss_12_400]}>
-              (Only verified purchase ratings are used for final calculation)
-            </Text> */}
 
-              {/* Map through the reviews data and render each using the new ReviewItem component */}
-              {/* <View style={styles.reviewsList}>
-              {astrologerData.reviews.map(review => (
-                <ReviewItem
-                  key={review.id}
-                  review={review}
-                  renderStars={renderStars}
-                />
-              ))}
-            </View> */}
-              {/* Button to see all reviews */}
-              {/* <TouchableOpacity style={styles.seeAllButton}>
-              <Text style={[styles.seeAllText,textStyle.fs_mont_14_700]}>See all reviews</Text>
-            </TouchableOpacity> */}
+                {data?.about && expandedAbout && (
+                  <Text
+                    style={[styles.aboutText, textStyle.fs_abyss_14_400]}
+                    numberOfLines={expandedAbout ? undefined : 4}>
+                    {data.about}
+                  </Text>
+                )}
+
+                {data?.about && (
+                  <TouchableOpacity
+                    onPress={() => setExpandedAbout(!expandedAbout)}
+                    style={[styles.readMoreButton]}>
+                    <Text
+                      style={[
+                        {color: colors.highlight_text},
+                        textStyle.fs_mont_14_700,
+                      ]}>
+                      {expandedAbout ? 'Read Less' : 'Read More'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
           </View>
         </ScrollView>
@@ -340,26 +331,50 @@ const DetailsProfile: React.FC = () => {
       {/* Bottom Action Buttons for Call and Chat */}
       <View style={styles.bottomActions}>
         <CustomButton
+          disabled={true}
+          style={[styles.actionButton, styles.callButton]}
+          leftIcon={<VideoCallIcon colors={['#ffffff']} size={18} />}
+          textStyle={styles.buttonText}
+          onPress={() => {
+            // Handle call action
+            console.log('Call button pressed');
+            handleSessionStart(data?.user?.id ?? '');
+          }}
+          title={'Voice Call'}
+        />
+        <CustomButton
+          disabled={true}
           style={[styles.actionButton, styles.callButton]}
           leftIcon={<CallIcon colors={['#ffffff']} height={18} width={18} />}
           textStyle={styles.buttonText}
           onPress={() => {
             // Handle call action
             console.log('Call button pressed');
+            handleSessionStart(data?.user?.id ?? '');
           }}
-          title={'Call'}
+          title={'Video Call'}
         />
         <CustomButton
           style={[styles.actionButton, styles.chatButton]}
-          leftIcon={<ChatIcon colors={['#ffffff']} height={18} width={18} />}
+          leftIcon={
+            <ChatIcon height={18} width={18} colors={[colors.whiteText]} />
+          }
           textStyle={textStyle.fs_mont_14_700}
           onPress={() => {
             // Handle chat action
-            console.log('Chat button pressed');
+            handleSessionStart(data?.user?.id ?? '');
           }}
           title={'Chat'}
         />
       </View>
+      <RequestSessionModal
+        isOpen={isRequestModalOpen}
+        onClose={() => {
+          setIsRequestModalOpen(false);
+          setSelectedAstrologer(null);
+        }}
+        astrologerId={selectedAstrologer}
+      />
     </ScreenLayout>
   );
 };
@@ -369,6 +384,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.primary_surface,
+    marginBottom: verticalScale(20),
   } as ViewStyle,
 
   headerGradient: {
@@ -390,7 +406,7 @@ const styles = StyleSheet.create({
   } as ViewStyle,
 
   profileTitle: {
-    color: colors.whiteText,
+    color: colors.primaryText,
     marginRight: scale(8),
   } as TextStyle,
 
@@ -404,7 +420,7 @@ const styles = StyleSheet.create({
   } as ViewStyle,
 
   verifiedCheck: {
-    color: colors.whiteText,
+    color: colors.primaryText,
   } as TextStyle,
 
   shareButton: {
@@ -413,7 +429,7 @@ const styles = StyleSheet.create({
 
   shareIcon: {
     fontSize: scaleFont(20),
-    color: colors.whiteText,
+    color: colors.primaryText,
     fontWeight: 'bold',
   } as TextStyle,
 
@@ -421,11 +437,11 @@ const styles = StyleSheet.create({
     position: 'relative',
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: verticalScale(30),
+    marginBottom: verticalScale(16),
   } as ViewStyle,
 
   profileCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
+    backgroundColor: colors.primary_surface_2,
     borderRadius: scale(16),
     padding: scale(16),
     flexDirection: 'row',
@@ -451,11 +467,12 @@ const styles = StyleSheet.create({
     right: 0,
     borderRadius: 20,
     borderWidth: 2,
-    borderColor: colors.whiteText,
+    borderColor: colors.primaryText,
   } as ViewStyle,
 
   profileInfoSection: {
     flex: 1,
+
     justifyContent: 'space-between',
   } as ViewStyle,
 
@@ -468,7 +485,7 @@ const styles = StyleSheet.create({
   languageIcon: {
     fontSize: scaleFont(14),
     marginRight: scale(8),
-    color: colors.whiteText,
+    color: colors.primaryText,
   } as TextStyle,
 
   languageItemText: {
@@ -502,12 +519,11 @@ const styles = StyleSheet.create({
   } as TextStyle,
 
   consultationSection: {
-    backgroundColor: colors.primary_surface,
+    borderRadius: scale(12),
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: scale(16),
-    paddingVertical: verticalScale(20),
     borderBottomWidth: 1,
     borderBottomColor: colors.secondary_surface,
     position: 'relative',
@@ -529,9 +545,20 @@ const styles = StyleSheet.create({
   } as TextStyle,
 
   priceContainer: {
+    backgroundColor: colors.primary_card_2,
+    padding: moderateScale(12),
+    borderRadius: scale(12),
+    gap: scale(8),
+  } as ViewStyle,
+
+  priceWrapper: {
+    // borderWidth: 1,
+    // borderColor: colors.secondary_Card,
     flexDirection: 'row',
     alignItems: 'center',
-  } as ViewStyle,
+
+    borderRadius: scale(12),
+  },
 
   priceText: {
     color: colors.secondaryText,
@@ -550,13 +577,12 @@ const styles = StyleSheet.create({
   } as TextStyle,
 
   mainContent: {
+    marginVertical: verticalScale(16),
     padding: scale(16),
-    backgroundColor: colors.primary_surface,
+    // backgroundColor: colors.primary_surface_2,
   } as ViewStyle,
 
-  aboutSection: {
-    marginBottom: verticalScale(25),
-  } as ViewStyle,
+  aboutSection: {} as ViewStyle,
 
   sectionHeader: {
     flexDirection: 'row',
@@ -565,7 +591,7 @@ const styles = StyleSheet.create({
   } as ViewStyle,
 
   sectionTitle: {
-    color: colors.secondaryText,
+    color: colors.primaryText,
     flex: 1,
   } as TextStyle,
 
@@ -585,7 +611,7 @@ const styles = StyleSheet.create({
   } as TextStyle,
 
   aboutContent: {
-    backgroundColor: colors.secondary_surface_2,
+    backgroundColor: colors.primary_card_2,
     borderRadius: scale(12),
     padding: scale(16),
   } as ViewStyle,
@@ -600,7 +626,7 @@ const styles = StyleSheet.create({
   } as ViewStyle,
 
   readMoreText: {
-    color: colors.primarybtn,
+    color: colors.primaryText,
   } as TextStyle,
 
   reviewsSection: {
@@ -672,6 +698,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderTopColor: colors.secondary_surface,
     shadowColor: '#000',
+    gap: scale(8),
     shadowOffset: {
       width: 0,
       height: -2,
@@ -683,17 +710,16 @@ const styles = StyleSheet.create({
 
   actionButton: {
     flex: 1,
-    marginHorizontal: scale(6),
-    paddingVertical: verticalScale(14),
+    paddingVertical: verticalScale(12),
     borderRadius: scale(25),
   } as ViewStyle,
 
   callButton: {
-    backgroundColor: colors.primarybtn,
+    backgroundColor: colors.secondarybtn,
   } as ViewStyle,
 
   chatButton: {
-    backgroundColor: colors.tertiary_btn,
+    backgroundColor: colors.secondarybtn,
   } as ViewStyle,
 
   buttonText: {

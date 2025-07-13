@@ -37,9 +37,9 @@ const PersonalDetailModal = ({
     gender: '',
     birthDate: now.toISOString().split('T')[0],
     birthTime: now.toTimeString().split(' ')[0],
-    birthPlace: '',
-    latitude: null,
-    longitude: null,
+    birthPlace: 'hell',
+    latitude: 34,
+    longitude: 45,
   });
 
   // 🔁 Populate state from existingDetails on modal open

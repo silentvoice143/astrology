@@ -6,19 +6,18 @@ import {colors} from '../../constants/colors';
 import {useAppSelector, useAppDispatch} from '../../hooks/redux-hook';
 import {setKundliPerson, resetToDefaultUser} from '../../store/reducer/kundli';
 import {UserPersonalDetail} from '../../utils/types';
+import EditIcon from '../../assets/icons/edit-icon';
+import {textStyle} from '../../constants/text-style';
+import {useRoute} from '@react-navigation/native';
 
 const BasicDetails = ({active}: {active: number}) => {
   const [openedForOther, setOpenedForOther] = useState(false);
   const dispatch = useAppDispatch();
-  const defaultUser = useAppSelector(state => state.kundli.defaultUser);
+
   const kundliPerson = useAppSelector(state => state.kundli.kundliPerson);
 
   const [showModal, setShowModal] = useState(false);
-
-  const isDefaultUser =
-    kundliPerson.name === defaultUser.name &&
-    kundliPerson.birthDate === defaultUser.birthDate &&
-    kundliPerson.birthTime === defaultUser.birthTime;
+  const route = useRoute();
 
   const handleUpdate = (updatedDetails: UserPersonalDetail) => {
     dispatch(setKundliPerson(updatedDetails));
@@ -29,31 +28,36 @@ const BasicDetails = ({active}: {active: number}) => {
     <View style={styles.container}>
       <View style={styles.card}>
         <View style={styles.headerRow}>
-          <Text style={styles.title}>Basic Details</Text>
-          <TouchableOpacity
-            onPress={() => {
-              setOpenedForOther(false); // ← This is the fix
-              setShowModal(true);
-            }}>
-            <Text style={styles.editText}>Edit</Text>
-          </TouchableOpacity>
+          <Text style={styles.title}>{kundliPerson.name}</Text>
         </View>
 
+        {route.name === 'chat' && (
+          <View style={styles.headerRow}>
+            <Text style={[textStyle.fs_mont_20_500]}>Details</Text>
+            <TouchableOpacity
+              onPress={() => {
+                setOpenedForOther(false); // ← This is the fix
+                setShowModal(true);
+              }}>
+              <EditIcon size={18} />
+            </TouchableOpacity>
+          </View>
+        )}
         <View style={styles.divider} />
 
-        <DetailRow label="Full Name" value={kundliPerson.name || '-'} />
-        <DetailRow label="Gender" value={kundliPerson.gender || '-'} />
+        <DetailRow label="Full Name" value={kundliPerson.name || '__'} />
+        <DetailRow label="Gender" value={kundliPerson.gender || '__'} />
         <DetailRow
           label="Date of Birth"
-          value={kundliPerson.birthDate || '-'}
+          value={kundliPerson.birthDate || '__'}
         />
         <DetailRow
           label="Time of Birth"
-          value={kundliPerson.birthTime || '-'}
+          value={kundliPerson.birthTime || '__'}
         />
         <DetailRow
           label="Place of Birth"
-          value={kundliPerson.birthPlace || '-'}
+          value={kundliPerson.birthPlace || '__'}
         />
       </View>
 
@@ -85,14 +89,11 @@ const styles = StyleSheet.create({
     padding: scale(16),
   },
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.primary_card_2,
     padding: scale(16),
     borderRadius: scale(12),
-    shadowColor: '#000',
-    shadowOpacity: 0.1,
+
     shadowRadius: 6,
-    shadowOffset: {width: 0, height: 2},
-    elevation: 3,
   },
   headerRow: {
     flexDirection: 'row',
@@ -101,9 +102,8 @@ const styles = StyleSheet.create({
     marginBottom: scale(8),
   },
   title: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: colors.primaryText ?? '#222',
+    ...textStyle.fs_abyss_36_400,
+    color: colors.primary_surface_2 ?? '#222',
   },
   editText: {
     fontSize: 14,

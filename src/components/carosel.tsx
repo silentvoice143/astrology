@@ -16,6 +16,7 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import {useNavigation} from '@react-navigation/native';
+import {colors} from '../constants/colors';
 
 const _spacing = 12;
 
@@ -54,6 +55,7 @@ function Carousel<T>({
   const [currentTab, setCurrentTab] = useState(0);
   const flatListRef = useRef<FlatList>(null);
   const cardWidth = screenWidth * cardWidthScale;
+  const scrollViewRef = useRef<ScrollView>(null);
   // const tabWidth = screenWidth / data.length;
 
   const onScroll = useAnimatedScrollHandler({
@@ -106,6 +108,8 @@ function Carousel<T>({
       {showTabs && (
         <View>
           <ScrollView
+            ref={scrollViewRef}
+            nestedScrollEnabled
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{paddingHorizontal: 12}}>
@@ -137,7 +141,7 @@ function Carousel<T>({
                     position: 'absolute',
                     bottom: 0,
                     height: 3,
-                    backgroundColor: '#333',
+                    backgroundColor: colors.primary_surface_2,
                   },
                   underlineStyle,
                 ]}
@@ -148,6 +152,7 @@ function Carousel<T>({
       )}
 
       <Animated.FlatList
+        nestedScrollEnabled
         ref={flatListRef}
         data={data}
         keyExtractor={(_, index) => index.toString()}
@@ -173,6 +178,15 @@ function Carousel<T>({
           const index = Math.round(offsetX / (cardWidth + _spacing));
           setCurrentTab(index);
           onChange && onChange(index);
+
+          // Auto-scroll tab into view
+          const layout = tabLayouts[index];
+          if (layout && scrollViewRef.current) {
+            scrollViewRef.current.scrollTo({
+              x: layout.x - 24, // scroll slightly before tab start
+              animated: true,
+            });
+          }
         }}
         scrollEventThrottle={16}
       />

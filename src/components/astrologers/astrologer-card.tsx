@@ -8,8 +8,10 @@ import CallIcon from '../../assets/icons/call-icon';
 import VideoCallIcon from '../../assets/icons/video-call-icon';
 import ChatIcon from '../../assets/icons/chat-icon';
 import {textStyle} from '../../constants/text-style';
+import {formatPrice} from '../../utils/utils';
 
 type AstrologerCardProps = {
+  id: string;
   name: string;
   rate: string;
   rating: number;
@@ -19,6 +21,11 @@ type AstrologerCardProps = {
   onCallPress?: () => void;
   onVideoPress?: () => void;
   onChatPress?: () => void;
+  pricePerMinuteChat: number;
+  pricePerMinuteVideo: number;
+  pricePerMinuteVoice: number;
+  expertise: string;
+  online: boolean;
 };
 
 const AstrologerCard: React.FC<AstrologerCardProps> = ({
@@ -26,21 +33,38 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
   rate,
   rating,
   experience,
+  expertise,
   languages,
   imageUri,
   onCallPress,
   onVideoPress,
   onChatPress,
+  pricePerMinuteChat,
+  pricePerMinuteVideo,
+  pricePerMinuteVoice,
+  online,
 }) => {
   return (
     <View style={styles.card}>
       <View style={styles.topSection}>
-        <Image source={{uri: imageUri}} style={styles.avatar} />
+        <View>
+          <View
+            style={{
+              position: 'absolute',
+              right: -2,
+              width: 12,
+              height: 12,
+              zIndex: 999,
+              borderRadius: 6,
+              backgroundColor: online ? colors.success.base : colors.error.base,
+            }}></View>
+          <Image source={{uri: imageUri}} style={styles.avatar} />
+        </View>
 
         <View style={{flex: 1, marginLeft: scale(12)}}>
           <View style={styles.nameRow}>
             <Text style={styles.name}>{name}</Text>
-            <LikeIcon />
+            {/* <LikeIcon /> */}
           </View>
 
           {rate && (
@@ -65,6 +89,12 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
             <Text style={styles.detailValue}>{experience}</Text>
           </View>
         )}
+        {expertise && (
+          <View>
+            <Text style={styles.detailLabel}>Expertise</Text>
+            <Text style={styles.detailValue}>{expertise}</Text>
+          </View>
+        )}
         {languages && (
           <View>
             <Text style={styles.detailLabel}>Language</Text>
@@ -74,20 +104,61 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
       </View>
 
       <View style={styles.actions}>
-        <TouchableOpacity onPress={onCallPress} style={styles.button}>
-          <CallIcon height={24} width={24} />
-          <Text style={styles.buttonText}>Call</Text>
-        </TouchableOpacity>
+        <View onStartShouldSetResponder={() => true}>
+          <TouchableOpacity
+            disabled={true}
+            onPress={onCallPress}
+            style={styles.button}>
+            <View
+              style={{
+                padding: moderateScale(4),
+                backgroundColor: colors.secondary_Card,
+                borderRadius: scale(12),
+              }}>
+              <CallIcon colors={[colors.whiteText]} height={16} width={16} />
+            </View>
+            <Text style={styles.buttonText}>
+              {formatPrice(pricePerMinuteVoice, 'min')}
+            </Text>
+          </TouchableOpacity>
+        </View>
 
-        <TouchableOpacity onPress={onVideoPress} style={styles.button}>
-          <VideoCallIcon size={24} />
-          <Text style={styles.buttonText}>Video</Text>
-        </TouchableOpacity>
+        <View onStartShouldSetResponder={() => true}>
+          <TouchableOpacity
+            disabled={true}
+            onPress={onVideoPress}
+            style={styles.button}>
+            <View
+              style={{
+                padding: moderateScale(4),
+                backgroundColor: colors.secondary_Card,
+                borderRadius: scale(12),
+              }}>
+              <VideoCallIcon size={16} colors={[colors.whiteText]} />
+            </View>
 
-        <TouchableOpacity onPress={onChatPress} style={styles.button}>
-          <ChatIcon height={24} width={24} />
-          <Text style={styles.buttonText}>Chat</Text>
-        </TouchableOpacity>
+            <Text style={styles.buttonText}>
+              {formatPrice(pricePerMinuteVideo, 'min')}
+            </Text>
+          </TouchableOpacity>
+        </View>
+
+        <View onStartShouldSetResponder={() => true}>
+          <TouchableOpacity onPress={onChatPress} style={styles.button}>
+            <View
+              style={{
+                padding: moderateScale(4),
+                backgroundColor: colors.secondary_Card,
+                borderRadius: scale(12),
+              }}>
+              <ChatIcon height={16} width={16} colors={[colors.whiteText]} />
+            </View>
+
+            <Text style={styles.buttonText}>
+              {formatPrice(pricePerMinuteChat, 'min')}
+            </Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </View>
   );
@@ -170,7 +241,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 20,
     paddingVertical: verticalScale(6),
-    paddingHorizontal: scale(12),
+    paddingHorizontal: scale(10),
   },
   buttonText: {
     marginLeft: scale(6),

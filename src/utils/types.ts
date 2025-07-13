@@ -19,8 +19,8 @@ export interface UserDetail {
   id: string;
   name: string;
   gender: 'MALE' | 'FEMALE' | 'OTHER';
-  birthDate: string; // Format: 'YYYY-MM-DD'
-  birthTime: string; // Format: 'HH:mm:ss'
+  birthDate: string;
+  birthTime: string;
   birthPlace: string;
   latitude: number;
   longitude: number;
@@ -29,6 +29,21 @@ export interface UserDetail {
   walletBalance: number;
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
+  imgUri: string;
+}
+
+export interface Astrologers {
+  about: string | null;
+  blocked: boolean;
+  experienceYears: number;
+  expertise: string;
+  id: string;
+  languages: string;
+  online: boolean;
+  pricePerMinuteChat: number;
+  pricePerMinuteVideo: number;
+  pricePerMinuteVoice: number;
+  user: UserDetail;
 }
 
 import {ImageSourcePropType} from 'react-native';
@@ -127,4 +142,60 @@ export interface KundliDetailResponse {
     name: string;
     description: string;
   }[];
+}
+
+//session
+
+export interface OtherUserType {
+  id: string;
+  astrologerId?: string;
+  name: string;
+  birthDate: string;
+  birthTime: string;
+  birthPlace: string;
+  latitude: number;
+  longitude: number;
+  mobile: string;
+  gender: 'MALE' | 'FEMALE' | 'OTHER';
+  imageUri?: string;
+}
+
+export interface SessionState {
+  session: ChatSession | null;
+  user: UserDetail | null;
+  otherUser: UserDetail | null;
+  sessionEnded: boolean;
+  messages: Message[];
+}
+
+export interface Message {
+  senderId: string;
+  receiverId: string;
+  sessionId: string;
+  message: string;
+  type: 'TEXT' | 'IMAGE';
+  timestamp: string;
+}
+
+export interface ChatSession {
+  id: string;
+  startedAt: string;
+  endedAt: string | null;
+  status: 'ACTIVE' | 'ENDED';
+  totalCost: number;
+  totalMinutes: number;
+  astrologer: UserDetail;
+  user: UserDetail;
+}
+
+// ========================================Wallets===============================
+
+export type TransactionType = 'credit' | 'debit';
+export interface Transaction {
+  id: string;
+  title: string;
+  description: string;
+  amount: number;
+  date: string;
+  type: TransactionType;
 }

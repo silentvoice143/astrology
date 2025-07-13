@@ -28,6 +28,13 @@ const Avatar: React.FC<AvatarProps> = ({
   textStyle,
 }) => {
   const [loadError, setLoadError] = useState(false);
+  const isValidImage =
+    image &&
+    (typeof image === 'number' || // local require('...') returns a number
+      (typeof image === 'object' &&
+        'uri' in image &&
+        typeof image.uri === 'string' &&
+        image.uri.trim() !== ''));
 
   return (
     <View
@@ -45,7 +52,7 @@ const Avatar: React.FC<AvatarProps> = ({
         },
         containerStyle,
       ]}>
-      {!loadError && image ? (
+      {!loadError && isValidImage ? (
         <Image
           source={image}
           style={{width: size, height: size, borderRadius: size / 2}}
@@ -57,7 +64,7 @@ const Avatar: React.FC<AvatarProps> = ({
           style={[
             {
               fontSize: size / 3,
-              color: '#555',
+              color: '#000',
               fontWeight: 'bold',
             },
             textStyle,

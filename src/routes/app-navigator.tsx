@@ -5,50 +5,64 @@ import PublicRoutes from './public-route';
 import PrivateRoutes from './private-route';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {userDetail} from '../store/reducer/user';
-import {logout, setUser} from '../store/reducer/auth';
+import {
+  logout,
+  setAstrologer,
+  setAuthentication,
+  setUser,
+} from '../store/reducer/auth';
 
 import {Text, View} from 'react-native';
-import {setDefaultUser, setKundliPerson} from '../store/reducer/kundli';
-import {UserPersonalDetail} from '../utils/types';
+
+import {useWebSocket} from '../hooks/use-socket';
+import {useSessionEvents} from '../hooks/use-session-events';
 
 export default function AppNavigator() {
-  const {token} = useAppSelector((state: any) => state.auth);
+  const {token, user} = useAppSelector((state: any) => state.auth);
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const {connect} = useWebSocket(user?.id);
+  const isAuthenticated = useAppSelector(state => state.auth.isAuthenticated);
 
   useEffect(() => {
     const checkAuth = async () => {
       if (token) {
         try {
           const {payload} = await dispatch(userDetail());
+
           if (payload?.success) {
-            setIsAuthenticated(true);
-            dispatch(setUser(payload?.user));
-            console.log(payload, '----on checkauth');
-            const user = payload?.user;
-            const personalDetail: UserPersonalDetail = {
-              name: user.name,
-              gender: user.gender,
-              birthDate: user.birthDate,
-              birthTime: user.birthTime,
-              birthPlace: user.birthPlace,
-              latitude: user.latitude,
-              longitude: user.longitude,
-            };
+            const userDetail: any = payload.user ?? payload.astrologer?.user!;
+
+            const astro = payload.astrologer;
+            const astrologer_detail: any = astro
+              ? {
+                  id: astro.id ?? '',
+                  about: astro.about ?? '',
+                  blocked: astro.blocked ?? false,
+                  experienceYears: astro.experienceYears ?? 0,
+                  expertise: astro.expertise ?? '',
+                  imgUri: astro.imgUri ?? '',
+                  languages: astro.languages ?? '',
+                  pricePerMinuteChat: astro.pricePerMinuteChat ?? 0,
+                  pricePerMinuteVoice: astro.pricePerMinuteVoice ?? 0,
+                  pricePerMinuteVideo: astro.pricePerMinuteVideo ?? 0,
+                }
+              : null;
+
+            dispatch(setAuthentication(true));
+            dispatch(setUser(userDetail));
+            if (astrologer_detail) dispatch(setAstrologer(astrologer_detail));
+            connect();
           } else {
             dispatch(logout());
-            setIsAuthenticated(false);
           }
         } catch (err) {
           console.log(err);
           dispatch(logout());
-          setIsAuthenticated(false);
         }
       } else {
-        setIsAuthenticated(false);
+        dispatch(logout());
       }
-
       setLoading(false);
     };
 
