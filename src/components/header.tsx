@@ -16,6 +16,7 @@ import {textStyle} from '../constants/text-style';
 import BackIcon from '../assets/icons/back-icon';
 import LinearGradient from 'react-native-linear-gradient';
 import NotificationIcon from '../assets/icons/notification-icon';
+import ChevronLeftIcon from '../assets/icons/chevron-left';
 
 const headerTitle = [
   {title: 'Home', href: 'Home'},
@@ -33,14 +34,15 @@ const Header = ({
   onMenuClick: () => void;
 }) => {
   const route = useRoute(); // <-- ✅ Get the current route
-  const animatedBg = useRef(new Animated.Value(0)).current;
   const currentHeader = headerTitle.find(item => item.href === route.name);
   const showRouteTitle = route.name !== 'Home';
 
   const showMenuIcon =
     route.name !== 'Home' &&
     route.name !== 'Astrologers' &&
-    route.name !== 'ChatHistory';
+    route.name !== 'ChatHistory' &&
+    route.name !== 'Remedies' &&
+    route.name !== 'KundliForm';
   const headerText = currentHeader?.title || route.name;
   const navigation = useNavigation<any>();
 
@@ -52,6 +54,10 @@ const Header = ({
         return 'About Us';
       case 'remedies':
         return 'Remedies';
+      case 'TermsAndConditions':
+        return 'Terms & Conditions';
+      case 'customer-support':
+        return 'Customer Support';
       default:
         return name;
     }
@@ -64,9 +70,53 @@ const Header = ({
     'remedies',
     'ChatHistory',
     'Profile',
+    'Horoscope',
   ];
 
   const headerWhite = exceptionArray.includes(route.name);
+
+  if (headerBackgroundColor) {
+    // ✅ If headerbgcolor prop exists, use plain View
+    return (
+      <View
+        style={{
+          backgroundColor: headerBackgroundColor,
+          borderBottomWidth: 1,
+          borderColor: themeColors.surface.border,
+        }}>
+        <View style={[styles.container]}>
+          <TouchableOpacity
+            style={{
+              position: 'absolute',
+              left: 10,
+              height: moderateScale(40),
+              width: moderateScale(40),
+              borderRadius: 12,
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginRight: scale(8),
+            }}
+            onPress={() => {
+              showMenuIcon ? navigation.goBack() : onMenuClick();
+              console.log('opening sidebar');
+            }}>
+            {showMenuIcon ? (
+              <ChevronLeftIcon size={32} color={themeColors.text.primary} />
+            ) : (
+              <MenuIcon color={themeColors.text.primary} />
+            )}
+          </TouchableOpacity>
+          <View style={{flexDirection: 'row'}}>
+            <View style={{marginTop: moderateScale(8)}}>
+              {showRouteTitle && (
+                <Text style={styles.title}>{getName(headerText)}</Text>
+              )}
+            </View>
+          </View>
+        </View>
+      </View>
+    );
+  }
 
   return (
     <LinearGradient
@@ -79,30 +129,32 @@ const Header = ({
         borderColor: themeColors.surface.border,
       }}>
       <View style={[styles.container]}>
+        <TouchableOpacity
+          style={{
+            position: 'absolute',
+            left: 10,
+            height: moderateScale(40),
+            width: moderateScale(40),
+            // backgroundColor: 'red',
+            borderRadius: 12,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: scale(8),
+          }}
+          onPress={() => {
+            {
+              showMenuIcon ? navigation.goBack() : onMenuClick();
+            }
+            console.log('opening sidebar');
+          }}>
+          {showMenuIcon ? (
+            <ChevronLeftIcon size={32} color={themeColors.text.primary} />
+          ) : (
+            <MenuIcon color={themeColors.text.primary} />
+          )}
+        </TouchableOpacity>
         <View style={{flexDirection: 'row'}}>
           {/* <Text>hello</Text> */}
-          <TouchableOpacity
-            style={{
-              height: moderateScale(40),
-              width: moderateScale(40),
-              // backgroundColor: 'red',
-              borderRadius: 12,
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginRight: scale(8),
-            }}
-            onPress={() => {
-              {
-                showMenuIcon ? navigation.goBack() : onMenuClick();
-              }
-              console.log('opening sidebar');
-            }}>
-            {showMenuIcon ? (
-              <BackIcon color={themeColors.text.primary} />
-            ) : (
-              <MenuIcon color={themeColors.text.primary} />
-            )}
-          </TouchableOpacity>
 
           <View style={{marginTop: moderateScale(8)}}>
             {showRouteTitle && (
@@ -134,19 +186,19 @@ export default Header;
 
 const styles = StyleSheet.create({
   title: {
-    ...textStyle.fs_mont_16_400,
+    ...textStyle.fs_mont_16_700,
     color: colors.primaryText ?? '#000',
     textAlign: 'center',
   },
 
   container: {
-    paddingHorizontal: scale(20),
+    paddingHorizontal: scale(10),
     height: verticalScale(80),
     // backgroundColor: colors.secondary_surface,
     gap: scale(8),
     alignItems: 'center',
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
   },
   bgImage: {
     position: 'absolute',

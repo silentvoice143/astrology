@@ -18,6 +18,11 @@ import Setting from '../screens/setting';
 import CustomerSupport from '../screens/customer-support';
 import Remedies from '../screens/remedies';
 import ProfilePage from '../screens/profile';
+import Horoscope from '../screens/horoscope';
+import MatchMaking from '../screens/match-making';
+import Tarot from '../screens/tarot';
+import LanguageSetting from '../screens/settings/language-setting';
+import TermsAndConditions from '../screens/settings/terms-conditions';
 
 const Stack = createNativeStackNavigator();
 
@@ -53,15 +58,19 @@ export default function PrivateRoutes() {
       <Stack.Screen name="Kundli" component={Kundli} />
       <Stack.Screen name="KundliForm" component={KundliForm} />
       <Stack.Screen name="DetailsProfile" component={DetailsProfile} />
+      <Stack.Screen name="Horoscope" component={Horoscope} />
+      <Stack.Screen name="MatchMaking" component={MatchMaking} />
+      <Stack.Screen name="Tarot" component={Tarot} />
       <Stack.Screen name="ChatHistory" component={ChatHistory} />
       <Stack.Screen name="Wallet" component={Wallet} />
-
       <Stack.Screen name="chat" component={ChatScreenDemo} />
       <Stack.Screen name="session-request" component={RequestScreen} />
-      <Stack.Screen name="remedies" component={Remedies} />
+      <Stack.Screen name="Remedies" component={Remedies} />
       <Stack.Screen name="about" component={About} />
       <Stack.Screen name="customer-support" component={CustomerSupport} />
-      <Stack.Screen name="setting" component={Setting} />
+      <Stack.Screen name="Setting" component={Setting} />
+      <Stack.Screen name="Language" component={LanguageSetting} />
+      <Stack.Screen name="TermsAndConditions" component={TermsAndConditions} />
     </Stack.Navigator>
   );
 }

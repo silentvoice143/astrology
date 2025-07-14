@@ -13,11 +13,13 @@ import {setProfileModelToggle, setUser} from '../store/reducer/auth';
 interface ScreenLayoutProps {
   children: ReactNode;
   headerBackgroundColor?: string;
+  hideHeader?: boolean;
 }
 
 const ScreenLayout: React.FC<ScreenLayoutProps> = ({
   children,
   headerBackgroundColor,
+  hideHeader,
 }) => {
   const sidebarRef = useRef<SidebarRef>(null);
   const {isProfileModalOpen, isProfileComplete} = useAppSelector(
@@ -42,10 +44,12 @@ const ScreenLayout: React.FC<ScreenLayoutProps> = ({
     <View style={{flex: 1, backgroundColor: colors.primary_surface}}>
       {/* Global Sidebar */}
       <Sidebar ref={sidebarRef} />
-      <Header
-        onMenuClick={() => sidebarRef.current?.open()}
-        headerBackgroundColor={headerBackgroundColor}
-      />
+      {!hideHeader && (
+        <Header
+          onMenuClick={() => sidebarRef.current?.open()}
+          headerBackgroundColor={headerBackgroundColor}
+        />
+      )}
       <View style={{flex: 1, backgroundColor: colors.primary_surface}}>
         {children}
       </View>

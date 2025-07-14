@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   Modal,
   View,
@@ -12,10 +12,12 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Platform,
+  Animated, // Import Animated
+  Easing, // Import Easing
 } from 'react-native';
 import {moderateScale, scale} from '../utils/sizer';
 import {textStyle} from '../constants/text-style';
-import {colors} from '../constants/colors';
+import {colors, themeColors} from '../constants/colors'; // Ensure themeColors is imported
 
 type HeaderObject = {
   title: string | React.ReactNode;
@@ -46,7 +48,7 @@ type CustomModalProps = {
   enableKeyboardAvoiding?: boolean;
   enableScrollView?: boolean;
   keyboardVerticalOffset?: number;
-  scrollViewProps?: any;
+  scrollViewProps?: any; // Consider a more specific type if possible
 };
 
 const CustomModal: React.FC<CustomModalProps> = ({
@@ -68,57 +70,96 @@ const CustomModal: React.FC<CustomModalProps> = ({
   keyboardVerticalOffset = 0,
   scrollViewProps = {},
 }) => {
-  function isHeaderObject(header: HeaderContent): header is HeaderObject {
-    return typeof header === 'object' && header !== null && 'title' in header;
+  const scaleAnim = useRef(new Animated.Value(0.8)).current; // Start slightly scaled down
+  const opacityAnim = useRef(new Animated.Value(0)).current;
+
+  // Animation logic for modal appearance/disappearance
+  useEffect(() => {
+    if (visible) {
+      // Reset values before showing to ensure smooth re-entry
+      scaleAnim.setValue(0.8);
+      opacityAnim.setValue(0);
+      Animated.parallel([
+        Animated.timing(scaleAnim, {
+          toValue: 1,
+          duration: 300,
+          easing: Easing.out(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 200,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    } else {
+      Animated.parallel([
+        Animated.timing(scaleAnim, {
+          toValue: 0.8,
+          duration: 200,
+          easing: Easing.in(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 0,
+          duration: 200,
+          easing: Easing.linear,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    }
+  }, [visible]); // Depend on the 'visible' prop
+
+  function isHeaderObject(
+    headerContent: HeaderContent,
+  ): headerContent is HeaderObject {
+    return (
+      typeof headerContent === 'object' &&
+      headerContent !== null &&
+      'title' in headerContent
+    );
   }
 
   const renderHeader = () => {
     if (!header && !showCloseButton) return null;
 
+    let headerTitle: React.ReactNode = null;
+    let headerDescription: string | undefined = undefined;
+
     if (React.isValidElement(header)) {
-      return (
-        <View style={[styles.header, headerStyle]}>
-          <View style={styles.headerContent}>
-            {header}
-            {showCloseButton && (
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                <Text style={styles.closeText}>×</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-      );
+      headerTitle = header;
+    } else if (isHeaderObject(header)) {
+      headerTitle =
+        typeof header.title === 'string' ? (
+          <Text style={styles.headerTitleText}>{header.title}</Text>
+        ) : (
+          header.title
+        );
+      headerDescription = header.description;
     }
 
-    if (isHeaderObject(header)) {
-      return (
-        <View style={[styles.header, headerStyle]}>
-          <View style={styles.headerContent}>
-            <View style={{flex: 1}}>
-              {typeof header.title === 'string' ? (
-                <>
-                  <Text style={[textStyle.fs_mont_18_700]}>{header.title}</Text>
-                  {header.description && (
-                    <Text style={styles.descriptionText}>
-                      {header.description}
-                    </Text>
-                  )}
-                </>
-              ) : (
-                header.title
-              )}
-            </View>
-            {showCloseButton && (
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                <Text style={styles.closeText}>×</Text>
-              </TouchableOpacity>
+    console.log(showCloseButton, '-------------show close btn');
+
+    return (
+      <View style={[styles.header, headerStyle]}>
+        <View style={styles.headerContent}>
+          <View style={styles.headerTextContainer}>
+            {headerTitle}
+            {headerDescription && (
+              <Text style={styles.headerDescriptionText}>
+                {headerDescription}
+              </Text>
             )}
           </View>
+          {showCloseButton && (
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Text style={styles.closeText}>×</Text>
+            </TouchableOpacity>
+          )}
         </View>
-      );
-    }
-
-    return null;
+      </View>
+    );
   };
 
   const renderContent = () => {
@@ -143,38 +184,46 @@ const CustomModal: React.FC<CustomModalProps> = ({
     return content;
   };
 
-  const renderModal = () => (
-    <View style={[styles.container, containerStyle]}>
-      <TouchableWithoutFeedback onPress={() => {}}>
-        <View style={[styles.modal, modalStyle]}>
-          {renderHeader()}
-          {renderContent()}
-          {footer && <View style={[styles.footer, footerStyle]}>{footer}</View>}
-        </View>
-      </TouchableWithoutFeedback>
-    </View>
+  const renderModalContent = () => (
+    <Animated.View // Apply animations here
+      style={[
+        styles.modal,
+        modalStyle,
+        {
+          transform: [{scale: scaleAnim}],
+          opacity: opacityAnim,
+        },
+      ]}>
+      {renderHeader()}
+      {renderContent()}
+      {footer && <View style={[styles.footer, footerStyle]}>{footer}</View>}
+    </Animated.View>
   );
 
-  const modalContent = enableKeyboardAvoiding ? (
+  const modalWrapper = enableKeyboardAvoiding ? (
     <KeyboardAvoidingView
       style={styles.keyboardAvoidingView}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={keyboardVerticalOffset}>
-      {renderModal()}
+      {renderModalContent()}
     </KeyboardAvoidingView>
   ) : (
-    renderModal()
+    renderModalContent()
   );
 
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <View style={[styles.backdrop, backdropStyle]}>
-        <TouchableWithoutFeedback
-          onPress={closeOnBackdropPress ? onClose : undefined}>
+      <TouchableWithoutFeedback
+        onPress={closeOnBackdropPress ? onClose : undefined}>
+        <View style={[styles.backdrop, backdropStyle]}>
+          {/* This empty view ensures the backdrop TouchableWithoutFeedback covers the whole screen */}
           <View style={styles.backdropTouchable} />
-        </TouchableWithoutFeedback>
-        {modalContent}
-      </View>
+          <TouchableWithoutFeedback onPress={() => {}}>
+            {/* This inner TouchableWithoutFeedback prevents closing when tapping inside the modal content */}
+            {modalWrapper}
+          </TouchableWithoutFeedback>
+        </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };
@@ -182,7 +231,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: colors.bg.overlay,
+    backgroundColor: themeColors.surface.overlay, // Using themeColors for consistency
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -199,46 +248,57 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
   },
-  container: {
-    maxWidth: '90%',
-    maxHeight: '80%',
-    width: '85%',
-  },
   modal: {
-    backgroundColor: '#fff',
-    borderRadius: moderateScale(20),
+    backgroundColor: themeColors.surface.background, // Primary surface for modal background
+    borderRadius: moderateScale(12), // Slightly smaller radius for elegance
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.primary_border,
-    maxHeight: '100%',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 6}, // More pronounced shadow
+    shadowOpacity: 0.25,
+    shadowRadius: 12, // Larger shadow radius for softness
+    elevation: 12, // Higher elevation for Android
+    width: '95%', // Default width
+    maxWidth: 400, // Max width for larger screens
+    maxHeight: '90%', // Max height to prevent overflow
   },
   header: {
-    padding: scale(12),
+    paddingHorizontal: scale(20),
+    paddingVertical: scale(15),
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#ddd',
+    borderBottomColor: themeColors.border.secondary, // Themed border color
+    backgroundColor: themeColors.surface.background, // Slightly different background for header
   },
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center', // Align items center for better vertical alignment
   },
-  titleText: {
-    fontWeight: '700',
-    color: '#222',
+  headerTextContainer: {
+    flex: 1, // Allow text to take up space
+    marginRight: scale(10), // Space before close button
   },
-  descriptionText: {
+  headerTitleText: {
+    ...textStyle.fs_mont_18_700, // Using provided textStyle
+    color: themeColors.text.primary, // Themed text color
+    fontWeight: 'bold',
+  },
+  headerDescriptionText: {
     fontSize: 14,
-    color: '#666',
-    marginTop: 4,
+    color: themeColors.text.secondary, // Themed text color
+    marginTop: scale(4),
   },
   closeButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    width: scale(30), // Fixed size for touch target
+    height: scale(30),
+    borderRadius: scale(15), // Circular button
+    backgroundColor: themeColors.surface.secondarySurface, // Subtle background for close button
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   closeText: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#999',
+    color: themeColors.text.primary, // Themed text color for close icon
   },
   scrollView: {
     flexGrow: 1,
@@ -247,13 +307,16 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   content: {
-    paddingHorizontal: scale(12),
-    paddingVertical: scale(12),
+    paddingHorizontal: scale(20), // Increased padding
+    paddingVertical: scale(20),
+    flexGrow: 1, // Allow content to expand
   },
   footer: {
-    padding: 12,
+    paddingHorizontal: scale(20),
+    paddingVertical: scale(15),
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#ddd',
+    borderTopColor: themeColors.border.secondary, // Themed border color
+    backgroundColor: themeColors.surface.background, // Consistent with header background
   },
 });
 

@@ -81,10 +81,13 @@ export const themeColors = {
   surface: {
     background: '#FFFFFF',
     primarySurface: '#EC504A',
-    secondarySurface: '#F4EBD0',
+    secondarySurface: '#f8f7f1',
     mutedSurface: '#D9D9D9',
+    lighterGray: '#f3f3f3',
     border: '#E3E3E3',
     highlight: '#F0DF1F',
+    darkPink: '#4f1653ff',
+    overlay: 'rgba(0, 0, 0, 0.3)',
   },
   text: {
     primary: '#000000',
@@ -103,7 +106,7 @@ export const themeColors = {
     info: '#00C9F0',
   },
   card: {
-    default: '#F4EBD0',
+    default: '#f8f7f1',
     elevated: '#FAF7ED',
     outlined: '#B5B5B5',
     shadow: '#D9D9D9',

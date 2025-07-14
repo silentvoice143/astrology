@@ -26,6 +26,7 @@ import AboutIcon from '../assets/icons/about-icon';
 import HelpIcon from '../assets/icons/customer-support-icon';
 import SettingIcon from '../assets/icons/setting-icon';
 import KundliBookIcon from '../assets/icons/kundli-book-icon';
+import LogoutIcon from '../assets/icons/logout-icon';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -64,8 +65,13 @@ const navItems = [
     href: 'customer-support',
     icon: <HelpIcon size={20} />,
   },
-  {title: 'Setting', href: 'setting', icon: <SettingIcon size={20} />},
+  {title: 'Setting', href: 'Setting', icon: <SettingIcon size={20} />},
   {title: 'About', href: 'about', icon: <AboutIcon size={20} />},
+  {
+    title: 'Logout',
+    href: '',
+    icon: <LogoutIcon color={themeColors.status.error.base} size={20} />,
+  },
 ];
 
 const Sidebar = forwardRef<SidebarRef>((_, ref) => {
@@ -156,8 +162,17 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
                 style={styles.avatar}
               />
             </TouchableOpacity>
-            <View style={{justifyContent: 'center'}}>
-              <Text style={styles.username}>{user?.name}</Text>
+            {/* Modified View for username and wallet */}
+            <View style={styles.userInfoTextAndWalletContainer}>
+              <View style={styles.usernameWrapper}>
+                <Text
+                  style={styles.username}
+                  numberOfLines={1} // Truncate to a single line
+                  ellipsizeMode="tail" // Add "..." at the end if truncated
+                >
+                  {user?.name ?? 'N/A'}
+                </Text>
+              </View>
               <View style={styles.walletContainer}>
                 <WalletIcon />
                 <Text style={styles.walletText}>
@@ -174,22 +189,16 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
                 key={index}
                 style={styles.navItem}
                 onPress={() => {
-                  handleNavigation(item?.href);
+                  if (item.title === 'Logout') {
+                    handleLogout();
+                  } else {
+                    handleNavigation(item?.href);
+                  }
                 }}>
                 <View>{item?.icon}</View>
                 <Text style={styles.navText}>{item.title}</Text>
               </TouchableOpacity>
             ))}
-          </View>
-
-          {/* Logout */}
-          <View style={styles.logoutWrapper}>
-            <CustomButton
-              title="Logout"
-              onPress={handleLogout}
-              style={styles.logoutButton}
-              textStyle={{}}
-            />
           </View>
         </ScrollView>
       </Animated.View>
@@ -221,8 +230,8 @@ const styles = StyleSheet.create({
     paddingBottom: verticalScale(30),
   },
   userSection: {
-    backgroundColor: colors.primary_surface_2,
-    flexDirection: 'row',
+    backgroundColor: themeColors.surface.primarySurface,
+    flexDirection: 'row', // Align avatar and user info horizontally
     alignItems: 'center',
     paddingHorizontal: scale(20),
     paddingVertical: verticalScale(20),
@@ -233,21 +242,31 @@ const styles = StyleSheet.create({
     borderRadius: scale(16),
     marginRight: scale(16),
   },
+  // New style for the container holding username and wallet
+  userInfoTextAndWalletContainer: {
+    flex: 1, // Allows this container to take remaining space
+    justifyContent: 'center',
+  },
+  // New style for username wrapper to handle truncation
+  usernameWrapper: {
+    flexShrink: 1, // Allows the username text to shrink and truncate
+    marginBottom: 4, // Space between username and wallet
+  },
   username: {
     fontSize: 18,
     fontWeight: '700',
     color: themeColors.text.light,
-    marginBottom: 4,
+    // numberOfLines and ellipsizeMode are applied directly in JSX
   },
   walletContainer: {
     backgroundColor: colors.primary_surface,
-    // width: scale(100),
     paddingHorizontal: scale(8),
     paddingVertical: scale(2),
     borderRadius: scale(16),
     flexDirection: 'row',
     alignItems: 'center',
     gap: moderateScale(6),
+    alignSelf: 'flex-start', // Ensures it doesn't stretch beyond its content
   },
   walletText: {
     ...textStyle.fs_abyss_16_400,
@@ -271,10 +290,5 @@ const styles = StyleSheet.create({
   logoutWrapper: {
     paddingHorizontal: scale(20),
     marginTop: verticalScale(20),
-  },
-  logoutButton: {
-    backgroundColor: colors.primary_surface_2, // Replace with your primary color
-    borderRadius: 8,
-    paddingVertical: 14,
   },
 });

@@ -21,6 +21,7 @@ const QuickNavigation = ({onClick = () => {}}: QuickNavigationProps) => {
       }}>
       <View>
         <TouchableOpacity
+          onPress={() => onClick('horoscope')}
           style={{
             height: scale(60),
             width: scale(60),
@@ -41,6 +42,7 @@ const QuickNavigation = ({onClick = () => {}}: QuickNavigationProps) => {
       </View>
       <View>
         <TouchableOpacity
+          onPress={() => onClick('kundli')}
           style={{
             height: scale(60),
             width: scale(60),
@@ -61,6 +63,7 @@ const QuickNavigation = ({onClick = () => {}}: QuickNavigationProps) => {
       </View>
       <View style={{flexDirection: 'column', alignItems: 'center'}}>
         <TouchableOpacity
+          onPress={() => onClick('match-making')}
           style={{
             height: scale(60),
             width: scale(60),
@@ -81,6 +84,7 @@ const QuickNavigation = ({onClick = () => {}}: QuickNavigationProps) => {
       </View>
       <View>
         <TouchableOpacity
+          onPress={() => onClick('tarot')}
           style={{
             height: scale(60),
             width: scale(60),

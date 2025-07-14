@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, TouchableOpacity, Text, StyleSheet} from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import {colors} from '../constants/colors';
+import {colors, themeColors} from '../constants/colors';
 import HomeIcon from '../assets/icons/home-icon';
 import AstrologerIcon from '../assets/icons/astrologer-icon';
 import HistoryIcon from '../assets/icons/history-icon';
@@ -31,7 +31,7 @@ const BottomNavigationBar = () => {
         },
     ,
     {label: 'Consult', route: 'ChatHistory', icon: HistoryIcon},
-    {label: 'Remedies', route: 'remedies', icon: StoreIcon},
+    {label: 'Remedies', route: 'Remedies', icon: StoreIcon},
   ];
 
   return (
@@ -67,9 +67,8 @@ export default BottomNavigationBar;
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: themeColors.surface.background,
     paddingVertical: 10,
-
     justifyContent: 'space-around',
     shadowColor: '#000',
     shadowOpacity: 0.1,

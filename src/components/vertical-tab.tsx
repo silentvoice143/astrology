@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -17,14 +17,16 @@ type TabOption = {
 
 interface TabSwitcherProps {
   tabs: TabOption[];
+  value: string;
   onTabChange?: (key: string) => void;
   initialTab?: string;
   containerStyle?: ViewStyle;
   tabTextStyle?: TextStyle;
 }
 
-const TabSwitcher: React.FC<TabSwitcherProps> = ({
+const VerticalTabSwitcher: React.FC<TabSwitcherProps> = ({
   tabs,
+  value,
   onTabChange,
   initialTab,
   containerStyle,
@@ -37,29 +39,33 @@ const TabSwitcher: React.FC<TabSwitcherProps> = ({
     onTabChange?.(key);
   };
 
+  useEffect(() => {
+    setActiveTab(value);
+  }, [value]);
   return (
-    <View style={[styles.tabContainer, containerStyle]}>
+    <View style={[containerStyle]}>
       {tabs.map(tab => (
-        <TouchableOpacity
-          key={tab.key}
-          style={[styles.tab, activeTab === tab.key && styles.activeTab]}
-          onPress={() => handleTabPress(tab.key)}
-          activeOpacity={0.8}>
-          <Text
-            style={[
-              styles.tabText,
-              tabTextStyle,
-              activeTab === tab.key && styles.activeTabText,
-            ]}>
-            {tab.label}
-          </Text>
-        </TouchableOpacity>
+        <View key={tab.key} style={[styles.tabContainer]}>
+          <TouchableOpacity
+            style={[styles.tab, activeTab === tab.key && styles.activeTab]}
+            onPress={() => handleTabPress(tab.key)}
+            activeOpacity={0.8}>
+            <Text
+              style={[
+                styles.tabText,
+                tabTextStyle,
+                activeTab === tab.key && styles.activeTabText,
+              ]}>
+              {tab.label}
+            </Text>
+          </TouchableOpacity>
+        </View>
       ))}
     </View>
   );
 };
 
-export default TabSwitcher;
+export default VerticalTabSwitcher;
 
 const styles = StyleSheet.create({
   tabContainer: {
@@ -67,14 +73,9 @@ const styles = StyleSheet.create({
     gap: scale(8),
     marginTop: verticalScale(20),
     marginHorizontal: scale(16),
-    backgroundColor: themeColors.surface.lighterGray,
+    backgroundColor: themeColors.surface.background,
     borderRadius: scale(30),
     padding: scale(4),
-    elevation: 4, // Android shadow
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 2}, // iOS shadow
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
   },
   tab: {
     flex: 1,
@@ -84,7 +85,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   activeTab: {
-    backgroundColor: themeColors.surface.primarySurface, // You can define this as '#ff9800' or something attractive
+    backgroundColor: colors.primary_surface_2, // You can define this as '#ff9800' or something attractive
     shadowColor: colors.secondarybtn,
     shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.3,

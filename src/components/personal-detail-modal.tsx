@@ -15,6 +15,7 @@ interface PersonalDetialModalProps {
   onClose: () => void;
   existingDetails?: UserPersonalDetail;
   onSubmit: (details: UserPersonalDetail) => void;
+  showClosebtn?: boolean;
 }
 
 const genderTags = [
@@ -28,6 +29,7 @@ const PersonalDetailModal = ({
   onClose,
   onSubmit,
   existingDetails,
+  showClosebtn,
 }: PersonalDetialModalProps) => {
   const [date, setDate] = useState(new Date());
   const [time, setTime] = useState(new Date());
@@ -70,7 +72,7 @@ const PersonalDetailModal = ({
 
   return (
     <CustomModal
-      showCloseButton={false}
+      showCloseButton={showClosebtn}
       footer={
         <View style={{gap: scale(4)}}>
           <CustomButton

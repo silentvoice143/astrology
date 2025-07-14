@@ -23,21 +23,15 @@ import Carousel from '../components/carosel';
 import PersonalDetailModal from '../components/personal-detail-modal';
 import {useNavigation} from '@react-navigation/native';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
-import {setFirstTime, setUser} from '../store/reducer/auth';
-import {postUserDetail} from '../store/reducer/user';
-import {UserPersonalDetail} from '../utils/types';
-import {setKundliPerson} from '../store/reducer/kundli';
 
 import {useUserRole} from '../hooks/use-role';
-import KundliBookIcon from '../assets/icons/kundli-book-icon';
-import TarotIcon from '../assets/icons/tarot-icon';
-import MatchmakingIcon from '../assets/icons/match-making-icon';
-import HoroscopeIcon from '../assets/icons/horoscope-icon';
 import QuickNavigation from '../components/home/quick-navigation';
+import FirstChatFreePopup from '../components/free-chat-popup';
 
 const Home = () => {
   const [search, setSearch] = useState('');
   const navigation = useNavigation<any>();
+  const [isFirstChatModalOpen, setIsFiirstChatModalOpen] = useState(false);
   const [headerBgColor, setHeaderBgColor] = useState('color');
 
   const user = useAppSelector(state => state.auth.user);
@@ -77,9 +71,33 @@ const Home = () => {
       focusSearch: true,
     });
   };
+  const handleQuickNavigation = (nav: string) => {
+    switch (nav) {
+      case 'horoscope':
+        navigation.navigate('Horoscope');
+        break;
+      case 'kundli':
+        navigation.navigate('KundliForm');
+        break;
+      case 'match-making':
+        navigation.navigate('MatchMaking');
+        break;
+      case 'tarot':
+        navigation.navigate('Tarot');
+        break;
+    }
+  };
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setIsFiirstChatModalOpen(true);
+    }, 500); // open after 500ms
+
+    return () => clearTimeout(timeout);
+  }, []);
 
   return (
-    <ScreenLayout headerBackgroundColor={headerBgColor}>
+    <ScreenLayout>
       {/* <PersonalDetailModal
         existingDetails={{
           name: userRole === 'ASTROLOGER' ? user.name : '',
@@ -90,19 +108,20 @@ const Home = () => {
           latitude: null,
           longitude: null,
         }}
-        isOpen={isPersonalDetailModalOpen}
-        onClose={() => {
-          setIsPersonalDetailModalOpen(false);
-        }}
-        onSubmit={data => {
-          if (forKundli) {
-            dispatch(setKundliPerson(data));
-            navigation.navigate('Kundli');
-          } else {
-            handlePostUserData(data);
-          }
-        }}
+        isOpen={true}
+        onClose={() => {}}
+        onSubmit={data => {}}
       /> */}
+
+      <FirstChatFreePopup
+        isOpen={isFirstChatModalOpen}
+        onClose={() => {
+          setIsFiirstChatModalOpen(false);
+        }}
+        onClaimPress={() => {
+          navigation.navigate('Astrologers');
+        }}
+      />
 
       <ScrollView
         scrollEventThrottle={16}
@@ -152,7 +171,7 @@ const Home = () => {
             source={require('../assets/imgs/bg-img2.png')}
           />
           <View style={{}}>
-            <QuickNavigation />
+            <QuickNavigation onClick={handleQuickNavigation} />
           </View>
 
           {/* banner */}
