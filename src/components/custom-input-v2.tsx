@@ -8,10 +8,11 @@ import {
   ViewStyle,
   StyleProp,
   TouchableOpacity,
+  TextInputProps,
 } from 'react-native';
 import {scale, scaleFont, verticalScale} from '../utils/sizer';
 
-type CustomInputProps = {
+type CustomInputProps = TextInputProps & {
   label?: string;
   value: string;
   onChangeText: (text: string) => void;
@@ -43,6 +44,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
   errorMessage,
   placeholder,
   editable = true, // ✅ Default true
+  ...props
 }) => {
   const [focused, setFocused] = useState(false);
   const [secure, setSecure] = useState(secureToggle);
@@ -81,6 +83,7 @@ const CustomInput: React.FC<CustomInputProps> = ({
           placeholder={placeholder}
           editable={editable} // ✅ Used here
           style={[styles.input, inputStyle]}
+          {...props}
         />
 
         {secureToggle && (

@@ -8,7 +8,7 @@ import {
   TextStyle,
 } from 'react-native';
 import {scale, verticalScale} from '../utils/sizer';
-import {colors} from '../constants/colors';
+import {colors, themeColors} from '../constants/colors';
 
 type TabOption = {
   key: string;
@@ -67,7 +67,7 @@ const styles = StyleSheet.create({
     gap: scale(8),
     marginTop: verticalScale(20),
     marginHorizontal: scale(16),
-    backgroundColor: '#f0f0f0',
+    backgroundColor: themeColors.surface.lighterGray,
     borderRadius: scale(30),
     padding: scale(4),
     elevation: 4, // Android shadow
@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   activeTab: {
-    backgroundColor: colors.primary_surface_2, // You can define this as '#ff9800' or something attractive
+    backgroundColor: themeColors.surface.primarySurface, // You can define this as '#ff9800' or something attractive
     shadowColor: colors.secondarybtn,
     shadowOffset: {width: 0, height: 1},
     shadowOpacity: 0.3,

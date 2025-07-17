@@ -13,9 +13,8 @@ import CustomButton from '../components/custom-button';
 import ChatIcon from '../assets/icons/chat-icon';
 import CallIcon from '../assets/icons/call-icon';
 import {textStyle} from '../constants/text-style';
-import KundliLogo from '../assets/icons/kundli-icon';
 import {scale, scaleFont, verticalScale} from '../utils/sizer';
-import {colors} from '../constants/colors';
+import {colors, themeColors} from '../constants/colors';
 import LinearGradient from 'react-native-linear-gradient';
 import SlidingCard from '../components/home/card-carosel';
 import AstrologerCarosel from '../components/home/top-astrologer-carosel';
@@ -23,78 +22,112 @@ import Carousel from '../components/carosel';
 import PersonalDetailModal from '../components/personal-detail-modal';
 import {useNavigation} from '@react-navigation/native';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
-import {setFirstTime, setUser} from '../store/reducer/auth';
-import {postUserDetail} from '../store/reducer/user';
-import {UserPersonalDetail} from '../utils/types';
-import {setKundliPerson} from '../store/reducer/kundli';
 
 import {useUserRole} from '../hooks/use-role';
+import QuickNavigation from '../components/home/quick-navigation';
+import FirstChatFreePopup from '../components/free-chat-popup';
+import {setFreeChatModalShown} from '../store/reducer/auth';
+import {getAllAstrologers} from '../store/reducer/astrologers';
+import {Astrologers as AstrologersType, UserDetail} from '../utils/types';
 
 const Home = () => {
   const [search, setSearch] = useState('');
   const navigation = useNavigation<any>();
-  const [headerBgColor, setHeaderBgColor] = useState('color');
+  const [isFirstChatModalOpen, setIsFirstChatModalOpen] = useState(false);
+  const {freeChatUsed} = useAppSelector(state => state.auth.user);
+  const {freeChatModalShown} = useAppSelector(state => state.auth);
+  const dispatch = useAppDispatch();
+  const [loading, setLoading] = useState(false);
+  const [astrologersData, setAstrologersData] = useState<
+    {
+      name: string;
+      expertise: string;
+      about: string;
+      imgUri: string;
+      id: string;
+      userId: string;
+    }[]
+  >([]);
 
-  const user = useAppSelector(state => state.auth.user);
-  const astrologer_detail = useAppSelector(
-    state => state.auth.astrologer_detail,
-  );
-  const userRole = useUserRole();
-  console.log(user, '-----user detail in redux');
-  // const {isProfileComplete} = useAppSelector(state => state.auth);
+  const fetchAstrologersData = async (pageNumber = 1, append = false) => {
+    if (loading) return;
+    try {
+      setLoading(true);
 
-  // const [isPersonalDetailModalOpen, setIsPersonalDetailModalOpen] =
-  //   useState(false);
-  // const [forKundli, setForKundli] = useState(false);
-  // const dispatch = useAppDispatch();
+      const payload = await dispatch(getAllAstrologers(`?page=1`)).unwrap();
+      console.log(payload, 'payload----------------- fetchAstrologersData');
+      if (payload.success) {
+        const newData =
+          payload.astrologers.map((item: AstrologersType) => ({
+            name: item?.user?.name,
+            expertise: item?.expertise,
+            about: item?.about,
+            id: item?.id,
+            imgUri: item?.user?.imgUri,
+            userId: item?.user?.id,
+          })) || [];
+        setAstrologersData(newData);
+      }
+    } catch (error) {
+      console.log('fetchAstrologersData Error : ', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-  // const handleScroll = (event: any) => {
-  //   const scrollY = event.nativeEvent.contentOffset.y;
-  //   if (scrollY > verticalScale(240)) {
-  //     setHeaderBgColor('transparent'); // or any color
-  //   } else {
-  //     setHeaderBgColor('transparent'); // original color
-  //   }
-  // };
+  // Function to handle search input changes
+  const handleSearchChange = (text: string) => {
+    setSearch(text); // Update the local state
+  };
+  const handleSearchSubmit = () => {
+    // Navigate to Astrologers screen with the current search query and focus instruction
+    navigation.navigate('Astrologers', {
+      initialSearch: search,
+      focusSearch: true,
+    });
+  };
+  const handleQuickNavigation = (nav: string) => {
+    switch (nav) {
+      case 'horoscope':
+        navigation.navigate('Horoscope');
+        break;
+      case 'kundli':
+        navigation.navigate('KundliForm');
+        break;
+      case 'match-making':
+        navigation.navigate('Astrologers', {sort: 'marriage'});
+        break;
+      case 'tarot':
+        navigation.navigate('Astrologers', {sort: 'tarot'});
+        break;
+    }
+  };
 
-  // const handlePostUserData = async (user: UserPersonalDetail) => {
-  //   try {
-  //     const payload = await dispatch(postUserDetail(user)).unwrap();
+  useEffect(() => {
+    if (freeChatUsed || isFirstChatModalOpen || freeChatModalShown) return;
+    const timeout = setTimeout(() => {
+      setIsFirstChatModalOpen(true);
+      dispatch(setFreeChatModalShown());
+    }, 500);
 
-  //     if (payload?.success) {
-  //       setIsPersonalDetailModalOpen(false);
-  //       dispatch(setUser(payload.user));
-  //     }
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // };
+    return () => clearTimeout(timeout);
+  }, []);
+
+  useEffect(() => {
+    fetchAstrologersData();
+  }, []);
 
   return (
-    <ScreenLayout headerBackgroundColor={headerBgColor}>
-      {/* <PersonalDetailModal
-        existingDetails={{
-          name: userRole === 'ASTROLOGER' ? user.name : '',
-          gender: '',
-          birthDate: new Date().toISOString().split('T')[0],
-          birthTime: new Date().toTimeString().split(' ')[0],
-          birthPlace: '',
-          latitude: null,
-          longitude: null,
-        }}
-        isOpen={isPersonalDetailModalOpen}
+    <ScreenLayout>
+      <FirstChatFreePopup
+        isOpen={isFirstChatModalOpen}
         onClose={() => {
-          setIsPersonalDetailModalOpen(false);
+          setIsFirstChatModalOpen(false);
         }}
-        onSubmit={data => {
-          if (forKundli) {
-            dispatch(setKundliPerson(data));
-            navigation.navigate('Kundli');
-          } else {
-            handlePostUserData(data);
-          }
+        onClaimPress={() => {
+          navigation.navigate('Astrologers');
         }}
-      /> */}
+      />
 
       <ScrollView
         scrollEventThrottle={16}
@@ -107,24 +140,32 @@ const Home = () => {
             // colors.secondary_surface_2,
             colors.primary_surface,
           ]}>
-          <View style={HomeStyle.greetingContainer}>
-            <Text style={[textStyle.fs_abyss_20_400]}>Hello</Text>
-            <Text style={[textStyle.fs_abyss_36_400, HomeStyle.userName]}>
-              Satyam
-            </Text>
-
-            {/* Horoscope Button */}
-            {/* <CustomButton
-              title="Today's horoscope"
-              onPress={() => {
-                navigation.push('DetailsProfile');
-              }}
-              style={HomeStyle.horoscopeButton}
-              textStyle={[textStyle.fs_mont_14_500, HomeStyle.horoscopeText]}
-            /> */}
+          <View
+            style={{
+              paddingHorizontal: scale(40),
+              marginTop: verticalScale(20),
+              width: '100%',
+            }}>
+            <AnimatedSearchInput
+              shadowColor={colors.glow_shadow}
+              iconColor={colors.primarybtn}
+              enableShadow={true}
+              placeholder="Search here for pandits"
+              value={search}
+              onChangeText={handleSearchChange}
+              iconPosition="left"
+              containerStyle={{width: '100%'}}
+              inputContainerStyle={HomeStyle.searchInput}
+              onSubmitEditing={handleSearchSubmit}
+            />
           </View>
         </LinearGradient>
-        <View style={{position: 'relative'}}>
+        <View
+          style={{
+            position: 'relative',
+            gap: verticalScale(20),
+            marginTop: verticalScale(40),
+          }}>
           <Image
             style={{
               position: 'absolute',
@@ -135,67 +176,16 @@ const Home = () => {
             }}
             source={require('../assets/imgs/bg-img2.png')}
           />
+          <View style={{}}>
+            <QuickNavigation onClick={handleQuickNavigation} />
+          </View>
+
+          {/* banner */}
           <View
             style={{
-              backgroundColor: colors.primary_surface,
-              borderTopEndRadius: 24,
-              borderTopStartRadius: 24,
-              position: 'relative',
-              top: -20,
-              paddingTop: verticalScale(60),
+              paddingHorizontal: scale(20),
             }}>
-            {/* Search Bar */}
-            <View
-              style={{
-                position: 'absolute',
-                top: verticalScale(-24),
-                paddingHorizontal: scale(40),
-                paddingVertical: verticalScale(2),
-                width: '100%',
-              }}>
-              <AnimatedSearchInput
-                shadowColor={colors.glow_shadow}
-                iconColor={colors.primarybtn}
-                enableShadow={true}
-                placeholder="Search here for pandits"
-                value={search}
-                onChangeText={setSearch}
-                iconPosition="left"
-                containerStyle={{width: '100%'}}
-                inputContainerStyle={HomeStyle.searchInput}
-              />
-            </View>
-
-            {/* Quick Actions */}
-            <View style={[HomeStyle.actionsContainer]}>
-              <View style={HomeStyle.singleAction}>
-                <TouchableOpacity
-                  style={HomeStyle.actionCard}
-                  onPress={() => navigation.navigate('Astrologers')}>
-                  <CallIcon />
-                </TouchableOpacity>
-                <Text
-                  style={[textStyle.fs_abyss_14_400, HomeStyle.actionText]}
-                  numberOfLines={1}
-                  ellipsizeMode="tail">
-                  Talk to Astrologer
-                </Text>
-              </View>
-
-              <View style={HomeStyle.singleAction}>
-                <TouchableOpacity
-                  style={HomeStyle.actionCard}
-                  onPress={() => navigation.navigate('Astrologers')}>
-                  <ChatIcon />
-                </TouchableOpacity>
-                <Text
-                  style={[textStyle.fs_abyss_14_400, HomeStyle.actionText]}
-                  numberOfLines={1}
-                  ellipsizeMode="tail">
-                  Chat with Astrologer
-                </Text>
-              </View>
-            </View>
+            <Image source={require('../assets/imgs/banner.png')} />
           </View>
 
           {/* Our Astrologer  */}
@@ -212,7 +202,7 @@ const Home = () => {
               ]}>
               Our Astrologers
             </Text>
-            <SlidingCard />
+            <SlidingCard data={astrologersData} />
           </View>
           <View
             style={{
@@ -241,7 +231,7 @@ const Home = () => {
               Top Astrologers
             </Text>
             <Carousel
-              data={introCardData}
+              data={astrologersData}
               pagination={true}
               cardWidthScale={0.9}
               CardComponent={AstrologerCarosel}
@@ -334,15 +324,7 @@ const HomeStyle = StyleSheet.create({
     fontWeight: '700',
     color: colors.userNmaeText,
   },
-  horoscopeButton: {
-    backgroundColor: colors.secondarybtn,
-    borderRadius: scale(20),
-    marginTop: scale(52),
-    paddingVertical: verticalScale(12),
-  },
-  horoscopeText: {
-    color: '#fff',
-  },
+
   searchContainer: {
     marginTop: verticalScale(30),
   },
@@ -407,7 +389,6 @@ const HomeStyle = StyleSheet.create({
     marginHorizontal: scale(28),
   },
   sectionTitle: {
-    marginTop: verticalScale(40),
     fontSize: scaleFont(18),
     fontWeight: '600',
     color: colors.primaryText,

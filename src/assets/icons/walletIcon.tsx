@@ -6,15 +6,21 @@ type Props = {
   width?: number;
   height?: number;
   color?: string;
+  size?: number;
 };
 
 const WalletIcon: React.FC<Props> = ({
   width = 24,
   height = 24,
   color = '#1C274C',
+  size,
 }) => {
   return (
-    <Svg width={width} height={height} viewBox="0 0 24 24" fill="none">
+    <Svg
+      width={size ? size : width}
+      height={size ? size : height}
+      viewBox="0 0 24 24"
+      fill="none">
       <Path
         fillRule="evenodd"
         clipRule="evenodd"

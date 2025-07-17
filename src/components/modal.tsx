@@ -15,7 +15,7 @@ import {
 } from 'react-native';
 import {moderateScale, scale} from '../utils/sizer';
 import {textStyle} from '../constants/text-style';
-import {colors} from '../constants/colors';
+import {themeColors} from '../constants/colors';
 
 type HeaderObject = {
   title: string | React.ReactNode;
@@ -30,19 +30,14 @@ type CustomModalProps = {
   header?: HeaderContent;
   footer?: React.ReactNode;
   children: React.ReactNode;
-
-  // Style overrides
   backdropStyle?: StyleProp<ViewStyle>;
   containerStyle?: StyleProp<ViewStyle>;
   modalStyle?: StyleProp<ViewStyle>;
   headerStyle?: StyleProp<ViewStyle>;
   contentStyle?: StyleProp<ViewStyle>;
   footerStyle?: StyleProp<ViewStyle>;
-
   showCloseButton?: boolean;
   closeOnBackdropPress?: boolean;
-
-  // Keyboard and scroll options
   enableKeyboardAvoiding?: boolean;
   enableScrollView?: boolean;
   keyboardVerticalOffset?: number;
@@ -56,7 +51,6 @@ const CustomModal: React.FC<CustomModalProps> = ({
   footer,
   children,
   backdropStyle,
-  containerStyle,
   modalStyle,
   headerStyle,
   contentStyle,
@@ -68,57 +62,53 @@ const CustomModal: React.FC<CustomModalProps> = ({
   keyboardVerticalOffset = 0,
   scrollViewProps = {},
 }) => {
-  function isHeaderObject(header: HeaderContent): header is HeaderObject {
-    return typeof header === 'object' && header !== null && 'title' in header;
+  function isHeaderObject(
+    headerContent: HeaderContent,
+  ): headerContent is HeaderObject {
+    return (
+      typeof headerContent === 'object' &&
+      headerContent !== null &&
+      'title' in headerContent
+    );
   }
 
   const renderHeader = () => {
     if (!header && !showCloseButton) return null;
 
+    let headerTitle: React.ReactNode = null;
+    let headerDescription: string | undefined;
+
     if (React.isValidElement(header)) {
-      return (
-        <View style={[styles.header, headerStyle]}>
-          <View style={styles.headerContent}>
-            {header}
-            {showCloseButton && (
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                <Text style={styles.closeText}>×</Text>
-              </TouchableOpacity>
-            )}
-          </View>
-        </View>
-      );
+      headerTitle = header;
+    } else if (isHeaderObject(header)) {
+      headerTitle =
+        typeof header.title === 'string' ? (
+          <Text style={styles.headerTitleText}>{header.title}</Text>
+        ) : (
+          header.title
+        );
+      headerDescription = header.description;
     }
 
-    if (isHeaderObject(header)) {
-      return (
-        <View style={[styles.header, headerStyle]}>
-          <View style={styles.headerContent}>
-            <View style={{flex: 1}}>
-              {typeof header.title === 'string' ? (
-                <>
-                  <Text style={[textStyle.fs_mont_18_700]}>{header.title}</Text>
-                  {header.description && (
-                    <Text style={styles.descriptionText}>
-                      {header.description}
-                    </Text>
-                  )}
-                </>
-              ) : (
-                header.title
-              )}
-            </View>
-            {showCloseButton && (
-              <TouchableOpacity onPress={onClose} style={styles.closeButton}>
-                <Text style={styles.closeText}>×</Text>
-              </TouchableOpacity>
+    return (
+      <View style={[styles.header, headerStyle]}>
+        <View style={styles.headerContent}>
+          <View style={styles.headerTextContainer}>
+            {headerTitle}
+            {headerDescription && (
+              <Text style={styles.headerDescriptionText}>
+                {headerDescription}
+              </Text>
             )}
           </View>
+          {showCloseButton && (
+            <TouchableOpacity onPress={onClose} style={styles.closeButton}>
+              <Text style={styles.closeText}>×</Text>
+            </TouchableOpacity>
+          )}
         </View>
-      );
-    }
-
-    return null;
+      </View>
+    );
   };
 
   const renderContent = () => {
@@ -129,7 +119,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
     if (enableScrollView) {
       return (
         <ScrollView
-          nestedScrollEnabled={true}
+          nestedScrollEnabled
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContentContainer}
           keyboardShouldPersistTaps="handled"
@@ -143,38 +133,36 @@ const CustomModal: React.FC<CustomModalProps> = ({
     return content;
   };
 
-  const renderModal = () => (
-    <View style={[styles.container, containerStyle]}>
-      <TouchableWithoutFeedback onPress={() => {}}>
-        <View style={[styles.modal, modalStyle]}>
-          {renderHeader()}
-          {renderContent()}
-          {footer && <View style={[styles.footer, footerStyle]}>{footer}</View>}
-        </View>
-      </TouchableWithoutFeedback>
+  const renderModalContent = () => (
+    <View style={[styles.modal, modalStyle]}>
+      {renderHeader()}
+      {renderContent()}
+      {footer && <View style={[styles.footer, footerStyle]}>{footer}</View>}
     </View>
   );
 
-  const modalContent = enableKeyboardAvoiding ? (
+  const modalWrapper = enableKeyboardAvoiding ? (
     <KeyboardAvoidingView
       style={styles.keyboardAvoidingView}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={keyboardVerticalOffset}>
-      {renderModal()}
+      {renderModalContent()}
     </KeyboardAvoidingView>
   ) : (
-    renderModal()
+    renderModalContent()
   );
 
   return (
     <Modal visible={visible} transparent animationType="fade">
-      <View style={[styles.backdrop, backdropStyle]}>
-        <TouchableWithoutFeedback
-          onPress={closeOnBackdropPress ? onClose : undefined}>
+      <TouchableWithoutFeedback
+        onPress={closeOnBackdropPress ? onClose : undefined}>
+        <View style={[styles.backdrop, backdropStyle]}>
           <View style={styles.backdropTouchable} />
-        </TouchableWithoutFeedback>
-        {modalContent}
-      </View>
+          <TouchableWithoutFeedback onPress={() => {}}>
+            {modalWrapper}
+          </TouchableWithoutFeedback>
+        </View>
+      </TouchableWithoutFeedback>
     </Modal>
   );
 };
@@ -182,7 +170,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: colors.bg.overlay,
+    backgroundColor: themeColors.surface.overlay,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -199,46 +187,57 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     width: '100%',
   },
-  container: {
-    maxWidth: '90%',
-    maxHeight: '80%',
-    width: '85%',
-  },
   modal: {
-    backgroundColor: '#fff',
-    borderRadius: moderateScale(20),
+    backgroundColor: themeColors.surface.background,
+    borderRadius: moderateScale(12),
     overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.primary_border,
-    maxHeight: '100%',
+    shadowColor: '#000',
+    shadowOffset: {width: 0, height: 6},
+    shadowOpacity: 0.25,
+    shadowRadius: 12,
+    elevation: 12,
+    width: '95%',
+    maxWidth: 400,
+    maxHeight: '90%',
   },
   header: {
-    padding: scale(12),
+    paddingHorizontal: scale(20),
+    paddingVertical: scale(15),
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: '#ddd',
+    borderBottomColor: themeColors.border.secondary,
+    backgroundColor: themeColors.surface.background,
   },
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'flex-start',
+    alignItems: 'center',
   },
-  titleText: {
-    fontWeight: '700',
-    color: '#222',
+  headerTextContainer: {
+    flex: 1,
+    marginRight: scale(10),
   },
-  descriptionText: {
+  headerTitleText: {
+    ...textStyle.fs_mont_18_700,
+    color: themeColors.text.primary,
+    fontWeight: 'bold',
+  },
+  headerDescriptionText: {
     fontSize: 14,
-    color: '#666',
-    marginTop: 4,
+    color: themeColors.text.secondary,
+    marginTop: scale(4),
   },
   closeButton: {
-    paddingHorizontal: 8,
-    paddingVertical: 4,
+    width: scale(30),
+    height: scale(30),
+    borderRadius: scale(15),
+    backgroundColor: themeColors.surface.secondarySurface,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   closeText: {
     fontSize: 20,
     fontWeight: '600',
-    color: '#999',
+    color: themeColors.text.primary,
   },
   scrollView: {
     flexGrow: 1,
@@ -247,13 +246,16 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   content: {
-    paddingHorizontal: scale(12),
-    paddingVertical: scale(12),
+    paddingHorizontal: scale(20),
+    paddingVertical: scale(20),
+    flexGrow: 1,
   },
   footer: {
-    padding: 12,
+    paddingHorizontal: scale(20),
+    paddingVertical: scale(15),
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: '#ddd',
+    borderTopColor: themeColors.border.secondary,
+    backgroundColor: themeColors.surface.background,
   },
 });
 

@@ -1,13 +1,14 @@
 import React from 'react';
 import {View, TouchableOpacity, Text, StyleSheet} from 'react-native';
 import {useNavigation, useRoute} from '@react-navigation/native';
-import {colors} from '../constants/colors';
+import {colors, themeColors} from '../constants/colors';
 import HomeIcon from '../assets/icons/home-icon';
 import AstrologerIcon from '../assets/icons/astrologer-icon';
 import HistoryIcon from '../assets/icons/history-icon';
 import {useUserRole} from '../hooks/use-role';
 import KundliIcon from '../assets/icons/kundli-icon-2';
 import PeopleIcon from '../assets/icons/people-icon';
+import StoreIcon from '../assets/icons/store-icon';
 
 const BottomNavigationBar = () => {
   const navigation = useNavigation<any>();
@@ -29,7 +30,8 @@ const BottomNavigationBar = () => {
           icon: PeopleIcon,
         },
     ,
-    {label: 'Consult', route: 'ChatHistory', icon: HistoryIcon},
+    {label: 'History', route: 'ChatHistory', icon: HistoryIcon},
+    {label: 'Remedies', route: 'Remedies', icon: StoreIcon},
   ];
 
   return (
@@ -46,6 +48,7 @@ const BottomNavigationBar = () => {
             {IconComponent && (
               <IconComponent
                 size={20}
+                strokeWidth={2}
                 color={isActive ? colors.primaryText : '#999'}
               />
             )}
@@ -64,9 +67,8 @@ export default BottomNavigationBar;
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: '#fff',
+    backgroundColor: themeColors.surface.background,
     paddingVertical: 10,
-
     justifyContent: 'space-around',
     shadowColor: '#000',
     shadowOpacity: 0.1,

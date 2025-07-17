@@ -1,13 +1,14 @@
 import React from 'react';
 import {View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
 import {scale, verticalScale, moderateScale} from '../../utils/sizer';
-import {colors} from '../../constants/colors';
+import {colors, themeColors} from '../../constants/colors';
 import LikeIcon from '../../assets/icons/like-icon';
 import StarIcon from '../../assets/icons/star-icon';
 import CallIcon from '../../assets/icons/call-icon';
 import VideoCallIcon from '../../assets/icons/video-call-icon';
 import ChatIcon from '../../assets/icons/chat-icon';
 import {textStyle} from '../../constants/text-style';
+import {formatPrice} from '../../utils/utils';
 
 type AstrologerCardProps = {
   id: string;
@@ -25,6 +26,7 @@ type AstrologerCardProps = {
   pricePerMinuteVoice: number;
   expertise: string;
   online: boolean;
+  freeChatAvailable: boolean;
 };
 
 const AstrologerCard: React.FC<AstrologerCardProps> = ({
@@ -42,6 +44,7 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
   pricePerMinuteVideo,
   pricePerMinuteVoice,
   online,
+  freeChatAvailable,
 }) => {
   return (
     <View style={styles.card}>
@@ -63,7 +66,7 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
         <View style={{flex: 1, marginLeft: scale(12)}}>
           <View style={styles.nameRow}>
             <Text style={styles.name}>{name}</Text>
-            <LikeIcon />
+            {/* <LikeIcon /> */}
           </View>
 
           {rate && (
@@ -116,7 +119,9 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
               }}>
               <CallIcon colors={[colors.whiteText]} height={16} width={16} />
             </View>
-            <Text style={styles.buttonText}>{pricePerMinuteVoice}</Text>
+            <Text style={styles.buttonText}>
+              {formatPrice(pricePerMinuteVoice, 'min')}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -134,22 +139,58 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
               <VideoCallIcon size={16} colors={[colors.whiteText]} />
             </View>
 
-            <Text style={styles.buttonText}>{pricePerMinuteVideo}</Text>
+            <Text style={styles.buttonText}>
+              {formatPrice(pricePerMinuteVideo, 'min')}
+            </Text>
           </TouchableOpacity>
         </View>
 
         <View onStartShouldSetResponder={() => true}>
-          <TouchableOpacity onPress={onChatPress} style={styles.button}>
+          <TouchableOpacity
+            onPress={onChatPress}
+            style={[
+              styles.button,
+              {
+                backgroundColor: freeChatAvailable
+                  ? themeColors.button.success
+                  : themeColors.surface.background,
+                borderColor: freeChatAvailable
+                  ? themeColors.button.success
+                  : colors.primary_border,
+              },
+            ]}>
             <View
               style={{
                 padding: moderateScale(4),
-                backgroundColor: colors.secondary_Card,
+                backgroundColor: freeChatAvailable
+                  ? themeColors.surface.background
+                  : colors.secondary_Card,
                 borderRadius: scale(12),
               }}>
-              <ChatIcon height={16} width={16} colors={[colors.whiteText]} />
+              <ChatIcon
+                height={16}
+                width={16}
+                colors={[
+                  freeChatAvailable
+                    ? themeColors.text.primary
+                    : colors.whiteText,
+                ]}
+              />
             </View>
 
-            <Text style={styles.buttonText}>{pricePerMinuteChat}</Text>
+            <Text
+              style={[
+                styles.buttonText,
+                {
+                  color: freeChatAvailable
+                    ? themeColors.text.light
+                    : themeColors.text.primary,
+                },
+              ]}>
+              {freeChatAvailable
+                ? 'Free Chat'
+                : formatPrice(pricePerMinuteChat, 'min')}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>

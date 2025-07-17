@@ -24,8 +24,8 @@ import Avatar from '../components/avatar';
 // import ReviewItem from '../components/Profile/ReviewItem';
 
 // Import interfaces for data types
-import {Review} from '../utils/types';
-import {colors} from '../constants/colors';
+import {Review, UserDetail} from '../utils/types';
+import {colors, themeColors} from '../constants/colors';
 import ProfileSectionItem from '../components/Profile/ProfileSectionItem';
 import {RouteProp, useRoute} from '@react-navigation/native';
 import {RootStackParamList} from '../hooks/navigation';
@@ -54,7 +54,7 @@ export interface AstrologerUser {
 
 export interface AstrologerProfile {
   id: string;
-  user: AstrologerUser;
+  user: UserDetail;
   about: string | null;
   expertise: string;
   experienceYears: number;
@@ -74,9 +74,8 @@ const DetailsProfile: React.FC = () => {
   // State to manage the expansion of the 'About Astrologer' section
   const [expandedAbout, setExpandedAbout] = useState<boolean>(false);
   const [data, setData] = useState<AstrologerProfile>();
-  const [selectedAstrologer, setSelectedAstrologer] = useState<string | null>(
-    null,
-  );
+  const [selectedAstrologer, setSelectedAstrologer] =
+    useState<UserDetail | null>(null);
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const {isProfileComplete} = useAppSelector(state => state.auth);
   const dispatch = useAppDispatch();
@@ -99,9 +98,9 @@ const DetailsProfile: React.FC = () => {
     fetchAstrologersDataById(id);
   }, [id]);
 
-  const handleSessionStart = (astrologerId: string) => {
+  const handleSessionStart = (astrologer: UserDetail) => {
     if (isProfileComplete) {
-      setSelectedAstrologer(astrologerId);
+      setSelectedAstrologer(astrologer);
       setIsRequestModalOpen(true);
     } else {
       dispatch(setProfileModelToggle());
@@ -150,27 +149,24 @@ const DetailsProfile: React.FC = () => {
   return (
     // ScreenLayout provides a consistent layout structure for the screen
     <ScreenLayout headerBackgroundColor="transparent">
-      {/* ScrollView allows the content to be scrollable if it exceeds screen height */}
       {data && (
         <ScrollView
           style={styles.container}
+          contentContainerStyle={{paddingBottom: verticalScale(20)}}
           showsVerticalScrollIndicator={false}>
-          {/* Header Section with a Linear Gradient background for a visually appealing top area */}
           <LinearGradient
             colors={['#fff', '#fff', '#fff']}
             style={styles.headerGradient}>
-            {/* Top Navigation Bar containing the astrologer's name and a share button */}
             <View style={styles.topNavBar}>
               <View style={styles.profileTitleContainer}>
                 <Text style={[styles.profileTitle, textStyle.fs_mont_20_700]}>
-                  {data.user.name}
+                  {data?.user?.name}
                 </Text>
-                {/* Verified badge for verified astrologers */}
               </View>
-              {/* Share button (ellipsis icon) */}
-              <TouchableOpacity style={styles.shareButton}>
+
+              {/* <TouchableOpacity style={styles.shareButton}>
                 <Text style={styles.shareIcon}>⋯</Text>
-              </TouchableOpacity>
+              </TouchableOpacity> */}
             </View>
 
             {/* Profile Card section displaying avatar and key information */}
@@ -179,8 +175,8 @@ const DetailsProfile: React.FC = () => {
                 {/* Avatar component for the astrologer's profile picture */}
                 <Avatar
                   image={{
-                    uri: data.imgUri
-                      ? data.imgUri
+                    uri: data?.user?.imgUri
+                      ? data?.user?.imgUri
                       : 'https://cdn-icons-png.flaticon.com/512/6596/6596121.png',
                   }}
                   fallbackText="AV"
@@ -188,7 +184,6 @@ const DetailsProfile: React.FC = () => {
                   borderColor={colors.secondary_Card}
                   borderWidth={3}
                 />
-                {/* Active status indicator (green dot) */}
               </View>
               <View style={styles.profileCard}>
                 <View style={styles.profileInfoSection}>
@@ -338,7 +333,7 @@ const DetailsProfile: React.FC = () => {
           onPress={() => {
             // Handle call action
             console.log('Call button pressed');
-            handleSessionStart(data?.user?.id ?? '');
+            handleSessionStart(data?.user as UserDetail);
           }}
           title={'Voice Call'}
         />
@@ -350,7 +345,7 @@ const DetailsProfile: React.FC = () => {
           onPress={() => {
             // Handle call action
             console.log('Call button pressed');
-            handleSessionStart(data?.user?.id ?? '');
+            handleSessionStart(data?.user as UserDetail);
           }}
           title={'Video Call'}
         />
@@ -362,7 +357,7 @@ const DetailsProfile: React.FC = () => {
           textStyle={textStyle.fs_mont_14_700}
           onPress={() => {
             // Handle chat action
-            handleSessionStart(data?.user?.id ?? '');
+            handleSessionStart(data?.user as UserDetail);
           }}
           title={'Chat'}
         />
@@ -373,7 +368,7 @@ const DetailsProfile: React.FC = () => {
           setIsRequestModalOpen(false);
           setSelectedAstrologer(null);
         }}
-        astrologerId={selectedAstrologer}
+        astrologer={selectedAstrologer}
       />
     </ScreenLayout>
   );
@@ -384,7 +379,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.primary_surface,
-    marginBottom: verticalScale(20),
+    marginBottom: verticalScale(40),
   } as ViewStyle,
 
   headerGradient: {
@@ -441,7 +436,7 @@ const styles = StyleSheet.create({
   } as ViewStyle,
 
   profileCard: {
-    backgroundColor: colors.primary_surface_2,
+    backgroundColor: themeColors.surface.background,
     borderRadius: scale(16),
     padding: scale(16),
     flexDirection: 'row',
@@ -489,7 +484,7 @@ const styles = StyleSheet.create({
   } as TextStyle,
 
   languageItemText: {
-    color: colors.whiteText,
+    color: themeColors.text.primary,
   } as TextStyle,
 
   followSection: {
@@ -617,6 +612,7 @@ const styles = StyleSheet.create({
   } as ViewStyle,
 
   aboutText: {
+    marginTop: verticalScale(20),
     color: colors.secondaryText,
     marginBottom: verticalScale(8),
   } as TextStyle,
@@ -715,11 +711,11 @@ const styles = StyleSheet.create({
   } as ViewStyle,
 
   callButton: {
-    backgroundColor: colors.secondarybtn,
+    backgroundColor: themeColors.button.primary,
   } as ViewStyle,
 
   chatButton: {
-    backgroundColor: colors.secondarybtn,
+    backgroundColor: themeColors.button.primary,
   } as ViewStyle,
 
   buttonText: {

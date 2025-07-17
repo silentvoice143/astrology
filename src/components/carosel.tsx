@@ -191,7 +191,7 @@ function Carousel<T>({
         scrollEventThrottle={16}
       />
 
-      {pagination && (
+      {/* {pagination && (
         <View
           style={{
             flexDirection: 'row',
@@ -234,7 +234,7 @@ function Carousel<T>({
             );
           })}
         </View>
-      )}
+      )} */}
     </View>
   );
 }

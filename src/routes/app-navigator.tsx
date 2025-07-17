@@ -1,6 +1,5 @@
 import React, {useEffect, useState} from 'react';
 import {NavigationContainer, useNavigation} from '@react-navigation/native';
-
 import PublicRoutes from './public-route';
 import PrivateRoutes from './private-route';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
@@ -31,6 +30,7 @@ export default function AppNavigator() {
           const {payload} = await dispatch(userDetail());
 
           if (payload?.success) {
+            console.log(payload, '------user detail');
             const userDetail: any = payload.user ?? payload.astrologer?.user!;
 
             const astro = payload.astrologer;

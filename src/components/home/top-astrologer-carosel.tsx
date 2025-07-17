@@ -21,14 +21,14 @@ const AstrologerCarosel: React.FC<CardProps> = ({
   return (
     <Pressable
       onPress={() => {
-        navigation.navigate('DetailsProfile');
+        navigation.navigate('DetailsProfile', {id: item.id});
       }}>
       <IntroCard
         cardWidth={cardWidth}
         name={item.name}
-        rate={item.rate}
-        avatar={item.avatar}
-        specialty={item.specialty}
+        rate={'21'}
+        avatar={item.imgUri}
+        specialty={item.expertise}
       />
     </Pressable>
   );
