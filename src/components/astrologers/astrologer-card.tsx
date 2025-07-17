@@ -9,6 +9,8 @@ import VideoCallIcon from '../../assets/icons/video-call-icon';
 import ChatIcon from '../../assets/icons/chat-icon';
 import {textStyle} from '../../constants/text-style';
 
+type SessionType = 'chat' | 'voice' | 'video';
+
 type AstrologerCardProps = {
   id: string;
   name: string;
@@ -20,6 +22,8 @@ type AstrologerCardProps = {
   onCallPress?: () => void;
   onVideoPress?: () => void;
   onChatPress?: () => void;
+  // NEW: Add session type handler
+  onSessionPress?: (sessionType: SessionType) => void;
   pricePerMinuteChat: number;
   pricePerMinuteVideo: number;
   pricePerMinuteVoice: number;
@@ -38,11 +42,32 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
   onCallPress,
   onVideoPress,
   onChatPress,
+  onSessionPress, // NEW
   pricePerMinuteChat,
   pricePerMinuteVideo,
   pricePerMinuteVoice,
   online,
 }) => {
+  // NEW: Handle session press with type
+  const handleSessionPress = (sessionType: SessionType) => {
+    if (onSessionPress) {
+      onSessionPress(sessionType);
+    } else {
+      // Fallback to old handlers for backward compatibility
+      switch (sessionType) {
+        case 'voice':
+          onCallPress?.();
+          break;
+        case 'video':
+          onVideoPress?.();
+          break;
+        case 'chat':
+          onChatPress?.();
+          break;
+      }
+    }
+  };
+
   return (
     <View style={styles.card}>
       <View style={styles.topSection}>
@@ -105,8 +130,7 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
       <View style={styles.actions}>
         <View onStartShouldSetResponder={() => true}>
           <TouchableOpacity
-            disabled={true}
-            onPress={onCallPress}
+            onPress={() => handleSessionPress('voice')}
             style={styles.button}>
             <View
               style={{
@@ -116,14 +140,14 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
               }}>
               <CallIcon colors={[colors.whiteText]} height={16} width={16} />
             </View>
-            <Text style={styles.buttonText}>{pricePerMinuteVoice}</Text>
+            <Text style={styles.buttonText}>₹{pricePerMinuteVoice}/min</Text>
+            {/* CHANGED: Show actual price */}
           </TouchableOpacity>
         </View>
 
         <View onStartShouldSetResponder={() => true}>
           <TouchableOpacity
-            disabled={true}
-            onPress={onVideoPress}
+            onPress={() => handleSessionPress('video')}
             style={styles.button}>
             <View
               style={{
@@ -133,13 +157,14 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
               }}>
               <VideoCallIcon size={16} colors={[colors.whiteText]} />
             </View>
-
-            <Text style={styles.buttonText}>{pricePerMinuteVideo}</Text>
+            <Text style={styles.buttonText}>₹{pricePerMinuteVideo}/min</Text>
           </TouchableOpacity>
         </View>
 
         <View onStartShouldSetResponder={() => true}>
-          <TouchableOpacity onPress={onChatPress} style={styles.button}>
+          <TouchableOpacity
+            onPress={() => handleSessionPress('chat')}
+            style={styles.button}>
             <View
               style={{
                 padding: moderateScale(4),
@@ -148,8 +173,7 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
               }}>
               <ChatIcon height={16} width={16} colors={[colors.whiteText]} />
             </View>
-
-            <Text style={styles.buttonText}>{pricePerMinuteChat}</Text>
+            <Text style={styles.buttonText}>₹{pricePerMinuteChat}/min</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -159,6 +183,7 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
 
 export default AstrologerCard;
 
+// Keep existing styles exactly the same
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#fff',

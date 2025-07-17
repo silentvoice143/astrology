@@ -25,6 +25,13 @@ api.interceptors.request.use(
     const shouldSkip = skipAuthPaths.some((path: string) =>
       urlPath.startsWith(path),
     );
+    console.log('🔗 API Request:', {
+      url: config?.baseURL + config?.url,
+      method: config.method?.toUpperCase(),
+      payload: config.data || null,
+    });
+
+
     const token = shouldSkip ? '' : getTokenFromStore();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

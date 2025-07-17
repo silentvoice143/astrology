@@ -21,32 +21,14 @@ import {shuffleArray} from '../utils/utils';
 import {textStyle} from '../constants/text-style';
 import {Astrologers as AstrologersType, UserDetail} from '../utils/types';
 
-const astrologers = [
-  {
-    name: 'Dr. Radhika Sharma',
-    rate: '₹20/min',
-    rating: 4.8,
-    experience: '10+ Years',
-    languages: 'Hindi, English',
-    imageUri: 'https://randomuser.me/api/portraits/women/65.jpg',
-  },
-  {
-    name: 'Guru Manish Verma',
-    rate: '₹15/min',
-    rating: 4.5,
-    experience: '8 Years',
-    languages: 'Hindi',
-    imageUri: 'https://randomuser.me/api/portraits/men/43.jpg',
-  },
-  {
-    name: 'Astro Kavita',
-    rate: '₹25/min',
-    rating: 5.0,
-    experience: '12+ Years',
-    languages: 'English, Tamil',
-    imageUri: 'https://randomuser.me/api/portraits/women/58.jpg',
-  },
-];
+type SessionType = 'chat' | 'voice' | 'video'; // NEW
+
+// NEW: Extended type for astrologer with pricing
+interface AstrologerWithPricing extends UserDetail {
+  pricePerMinuteChat: number;
+  pricePerMinuteVideo: number;
+  pricePerMinuteVoice: number;
+}
 
 const tags = [
   {id: 'all', label: 'All', icon: '✨'},
@@ -62,14 +44,15 @@ const tags = [
 
 const Astrologers = () => {
   const [selected, setSelected] = useState<string[]>(['all']);
-  const [selectedAstrologer, setSelectedAstrologer] =
-    useState<UserDetail | null>(null);
+  const [selectedAstrologer, setSelectedAstrologer] = useState<AstrologerWithPricing | null>(null); // CHANGED
+  const [selectedSessionType, setSelectedSessionType] = useState<SessionType>('chat'); // NEW
   const [astrologersData, setAstrologersData] = useState<AstrologersType[]>([]);
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const {isProfileComplete} = useAppSelector(state => state.auth);
   const dispatch = useAppDispatch();
   const navigation = useTypedNavigation();
+
   const fetchAstrologersData = async () => {
     try {
       setLoading(true);
@@ -84,9 +67,9 @@ const Astrologers = () => {
             userId: astro?.user?.id,
             user: astro?.user,
             expertise: astro?.expertise,
-            pricePerMinuteChat: `${astro?.pricePerMinuteChat} ₹/min`,
-            pricePerMinuteVoice: `${astro?.pricePerMinuteVoice} ₹/min`,
-            pricePerMinuteVideo: `${astro?.pricePerMinuteVideo} ₹/min`,
+            pricePerMinuteChat: astro?.pricePerMinuteChat || 0, // CHANGED: Use actual numbers
+            pricePerMinuteVideo: astro?.pricePerMinuteVideo || 0,
+            pricePerMinuteVoice: astro?.pricePerMinuteVoice || 0,
             rating: astro?.rating || null,
             experience: `${astro?.experienceYears} Years`,
             languages: astro?.languages,
@@ -103,15 +86,26 @@ const Astrologers = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     fetchAstrologersData();
   }, []);
 
-  const handleSessionStart = (astrologer: UserDetail) => {
+  // CHANGED: Handle session start with session type and pricing
+  const handleSessionStart = (astrologer: AstrologersType, sessionType: SessionType) => {
     if (isProfileComplete) {
       console.log('handling session');
 
-      setSelectedAstrologer(astrologer);
+      // Create astrologer with pricing info
+      const astrologerWithPricing: AstrologerWithPricing = {
+        ...astrologer.user,
+        pricePerMinuteChat: astrologer.pricePerMinuteChat,
+        pricePerMinuteVideo: astrologer.pricePerMinuteVideo,
+        pricePerMinuteVoice: astrologer.pricePerMinuteVoice,
+      };
+
+      setSelectedAstrologer(astrologerWithPricing);
+      setSelectedSessionType(sessionType);
       setIsRequestModalOpen(true);
     } else {
       dispatch(setProfileModelToggle());
@@ -208,18 +202,9 @@ const Astrologers = () => {
                   experience={item?.experience}
                   languages={item?.languages}
                   imageUri={item?.imageUri}
-                  onCallPress={() => {
-                    console.log('Calling');
-
-                    handleSessionStart(item.user);
-                  }}
-                  onVideoPress={() => {
-                    console.log('Video');
-                    handleSessionStart(item.user);
-                  }}
-                  onChatPress={() => {
-                    console.log('Chat');
-                    handleSessionStart(item.user);
+                  // CHANGED: Use new session handler instead of separate handlers
+                  onSessionPress={(sessionType) => {
+                    handleSessionStart(item, sessionType);
                   }}
                 />
               </Pressable>
@@ -234,6 +219,7 @@ const Astrologers = () => {
           setSelectedAstrologer(null);
         }}
         astrologer={selectedAstrologer}
+        initialSessionType={selectedSessionType} // NEW: Pass initial session type
       />
     </ScreenLayout>
   );

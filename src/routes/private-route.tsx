@@ -15,6 +15,7 @@ import {useNavigation} from '@react-navigation/native';
 import {useUserRole} from '../hooks/use-role';
 import {useSessionEvents} from '../hooks/use-session-events';
 import About from '../screens/about';
+import Call from '../screens/call';
 
 const Stack = createNativeStackNavigator();
 
@@ -53,6 +54,7 @@ export default function PrivateRoutes() {
       <Stack.Screen name="Wallet" component={Wallet} />
       <Stack.Screen name="chat-screen" component={ChatScreen} />
       <Stack.Screen name="chat" component={ChatScreenDemo} />
+      <Stack.Screen name="call" component={Call} />
       <Stack.Screen name="session-request" component={RequestScreen} />
       <Stack.Screen name="about" component={About} />
     </Stack.Navigator>

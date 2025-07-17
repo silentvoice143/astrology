@@ -28,6 +28,21 @@ export const sendSessionRequest = createAsyncThunk<
   }
 });
 
+
+export const sendCallRequest= createAsyncThunk<
+  any, // response type as any
+  any, // argument type
+  {rejectValue: any}
+>('session/call-request', async (payload, {rejectWithValue}) => {
+  try {
+    console.log(payload, '-----bodyyy');
+    const response = await api.post('/api/v1/call/request', payload);
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});
+
 export const acceptSessionRequest = createAsyncThunk<
   any, // response type as any
   any, // argument type

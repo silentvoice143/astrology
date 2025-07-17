@@ -13,6 +13,7 @@ import {
   getChatHistory,
   getChatMessages,
   getQueueRequest,
+  sendCallRequest,
   sendSessionRequest,
 } from './action';
 
@@ -56,6 +57,7 @@ const sessionSlice = createSlice({
   },
   extraReducers: builder => {
     builder.addCase(sendSessionRequest.fulfilled, state => {});
+    builder.addCase(sendCallRequest.fulfilled, state => {});
     builder.addCase(getQueueRequest.fulfilled, state => {});
     builder.addCase(acceptSessionRequest.fulfilled, state => {});
     builder.addCase(getChatHistory.fulfilled, state => {});
@@ -79,6 +81,7 @@ export {
   getChatHistory,
   acceptSessionRequest,
   getChatMessages,
+  sendCallRequest
 };
 
 export default sessionSlice.reducer;
