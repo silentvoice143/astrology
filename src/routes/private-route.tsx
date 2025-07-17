@@ -23,6 +23,8 @@ import MatchMaking from '../screens/match-making';
 import Tarot from '../screens/tarot';
 import LanguageSetting from '../screens/settings/language-setting';
 import TermsAndConditions from '../screens/settings/terms-conditions';
+import PofileEdit from '../screens/pofile-edit';
+import ProfileEdit from '../screens/pofile-edit';
 
 const Stack = createNativeStackNavigator();
 
@@ -54,6 +56,7 @@ export default function PrivateRoutes() {
       }}>
       <Stack.Screen name="Home" component={Home} />
       <Stack.Screen name="Profile" component={ProfilePage} />
+      <Stack.Screen name="ProfileEdit" component={ProfileEdit} />
       <Stack.Screen name="Astrologers" component={Astrologers} />
       <Stack.Screen name="Kundli" component={Kundli} />
       <Stack.Screen name="KundliForm" component={KundliForm} />

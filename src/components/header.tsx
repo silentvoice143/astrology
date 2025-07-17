@@ -52,8 +52,12 @@ const Header = ({
         return 'Kundli Form';
       case 'about':
         return 'About Us';
+      case 'session-request':
+        return 'Session Requests';
       case 'remedies':
         return 'Remedies';
+      case 'DetailsProfile':
+        return 'Astrologer';
       case 'TermsAndConditions':
         return 'Terms & Conditions';
       case 'customer-support':
@@ -71,6 +75,8 @@ const Header = ({
     'ChatHistory',
     'Profile',
     'Horoscope',
+    'Remedies',
+    'session-request',
   ];
 
   const headerWhite = exceptionArray.includes(route.name);
@@ -97,8 +103,11 @@ const Header = ({
               marginRight: scale(8),
             }}
             onPress={() => {
-              showMenuIcon ? navigation.goBack() : onMenuClick();
-              console.log('opening sidebar');
+              showMenuIcon
+                ? route.name === 'Profile'
+                  ? navigation.navigate('Home')
+                  : navigation.goBack()
+                : onMenuClick();
             }}>
             {showMenuIcon ? (
               <ChevronLeftIcon size={32} color={themeColors.text.primary} />
@@ -143,9 +152,12 @@ const Header = ({
           }}
           onPress={() => {
             {
-              showMenuIcon ? navigation.goBack() : onMenuClick();
+              showMenuIcon
+                ? route.name === 'Profile'
+                  ? navigation.navigate('Home')
+                  : navigation.goBack()
+                : onMenuClick();
             }
-            console.log('opening sidebar');
           }}>
           {showMenuIcon ? (
             <ChevronLeftIcon size={32} color={themeColors.text.primary} />

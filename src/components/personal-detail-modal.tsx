@@ -11,6 +11,7 @@ import {UserPersonalDetail} from '../utils/types';
 import ControlledTagSelector from './controlled-tag-selector';
 
 interface PersonalDetialModalProps {
+  isSaving?: boolean;
   isOpen: boolean;
   onClose: () => void;
   existingDetails?: UserPersonalDetail;
@@ -25,6 +26,7 @@ const genderTags = [
 ];
 
 const PersonalDetailModal = ({
+  isSaving,
   isOpen,
   onClose,
   onSubmit,
@@ -76,6 +78,7 @@ const PersonalDetailModal = ({
       footer={
         <View style={{gap: scale(4)}}>
           <CustomButton
+            loading={isSaving}
             title="Submit"
             onPress={() => {
               const formattedDetails = {

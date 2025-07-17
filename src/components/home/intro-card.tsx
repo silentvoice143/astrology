@@ -1,10 +1,12 @@
-import {View, Text} from 'react-native';
+import {View, Text, TouchableOpacity} from 'react-native';
 import React from 'react';
 import {scale, verticalScale} from '../../utils/sizer';
-import {colors} from '../../constants/colors';
+import {colors, themeColors} from '../../constants/colors';
 import Avatar from '../avatar';
 import {textStyle} from '../../constants/text-style';
 import LinearGradient from 'react-native-linear-gradient';
+import ChatIcon from '../../assets/icons/chat-icon';
+import {useNavigation} from '@react-navigation/native';
 
 type IntroCardProps = {
   name: string;
@@ -21,6 +23,7 @@ const IntroCard = ({
   specialty,
   cardWidth,
 }: IntroCardProps) => {
+  const navigation = useNavigation<any>();
   return (
     <View
       style={{
@@ -51,26 +54,30 @@ const IntroCard = ({
           ]}>
           {specialty}
         </Text>
-        <View
+        {/* <View
           style={{flex: 1, alignItems: 'flex-end', justifyContent: 'flex-end'}}>
-          <LinearGradient
-            colors={[
-              colors.primary_card,
-              colors.secondary_Card,
-              colors.tertiary_card,
-            ]}
-            style={{
-              flexDirection: 'row',
-              justifyContent: 'center',
-              alignItems: 'center',
-              width: 120,
-              height: verticalScale(40),
-              borderRadius: scale(20),
-              paddingHorizontal: scale(12),
-            }}>
-            <Text style={{color: colors.whiteText}}>{rate}</Text>
-          </LinearGradient>
-        </View>
+          <TouchableOpacity onPress={() => navigation.navigate('Astrologers')}>
+            <LinearGradient
+              colors={[
+                colors.primary_card,
+                colors.secondary_Card,
+                colors.tertiary_card,
+              ]}
+              style={{
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                width: 120,
+                height: verticalScale(40),
+                borderRadius: scale(20),
+                paddingHorizontal: scale(12),
+                gap: scale(8),
+              }}>
+              <ChatIcon size={20} colors={[themeColors.text.light]} />
+              <Text style={{color: colors.whiteText}}>Chat</Text>
+            </LinearGradient>
+          </TouchableOpacity>
+        </View> */}
       </View>
     </View>
   );

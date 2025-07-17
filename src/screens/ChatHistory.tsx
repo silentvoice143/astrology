@@ -24,6 +24,7 @@ import {
 } from '../store/reducer/session';
 import {useUserRole} from '../hooks/use-role';
 import {ChatSession, UserDetail} from '../utils/types';
+import {formatDateString, formatedDate} from '../utils/utils';
 
 interface CallItem {
   id: string;
@@ -86,7 +87,7 @@ const ChatHistory = () => {
           } else {
             dispatch(setOtherUser(item.user));
           }
-          console.log(item, '-------session thing');
+
           dispatch(setSession(item));
           navigation.navigate('chat');
         }}>
@@ -94,7 +95,7 @@ const ChatHistory = () => {
           name={data.name}
           time={item.startedAt}
           avatar={{uri: ''}}
-          active={activeSessionId === item.id}
+          active={item.status === 'ACTIVE' && activeSessionId === item.id}
         />
       </TouchableOpacity>
     );
@@ -172,6 +173,16 @@ const ChatHistory = () => {
             loading ? (
               <ActivityIndicator size="small" style={{marginVertical: 10}} />
             ) : null
+          }
+          ListEmptyComponent={
+            <View
+              style={{
+                height: verticalScale(400),
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Text style={[textStyle.fs_mont_16_500]}>No Chat History</Text>
+            </View>
           }
         />
       ) : (

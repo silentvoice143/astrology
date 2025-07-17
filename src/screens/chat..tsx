@@ -9,6 +9,7 @@ import {
   Platform,
   StyleSheet,
   TouchableOpacity,
+  Image,
 } from 'react-native';
 import {useWebSocket} from '../hooks/use-socket';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
@@ -25,12 +26,18 @@ import {RootState} from '../store';
 import Avatar from '../components/avatar';
 import {textStyle} from '../constants/text-style';
 import {moderateScale, scale, verticalScale} from '../utils/sizer';
-import {colors} from '../constants/colors';
+import {colors, themeColors} from '../constants/colors';
 import KundliIcon from '../assets/icons/kundli-icon-2';
 import SendIcon from '../assets/icons/sendIcon';
 import SessionKundliModal from '../components/session/modals/kundli-modal';
 import {setKundliPerson} from '../store/reducer/kundli';
 import {useUserRole} from '../hooks/use-role';
+import Toast from 'react-native-toast-message';
+import {uploadImage} from '../store/reducer/general';
+import CameraModal from '../components/chat/modal/camera-modal';
+import ImageViewer from 'react-native-image-zoom-viewer';
+import Modal from 'react-native-modal';
+import CameraIcon from '../assets/icons/camera-icon';
 
 export const ChatScreenDemo = () => {
   const userId = useAppSelector(state => state.auth.user.id);
@@ -55,9 +62,10 @@ export const ChatScreenDemo = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const typingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const flatListRef = useRef<FlatList<Message>>(null);
+  const [imageModalVisible, setImageModalVisible] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const dispatch = useAppDispatch();
 
-  console.log(session, messages, '---------session');
   const getChatMessagesDetails = async (page: number) => {
     if (loading || !hasMore) return;
     try {
@@ -81,6 +89,46 @@ export const ChatScreenDemo = () => {
       console.log(err);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const [showCamera, setShowCamera] = useState(false);
+
+  const handleCaptureImage = async (filePath: string) => {
+    if (!filePath) return;
+    if (!session || !otherUserId) return;
+    const result = await fetch(`file://${filePath}`);
+    const data = await result.blob();
+
+    try {
+      const formData = new FormData();
+      formData.append('image', {
+        uri: 'file://' + filePath,
+        name: `image-${userId}-${new Date().toISOString()}.jpg`,
+        type: 'image/jpeg',
+      });
+
+      const payload = await dispatch(uploadImage(formData)).unwrap();
+
+      if (payload?.success) {
+        const newMsg: Message = {
+          senderId: userId,
+          receiverId: otherUserId,
+          sessionId: session?.id,
+          message: payload.imgUrl,
+          type: 'IMAGE',
+          timestamp: new Date(),
+        };
+        send('/app/chat.send', {}, JSON.stringify(newMsg));
+        dispatch(addMessage(newMsg));
+      }
+    } catch (error) {
+      console.log(error);
+      Toast.show({
+        type: 'error',
+        text1: 'Upload Failed',
+        text2: 'Please try again later.',
+      });
     }
   };
 
@@ -166,7 +214,7 @@ export const ChatScreenDemo = () => {
 
   const handleSend = () => {
     if (!input.trim()) return;
-    if (!session || !otherUserId) return;
+    if (session?.status !== 'ACTIVE' || !session || !otherUserId) return;
 
     const newMsg: Message = {
       senderId: userId,
@@ -174,7 +222,7 @@ export const ChatScreenDemo = () => {
       sessionId: session.id,
       message: input.trim(),
       type: 'TEXT',
-      timestamp: new Date().toISOString(),
+      timestamp: new Date(),
     };
 
     send(`/app/chat.send`, {}, JSON.stringify(newMsg));
@@ -212,20 +260,37 @@ export const ChatScreenDemo = () => {
 
   const renderMessage = ({item}: {item: Message}) => {
     const isMine = item.senderId === userId;
+
+    const handleImagePress = () => {
+      setSelectedImage(item.message); // this is the image URL
+      setImageModalVisible(true);
+    };
+
     return (
-      <View
-        style={[
-          styles.message,
-          isMine ? styles.myMessage : styles.otherMessage,
-        ]}>
-        <Text>{item.message}</Text>
-        <Text style={styles.timestamp}>
-          {getTimeOnly(item.timestamp, true)}
-        </Text>
-      </View>
+      <TouchableOpacity
+        onPress={item.type === 'IMAGE' ? handleImagePress : () => {}}
+        activeOpacity={0.9}>
+        <View
+          style={[
+            styles.message,
+            isMine ? styles.myMessage : styles.otherMessage,
+          ]}>
+          {item.type === 'IMAGE' ? (
+            <Image
+              source={{uri: item.message}}
+              style={{width: 200, height: 200, borderRadius: 8}}
+              resizeMode="cover"
+            />
+          ) : (
+            <Text>{item.message}</Text>
+          )}
+          <Text style={styles.timestamp}>
+            {getTimeOnly(item.timestamp, true)}
+          </Text>
+        </View>
+      </TouchableOpacity>
     );
   };
-
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -236,24 +301,35 @@ export const ChatScreenDemo = () => {
             styles.header,
             {flexDirection: 'row', gap: scale(12), alignItems: 'center'},
           ]}>
-          <Avatar
-            size={60}
-            image={{uri: ''}}
-            fallbackText={otherUser?.name.charAt(0).toUpperCase()}
-          />
+          <View>
+            <Avatar
+              size={60}
+              image={{uri: ''}}
+              fallbackText={otherUser?.name.charAt(0).toUpperCase()}
+            />
+            <View
+              style={{
+                position: 'absolute',
+                top: 5,
+                right: 0,
+                height: scale(8),
+                width: scale(8),
+                backgroundColor:
+                  session?.status === 'ACTIVE'
+                    ? colors.success.base
+                    : colors.error.base,
+                borderRadius: scale(4),
+              }}></View>
+          </View>
           <View>
             <View style={{flexDirection: 'row', gap: 8}}>
-              <Text style={[textStyle.fs_mont_20_700]}>{otherUser?.name}</Text>
-              <View
-                style={{
-                  height: scale(8),
-                  width: scale(8),
-                  backgroundColor:
-                    session?.status === 'ACTIVE'
-                      ? colors.success.base
-                      : colors.error.base,
-                  borderRadius: scale(4),
-                }}></View>
+              <Text
+                style={[
+                  textStyle.fs_mont_20_700,
+                  {marginTop: verticalScale(8)},
+                ]}>
+                {otherUser?.name}
+              </Text>
             </View>
 
             <Text
@@ -269,10 +345,10 @@ export const ChatScreenDemo = () => {
             </Text>
           </View>
         </View>
-        {session?.status === 'ACTIVE' && (
+        {session?.status === 'ACTIVE' && timer && (
           <View
             style={{
-              backgroundColor: colors.primary_card,
+              backgroundColor: themeColors.status.success.base,
               justifyContent: 'center',
               alignItems: 'center',
               paddingVertical: verticalScale(4),
@@ -283,6 +359,23 @@ export const ChatScreenDemo = () => {
                 textStyle.fs_mont_16_700,
               ]}>
               {timer}
+            </Text>
+          </View>
+        )}
+        {session?.status !== 'ACTIVE' && (
+          <View
+            style={{
+              backgroundColor: themeColors.status.success.base,
+              justifyContent: 'center',
+              alignItems: 'center',
+              paddingVertical: verticalScale(4),
+            }}>
+            <Text
+              style={[
+                {color: colors.whiteText, textAlign: 'center'},
+                textStyle.fs_mont_16_700,
+              ]}>
+              Chat Already Ended
             </Text>
           </View>
         )}
@@ -308,6 +401,26 @@ export const ChatScreenDemo = () => {
         )}
 
         <View style={styles.inputArea}>
+          <TouchableOpacity
+            onPress={() =>
+              !!session && session.status === 'ACTIVE'
+                ? setShowCamera(true)
+                : {}
+            }
+            style={{
+              backgroundColor:
+                !!session && session.status === 'ACTIVE'
+                  ? colors.primarybtn
+                  : colors.disabled,
+              height: moderateScale(40),
+              width: moderateScale(40),
+              borderRadius: moderateScale(20),
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginRight: scale(10),
+            }}>
+            <CameraIcon size={16} strokeWidth={1} />
+          </TouchableOpacity>
           <TextInput
             style={styles.input}
             value={input}
@@ -361,6 +474,23 @@ export const ChatScreenDemo = () => {
           }}
         />
       </>
+      <CameraModal
+        visible={showCamera}
+        onClose={() => setShowCamera(false)}
+        onCapture={handleCaptureImage}
+      />
+      <Modal
+        isVisible={imageModalVisible}
+        onBackdropPress={() => setImageModalVisible(false)}
+        onBackButtonPress={() => setImageModalVisible(false)}
+        style={{margin: 0}}>
+        <ImageViewer
+          imageUrls={[{url: selectedImage || ''}]}
+          enableSwipeDown
+          onSwipeDown={() => setImageModalVisible(false)}
+          backgroundColor="#000"
+        />
+      </Modal>
     </KeyboardAvoidingView>
   );
 };
@@ -384,7 +514,7 @@ const styles = StyleSheet.create({
   messagesArea: {
     padding: 10,
     flexGrow: 1,
-    backgroundColor: colors.primary.light,
+    backgroundColor: themeColors.surface.secondarySurface,
   },
   message: {padding: 10, marginVertical: 4, borderRadius: 10, maxWidth: '75%'},
   myMessage: {alignSelf: 'flex-end', backgroundColor: '#DCF8C6'},

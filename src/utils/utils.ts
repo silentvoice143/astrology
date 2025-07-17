@@ -48,7 +48,7 @@ export function formatRelativeDate(isoString: string): string {
 }
 
 export function getTimeOnly(
-  isoString: string,
+  isoString: Date,
   use12Hour: boolean = false,
 ): string {
   const dateObj = new Date(isoString);
@@ -72,3 +72,50 @@ export const formatPrice = (
 ): string => {
   return `${symbol}${value}/${unit}`;
 };
+
+// ==================date====================
+export const formatedDate = (date: Date) => {
+  return date?.toLocaleString('en-IN', {
+    timeZone: 'Asia/Kolkata',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true,
+  });
+};
+
+export const formatDateString = (isoDateString: string | Date): string => {
+  const date = new Date(isoDateString);
+  const options: Intl.DateTimeFormatOptions = {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  };
+  return date.toLocaleDateString('en-IN', options); // e.g., "06 May 2025"
+};
+
+export function formatTimeToDateString(
+  timeStr: string,
+  baseDate: Date = new Date(),
+): string {
+  const [hours, minutes, seconds] = timeStr.split(':').map(Number);
+
+  const date = new Date(
+    baseDate.getFullYear(),
+    baseDate.getMonth(),
+    baseDate.getDate(),
+    hours,
+    minutes,
+    seconds,
+    0, // milliseconds
+  );
+
+  const pad = (n: number, width: number = 2) => String(n).padStart(width, '0');
+
+  const formatted =
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+    `T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(
+      date.getSeconds(),
+    )}.000000`;
+
+  return formatted;
+}

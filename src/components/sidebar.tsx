@@ -10,7 +10,6 @@ import {
   Image,
   ScrollView,
 } from 'react-native';
-import CustomButton from './custom-button';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {logout} from '../store/reducer/auth';
 import WalletIcon from '../assets/icons/walletIcon';
@@ -88,6 +87,11 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
     close,
   }));
 
+  const profileImage =
+    user?.gender === 'MALE' || !user?.gender
+      ? require('../assets/imgs/male.jpg')
+      : require('../assets/imgs/female.jpg');
+
   const open = () => {
     setVisible(true);
     Animated.parallel([
@@ -157,19 +161,19 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
                 close();
                 navigation.navigate('Profile');
               }}>
-              <Image
-                source={{uri: 'https://i.pravatar.cc/300?img=5'}}
-                style={styles.avatar}
-              />
+              {user.imgUri ? (
+                <Image source={{uri: user.imgUri}} style={styles.avatar} />
+              ) : (
+                <Image source={profileImage} style={styles.avatar} />
+              )}
             </TouchableOpacity>
-            {/* Modified View for username and wallet */}
+
             <View style={styles.userInfoTextAndWalletContainer}>
               <View style={styles.usernameWrapper}>
                 <Text
                   style={styles.username}
-                  numberOfLines={1} // Truncate to a single line
-                  ellipsizeMode="tail" // Add "..." at the end if truncated
-                >
+                  numberOfLines={1}
+                  ellipsizeMode="tail">
                   {user?.name ?? 'N/A'}
                 </Text>
               </View>

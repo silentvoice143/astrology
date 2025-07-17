@@ -46,7 +46,6 @@ const RequestSessionModal = ({
     try {
       const body = {astrologerId: astrologer?.id, duration: selected?.value};
       const payload = await dispatch(sendSessionRequest(body)).unwrap();
-      console.log(body, payload, '----body');
 
       if (payload.success) {
         dispatch(setOtherUser(astrologer));

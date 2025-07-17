@@ -8,11 +8,11 @@ type ThunkApiConfig = {
 
 export const getAllAstrologers = createAsyncThunk<
   UserResponse,
-  void,
+  string,
   ThunkApiConfig
->('astrologers/getAllAstrologers', async (_, {rejectWithValue}) => {
+>('astrologers/getAllAstrologers', async (params, {rejectWithValue}) => {
   try {
-    const response = await api.get('/api/v1/astrologers');
+    const response = await api.get(`/api/v1/astrologers${params}`);
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data || error.message);

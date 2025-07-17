@@ -5,6 +5,7 @@ import {
   Pressable,
   ActivityIndicator,
   Keyboard,
+  FlatList,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import AstrologerCard from '../components/astrologers/astrologer-card';
@@ -22,33 +23,7 @@ import {shuffleArray} from '../utils/utils';
 import {textStyle} from '../constants/text-style';
 import {Astrologers as AstrologersType, UserDetail} from '../utils/types';
 import {RouteProp, useRoute} from '@react-navigation/native';
-
-const astrologers = [
-  {
-    name: 'Dr. Radhika Sharma',
-    rate: '₹20/min',
-    rating: 4.8,
-    experience: '10+ Years',
-    languages: 'Hindi, English',
-    imageUri: 'https://randomuser.me/api/portraits/women/65.jpg',
-  },
-  {
-    name: 'Guru Manish Verma',
-    rate: '₹15/min',
-    rating: 4.5,
-    experience: '8 Years',
-    languages: 'Hindi',
-    imageUri: 'https://randomuser.me/api/portraits/men/43.jpg',
-  },
-  {
-    name: 'Astro Kavita',
-    rate: '₹25/min',
-    rating: 5.0,
-    experience: '12+ Years',
-    languages: 'English, Tamil',
-    imageUri: 'https://randomuser.me/api/portraits/women/58.jpg',
-  },
-];
+import {sendSessionRequest, setOtherUser} from '../store/reducer/session';
 
 const tags = [
   {id: 'all', label: 'All', icon: '✨'},
@@ -65,6 +40,7 @@ const tags = [
 // Define the type for the route parameters for the 'Astrologers' screen
 type AstrologersRouteParams = {
   initialSearch?: string;
+  sort?: string;
 };
 
 // Define the type for the route object using RouteProp
@@ -75,9 +51,8 @@ type AstrologersScreenRouteProp = RouteProp<
 
 const Astrologers = () => {
   const route = useRoute<AstrologersScreenRouteProp>(); // Use useRoute hook to access params
-  const {initialSearch = ''} = route.params || {};
+  const {initialSearch = '', sort = ''} = route.params || {};
   const [search, setSearch] = useState(initialSearch); // Initialize search state with initialSearch param
-  const searchInputRef = useRef(null);
   const [selected, setSelected] = useState<string[]>(['all']);
   const [selectedAstrologer, setSelectedAstrologer] =
     useState<UserDetail | null>(null);
@@ -87,49 +62,60 @@ const Astrologers = () => {
   const {isProfileComplete} = useAppSelector(state => state.auth);
   const dispatch = useAppDispatch();
   const navigation = useTypedNavigation();
-  const fetchAstrologersData = async () => {
+  const {freeChatUsed} = useAppSelector(state => state.auth.user);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const fetchAstrologersData = async (pageNumber = 1, append = false) => {
+    if (loading || isFetchingMore || !hasMore) return;
     try {
-      setLoading(true);
-      const payload = await dispatch(getAllAstrologers()).unwrap();
-      console.log(payload, 'payload----------------- fetchAstrologersData');
+      if (append) setIsFetchingMore(true);
+      else setLoading(true);
+
+      const payload = await dispatch(
+        getAllAstrologers(`?page=${pageNumber}&search=&sort=${sort}`),
+      ).unwrap();
       if (payload.success) {
-        // const customAstro = payload?.astrologers?.map((astro: any) => {
-        //   return {
-        //     online: astro?.online,
-        //     id: astro?.id,
-        //     name: astro?.user?.name,
-        //     userId: astro?.user?.id,
-        //     user: astro?.user,
-        //     expertise: astro?.expertise,
-        //     pricePerMinuteChat: `${astro?.pricePerMinuteChat} ₹/min`,
-        //     pricePerMinuteVoice: `${astro?.pricePerMinuteVoice} ₹/min`,
-        //     pricePerMinuteVideo: `${astro?.pricePerMinuteVideo} ₹/min`,
-        //     rating: astro?.rating || null,
-        //     experience: `${astro?.experienceYears} Years`,
-        //     languages: astro?.languages,
-        //     imageUri:
-        //       astro?.imgUri ||
-        //       'https://img.freepik.com/free-vector/young-man-orange-hoodie_1308-175788.jpg?ga=GA1.1.1570607994.1749976697&semt=ais_hybrid&w=740',
-        //   };
-        // });
-        setAstrologersData(payload?.astrologers);
+        const newData = payload.astrologers || [];
+        setAstrologersData(prev => (append ? [...prev, ...newData] : newData));
+        setPage(payload.currentPage);
+        setHasMore(!payload.isLastPage);
       }
     } catch (error) {
       console.log('fetchAstrologersData Error : ', error);
     } finally {
-      setLoading(false);
+      if (append) setIsFetchingMore(false);
+      else setLoading(false);
+    }
+  };
+
+  const requestSession = async (astrologer: UserDetail) => {
+    try {
+      const body = {astrologerId: astrologer?.id, duration: 2};
+      const payload = await dispatch(sendSessionRequest(body)).unwrap();
+
+      if (payload.success) {
+        dispatch(setOtherUser(astrologer));
+        navigation.navigate('chat');
+      }
+
+      console.log(payload);
+    } catch (err) {
+      console.log('sendSessionRequest Error : ', err);
     }
   };
   useEffect(() => {
-    fetchAstrologersData();
+    fetchAstrologersData(1);
   }, []);
 
   const handleSessionStart = (astrologer: UserDetail) => {
     if (isProfileComplete) {
-      console.log('handling session');
-
-      setSelectedAstrologer(astrologer);
-      setIsRequestModalOpen(true);
+      if (freeChatUsed) {
+        setSelectedAstrologer(astrologer);
+        setIsRequestModalOpen(true);
+      } else {
+        requestSession(astrologer);
+      }
     } else {
       dispatch(setProfileModelToggle());
     }
@@ -201,52 +187,62 @@ const Astrologers = () => {
           </Text>
         </View>
       ) : (
-        <ScrollView showsVerticalScrollIndicator={false}>
-          <View
-            style={{
-              backgroundColor: colors.primary_surface,
-              flex: 1,
-              paddingHorizontal: scale(12),
-              marginBottom: verticalScale(20),
-            }}>
-            {astrologersData.map((item, idx) => (
-              <Pressable
-                onPress={() =>
-                  navigation.navigate('DetailsProfile', {id: item.id})
-                }
-                key={`card-astrologer-${item.id}`}>
-                <AstrologerCard
-                  id={item.id}
-                  online={item.online}
-                  pricePerMinuteChat={item.pricePerMinuteChat}
-                  pricePerMinuteVideo={item.pricePerMinuteVideo}
-                  pricePerMinuteVoice={item.pricePerMinuteVoice}
-                  expertise={item.expertise}
-                  key={`card-astrologer-${idx}`}
-                  name={item?.user?.name}
-                  rate={''}
-                  rating={4}
-                  experience={item?.experienceYears.toString()}
-                  languages={item?.languages}
-                  imageUri={item?.user?.imgUri}
-                  onCallPress={() => {
-                    console.log('Calling');
-
-                    handleSessionStart(item.user);
-                  }}
-                  onVideoPress={() => {
-                    console.log('Video');
-                    handleSessionStart(item.user);
-                  }}
-                  onChatPress={() => {
-                    console.log('Chat');
-                    handleSessionStart(item.user);
-                  }}
-                />
-              </Pressable>
-            ))}
-          </View>
-        </ScrollView>
+        <FlatList
+          showsVerticalScrollIndicator={false}
+          data={astrologersData}
+          keyExtractor={item => `card-astrologer-${item.id}`}
+          contentContainerStyle={{paddingBottom: verticalScale(20)}}
+          onEndReached={() => {
+            if (hasMore && !isFetchingMore && !loading) {
+              fetchAstrologersData(page + 1, true);
+            }
+          }}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            isFetchingMore ? (
+              <View style={{paddingVertical: 10}}>
+                <ActivityIndicator />
+                <Text style={[textStyle.fs_mont_12_400, {textAlign: 'center'}]}>
+                  Loading more astrologers...
+                </Text>
+              </View>
+            ) : null
+          }
+          renderItem={({item}) => (
+            <Pressable
+              onPress={() =>
+                navigation.navigate('DetailsProfile', {id: item.id})
+              }
+              style={{marginHorizontal: scale(10)}}
+              key={`card-astrologer-${item.id}`}>
+              <AstrologerCard
+                id={item.id}
+                online={item.online}
+                pricePerMinuteChat={item.pricePerMinuteChat}
+                pricePerMinuteVideo={item.pricePerMinuteVideo}
+                pricePerMinuteVoice={item.pricePerMinuteVoice}
+                expertise={item.expertise}
+                name={item?.user?.name}
+                rate={''}
+                rating={4}
+                experience={item?.experienceYears.toString()}
+                languages={item?.languages}
+                imageUri={item?.user?.imgUri}
+                freeChatAvailable={!freeChatUsed}
+                onCallPress={() => handleSessionStart(item.user)}
+                onVideoPress={() => handleSessionStart(item.user)}
+                onChatPress={() => handleSessionStart(item.user)}
+              />
+            </Pressable>
+          )}
+          ListEmptyComponent={
+            !loading && (
+              <Text style={[textStyle.fs_mont_12_400, {textAlign: 'center'}]}>
+                No astrologers found.
+              </Text>
+            )
+          }
+        />
       )}
       <RequestSessionModal
         isOpen={isRequestModalOpen}

@@ -13,7 +13,6 @@ import CustomButton from '../components/custom-button';
 import ChatIcon from '../assets/icons/chat-icon';
 import CallIcon from '../assets/icons/call-icon';
 import {textStyle} from '../constants/text-style';
-import KundliLogo from '../assets/icons/kundli-icon';
 import {scale, scaleFont, verticalScale} from '../utils/sizer';
 import {colors, themeColors} from '../constants/colors';
 import LinearGradient from 'react-native-linear-gradient';
@@ -27,38 +26,54 @@ import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {useUserRole} from '../hooks/use-role';
 import QuickNavigation from '../components/home/quick-navigation';
 import FirstChatFreePopup from '../components/free-chat-popup';
+import {setFreeChatModalShown} from '../store/reducer/auth';
+import {getAllAstrologers} from '../store/reducer/astrologers';
+import {Astrologers as AstrologersType, UserDetail} from '../utils/types';
 
 const Home = () => {
   const [search, setSearch] = useState('');
   const navigation = useNavigation<any>();
-  const [isFirstChatModalOpen, setIsFiirstChatModalOpen] = useState(false);
-  const [headerBgColor, setHeaderBgColor] = useState('color');
+  const [isFirstChatModalOpen, setIsFirstChatModalOpen] = useState(false);
+  const {freeChatUsed} = useAppSelector(state => state.auth.user);
+  const {freeChatModalShown} = useAppSelector(state => state.auth);
+  const dispatch = useAppDispatch();
+  const [loading, setLoading] = useState(false);
+  const [astrologersData, setAstrologersData] = useState<
+    {
+      name: string;
+      expertise: string;
+      about: string;
+      imgUri: string;
+      id: string;
+      userId: string;
+    }[]
+  >([]);
 
-  const user = useAppSelector(state => state.auth.user);
-  const astrologer_detail = useAppSelector(
-    state => state.auth.astrologer_detail,
-  );
-  const userRole = useUserRole();
-  console.log(user, '-----user detail in redux');
-  // const {isProfileComplete} = useAppSelector(state => state.auth);
+  const fetchAstrologersData = async (pageNumber = 1, append = false) => {
+    if (loading) return;
+    try {
+      setLoading(true);
 
-  // const [isPersonalDetailModalOpen, setIsPersonalDetailModalOpen] =
-  //   useState(false);
-  // const [forKundli, setForKundli] = useState(false);
-  // const dispatch = useAppDispatch();
-
-  // const handlePostUserData = async (user: UserPersonalDetail) => {
-  //   try {
-  //     const payload = await dispatch(postUserDetail(user)).unwrap();
-
-  //     if (payload?.success) {
-  //       setIsPersonalDetailModalOpen(false);
-  //       dispatch(setUser(payload.user));
-  //     }
-  //   } catch (err) {
-  //     console.log(err);
-  //   }
-  // };
+      const payload = await dispatch(getAllAstrologers(`?page=1`)).unwrap();
+      console.log(payload, 'payload----------------- fetchAstrologersData');
+      if (payload.success) {
+        const newData =
+          payload.astrologers.map((item: AstrologersType) => ({
+            name: item?.user?.name,
+            expertise: item?.expertise,
+            about: item?.about,
+            id: item?.id,
+            imgUri: item?.user?.imgUri,
+            userId: item?.user?.id,
+          })) || [];
+        setAstrologersData(newData);
+      }
+    } catch (error) {
+      console.log('fetchAstrologersData Error : ', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Function to handle search input changes
   const handleSearchChange = (text: string) => {
@@ -80,43 +95,34 @@ const Home = () => {
         navigation.navigate('KundliForm');
         break;
       case 'match-making':
-        navigation.navigate('MatchMaking');
+        navigation.navigate('Astrologers', {sort: 'marriage'});
         break;
       case 'tarot':
-        navigation.navigate('Tarot');
+        navigation.navigate('Astrologers', {sort: 'tarot'});
         break;
     }
   };
 
   useEffect(() => {
+    if (freeChatUsed || isFirstChatModalOpen || freeChatModalShown) return;
     const timeout = setTimeout(() => {
-      setIsFiirstChatModalOpen(true);
-    }, 500); // open after 500ms
+      setIsFirstChatModalOpen(true);
+      dispatch(setFreeChatModalShown());
+    }, 500);
 
     return () => clearTimeout(timeout);
   }, []);
 
+  useEffect(() => {
+    fetchAstrologersData();
+  }, []);
+
   return (
     <ScreenLayout>
-      {/* <PersonalDetailModal
-        existingDetails={{
-          name: userRole === 'ASTROLOGER' ? user.name : '',
-          gender: '',
-          birthDate: new Date().toISOString().split('T')[0],
-          birthTime: new Date().toTimeString().split(' ')[0],
-          birthPlace: '',
-          latitude: null,
-          longitude: null,
-        }}
-        isOpen={true}
-        onClose={() => {}}
-        onSubmit={data => {}}
-      /> */}
-
       <FirstChatFreePopup
         isOpen={isFirstChatModalOpen}
         onClose={() => {
-          setIsFiirstChatModalOpen(false);
+          setIsFirstChatModalOpen(false);
         }}
         onClaimPress={() => {
           navigation.navigate('Astrologers');
@@ -196,7 +202,7 @@ const Home = () => {
               ]}>
               Our Astrologers
             </Text>
-            <SlidingCard />
+            <SlidingCard data={astrologersData} />
           </View>
           <View
             style={{
@@ -225,7 +231,7 @@ const Home = () => {
               Top Astrologers
             </Text>
             <Carousel
-              data={introCardData}
+              data={astrologersData}
               pagination={true}
               cardWidthScale={0.9}
               CardComponent={AstrologerCarosel}

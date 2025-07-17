@@ -1,4 +1,4 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React from 'react';
 import {
   Modal,
   View,
@@ -12,12 +12,10 @@ import {
   KeyboardAvoidingView,
   ScrollView,
   Platform,
-  Animated, // Import Animated
-  Easing, // Import Easing
 } from 'react-native';
 import {moderateScale, scale} from '../utils/sizer';
 import {textStyle} from '../constants/text-style';
-import {colors, themeColors} from '../constants/colors'; // Ensure themeColors is imported
+import {themeColors} from '../constants/colors';
 
 type HeaderObject = {
   title: string | React.ReactNode;
@@ -32,23 +30,18 @@ type CustomModalProps = {
   header?: HeaderContent;
   footer?: React.ReactNode;
   children: React.ReactNode;
-
-  // Style overrides
   backdropStyle?: StyleProp<ViewStyle>;
   containerStyle?: StyleProp<ViewStyle>;
   modalStyle?: StyleProp<ViewStyle>;
   headerStyle?: StyleProp<ViewStyle>;
   contentStyle?: StyleProp<ViewStyle>;
   footerStyle?: StyleProp<ViewStyle>;
-
   showCloseButton?: boolean;
   closeOnBackdropPress?: boolean;
-
-  // Keyboard and scroll options
   enableKeyboardAvoiding?: boolean;
   enableScrollView?: boolean;
   keyboardVerticalOffset?: number;
-  scrollViewProps?: any; // Consider a more specific type if possible
+  scrollViewProps?: any;
 };
 
 const CustomModal: React.FC<CustomModalProps> = ({
@@ -58,7 +51,6 @@ const CustomModal: React.FC<CustomModalProps> = ({
   footer,
   children,
   backdropStyle,
-  containerStyle,
   modalStyle,
   headerStyle,
   contentStyle,
@@ -70,47 +62,6 @@ const CustomModal: React.FC<CustomModalProps> = ({
   keyboardVerticalOffset = 0,
   scrollViewProps = {},
 }) => {
-  const scaleAnim = useRef(new Animated.Value(0.8)).current; // Start slightly scaled down
-  const opacityAnim = useRef(new Animated.Value(0)).current;
-
-  // Animation logic for modal appearance/disappearance
-  useEffect(() => {
-    if (visible) {
-      // Reset values before showing to ensure smooth re-entry
-      scaleAnim.setValue(0.8);
-      opacityAnim.setValue(0);
-      Animated.parallel([
-        Animated.timing(scaleAnim, {
-          toValue: 1,
-          duration: 300,
-          easing: Easing.out(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 1,
-          duration: 200,
-          easing: Easing.linear,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    } else {
-      Animated.parallel([
-        Animated.timing(scaleAnim, {
-          toValue: 0.8,
-          duration: 200,
-          easing: Easing.in(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(opacityAnim, {
-          toValue: 0,
-          duration: 200,
-          easing: Easing.linear,
-          useNativeDriver: true,
-        }),
-      ]).start();
-    }
-  }, [visible]); // Depend on the 'visible' prop
-
   function isHeaderObject(
     headerContent: HeaderContent,
   ): headerContent is HeaderObject {
@@ -125,7 +76,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
     if (!header && !showCloseButton) return null;
 
     let headerTitle: React.ReactNode = null;
-    let headerDescription: string | undefined = undefined;
+    let headerDescription: string | undefined;
 
     if (React.isValidElement(header)) {
       headerTitle = header;
@@ -138,8 +89,6 @@ const CustomModal: React.FC<CustomModalProps> = ({
         );
       headerDescription = header.description;
     }
-
-    console.log(showCloseButton, '-------------show close btn');
 
     return (
       <View style={[styles.header, headerStyle]}>
@@ -170,7 +119,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
     if (enableScrollView) {
       return (
         <ScrollView
-          nestedScrollEnabled={true}
+          nestedScrollEnabled
           style={styles.scrollView}
           contentContainerStyle={styles.scrollContentContainer}
           keyboardShouldPersistTaps="handled"
@@ -185,19 +134,11 @@ const CustomModal: React.FC<CustomModalProps> = ({
   };
 
   const renderModalContent = () => (
-    <Animated.View // Apply animations here
-      style={[
-        styles.modal,
-        modalStyle,
-        {
-          transform: [{scale: scaleAnim}],
-          opacity: opacityAnim,
-        },
-      ]}>
+    <View style={[styles.modal, modalStyle]}>
       {renderHeader()}
       {renderContent()}
       {footer && <View style={[styles.footer, footerStyle]}>{footer}</View>}
-    </Animated.View>
+    </View>
   );
 
   const modalWrapper = enableKeyboardAvoiding ? (
@@ -216,10 +157,8 @@ const CustomModal: React.FC<CustomModalProps> = ({
       <TouchableWithoutFeedback
         onPress={closeOnBackdropPress ? onClose : undefined}>
         <View style={[styles.backdrop, backdropStyle]}>
-          {/* This empty view ensures the backdrop TouchableWithoutFeedback covers the whole screen */}
           <View style={styles.backdropTouchable} />
           <TouchableWithoutFeedback onPress={() => {}}>
-            {/* This inner TouchableWithoutFeedback prevents closing when tapping inside the modal content */}
             {modalWrapper}
           </TouchableWithoutFeedback>
         </View>
@@ -231,7 +170,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: themeColors.surface.overlay, // Using themeColors for consistency
+    backgroundColor: themeColors.surface.overlay,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -249,56 +188,56 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   modal: {
-    backgroundColor: themeColors.surface.background, // Primary surface for modal background
-    borderRadius: moderateScale(12), // Slightly smaller radius for elegance
+    backgroundColor: themeColors.surface.background,
+    borderRadius: moderateScale(12),
     overflow: 'hidden',
     shadowColor: '#000',
-    shadowOffset: {width: 0, height: 6}, // More pronounced shadow
+    shadowOffset: {width: 0, height: 6},
     shadowOpacity: 0.25,
-    shadowRadius: 12, // Larger shadow radius for softness
-    elevation: 12, // Higher elevation for Android
-    width: '95%', // Default width
-    maxWidth: 400, // Max width for larger screens
-    maxHeight: '90%', // Max height to prevent overflow
+    shadowRadius: 12,
+    elevation: 12,
+    width: '95%',
+    maxWidth: 400,
+    maxHeight: '90%',
   },
   header: {
     paddingHorizontal: scale(20),
     paddingVertical: scale(15),
     borderBottomWidth: StyleSheet.hairlineWidth,
-    borderBottomColor: themeColors.border.secondary, // Themed border color
-    backgroundColor: themeColors.surface.background, // Slightly different background for header
+    borderBottomColor: themeColors.border.secondary,
+    backgroundColor: themeColors.surface.background,
   },
   headerContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center', // Align items center for better vertical alignment
+    alignItems: 'center',
   },
   headerTextContainer: {
-    flex: 1, // Allow text to take up space
-    marginRight: scale(10), // Space before close button
+    flex: 1,
+    marginRight: scale(10),
   },
   headerTitleText: {
-    ...textStyle.fs_mont_18_700, // Using provided textStyle
-    color: themeColors.text.primary, // Themed text color
+    ...textStyle.fs_mont_18_700,
+    color: themeColors.text.primary,
     fontWeight: 'bold',
   },
   headerDescriptionText: {
     fontSize: 14,
-    color: themeColors.text.secondary, // Themed text color
+    color: themeColors.text.secondary,
     marginTop: scale(4),
   },
   closeButton: {
-    width: scale(30), // Fixed size for touch target
+    width: scale(30),
     height: scale(30),
-    borderRadius: scale(15), // Circular button
-    backgroundColor: themeColors.surface.secondarySurface, // Subtle background for close button
+    borderRadius: scale(15),
+    backgroundColor: themeColors.surface.secondarySurface,
     justifyContent: 'center',
     alignItems: 'center',
   },
   closeText: {
     fontSize: 20,
     fontWeight: '600',
-    color: themeColors.text.primary, // Themed text color for close icon
+    color: themeColors.text.primary,
   },
   scrollView: {
     flexGrow: 1,
@@ -307,16 +246,16 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   content: {
-    paddingHorizontal: scale(20), // Increased padding
+    paddingHorizontal: scale(20),
     paddingVertical: scale(20),
-    flexGrow: 1, // Allow content to expand
+    flexGrow: 1,
   },
   footer: {
     paddingHorizontal: scale(20),
     paddingVertical: scale(15),
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: themeColors.border.secondary, // Themed border color
-    backgroundColor: themeColors.surface.background, // Consistent with header background
+    borderTopColor: themeColors.border.secondary,
+    backgroundColor: themeColors.surface.background,
   },
 });
 

@@ -30,7 +30,7 @@ const BottomNavigationBar = () => {
           icon: PeopleIcon,
         },
     ,
-    {label: 'Consult', route: 'ChatHistory', icon: HistoryIcon},
+    {label: 'History', route: 'ChatHistory', icon: HistoryIcon},
     {label: 'Remedies', route: 'Remedies', icon: StoreIcon},
   ];
 

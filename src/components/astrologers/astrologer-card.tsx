@@ -1,7 +1,7 @@
 import React from 'react';
 import {View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
 import {scale, verticalScale, moderateScale} from '../../utils/sizer';
-import {colors} from '../../constants/colors';
+import {colors, themeColors} from '../../constants/colors';
 import LikeIcon from '../../assets/icons/like-icon';
 import StarIcon from '../../assets/icons/star-icon';
 import CallIcon from '../../assets/icons/call-icon';
@@ -26,6 +26,7 @@ type AstrologerCardProps = {
   pricePerMinuteVoice: number;
   expertise: string;
   online: boolean;
+  freeChatAvailable: boolean;
 };
 
 const AstrologerCard: React.FC<AstrologerCardProps> = ({
@@ -43,6 +44,7 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
   pricePerMinuteVideo,
   pricePerMinuteVoice,
   online,
+  freeChatAvailable,
 }) => {
   return (
     <View style={styles.card}>
@@ -144,18 +146,50 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
         </View>
 
         <View onStartShouldSetResponder={() => true}>
-          <TouchableOpacity onPress={onChatPress} style={styles.button}>
+          <TouchableOpacity
+            onPress={onChatPress}
+            style={[
+              styles.button,
+              {
+                backgroundColor: freeChatAvailable
+                  ? themeColors.button.success
+                  : themeColors.surface.background,
+                borderColor: freeChatAvailable
+                  ? themeColors.button.success
+                  : colors.primary_border,
+              },
+            ]}>
             <View
               style={{
                 padding: moderateScale(4),
-                backgroundColor: colors.secondary_Card,
+                backgroundColor: freeChatAvailable
+                  ? themeColors.surface.background
+                  : colors.secondary_Card,
                 borderRadius: scale(12),
               }}>
-              <ChatIcon height={16} width={16} colors={[colors.whiteText]} />
+              <ChatIcon
+                height={16}
+                width={16}
+                colors={[
+                  freeChatAvailable
+                    ? themeColors.text.primary
+                    : colors.whiteText,
+                ]}
+              />
             </View>
 
-            <Text style={styles.buttonText}>
-              {formatPrice(pricePerMinuteChat, 'min')}
+            <Text
+              style={[
+                styles.buttonText,
+                {
+                  color: freeChatAvailable
+                    ? themeColors.text.light
+                    : themeColors.text.primary,
+                },
+              ]}>
+              {freeChatAvailable
+                ? 'Free Chat'
+                : formatPrice(pricePerMinuteChat, 'min')}
             </Text>
           </TouchableOpacity>
         </View>

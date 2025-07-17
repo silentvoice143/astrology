@@ -1,4 +1,4 @@
-import React, {ReactNode, useRef} from 'react';
+import React, {ReactNode, useRef, useState} from 'react';
 import {View} from 'react-native';
 import Header from './header';
 import Sidebar, {SidebarRef} from './sidebar';
@@ -25,10 +25,12 @@ const ScreenLayout: React.FC<ScreenLayoutProps> = ({
   const {isProfileModalOpen, isProfileComplete} = useAppSelector(
     state => state.auth,
   );
+  const [isSaving, setIsSaving] = useState(false);
 
   const dispatch = useAppDispatch();
 
   const handlePostUserData = async (user: UserPersonalDetail) => {
+    setIsSaving(true);
     try {
       const payload = await dispatch(postUserDetail(user)).unwrap();
 
@@ -38,6 +40,8 @@ const ScreenLayout: React.FC<ScreenLayoutProps> = ({
       }
     } catch (err) {
       console.log(err);
+    } finally {
+      setIsSaving(false);
     }
   };
   return (
@@ -55,6 +59,7 @@ const ScreenLayout: React.FC<ScreenLayoutProps> = ({
       </View>
       <BottomNavigationBar />
       <PersonalDetailModal
+        isSaving={isSaving}
         isOpen={isProfileModalOpen}
         onClose={() => {
           if (isProfileModalOpen) {
