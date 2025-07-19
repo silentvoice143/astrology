@@ -26,6 +26,9 @@ import HelpIcon from '../assets/icons/customer-support-icon';
 import SettingIcon from '../assets/icons/setting-icon';
 import KundliBookIcon from '../assets/icons/kundli-book-icon';
 import LogoutIcon from '../assets/icons/logout-icon';
+import PeopleIcon from '../assets/icons/people-icon';
+import {useUserRole} from '../hooks/use-role';
+import HoroscopeIcon from '../assets/icons/horoscope-icon';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -35,41 +38,74 @@ export type SidebarRef = {
 };
 
 const navItems = [
-  {title: 'Home', href: 'Home', icon: <HomeIcon size={20} />},
-  // {title: 'Daily Horoscope', href: 'DailyHoroscope'},
+  {
+    title: 'Home',
+    href: 'Home',
+    icon: <HomeIcon size={20} />,
+    allowed: ['USER', 'ASTROLOGER'],
+  },
+  {
+    title: 'Horoscope',
+    href: 'Horoscope',
+    icon: <HoroscopeIcon strokeWidth={2} size={20} />,
+    allowed: ['USER', 'ASTROLOGER'],
+  },
   {
     title: 'Kundli',
     href: 'KundliForm',
     icon: <KundliBookIcon strokeWidth={2} size={20} />,
+    allowed: ['USER', 'ASTROLOGER'],
   },
   {
     title: 'Astrologers',
     href: 'Astrologers',
     icon: <AstrologerIcon size={20} />,
+    allowed: ['USER', 'ASTROLOGER'],
+  },
+  {
+    title: 'Requests',
+    href: 'session-requests',
+    icon: <PeopleIcon size={20} />,
+    allowed: ['ASTROLOGER'],
   },
   {
     title: 'Chat History',
     href: 'ChatHistory',
     params: {type: 'user'},
     icon: <ChatIcon size={20} />,
+    allowed: ['USER', 'ASTROLOGER'],
   },
   {
     title: 'Wallet',
     href: 'Wallet',
     params: {type: 'user'},
     icon: <WalletIcon size={20} />,
+    allowed: ['USER', 'ASTROLOGER'],
   },
   {
     title: 'Customer Support',
     href: 'customer-support',
     icon: <HelpIcon size={20} />,
+    allowed: ['USER', 'ASTROLOGER'],
   },
-  {title: 'Setting', href: 'Setting', icon: <SettingIcon size={20} />},
-  {title: 'About', href: 'about', icon: <AboutIcon size={20} />},
+
+  {
+    title: 'Setting',
+    href: 'Setting',
+    icon: <SettingIcon size={20} />,
+    allowed: ['USER', 'ASTROLOGER'],
+  },
+  {
+    title: 'About',
+    href: 'about',
+    icon: <AboutIcon size={20} />,
+    allowed: ['USER', 'ASTROLOGER'],
+  },
   {
     title: 'Logout',
     href: '',
     icon: <LogoutIcon color={themeColors.status.error.base} size={20} />,
+    allowed: ['USER', 'ASTROLOGER'],
   },
 ];
 
@@ -77,7 +113,7 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
   const [visible, setVisible] = useState(false);
   const sidebarAnim = useRef(new Animated.Value(-SCREEN_WIDTH)).current;
   const overlayAnim = useRef(new Animated.Value(0)).current;
-
+  const role = useUserRole();
   const dispatch = useAppDispatch();
   const navigation = useNavigation<any>();
   const {user} = useAppSelector(state => state.auth);
@@ -143,6 +179,8 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
     navigation.navigate(href);
   };
 
+  const filteredNavitem = navItems.filter(item => item.allowed?.includes(role));
+
   return (
     <View style={StyleSheet.absoluteFill}>
       <Animated.View style={[styles.overlay, {opacity: overlayAnim}]}>
@@ -188,7 +226,7 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
 
           {/* Navigation Tabs */}
           <View style={styles.navSection}>
-            {navItems.map((item, index) => (
+            {filteredNavitem.map((item, index) => (
               <TouchableOpacity
                 key={index}
                 style={styles.navItem}

@@ -9,6 +9,7 @@ import VideoCallIcon from '../../assets/icons/video-call-icon';
 import ChatIcon from '../../assets/icons/chat-icon';
 import {textStyle} from '../../constants/text-style';
 import {formatPrice} from '../../utils/utils';
+import Avatar from '../avatar';
 
 type AstrologerCardProps = {
   id: string;
@@ -49,18 +50,28 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
   return (
     <View style={styles.card}>
       <View style={styles.topSection}>
-        <View>
+        <View style={{}}>
           <View
             style={{
               position: 'absolute',
-              right: -2,
+              right: 4,
+              top: 1,
               width: 12,
               height: 12,
               zIndex: 999,
               borderRadius: 6,
+
               backgroundColor: online ? colors.success.base : colors.error.base,
             }}></View>
-          <Image source={{uri: imageUri}} style={styles.avatar} />
+          <Avatar
+            image={{uri: imageUri}}
+            fallbackText={name.charAt(0).toUpperCase()}
+            containerStyle={{
+              borderWidth: 1,
+              borderColor: online ? colors.success.base : colors.error.base,
+              ...styles.avatar,
+            }}
+          />
         </View>
 
         <View style={{flex: 1, marginLeft: scale(12)}}>

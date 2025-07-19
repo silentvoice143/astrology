@@ -146,14 +146,16 @@ const ChatHistory = () => {
       </View>
 
       {/* tab  */}
-      <Tab
-        tabs={[
-          {key: 'chat', label: 'Chat'},
-          {key: 'call', label: 'Call'},
-        ]}
-        onTabChange={tab => setActiveTab(tab)}
-        initialTab="chat"
-      />
+      <View>
+        <Tab
+          tabs={[
+            {key: 'chat', label: 'Chat'},
+            {key: 'call', label: 'Call'},
+          ]}
+          onTabChange={tab => setActiveTab(tab)}
+          initialTab="chat"
+        />
+      </View>
 
       {/* Content based on active tab */}
       {activeTab === 'chat' ? (

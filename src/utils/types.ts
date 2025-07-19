@@ -167,6 +167,7 @@ export interface SessionState {
   otherUser: UserDetail | null;
   sessionEnded: boolean;
   messages: Message[];
+  queueRequestCount: number;
 }
 
 export interface Message {

@@ -25,6 +25,7 @@ import LanguageSetting from '../screens/settings/language-setting';
 import TermsAndConditions from '../screens/settings/terms-conditions';
 import PofileEdit from '../screens/pofile-edit';
 import ProfileEdit from '../screens/pofile-edit';
+import {useQueueCountOnResume} from '../hooks/use-queue-count';
 
 const Stack = createNativeStackNavigator();
 
@@ -46,6 +47,7 @@ export default function PrivateRoutes() {
   //   prevSessionEnded.current = sessionEnded; // update ref
   // }, [sessionEnded]);
   useSessionEvents(user?.id, isAuthenticated);
+  useQueueCountOnResume(isAuthenticated, role);
   console.log('calling private route ------');
   return (
     <Stack.Navigator

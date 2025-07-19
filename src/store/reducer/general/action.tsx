@@ -19,3 +19,18 @@ export const uploadImage = createAsyncThunk<
     return rejectWithValue(error.response?.data || error.message);
   }
 });
+
+export const getBanner = createAsyncThunk<
+  any, // response type
+  void, // payload must be FormData
+  {rejectValue: any}
+>('banner-get', async (formData, {rejectWithValue}) => {
+  console.log(formData, 'this api hits,....');
+  try {
+    const response = await api.get('/api/v1/bannar');
+
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});

@@ -6,6 +6,7 @@ import {
   Image,
   StyleSheet,
   ScrollView,
+  Dimensions,
 } from 'react-native';
 import ScreenLayout from '../components/screen-layout';
 import AnimatedSearchInput from '../components/custom-searchbox';
@@ -14,24 +15,28 @@ import ChatIcon from '../assets/icons/chat-icon';
 import CallIcon from '../assets/icons/call-icon';
 import {textStyle} from '../constants/text-style';
 import {scale, scaleFont, verticalScale} from '../utils/sizer';
-import {colors, themeColors} from '../constants/colors';
+import {colors} from '../constants/colors';
 import LinearGradient from 'react-native-linear-gradient';
 import SlidingCard from '../components/home/card-carosel';
-import AstrologerCarosel from '../components/home/top-astrologer-carosel';
-import Carousel from '../components/carosel';
-import PersonalDetailModal from '../components/personal-detail-modal';
 import {useNavigation} from '@react-navigation/native';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 
-import {useUserRole} from '../hooks/use-role';
 import QuickNavigation from '../components/home/quick-navigation';
 import FirstChatFreePopup from '../components/free-chat-popup';
 import {setFreeChatModalShown} from '../store/reducer/auth';
 import {getAllAstrologers} from '../store/reducer/astrologers';
 import {Astrologers as AstrologersType, UserDetail} from '../utils/types';
+import Carousel, {ICarouselInstance} from 'react-native-reanimated-carousel';
+import {useSharedValue} from 'react-native-reanimated';
+import IntroCard from '../components/home/intro-card';
+import {getBanner} from '../store/reducer/general';
+
+const width = Dimensions.get('window').width - 40;
+const data = [...new Array(6).keys()];
 
 const Home = () => {
   const [search, setSearch] = useState('');
+  const [banner, setBanner] = useState<{imgUrl: string; id: string}[]>([]);
   const navigation = useNavigation<any>();
   const [isFirstChatModalOpen, setIsFirstChatModalOpen] = useState(false);
   const {freeChatUsed} = useAppSelector(state => state.auth.user);
@@ -48,6 +53,8 @@ const Home = () => {
       userId: string;
     }[]
   >([]);
+  const ref = React.useRef<ICarouselInstance>(null);
+  const progress = useSharedValue<number>(0);
 
   const fetchAstrologersData = async (pageNumber = 1, append = false) => {
     if (loading) return;
@@ -55,7 +62,7 @@ const Home = () => {
       setLoading(true);
 
       const payload = await dispatch(getAllAstrologers(`?page=1`)).unwrap();
-      console.log(payload, 'payload----------------- fetchAstrologersData');
+
       if (payload.success) {
         const newData =
           payload.astrologers.map((item: AstrologersType) => ({
@@ -70,6 +77,24 @@ const Home = () => {
       }
     } catch (error) {
       console.log('fetchAstrologersData Error : ', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getBannerData = async () => {
+    if (loading) return;
+    try {
+      setLoading(true);
+
+      const payload = await dispatch(getBanner()).unwrap();
+      console.log(payload, '----data');
+
+      if (payload.success) {
+        setBanner(payload.bannars);
+      }
+    } catch (error) {
+      console.log('getBannerData Error : ', error);
     } finally {
       setLoading(false);
     }
@@ -115,6 +140,7 @@ const Home = () => {
 
   useEffect(() => {
     fetchAstrologersData();
+    getBannerData();
   }, []);
 
   return (
@@ -130,9 +156,11 @@ const Home = () => {
       />
 
       <ScrollView
+        keyboardShouldPersistTaps="handled"
         scrollEventThrottle={16}
         style={HomeStyle.container}
-        showsVerticalScrollIndicator={false}>
+        showsVerticalScrollIndicator={false}
+        nestedScrollEnabled={true}>
         {/* Greeting */}
         <LinearGradient
           colors={[
@@ -181,12 +209,33 @@ const Home = () => {
           </View>
 
           {/* banner */}
-          <View
-            style={{
-              paddingHorizontal: scale(20),
-            }}>
-            <Image source={require('../assets/imgs/banner.png')} />
-          </View>
+          {banner.length > 0 && (
+            <View
+              style={{
+                paddingHorizontal: scale(20),
+              }}>
+              <Carousel
+                ref={ref}
+                height={verticalScale(100)}
+                width={width}
+                data={banner}
+                onProgressChange={progress}
+                autoPlay={true}
+                scrollAnimationDuration={2000}
+                renderItem={({index, item}) => (
+                  <Image
+                    source={{uri: item?.imgUrl}}
+                    resizeMode="cover"
+                    style={{
+                      height: verticalScale(100),
+                      width: '100%',
+                      borderRadius: scale(16),
+                    }}
+                  />
+                )}
+              />
+            </View>
+          )}
 
           {/* Our Astrologer  */}
           <View style={{}}>
@@ -231,11 +280,40 @@ const Home = () => {
               Top Astrologers
             </Text>
             <Carousel
+              ref={ref}
+              height={width / 2}
+              width={width}
+              data={astrologersData}
+              onProgressChange={progress}
+              mode="parallax"
+              modeConfig={{
+                parallaxScrollingScale: 1,
+                parallaxScrollingOffset: 10,
+                parallaxAdjacentItemScale: 0.8,
+              }}
+              renderItem={({item, index}) => (
+                <View
+                  style={{
+                    flex: 1,
+
+                    justifyContent: 'center',
+                  }}>
+                  <IntroCard
+                    id={item.id}
+                    name={item.name}
+                    rate={'21'}
+                    avatar={item.imgUri}
+                    specialty={item.expertise}
+                  />
+                </View>
+              )}
+            />
+            {/* <Carousel
               data={astrologersData}
               pagination={true}
               cardWidthScale={0.9}
               CardComponent={AstrologerCarosel}
-            />
+            /> */}
           </View>
         </View>
       </ScrollView>

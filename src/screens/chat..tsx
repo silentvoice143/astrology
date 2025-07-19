@@ -253,10 +253,27 @@ export const ChatScreenDemo = () => {
       dispatch(clearSession());
     };
   }, []);
+
   useEffect(() => {
     if (!session) return;
     getChatMessagesDetails(1);
   }, [session]);
+
+  useEffect(() => {
+    return () => {
+      if (userId && otherUserId) {
+        send(
+          '/chat.leave',
+          {},
+          JSON.stringify({
+            userId: userId, // UUID of the user who cancels
+            astrologerId: otherUserId, // UUID of the astrologer
+          }),
+        );
+        console.log('Leave request sent to /chat.leave');
+      }
+    };
+  }, [userId, otherUserId]);
 
   const renderMessage = ({item}: {item: Message}) => {
     const isMine = item.senderId === userId;
@@ -310,15 +327,15 @@ export const ChatScreenDemo = () => {
             <View
               style={{
                 position: 'absolute',
-                top: 5,
+                top: 8,
                 right: 0,
-                height: scale(8),
-                width: scale(8),
+                height: scale(10),
+                width: scale(10),
                 backgroundColor:
                   session?.status === 'ACTIVE'
                     ? colors.success.base
                     : colors.error.base,
-                borderRadius: scale(4),
+                borderRadius: scale(6),
               }}></View>
           </View>
           <View>
@@ -362,7 +379,7 @@ export const ChatScreenDemo = () => {
             </Text>
           </View>
         )}
-        {session?.status !== 'ACTIVE' && (
+        {/* {session?.status !== 'ACTIVE' && (
           <View
             style={{
               backgroundColor: themeColors.status.success.base,
@@ -378,7 +395,7 @@ export const ChatScreenDemo = () => {
               Chat Already Ended
             </Text>
           </View>
-        )}
+        )} */}
         {!session ? (
           <View style={styles.waitingContainer}>
             <Text style={styles.waitingText}>
@@ -428,7 +445,7 @@ export const ChatScreenDemo = () => {
             placeholder="Type a message..."
             onSubmitEditing={handleSend}
             returnKeyType="send"
-            // editable={!!session && session.status === 'ACTIVE'}
+            editable={!!session && session.status === 'ACTIVE'}
           />
           <View style={{flexDirection: 'row', gap: scale(8)}}>
             <TouchableOpacity
