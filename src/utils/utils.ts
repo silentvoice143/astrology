@@ -119,3 +119,12 @@ export function formatTimeToDateString(
 
   return formatted;
 }
+
+export function getFormattedDate() {
+  const date = new Date(); // July 18, 2025 (months are 0-based)
+  return {
+    day: date.getDate(),
+    month: date.getMonth() + 1,
+    year: date.getFullYear(),
+  };
+}

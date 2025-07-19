@@ -22,6 +22,7 @@ const initialState: SessionState = {
   otherUser: null,
   sessionEnded: true,
   messages: [],
+  queueRequestCount: 0,
 };
 
 const sessionSlice = createSlice({
@@ -53,6 +54,15 @@ const sessionSlice = createSlice({
     prependMessages(state, action: PayloadAction<Message[]>) {
       state.messages = [...state.messages, ...action.payload]; // older messages at the start
     },
+    incrementQueueRequest: state => {
+      state.queueRequestCount += 1;
+    },
+    clearQueueRequestCount: state => {
+      state.queueRequestCount = 0;
+    },
+    setQueueCount: (state, action) => {
+      state.queueRequestCount = action.payload;
+    },
   },
   extraReducers: builder => {
     builder.addCase(sendSessionRequest.fulfilled, state => {});
@@ -71,6 +81,9 @@ export const {
   addMessage,
   prependMessages,
   setMessage,
+  setQueueCount,
+  incrementQueueRequest,
+  clearQueueRequestCount,
 } = sessionSlice.actions;
 
 export {
