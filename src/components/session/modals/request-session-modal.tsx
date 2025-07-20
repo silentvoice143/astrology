@@ -179,6 +179,9 @@ const RequestSessionModal = ({
 
       console.log(body, payload, '----session request body & response');
 
+      
+      
+
       if (payload.success) {
         dispatch(setOtherUser(astrologer));
         onClose();
@@ -187,7 +190,7 @@ const RequestSessionModal = ({
           navigation.navigate('chat');
         } else {
           navigation.navigate('call', {
-            callType: selectedSessionType,
+            callType: selectedSessionType?.toUpperCase(),
             astrologer: {
               id: astrologer.id,
               name: astrologer.name,

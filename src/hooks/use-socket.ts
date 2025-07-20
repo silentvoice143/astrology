@@ -13,8 +13,8 @@ export const useWebSocket = (userId: string, socketUrl?: string) => {
     if (!singletonService) {
       singletonService = new WebSocketService(
         userId,
-        socketUrl || 'https://astrosevaa.com/ws-chat',
-        // socketUrl || 'https://quagga-driving-socially.ngrok-free.app/ws-chat',
+        // socketUrl || 'https://astrosevaa.com/ws-chat',
+        socketUrl || 'https://quagga-driving-socially.ngrok-free.app/ws-chat',
         // socketUrl || 'https://gorilla-fitting-feline.ngrok-free.app/ws-chat',
       );
 

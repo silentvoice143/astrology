@@ -1,11 +1,21 @@
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import {useWebSocket} from './use-socket';
-import {addMessage, clearSession, setSession} from '../store/reducer/session';
+import {
+  addMessage,
+  clearSession,
+  setCallSession,
+  setSession,
+} from '../store/reducer/session';
 import {useAppDispatch, useAppSelector} from './redux-hook';
 import {decodeMessageBody} from '../utils/utils';
 
 import {useUserRole} from './use-role';
 import Toast from 'react-native-toast-message';
+
+interface CallRequest {
+  userId: string;
+  callType: 'VOICE' | 'VIDEO';
+}
 
 let hasSubscribed = false;
 
@@ -17,6 +27,11 @@ export const useSessionEvents = (
   const dispatch = useAppDispatch();
   const {session} = useAppSelector(state => state.session);
   const role = useUserRole();
+  const [callRequestNotification, setCallRequestNotification] = useState(false);
+  const [callRequest, setCallRequest] = useState<CallRequest>({
+    userId: '',
+    callType: 'VOICE',
+  });
 
   useEffect(() => {
     // Guard: If already subscribed, don't do it again
@@ -25,16 +40,30 @@ export const useSessionEvents = (
     console.log('[useSessionEvents] Subscribing globally...');
     hasSubscribed = true; // mark as subscribed
 
-    const queueSub = subscribe(`/topic/queue/${userId}`, msg => {
+    const queueSub = subscribe(`/topic/queue/${userId}`, data => {
       try {
-        console.log(decodeMessageBody(msg));
+        const res = JSON.parse(decodeMessageBody(data));
+        console.log(res, 'data queue');
+
         Toast.show({
           type: 'success',
           text1: 'Session',
-          text2: decodeMessageBody(msg),
+          text2: res.msg,
         });
+        setCallRequest(res);
+        setCallRequestNotification(true);
       } catch (err) {
         console.error('Failed to parse queue message:', err);
+      }
+    });
+
+    const callSessionSub = subscribe(`/topic/call/${userId}/session`, msg => {
+      try {
+        const sessionData = JSON.parse(decodeMessageBody(msg));
+        console.log('Session details received:', sessionData);
+        dispatch(setCallSession(sessionData));
+      } catch (err) {
+        console.error('Session details parse error:', err);
       }
     });
 
@@ -60,6 +89,7 @@ export const useSessionEvents = (
       console.log('[useSessionEvents] Cleaning up global subscriptions...');
       queueSub?.unsubscribe();
       chatSub?.unsubscribe();
+      callSessionSub?.unsubscribe();
 
       hasSubscribed = false; // allow re-subscription if needed on remount
     };
@@ -93,4 +123,6 @@ export const useSessionEvents = (
       chatEnd?.unsubscribe();
     };
   }, [session, subscribe, userId]);
+
+  return {callRequest, callRequestNotification};
 };

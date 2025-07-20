@@ -15,7 +15,7 @@ import {useNavigation} from '@react-navigation/native';
 import {useUserRole} from '../hooks/use-role';
 import {useSessionEvents} from '../hooks/use-session-events';
 import About from '../screens/about';
-import Call from '../screens/call';
+import Call from '../screens/call/call';
 
 const Stack = createNativeStackNavigator();
 

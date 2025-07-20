@@ -12,7 +12,7 @@ export const getAllAstrologers = createAsyncThunk<
   ThunkApiConfig
 >('astrologers/getAllAstrologers', async (_, {rejectWithValue}) => {
   try {
-    const response = await api.get('/api/v1/astrologers');
+    const response = await api.get('/api/v1/astrologers?size=20');
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data || error.message);
