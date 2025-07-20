@@ -86,8 +86,12 @@ export class WebSocketService {
     if (this.client) {
       this.subscriptions.forEach(sub => sub.unsubscribe());
       this.subscriptions = [];
-      this.pendingSubscriptions = []; // 🔹 clear pending subs
+      this.activeSubscriptions = []; // 🔹 Clear this too
+      this.pendingSubscriptions = [];
       this.client.deactivate();
+      console.log(
+        '[WebSocketService] All subscriptions cleared and client deactivated',
+      );
     }
   }
 
@@ -96,6 +100,30 @@ export class WebSocketService {
     callback: (message: IMessage) => void,
   ): StompSubscription | undefined {
     console.log(`[WebSocketService] subscribe() called for ${destination}`);
+    console.log(
+      this.activeSubscriptions,
+      this.pendingSubscriptions,
+      'already subscribed and pending one',
+    );
+    const existingActive = this.activeSubscriptions.find(
+      sub => sub.destination === destination,
+    );
+    if (existingActive) {
+      console.warn(
+        `[WebSocketService] Already actively subscribed to ${destination}`,
+      );
+      return existingActive.stompSubscription; // 🔹 return existing subscription
+    }
+
+    const isPending = this.pendingSubscriptions.find(
+      sub => sub.destination === destination,
+    );
+    if (isPending) {
+      console.warn(
+        `[WebSocketService] Subscription already pending for ${destination}`,
+      );
+      return undefined; // 🔹 not subscribed yet, can't return one
+    }
     if (this.client && this.client.connected) {
       const subscription = this.client.subscribe(destination, callback);
       this.activeSubscriptions.push({
@@ -114,6 +142,27 @@ export class WebSocketService {
       );
       this.pendingSubscriptions.push({destination, callback});
       return undefined;
+    }
+  }
+
+  public unsubscribe(destination: string): void {
+    const index = this.activeSubscriptions.findIndex(
+      sub => sub.destination === destination,
+    );
+
+    if (index !== -1) {
+      const {stompSubscription} = this.activeSubscriptions[index];
+      stompSubscription.unsubscribe(); // 🔹 Unsubscribe from STOMP
+      this.activeSubscriptions.splice(index, 1); // 🔹 Remove from active
+      this.subscriptions = this.subscriptions.filter(
+        sub => sub.id !== stompSubscription.id,
+      ); // 🔹 Remove from global list
+
+      console.log(`[WebSocketService] Unsubscribed from ${destination}`);
+    } else {
+      console.warn(
+        `[WebSocketService] No active subscription found for ${destination}`,
+      );
     }
   }
 

@@ -14,6 +14,7 @@ import {
   getChatMessages,
   getQueueRequest,
   sendSessionRequest,
+  skipSessionRequest,
 } from './action';
 
 const initialState: SessionState = {
@@ -23,6 +24,7 @@ const initialState: SessionState = {
   sessionEnded: true,
   messages: [],
   queueRequestCount: 0,
+  countRefresh: true,
 };
 
 const sessionSlice = createSlice({
@@ -63,11 +65,15 @@ const sessionSlice = createSlice({
     setQueueCount: (state, action) => {
       state.queueRequestCount = action.payload;
     },
+    toggleCountRefresh: state => {
+      state.countRefresh = !state.countRefresh;
+    },
   },
   extraReducers: builder => {
     builder.addCase(sendSessionRequest.fulfilled, state => {});
     builder.addCase(getQueueRequest.fulfilled, state => {});
     builder.addCase(acceptSessionRequest.fulfilled, state => {});
+    builder.addCase(skipSessionRequest.fulfilled, state => {});
     builder.addCase(getChatHistory.fulfilled, state => {});
     builder.addCase(getChatMessages.fulfilled, state => {});
   },
@@ -84,10 +90,12 @@ export const {
   setQueueCount,
   incrementQueueRequest,
   clearQueueRequestCount,
+  toggleCountRefresh,
 } = sessionSlice.actions;
 
 export {
   sendSessionRequest,
+  skipSessionRequest,
   getQueueRequest,
   getChatHistory,
   acceptSessionRequest,

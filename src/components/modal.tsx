@@ -1,10 +1,8 @@
 import React from 'react';
 import {
-  Modal,
   View,
   Text,
   TouchableOpacity,
-  TouchableWithoutFeedback,
   StyleSheet,
   StyleProp,
   ViewStyle,
@@ -13,7 +11,8 @@ import {
   ScrollView,
   Platform,
 } from 'react-native';
-import {moderateScale, scale} from '../utils/sizer';
+import RNModal from 'react-native-modal';
+import {moderateScale, scale, verticalScale} from '../utils/sizer';
 import {textStyle} from '../constants/text-style';
 import {themeColors} from '../constants/colors';
 
@@ -112,25 +111,23 @@ const CustomModal: React.FC<CustomModalProps> = ({
   };
 
   const renderContent = () => {
-    const content = (
-      <View style={[styles.content, contentStyle]}>{children}</View>
-    );
-
     if (enableScrollView) {
       return (
         <ScrollView
           nestedScrollEnabled
           style={styles.scrollView}
-          contentContainerStyle={styles.scrollContentContainer}
+          contentContainerStyle={[styles.scrollContentContainer, contentStyle]}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           {...scrollViewProps}>
-          {content}
+          {children}
         </ScrollView>
       );
     }
 
-    return content;
+    return (
+      <View style={[styles.contentNoScroll, contentStyle]}>{children}</View>
+    );
   };
 
   const renderModalContent = () => (
@@ -153,39 +150,29 @@ const CustomModal: React.FC<CustomModalProps> = ({
   );
 
   return (
-    <Modal visible={visible} transparent animationType="fade">
-      <TouchableWithoutFeedback
-        onPress={closeOnBackdropPress ? onClose : undefined}>
-        <View style={[styles.backdrop, backdropStyle]}>
-          <View style={styles.backdropTouchable} />
-          <TouchableWithoutFeedback onPress={() => {}}>
-            {modalWrapper}
-          </TouchableWithoutFeedback>
-        </View>
-      </TouchableWithoutFeedback>
-    </Modal>
+    <RNModal
+      backdropColor="#000"
+      backdropOpacity={0.3}
+      isVisible={visible}
+      onBackdropPress={closeOnBackdropPress ? onClose : undefined}
+      backdropTransitionOutTiming={0}
+      useNativeDriver
+      style={[styles.backdrop, backdropStyle]}>
+      {modalWrapper}
+    </RNModal>
   );
 };
 
 const styles = StyleSheet.create({
   backdrop: {
-    flex: 1,
-    backgroundColor: themeColors.surface.overlay,
+    margin: 0,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  backdropTouchable: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    bottom: 0,
   },
   keyboardAvoidingView: {
-    flex: 1,
+    width: '100%',
     justifyContent: 'center',
     alignItems: 'center',
-    width: '100%',
   },
   modal: {
     backgroundColor: themeColors.surface.background,
@@ -198,7 +185,7 @@ const styles = StyleSheet.create({
     elevation: 12,
     width: '95%',
     maxWidth: 400,
-    maxHeight: '90%',
+    maxHeight: '100%',
   },
   header: {
     paddingHorizontal: scale(20),
@@ -243,14 +230,15 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
   scrollContentContainer: {
-    flexGrow: 1,
-  },
-  content: {
     paddingHorizontal: scale(20),
     paddingVertical: scale(20),
-    flexGrow: 1,
+  },
+  contentNoScroll: {
+    paddingHorizontal: scale(20),
+    paddingVertical: scale(20),
   },
   footer: {
+    height: 'auto',
     paddingHorizontal: scale(20),
     paddingVertical: scale(15),
     borderTopWidth: StyleSheet.hairlineWidth,

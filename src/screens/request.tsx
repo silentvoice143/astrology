@@ -3,12 +3,15 @@ import React, {useEffect, useState} from 'react';
 import ScreenLayout from '../components/screen-layout';
 import {useAppDispatch} from '../hooks/redux-hook';
 import {
+  clearSession,
   getQueueRequest,
   setChatUser,
   setOtherUser,
+  setSession,
+  skipSessionRequest,
 } from '../store/reducer/session';
 import CustomButton from '../components/custom-button';
-import {acceptSessionRequest} from '../store/reducer/session/action';
+import {acceptSessionRequest} from '../store/reducer/session';
 import {UserDetail, UserPersonalDetail} from '../utils/types';
 import UserRequestCard from '../components/session/user-request-card';
 import {scale, verticalScale} from '../utils/sizer';
@@ -50,6 +53,19 @@ const RequestScreen = () => {
     }
   };
 
+  const handleSkip = async (user: UserDetail) => {
+    try {
+      const payload = await dispatch(skipSessionRequest(user.id)).unwrap();
+      console.log(payload, '----skip res');
+      if (payload.success) {
+        dispatch(clearSession());
+        getAllRequests();
+      }
+    } catch (err) {
+      console.log(err);
+    }
+  };
+
   useEffect(() => {
     getAllRequests();
   }, []);
@@ -70,7 +86,10 @@ const RequestScreen = () => {
                   onAccept={() => {
                     handleAccept(user);
                   }}
-                  onSkip={() => {}}
+                  onSkip={() => {
+                    handleSkip(user);
+                  }}
+                  showActions={index === 0}
                 />
               </View>
             ))

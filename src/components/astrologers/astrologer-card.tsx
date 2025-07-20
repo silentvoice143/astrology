@@ -79,19 +79,6 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
             <Text style={styles.name}>{name}</Text>
             {/* <LikeIcon /> */}
           </View>
-
-          {rate && (
-            <View style={styles.rateTag}>
-              <Text style={styles.rateText}>{rate}</Text>
-            </View>
-          )}
-
-          {rating && (
-            <View style={styles.ratingRow}>
-              <StarIcon color={colors.glow_shadow} />
-              <Text style={styles.ratingText}>{rating} / 5</Text>
-            </View>
-          )}
         </View>
       </View>
 

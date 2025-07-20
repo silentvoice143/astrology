@@ -76,7 +76,7 @@ const ProfilePage = () => {
             <EditIcon size={16} color="black" />
           </TouchableOpacity>
           <View style={{justifyContent: 'center'}}>
-            <Text style={styles.name}>{user?.name}</Text>
+            <Text style={styles.name}>{user?.name ? user?.name : 'N/A'}</Text>
             <Text style={styles.phone}>{`+91 ${user?.mobile}`}</Text>
           </View>
         </View>
@@ -95,16 +95,25 @@ const ProfilePage = () => {
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>Personal Details</Text>
-          <Text style={styles.detailText}>Name: {user?.name}</Text>
           <Text style={styles.detailText}>
-            Expertise: {astrologer_detail?.expertise}
+            Name: {user?.name ? user?.name : '__'}
           </Text>
           <Text style={styles.detailText}>
-            Experience: {astrologer_detail?.experienceYears} Years
+            Expertise:{' '}
+            {astrologer_detail?.expertise ? astrologer_detail?.expertise : '__'}
           </Text>
           <Text style={styles.detailText}>
-            Languages: {astrologer_detail?.languages}
+            Experience:{' '}
+            {astrologer_detail?.experienceYears
+              ? astrologer_detail?.experienceYears
+              : '__'}{' '}
+            Years
           </Text>
+          {isAstrologer && (
+            <Text style={styles.detailText}>
+              Languages: {astrologer_detail?.languages}
+            </Text>
+          )}
 
           {!isAstrologer && (
             <Text style={styles.detailText}>

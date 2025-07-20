@@ -25,7 +25,6 @@ const RequestSessionModal = ({
   onClose: () => void;
   astrologer: UserDetail | null;
 }) => {
-  console.log('modal open');
   const durationOptions = [
     {label: '5m', id: '5m', value: 5},
     {label: '10m', id: '10m', value: 10},
@@ -59,6 +58,7 @@ const RequestSessionModal = ({
   };
   return (
     <CustomModal
+      enableScrollView={false}
       header={{title: 'Start Session', description: 'Choose the options'}}
       visible={isOpen}
       onClose={onClose}

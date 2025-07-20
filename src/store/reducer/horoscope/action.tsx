@@ -7,7 +7,7 @@ export const getDailyHoroscope = createAsyncThunk<
   {rejectValue: any}
 >('get-daily-horoscope', async (payload, {rejectWithValue}) => {
   try {
-    const response = await api.get(`/api/v1/horoscope/daily/${payload}`);
+    const response = await api.get(`/api/v1/horoscope/daily${payload}`);
 
     return response.data;
   } catch (error: any) {
@@ -21,7 +21,7 @@ export const getWeeklyHoroscope = createAsyncThunk<
   {rejectValue: any}
 >('get-weekly-horoscope', async (payload, {rejectWithValue}) => {
   try {
-    const response = await api.get(`/api/v1/horoscope/weekly/${payload}`);
+    const response = await api.get(`/api/v1/horoscope/weekly${payload}`);
 
     return response.data;
   } catch (error: any) {
@@ -35,7 +35,7 @@ export const getMonthlyHoroscope = createAsyncThunk<
   {rejectValue: any}
 >('get-monthly-horoscope', async (payload, {rejectWithValue}) => {
   try {
-    const response = await api.get(`/api/v1/horoscope/monthly/${payload}`);
+    const response = await api.get(`/api/v1/horoscope/monthly${payload}`);
 
     return response.data;
   } catch (error: any) {

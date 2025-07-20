@@ -88,7 +88,6 @@ const Home = () => {
       setLoading(true);
 
       const payload = await dispatch(getBanner()).unwrap();
-      console.log(payload, '----data');
 
       if (payload.success) {
         setBanner(payload.bannars);
@@ -222,6 +221,12 @@ const Home = () => {
                 onProgressChange={progress}
                 autoPlay={true}
                 scrollAnimationDuration={2000}
+                mode="parallax"
+                modeConfig={{
+                  parallaxScrollingScale: 1,
+                  parallaxScrollingOffset: 10,
+                  parallaxAdjacentItemScale: 0.8,
+                }}
                 renderItem={({index, item}) => (
                   <Image
                     source={{uri: item?.imgUrl}}

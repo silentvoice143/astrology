@@ -47,7 +47,9 @@ const UserProfileEdit = () => {
   const [errors, setErrors] = useState<string[]>([]);
   const [date, setDate] = useState(new Date(user.birthDate));
   const [time, setTime] = useState(
-    new Date(formatTimeToDateString(user.birthTime)),
+    user.birthTime
+      ? new Date(formatTimeToDateString(user.birthTime))
+      : new Date(),
   );
   const now = new Date();
   const [personalDetail, setPersonalDetail] = useState<UserPersonalDetail>({

@@ -86,9 +86,9 @@ const Horoscope = () => {
           `?sign=${selectedZodiac?.name}&day=${day}&month=${month}&year=${year}`,
         ),
       ).unwrap();
-      console.log(payload, '---horoscope');
-      if (payload.data.success) {
-        setHoroscopeData(payload.data.data.prediction);
+      if (payload.success) {
+        console.log(payload, '---horoscope daily');
+        setHoroscopeData(payload?.data?.prediction);
       } else {
         Toast.show({
           type: 'warning',
@@ -109,8 +109,8 @@ const Horoscope = () => {
         getDailyHoroscope(`?sign=${selectedZodiac?.name}`),
       ).unwrap();
       console.log(payload, '---horoscope weekly');
-      if (payload.data.success) {
-        setHoroscopeData(payload.data.data.prediction);
+      if (payload.success) {
+        setHoroscopeData(payload?.data?.prediction);
       } else {
         Toast.show({
           type: 'warning',
@@ -130,9 +130,10 @@ const Horoscope = () => {
       const payload = await dispatch(
         getMonthlyHoroscope(`?sign=${selectedZodiac?.name}`),
       ).unwrap();
-      console.log(payload, '---horoscope monthly');
-      if (payload.data.success) {
-        setHoroscopeData(payload.data.data.prediction);
+      if (payload.success) {
+        console.log(payload, '---horoscope monthly');
+
+        setHoroscopeData(payload?.data?.prediction);
       } else {
         Toast.show({
           type: 'warning',
@@ -140,6 +141,7 @@ const Horoscope = () => {
         });
       }
     } catch (err: any) {
+      console.log(err);
       Toast.show({
         type: 'error',
         text1: err?.msg || 'Something went wrong',

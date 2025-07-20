@@ -168,6 +168,7 @@ export interface SessionState {
   sessionEnded: boolean;
   messages: Message[];
   queueRequestCount: number;
+  countRefresh: boolean;
 }
 
 export interface Message {

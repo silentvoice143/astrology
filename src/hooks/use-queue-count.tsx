@@ -1,7 +1,11 @@
 import {AppState} from 'react-native';
 import {useEffect, useRef} from 'react';
-import {useAppDispatch} from './redux-hook';
-import {getQueueRequest, setQueueCount} from '../store/reducer/session'; // <-- your count action
+import {useAppDispatch, useAppSelector} from './redux-hook';
+import {
+  getQueueRequest,
+  setQueueCount,
+  toggleCountRefresh,
+} from '../store/reducer/session'; // <-- your count action
 import Toast from 'react-native-toast-message';
 
 export const useQueueCountOnResume = (
@@ -10,6 +14,7 @@ export const useQueueCountOnResume = (
 ) => {
   if (role !== 'ASTROLOGER') return;
   const dispatch = useAppDispatch();
+  const {countRefresh} = useAppSelector(state => state.session);
   const appState = useRef(AppState.currentState);
 
   const fetchQueueCount = async () => {
@@ -26,6 +31,8 @@ export const useQueueCountOnResume = (
       }
     } catch (err) {
       console.log(err);
+    } finally {
+      dispatch(toggleCountRefresh());
     }
   };
 
@@ -46,6 +53,8 @@ export const useQueueCountOnResume = (
 
   useEffect(() => {
     if (!isAuthenticated) return;
-    fetchQueueCount();
-  }, [isAuthenticated]);
+    if (countRefresh) {
+      fetchQueueCount();
+    }
+  }, [isAuthenticated, countRefresh]);
 };

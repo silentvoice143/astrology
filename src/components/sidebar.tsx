@@ -29,6 +29,7 @@ import LogoutIcon from '../assets/icons/logout-icon';
 import PeopleIcon from '../assets/icons/people-icon';
 import {useUserRole} from '../hooks/use-role';
 import HoroscopeIcon from '../assets/icons/horoscope-icon';
+import {useWebSocket} from '../hooks/use-socket';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -60,7 +61,7 @@ const navItems = [
     title: 'Astrologers',
     href: 'Astrologers',
     icon: <AstrologerIcon size={20} />,
-    allowed: ['USER', 'ASTROLOGER'],
+    allowed: ['USER'],
   },
   {
     title: 'Requests',
@@ -117,6 +118,7 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
   const dispatch = useAppDispatch();
   const navigation = useNavigation<any>();
   const {user} = useAppSelector(state => state.auth);
+  const {disconnect} = useWebSocket(user.id);
 
   useImperativeHandle(ref, () => ({
     open,
@@ -167,6 +169,7 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
     try {
       await dispatch(logout());
       dispatch(clearSession());
+      disconnect();
     } catch (err) {
       console.log(err);
     }
