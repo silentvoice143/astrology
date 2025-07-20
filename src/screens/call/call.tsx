@@ -27,7 +27,6 @@ import {scale, verticalScale} from '../../utils/sizer';
 import {colors} from '../../constants/colors';
 import {textStyle} from '../../constants/text-style';
 
-// ZegoCloud App credentials
 const ZEGO_APP_ID = 1648384958;
 const ZEGO_APP_SIGN =
   '6baacf543390ae6c21d16cc29579930e714655c0401d3bdd8337cb4bfd2998b3';
@@ -54,9 +53,9 @@ interface CallSessionDetails {
   sessionType: 'VOICE' | 'VIDEO';
   totalMinutes: number;
   totalCost: number;
-  agoraChannelName: string; // This will be used as callId for ZegoCloud
+  agoraChannelName: string;
   agoraToken?: string;
-  callId?: string; // New field for ZegoCloud callId
+  callId?: string;
 }
 
 const CallScreen = () => {
@@ -126,7 +125,6 @@ const CallScreen = () => {
     }
   };
 
-  // Waiting Timer
   const startWaitingTimer = () => {
     waitingInterval.current = setInterval(() => {
       setWaitingTime(prev => {
@@ -156,27 +154,27 @@ const CallScreen = () => {
 
   // Socket Listeners
   const setupSocketListeners = () => {
-    console.log(
-      '🔌 Setting up socket listeners for session:',
-      callSession?.id || sessionId,
-    );
+    const sessionIdToUse = callSession?.id || sessionId;
+    console.log('🔌 Setting up socket listeners for session:', sessionIdToUse);
 
-    const timerSub = subscribe(
-      `/topic/call/${callSession?.id || sessionId}/timer`,
-      msg => {
+    // Initialize subscriptions array to track them
+    const subscriptions: any[] = [];
+
+    if (sessionIdToUse) {
+      // Timer subscription - listen for both session types
+      const timerSub = subscribe(`/topic/call/${sessionIdToUse}/timer`, msg => {
         try {
           const timeData = decodeMessageBody(msg);
-          console.log('⏱️ Timer update:', timeData);
+          console.log('⏱️ Timer update from socket:', timeData);
           setTimer(timeData);
         } catch (err) {
           console.error('Timer message parse error:', err);
         }
-      },
-    );
+      });
+      subscriptions.push(timerSub);
 
-    const endSub = subscribe(
-      `/topic/call/${callSession?.id || sessionId}`,
-      msg => {
+      // Call end subscription
+      const endSub = subscribe(`/topic/call/${sessionIdToUse}`, msg => {
         try {
           const data = JSON.parse(decodeMessageBody(msg));
           console.log('📞 Call status update:', data);
@@ -186,37 +184,45 @@ const CallScreen = () => {
         } catch (err) {
           console.error('Call end message parse error:', err);
         }
-      },
-    );
+      });
+      subscriptions.push(endSub);
+    }
 
-    const rejectSub = subscribe(`/topic/call/${user?.id}/rejected`, msg => {
-      try {
-        const data = JSON.parse(decodeMessageBody(msg));
-        console.log('❌ Call rejected:', data);
-        setCallState('rejected');
-        setTimeout(() => {
-          navigation.goBack();
-          Toast.show({
-            type: 'error',
-            text1: 'Call Rejected',
-            text2: 'The astrologer is currently unavailable',
-          });
-        }, 2000);
-      } catch (err) {
-        console.error('Call rejection parse error:', err);
-      }
-    });
+    if (user?.id) {
+      const rejectSub = subscribe(`/topic/call/${user?.id}/rejected`, msg => {
+        try {
+          const data = JSON.parse(decodeMessageBody(msg));
+          console.log('❌ Call rejected:', data);
+          setCallState('rejected');
+          setTimeout(() => {
+            navigation.goBack();
+            Toast.show({
+              type: 'error',
+              text1: 'Call Rejected',
+              text2: 'The astrologer is currently unavailable',
+            });
+          }, 2000);
+        } catch (err) {
+          console.error('Call rejection parse error:', err);
+        }
+      });
+      subscriptions.push(rejectSub);
+    }
 
-    // Return cleanup function
+    console.log(`📡 Set up ${subscriptions.length} socket subscriptions`);
+
     return () => {
       console.log('🧹 Cleaning up socket listeners');
-      timerSub?.unsubscribe();
-      endSub?.unsubscribe();
-      rejectSub?.unsubscribe();
+      subscriptions.forEach(sub => {
+        try {
+          sub?.unsubscribe();
+        } catch (error) {
+          console.error('Error unsubscribing:', error);
+        }
+      });
     };
   };
 
-  // Call Timeout & Cancel
   const handleCallTimeout = () => {
     console.log('⏰ Call timeout');
     setCallState('ended');
@@ -237,7 +243,6 @@ const CallScreen = () => {
     navigation.goBack();
   };
 
-  // Timer Management
   const startLocalTimer = () => {
     console.log('⏱️ Starting local timer');
     if (timerInterval.current) clearInterval(timerInterval.current);
@@ -252,6 +257,7 @@ const CallScreen = () => {
         const localTimer = `${minutes.toString().padStart(2, '0')}:${seconds
           .toString()
           .padStart(2, '0')}`;
+
         if (!timer || timer === '00:00') {
           setTimer(localTimer);
         }
@@ -266,7 +272,6 @@ const CallScreen = () => {
     }
   };
 
-  // Call End Handler
   const handleCallEnd = async (userInitiated = true) => {
     if (callState === 'ended') return;
 
@@ -283,7 +288,6 @@ const CallScreen = () => {
       );
     }
 
-    // Send call end message if user initiated
     if (userInitiated && callSession) {
       try {
         send(`/app/call/${callSession.id}/end`, {});
@@ -304,7 +308,7 @@ const CallScreen = () => {
       Toast.show({
         type: 'success',
         text1: 'Call Ended',
-        text2: actualDuration > 0 ? `Duration: ${timer}` : 'Call completed',
+        text2: actualDuration > 0 ? `${timer} left` : 'Call completed',
       });
     }, 1000);
   };
@@ -330,7 +334,7 @@ const CallScreen = () => {
       return;
     }
 
-    setCallState('connecting');
+    setCallState('connected');
     stopWaitingTimer();
 
     // Start call timer when joining
@@ -358,7 +362,6 @@ const CallScreen = () => {
 
   const getCallId = () => {
     if (callSession) {
-      // Use callId field if available, otherwise fallback to agoraChannelName
       return callSession.agoraChannelName;
     }
     return sessionId || '';
@@ -381,6 +384,16 @@ const CallScreen = () => {
 
     return {
       ...baseConfig,
+      // Remove ZegoCloud's default timer and top bar
+      topMenuBarConfig: {
+        ...baseConfig.topMenuBarConfig,
+        isVisible: false, // Hide top menu bar with default timer
+      },
+      // Custom configuration to optimize call experience
+      turnOnCameraWhenJoining: callType === 'VIDEO',
+      turnOnMicrophoneWhenJoining: true,
+      useSpeakerWhenJoining: callType === 'VIDEO',
+      // Event handlers
       onCallEnd: (callId: string, reason: any, duration: number) => {
         console.log('📞 ZegoCloud call ended:', {callId, reason, duration});
         handleCallEnd(true);
@@ -398,6 +411,12 @@ const CallScreen = () => {
       },
       onUserLeave: (users: any[]) => {
         console.log('👥 Users left:', users);
+        if (users.length === 0) {
+          // All users left, end the call
+          setTimeout(() => {
+            handleCallEnd(false);
+          }, 3000);
+        }
       },
       onError: (error: any) => {
         console.error('❌ ZegoCloud error:', error);
@@ -422,10 +441,10 @@ const CallScreen = () => {
           borderColor={colors.primary_surface}
           borderWidth={3}
         />
-        <Text style={[textStyle.fs_mont_24_700, styles.astrologerName]}>
+        <Text style={[textStyle.fs_mont_24_700, styles.personName]}>
           {otherPerson.name}
         </Text>
-        <Text style={[textStyle.fs_mont_16_400, styles.waitingText]}>
+        <Text style={[textStyle.fs_mont_16_400, styles.statusText]}>
           {isAstrologer
             ? 'Connecting to user...'
             : 'Waiting for astrologer to accept...'}
@@ -441,7 +460,7 @@ const CallScreen = () => {
             <TouchableOpacity
               style={styles.cancelButton}
               onPress={handleCallCancel}>
-              <Text style={[textStyle.fs_mont_16_600, styles.cancelButtonText]}>
+              <Text style={[textStyle.fs_mont_16_600, styles.buttonText]}>
                 Cancel Call
               </Text>
             </TouchableOpacity>
@@ -462,17 +481,17 @@ const CallScreen = () => {
           borderColor={colors.success.base}
           borderWidth={3}
         />
-        <Text style={[textStyle.fs_mont_24_700, styles.astrologerName]}>
+        <Text style={[textStyle.fs_mont_24_700, styles.personName]}>
           {otherPerson.name}
         </Text>
-        <Text style={[textStyle.fs_mont_16_400, styles.waitingText]}>
-          Connecting to call...
+        <Text style={[textStyle.fs_mont_16_400, styles.statusText]}>
+          Ready to connect...
         </Text>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.success.base} />
         </View>
         <TouchableOpacity style={styles.joinButton} onPress={joinCall}>
-          <Text style={[textStyle.fs_mont_16_600, styles.joinButtonText]}>
+          <Text style={[textStyle.fs_mont_16_600, styles.buttonText]}>
             Join Call
           </Text>
         </TouchableOpacity>
@@ -491,7 +510,7 @@ const CallScreen = () => {
           borderColor={colors.error.base}
           borderWidth={3}
         />
-        <Text style={[textStyle.fs_mont_24_700, styles.astrologerName]}>
+        <Text style={[textStyle.fs_mont_24_700, styles.personName]}>
           {otherPerson.name}
         </Text>
         <Text style={[textStyle.fs_mont_16_400, styles.rejectedText]}>
@@ -522,7 +541,7 @@ const CallScreen = () => {
           <TouchableOpacity
             style={styles.cancelButton}
             onPress={() => handleCallEnd(true)}>
-            <Text style={styles.cancelButtonText}>Go Back</Text>
+            <Text style={styles.buttonText}>Go Back</Text>
           </TouchableOpacity>
         </View>
       );
@@ -530,6 +549,12 @@ const CallScreen = () => {
 
     return (
       <View style={styles.callContainer}>
+        <View style={styles.timerOverlay}>
+          <View style={styles.timerContainer}>
+            <Text style={styles.timerText}>{timer}</Text>
+          </View>
+        </View>
+
         <ZegoUIKitPrebuiltCall
           appID={ZEGO_APP_ID}
           appSign={ZEGO_APP_SIGN}
@@ -547,13 +572,8 @@ const CallScreen = () => {
     console.log('🚀 Component mounted with params:', params);
 
     const initializeCall = async () => {
-      // Check permissions
       await checkPermissions();
-
-      // Setup socket listeners
       socketUnsubscribe.current = setupSocketListeners();
-
-      // Start waiting timer if not astrologer
       if (!isAstrologer) {
         startWaitingTimer();
       }
@@ -561,11 +581,14 @@ const CallScreen = () => {
 
     initializeCall();
 
-    // Handle hardware back button
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       () => {
-        handleCallCancel();
+        if (isInCall) {
+          handleCallEnd(true);
+        } else {
+          handleCallCancel();
+        }
         return true;
       },
     );
@@ -581,7 +604,6 @@ const CallScreen = () => {
     };
   }, []);
 
-  // Handle session data changes
   useEffect(() => {
     console.log('🔍 callSession updated:', callSession);
     if (callSession && permissionsGranted) {
@@ -590,6 +612,11 @@ const CallScreen = () => {
       );
       setCallState('connecting');
       stopWaitingTimer();
+
+      if (socketUnsubscribe.current) {
+        socketUnsubscribe.current();
+      }
+      socketUnsubscribe.current = setupSocketListeners();
     } else if (!callSession) {
       console.log('⚠️ No callSession data yet');
     }
@@ -603,17 +630,18 @@ const CallScreen = () => {
         backgroundColor={colors.primaryText}
       />
 
-      {/* Header */}
-      <View style={styles.header}>
-        <Text style={[textStyle.fs_mont_18_600, styles.headerText]}>
-          {callType === 'VIDEO' ? 'Video Call' : 'Voice Call'}
-        </Text>
-        {(callState === 'connected' || isInCall) && (
-          <Text style={[textStyle.fs_mont_16_400, styles.timerText]}>
-            {timer}
+      {!isInCall && (
+        <View style={styles.header}>
+          <Text style={[textStyle.fs_mont_18_600, styles.headerText]}>
+            {callType === 'VIDEO' ? 'Video Call' : 'Voice Call'}
           </Text>
-        )}
-      </View>
+          {callState === 'connected' && (
+            <Text style={[textStyle.fs_mont_16_400, styles.headerTimerText]}>
+              {timer}
+            </Text>
+          )}
+        </View>
+      )}
 
       {/* Content */}
       <View style={styles.content}>
@@ -642,7 +670,7 @@ const styles = StyleSheet.create({
     color: colors.whiteText,
     marginBottom: verticalScale(8),
   },
-  timerText: {
+  headerTimerText: {
     color: colors.success.base,
     fontSize: scale(18),
     fontWeight: 'bold',
@@ -656,13 +684,13 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingHorizontal: scale(40),
   },
-  astrologerName: {
+  personName: {
     color: colors.whiteText,
     marginTop: verticalScale(20),
     marginBottom: verticalScale(10),
     textAlign: 'center',
   },
-  waitingText: {
+  statusText: {
     color: colors.grey300,
     textAlign: 'center',
     marginBottom: verticalScale(30),
@@ -674,15 +702,14 @@ const styles = StyleSheet.create({
     color: colors.primary_surface,
     textAlign: 'center',
     marginBottom: verticalScale(40),
+    fontSize: scale(16),
+    fontWeight: '600',
   },
   cancelButton: {
     backgroundColor: colors.error.base,
     paddingHorizontal: scale(40),
     paddingVertical: verticalScale(12),
     borderRadius: scale(25),
-  },
-  cancelButtonText: {
-    color: colors.whiteText,
   },
   joinButton: {
     backgroundColor: colors.success.base,
@@ -691,8 +718,9 @@ const styles = StyleSheet.create({
     borderRadius: scale(25),
     marginTop: verticalScale(20),
   },
-  joinButtonText: {
+  buttonText: {
     color: colors.whiteText,
+    textAlign: 'center',
   },
   rejectedText: {
     color: colors.error.base,
@@ -706,6 +734,35 @@ const styles = StyleSheet.create({
   },
   callContainer: {
     flex: 1,
+    position: 'relative',
+  },
+  timerOverlay: {
+    position: 'absolute',
+    top: verticalScale(50),
+    left: 0,
+    right: 0,
+    zIndex: 1000,
+    alignItems: 'center',
+  },
+  timerContainer: {
+    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+    borderRadius: scale(20),
+    paddingHorizontal: scale(16),
+    paddingVertical: verticalScale(8),
+    shadowColor: '#000',
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    shadowOpacity: 0.25,
+    shadowRadius: 3.84,
+    elevation: 5,
+  },
+  timerText: {
+    color: colors.whiteText,
+    fontSize: scale(18),
+    fontWeight: '700',
+    letterSpacing: 1,
   },
   errorContainer: {
     flex: 1,

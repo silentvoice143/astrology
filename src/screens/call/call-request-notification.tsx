@@ -28,12 +28,13 @@ interface CallRequestNotificationProps {
   visible: boolean;
   callRequest: CallRequest | null;
   onClose: () => void;
+  onAccept: () => void;
 }
 
 const CallRequestNotification: React.FC<CallRequestNotificationProps> = ({
   visible,
   callRequest,
-  onClose,
+  onClose,onAccept
 }) => {
   const [timeLeft, setTimeLeft] = useState(30);
   const [isResponding, setIsResponding] = useState(false);
@@ -100,7 +101,7 @@ const CallRequestNotification: React.FC<CallRequestNotificationProps> = ({
           text2: 'Connecting to the call...',
         });
         console.log(callRequest, 'call request notify');
-
+        onAccept()
         navigation.navigate('call', {
           callType: callRequest?.type || 'VOICE',
           astrologer: {

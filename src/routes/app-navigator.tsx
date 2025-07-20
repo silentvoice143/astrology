@@ -31,8 +31,7 @@ export default function AppNavigator() {
     isAuthenticated,
   );
 
-  console.log(callRequest,callRequestNotification,"call request hai");
-  
+  console.log(callRequest, callRequestNotification, 'call request hai');
 
   useEffect(() => {
     if (callRequestNotification && callRequest) {
@@ -50,6 +49,10 @@ export default function AppNavigator() {
   const handleCloseCallNotification = () => {
     console.log('Closing call notification');
     setLocalCallRequestVisible(false);
+    setLocalCallRequest(null);
+  };
+
+  const onAccept = () => {
     setLocalCallRequest(null);
   };
 
@@ -110,14 +113,16 @@ export default function AppNavigator() {
     <NavigationContainer>
       {isAuthenticated ? <PrivateRoutes /> : <PublicRoutes />}
 
-    
-      {isAuthenticated && localCallRequestVisible && localCallRequest.userId && (
-        <CallRequestNotification
-          visible={localCallRequestVisible}
-          callRequest={localCallRequest}
-          onClose={handleCloseCallNotification}
-        />
-      )} 
+      {isAuthenticated &&
+        localCallRequestVisible &&
+        localCallRequest.userId && (
+          <CallRequestNotification
+            visible={localCallRequestVisible}
+            callRequest={localCallRequest}
+            onClose={handleCloseCallNotification}
+            onAccept={onAccept}
+          />
+        )}
     </NavigationContainer>
   );
 }
