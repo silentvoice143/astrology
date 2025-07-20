@@ -1,3 +1,4 @@
+import {format, toZonedTime} from 'date-fns-tz';
 export function shuffleArray<T>(array: T[]): T[] {
   const result = [...array]; // create a copy to avoid mutating the original
   for (let i = result.length - 1; i > 0; i--) {
@@ -74,13 +75,14 @@ export const formatPrice = (
 };
 
 // ==================date====================
-export const formatedDate = (date: Date) => {
-  return date?.toLocaleString('en-IN', {
-    timeZone: 'Asia/Kolkata',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
+export const formatedDate = (date: Date | string) => {
+  const timeZone = 'Asia/Kolkata';
+
+  const dateString: Date | string = date + 'Z';
+  const utcDate = dateString as unknown as Date;
+
+  const zonedDate = toZonedTime(utcDate, timeZone); // Convert to IST
+  return format(zonedDate, 'hh:mm a', {timeZone}); // Format in IST
 };
 
 export const formatDateString = (isoDateString: string | Date): string => {

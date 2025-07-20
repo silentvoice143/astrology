@@ -35,17 +35,7 @@ export default function PrivateRoutes() {
   const role = useUserRole();
   const sessionEnded = useAppSelector(state => state.session.sessionEnded);
 
-  // const prevSessionEnded = useRef(sessionEnded);
-
-  // useEffect(() => {
-  //   if (prevSessionEnded.current === false && sessionEnded === true) {
-  //     // session just ended, navigate
-  //     role === 'USER'
-  //       ? navigation.navigate('Astrologers')
-  //       : navigation.navigate('session-request');
-  //   }
-  //   prevSessionEnded.current = sessionEnded; // update ref
-  // }, [sessionEnded]);
+  console.log(user, '----user');
   useSessionEvents(user?.id, isAuthenticated);
   useQueueCountOnResume(isAuthenticated, role);
   console.log('calling private route ------');

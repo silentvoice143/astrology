@@ -24,7 +24,6 @@ const ChatHistoryCard: React.FC<ChatHistoryCardProps> = ({
   avatar,
   active,
 }) => {
-  console.log(formatedDate(time), '--------time', time);
   return (
     <View
       style={[
@@ -46,8 +45,7 @@ const ChatHistoryCard: React.FC<ChatHistoryCardProps> = ({
         <View style={styles.textContainer}>
           <Text style={[styles.name, textStyle.fs_abyss_16_400]}>{name}</Text>
           <Text style={[styles.name, textStyle.fs_abyss_12_400]}>
-            {getTimeOnly(time, true)}
-            {/* {formatedDate(time)} */}
+            {formatedDate(time)}
           </Text>
         </View>
       </View>

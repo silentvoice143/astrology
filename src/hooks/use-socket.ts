@@ -46,6 +46,14 @@ export const useWebSocket = (userId: string, socketUrl?: string) => {
     [],
   );
 
+  const unsubscribe = useCallback((destination: string) => {
+    if (!singletonService) {
+      console.warn('[useWebSocket] Tried to unsubscribe before initializing.');
+      return;
+    }
+    singletonService.unsubscribe(destination);
+  }, []);
+
   const send = useCallback(
     (
       destination: string,
@@ -65,6 +73,7 @@ export const useWebSocket = (userId: string, socketUrl?: string) => {
     connect,
     disconnect,
     subscribe,
+    unsubscribe,
     send,
     isConnected: connected,
   };

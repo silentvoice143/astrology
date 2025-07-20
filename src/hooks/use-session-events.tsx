@@ -1,6 +1,11 @@
 import {useEffect} from 'react';
 import {useWebSocket} from './use-socket';
-import {addMessage, clearSession, setSession} from '../store/reducer/session';
+import {
+  addMessage,
+  clearSession,
+  setSession,
+  toggleCountRefresh,
+} from '../store/reducer/session';
 import {useAppDispatch, useAppSelector} from './redux-hook';
 import {decodeMessageBody} from '../utils/utils';
 
@@ -13,7 +18,7 @@ export const useSessionEvents = (
   userId: string = '',
   active: boolean = false,
 ) => {
-  const {subscribe} = useWebSocket(userId);
+  const {subscribe, unsubscribe} = useWebSocket(userId);
   const dispatch = useAppDispatch();
   const {session} = useAppSelector(state => state.session);
   const role = useUserRole();
@@ -21,13 +26,16 @@ export const useSessionEvents = (
   useEffect(() => {
     // Guard: If already subscribed, don't do it again
     if (!active || !userId || hasSubscribed) return;
+    let queueDest = `/topic/queue/${userId}`;
+    let requestDest = `/topic/chat/${userId}/chatId`;
 
     console.log('[useSessionEvents] Subscribing globally...');
     hasSubscribed = true; // mark as subscribed
 
-    const queueSub = subscribe(`/topic/queue/${userId}`, msg => {
+    const queueSub = subscribe(queueDest, msg => {
       try {
         console.log(decodeMessageBody(msg));
+        dispatch(toggleCountRefresh());
         Toast.show({
           type: 'success',
           text1: 'Session',
@@ -38,7 +46,7 @@ export const useSessionEvents = (
       }
     });
 
-    const chatSub = subscribe(`/topic/chat/${userId}/chatId`, msg => {
+    const chatSub = subscribe(requestDest, msg => {
       try {
         const data = JSON.parse(decodeMessageBody(msg));
         dispatch(setSession(data));
@@ -58,39 +66,9 @@ export const useSessionEvents = (
 
     return () => {
       console.log('[useSessionEvents] Cleaning up global subscriptions...');
-      queueSub?.unsubscribe();
-      chatSub?.unsubscribe();
-
-      hasSubscribed = false; // allow re-subscription if needed on remount
+      queueSub && unsubscribe(queueDest);
+      chatSub && unsubscribe(requestDest);
+      hasSubscribed = false;
     };
   }, [subscribe, userId, active]);
-
-  useEffect(() => {
-    if (!session) return;
-
-    const chatEnd = subscribe(`/topic/chat/${session.id}`, msg => {
-      try {
-        const data = JSON.parse(decodeMessageBody(msg));
-        console.log(data);
-        if (data.status === 'ended') {
-          dispatch(
-            setSession({
-              ...session,
-              status: data.status === 'ended' ? 'ENDED' : 'ACTIVE',
-            }),
-          );
-          Toast.show({
-            type: 'info',
-            text1: 'Session Ended',
-          });
-        }
-      } catch (err) {
-        console.error('Failed to parse chat end message:', err);
-      }
-    });
-
-    return () => {
-      chatEnd?.unsubscribe();
-    };
-  }, [session, subscribe, userId]);
 };

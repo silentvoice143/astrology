@@ -10,10 +10,11 @@ import {
   StyleSheet,
   TouchableOpacity,
   Image,
+  BackHandler,
 } from 'react-native';
 import {useWebSocket} from '../hooks/use-socket';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
-import {decodeMessageBody, getTimeOnly} from '../utils/utils';
+import {decodeMessageBody, formatedDate, getTimeOnly} from '../utils/utils';
 import {Message} from '../utils/types';
 import {
   addMessage,
@@ -21,6 +22,7 @@ import {
   getChatMessages,
   prependMessages,
   setMessage,
+  setSession,
 } from '../store/reducer/session';
 import {RootState} from '../store';
 import Avatar from '../components/avatar';
@@ -38,6 +40,10 @@ import CameraModal from '../components/chat/modal/camera-modal';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import Modal from 'react-native-modal';
 import CameraIcon from '../assets/icons/camera-icon';
+import ChevronLeftIcon from '../assets/icons/chevron-left';
+import {useNavigation} from '@react-navigation/native';
+import {StompSubscription} from '@stomp/stompjs';
+import Timer from '../components/session/timer';
 
 export const ChatScreenDemo = () => {
   const userId = useAppSelector(state => state.auth.user.id);
@@ -45,11 +51,9 @@ export const ChatScreenDemo = () => {
     (state: RootState) => state.session.otherUser,
   );
   const otherUserId = otherUser?.id;
-
   const session = useAppSelector(state => state?.session?.session);
-
-  const {subscribe, send} = useWebSocket(userId);
-
+  // console.log(session, '----this is session');
+  const {subscribe, send, unsubscribe} = useWebSocket(userId);
   const [timer, setTimer] = useState<string>('');
   // const [messages, setMessages] = useState<Message[]>([]);
   const {messages} = useAppSelector(state => state.session);
@@ -65,7 +69,13 @@ export const ChatScreenDemo = () => {
   const [imageModalVisible, setImageModalVisible] = useState(false);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const dispatch = useAppDispatch();
+  const navigation = useNavigation<any>();
 
+  // ==============distinations===============
+  const messageSubDest = `/topic/chat/${userId}/messages`;
+  const typingSubDest = `/topic/chat/${userId}/typing`;
+  const timerSubDest = `/topic/chat/${session?.id}/timer`;
+  const chatEndDest = `/topic/chat/${session?.id}`;
   const getChatMessagesDetails = async (page: number) => {
     if (loading || !hasMore) return;
     try {
@@ -73,7 +83,7 @@ export const ChatScreenDemo = () => {
       const payload = await dispatch(
         getChatMessages(`/${session?.id}?page=${page}&size=${15}`),
       ).unwrap();
-      console.log(payload.messages, '----payload');
+      // console.log(payload.messages, '----payload');
       if (payload.success) {
         if (page === 1) {
           dispatch(setMessage(payload.messages));
@@ -97,8 +107,6 @@ export const ChatScreenDemo = () => {
   const handleCaptureImage = async (filePath: string) => {
     if (!filePath) return;
     if (!session || !otherUserId) return;
-    const result = await fetch(`file://${filePath}`);
-    const data = await result.blob();
 
     try {
       const formData = new FormData();
@@ -133,48 +141,72 @@ export const ChatScreenDemo = () => {
   };
 
   useEffect(() => {
-    if (!session) return;
+    let chatTimerSub: StompSubscription | undefined;
+    let chatEndSub: StompSubscription | undefined;
+    let chatMessage: StompSubscription | undefined;
+    let typingSub: StompSubscription | undefined;
 
-    // =========================subscriptions==============================
-    const chatMessage = subscribe(`/topic/chat/${userId}/messages`, msg => {
-      try {
-        const data = JSON.parse(decodeMessageBody(msg));
-        console.log(data);
-        dispatch(addMessage(data));
-        // You may want to dispatch(addMessage(data)) here if needed
-      } catch (err) {
-        console.error('Failed to parse chat message:', err);
-      }
-    });
-    const typingSub = subscribe(`/topic/chat/${userId}/typing`, msg => {
-      try {
-        const data = JSON.parse(decodeMessageBody(msg));
-        if (data.senderId === otherUserId) {
-          setOtherUserTyping(data.typing);
+    if (session && session.status !== 'ENDED') {
+      chatMessage = subscribe(messageSubDest, msg => {
+        try {
+          const data = JSON.parse(decodeMessageBody(msg));
+          console.log(data);
+          dispatch(addMessage(data));
+          console.log('Adding msgs');
+          // You may want to dispatch(addMessage(data)) here if needed
+        } catch (err) {
+          console.error('Failed to parse chat message:', err);
         }
-        console.log(JSON.parse(decodeMessageBody(msg)));
-      } catch (err) {
-        console.error('Failed to parse chat typing:', err);
-      }
-    });
+      });
+      typingSub = subscribe(typingSubDest, msg => {
+        try {
+          const data = JSON.parse(decodeMessageBody(msg));
+          if (data.senderId === otherUserId) {
+            setOtherUserTyping(data.typing);
+            console.log('typing.....');
+          }
+          console.log(JSON.parse(decodeMessageBody(msg)));
+        } catch (err) {
+          console.error('Failed to parse chat typing:', err);
+        }
+      });
+      chatTimerSub = subscribe(timerSubDest, msg => {
+        try {
+          const data = decodeMessageBody(msg);
+
+          setTimer(data);
+        } catch (err) {
+          console.error('Failed to parse chat message:', err);
+        }
+      });
+      chatEndSub = subscribe(chatEndDest, msg => {
+        try {
+          const data = JSON.parse(decodeMessageBody(msg));
+          console.log(data);
+          if (data.status === 'ended') {
+            dispatch(
+              setSession({
+                ...session,
+                status: data.status === 'ended' ? 'ENDED' : 'ACTIVE',
+              }),
+            );
+            Toast.show({
+              type: 'info',
+              text1: 'Session Ended',
+            });
+          }
+        } catch (err) {
+          console.error('Failed to parse chat end message:', err);
+        }
+      });
+    }
 
     return () => {
-      typingSub?.unsubscribe();
-      chatMessage?.unsubscribe();
+      chatTimerSub && unsubscribe(timerSubDest);
+      chatEndSub && unsubscribe(chatEndDest);
+      chatMessage && unsubscribe(messageSubDest);
+      typingSub && unsubscribe(typingSubDest);
     };
-  }, [subscribe, userId, session, otherUserId]);
-
-  useEffect(() => {
-    if (!session) return;
-    const chatTimer = subscribe(`/topic/chat/${session.id}/timer`, msg => {
-      try {
-        const data = decodeMessageBody(msg);
-        setTimer(data);
-      } catch (err) {
-        console.error('Failed to parse chat message:', err);
-      }
-    });
-    return () => chatTimer?.unsubscribe();
   }, [session, subscribe]);
 
   // Handle text input + typing event
@@ -259,21 +291,44 @@ export const ChatScreenDemo = () => {
     getChatMessagesDetails(1);
   }, [session]);
 
+  // useEffect(() => {
+  //   return () => {
+  //     if (userId && otherUserId && role === 'USER' && !session) {
+  //       send(
+  //         '/chat.leave',
+  //         {},
+  //         JSON.stringify({
+  //           userId: userId, // UUID of the user who cancels
+  //           astrologerId: otherUserId, // UUID of the astrologer
+  //         }),
+  //       );
+  //       console.log('Leave request sent to /chat.leave');
+  //     }
+  //   };
+  // }, [userId, otherUserId]);
+
   useEffect(() => {
-    return () => {
-      if (userId && otherUserId) {
-        send(
-          '/chat.leave',
-          {},
-          JSON.stringify({
-            userId: userId, // UUID of the user who cancels
-            astrologerId: otherUserId, // UUID of the astrologer
-          }),
-        );
-        console.log('Leave request sent to /chat.leave');
-      }
-    };
-  }, [userId, otherUserId]);
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        console.log('back to chatScreen');
+        if (role === 'USER' && userId && otherUserId && !session) {
+          send(
+            '/chat.leave',
+            {},
+            JSON.stringify({
+              userId: userId,
+              astrologerId: otherUserId,
+            }),
+          );
+          console.log('Leave request sent to /chat.leave');
+        }
+        navigation.replace('ChatHistory');
+        return true;
+      },
+    );
+    return () => backHandler.remove();
+  }, []);
 
   const renderMessage = ({item}: {item: Message}) => {
     const isMine = item.senderId === userId;
@@ -301,13 +356,16 @@ export const ChatScreenDemo = () => {
           ) : (
             <Text>{item.message}</Text>
           )}
-          <Text style={styles.timestamp}>
-            {getTimeOnly(item.timestamp, true)}
-          </Text>
+          {/* <Text style={styles.timestamp}>
+            {isMine
+              ? getTimeOnly(item?.timestamp, true)
+              : formatedDate(item?.timestamp)}
+          </Text> */}
         </View>
       </TouchableOpacity>
     );
   };
+
   return (
     <KeyboardAvoidingView
       style={styles.container}
@@ -318,16 +376,19 @@ export const ChatScreenDemo = () => {
             styles.header,
             {flexDirection: 'row', gap: scale(12), alignItems: 'center'},
           ]}>
+          <TouchableOpacity onPress={() => navigation.replace('ChatHistory')}>
+            <ChevronLeftIcon size={32} />
+          </TouchableOpacity>
           <View>
             <Avatar
-              size={60}
+              size={50}
               image={{uri: ''}}
               fallbackText={otherUser?.name.charAt(0).toUpperCase()}
             />
             <View
               style={{
                 position: 'absolute',
-                top: 8,
+                top: 6,
                 right: 0,
                 height: scale(10),
                 width: scale(10),
@@ -362,40 +423,8 @@ export const ChatScreenDemo = () => {
             </Text>
           </View>
         </View>
-        {session?.status === 'ACTIVE' && timer && (
-          <View
-            style={{
-              backgroundColor: themeColors.status.success.base,
-              justifyContent: 'center',
-              alignItems: 'center',
-              paddingVertical: verticalScale(4),
-            }}>
-            <Text
-              style={[
-                {color: colors.whiteText, textAlign: 'center'},
-                textStyle.fs_mont_16_700,
-              ]}>
-              {timer}
-            </Text>
-          </View>
-        )}
-        {/* {session?.status !== 'ACTIVE' && (
-          <View
-            style={{
-              backgroundColor: themeColors.status.success.base,
-              justifyContent: 'center',
-              alignItems: 'center',
-              paddingVertical: verticalScale(4),
-            }}>
-            <Text
-              style={[
-                {color: colors.whiteText, textAlign: 'center'},
-                textStyle.fs_mont_16_700,
-              ]}>
-              Chat Already Ended
-            </Text>
-          </View>
-        )} */}
+        {session?.status === 'ACTIVE' && timer && <Timer timer={timer} />}
+
         {!session ? (
           <View style={styles.waitingContainer}>
             <Text style={styles.waitingText}>

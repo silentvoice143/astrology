@@ -67,6 +67,7 @@ const Astrologers = () => {
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const fetchAstrologersData = async (pageNumber = 1, append = false) => {
+    console.log(pageNumber, '---page');
     if (loading || isFetchingMore || !hasMore) return;
     try {
       if (append) setIsFetchingMore(true);
