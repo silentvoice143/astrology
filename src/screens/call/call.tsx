@@ -119,7 +119,6 @@ const CallScreen = () => {
         return false;
       }
     } else {
-      // For iOS, permissions are handled automatically by the SDK
       setPermissionsGranted(true);
       return true;
     }
@@ -157,11 +156,9 @@ const CallScreen = () => {
     const sessionIdToUse = callSession?.id || sessionId;
     console.log('🔌 Setting up socket listeners for session:', sessionIdToUse);
 
-    // Initialize subscriptions array to track them
     const subscriptions: any[] = [];
 
     if (sessionIdToUse) {
-      // Timer subscription - listen for both session types
       const timerSub = subscribe(`/topic/call/${sessionIdToUse}/timer`, msg => {
         try {
           const timeData = decodeMessageBody(msg);
@@ -173,7 +170,6 @@ const CallScreen = () => {
       });
       subscriptions.push(timerSub);
 
-      // Call end subscription
       const endSub = subscribe(`/topic/call/${sessionIdToUse}`, msg => {
         try {
           const data = JSON.parse(decodeMessageBody(msg));
@@ -188,27 +184,7 @@ const CallScreen = () => {
       subscriptions.push(endSub);
     }
 
-    if (user?.id) {
-      const rejectSub = subscribe(`/topic/call/${user?.id}/rejected`, msg => {
-        try {
-          const data = JSON.parse(decodeMessageBody(msg));
-          console.log('❌ Call rejected:', data);
-          setCallState('rejected');
-          setTimeout(() => {
-            navigation.goBack();
-            Toast.show({
-              type: 'error',
-              text1: 'Call Rejected',
-              text2: 'The astrologer is currently unavailable',
-            });
-          }, 2000);
-        } catch (err) {
-          console.error('Call rejection parse error:', err);
-        }
-      });
-      subscriptions.push(rejectSub);
-    }
-
+    
     console.log(`📡 Set up ${subscriptions.length} socket subscriptions`);
 
     return () => {
@@ -288,13 +264,7 @@ const CallScreen = () => {
       );
     }
 
-    if (userInitiated && callSession) {
-      try {
-        send(`/app/call/${callSession.id}/end`, {});
-      } catch (error) {
-        console.error('Error sending call end message:', error);
-      }
-    }
+   
 
     dispatch(clearCallSession());
 
@@ -337,7 +307,6 @@ const CallScreen = () => {
     setCallState('connected');
     stopWaitingTimer();
 
-    // Start call timer when joining
     setCallStartTime(new Date());
     startLocalTimer();
 
@@ -375,7 +344,6 @@ const CallScreen = () => {
     return user?.name || 'User';
   };
 
-  // ZegoCloud Configuration
   const getZegoConfig = () => {
     const baseConfig =
       callType === 'VIDEO'
@@ -384,12 +352,11 @@ const CallScreen = () => {
 
     return {
       ...baseConfig,
-      // Remove ZegoCloud's default timer and top bar
+
       topMenuBarConfig: {
         ...baseConfig.topMenuBarConfig,
-        isVisible: false, // Hide top menu bar with default timer
+        isVisible: false,
       },
-      // Custom configuration to optimize call experience
       turnOnCameraWhenJoining: callType === 'VIDEO',
       turnOnMicrophoneWhenJoining: true,
       useSpeakerWhenJoining: callType === 'VIDEO',
