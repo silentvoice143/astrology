@@ -18,6 +18,7 @@ import {
 } from './action';
 
 const initialState: SessionState = {
+  activeSession: null,
   session: null,
   user: null,
   otherUser: null,
@@ -34,7 +35,9 @@ const sessionSlice = createSlice({
     setSession(state, action: PayloadAction<ChatSession>) {
       state.session = action.payload;
     },
-
+    clearActiveSession(state) {
+      state.activeSession = null;
+    },
     setChatUser(state, action) {
       state.user = action.payload;
     },
@@ -82,6 +85,7 @@ const sessionSlice = createSlice({
 export const {
   setSession,
   clearSession,
+  clearActiveSession,
   setChatUser,
   setOtherUser,
   addMessage,

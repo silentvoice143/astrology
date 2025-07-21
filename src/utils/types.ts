@@ -162,6 +162,7 @@ export interface OtherUserType {
 }
 
 export interface SessionState {
+  activeSession: ChatSession | null;
   session: ChatSession | null;
   user: UserDetail | null;
   otherUser: UserDetail | null;

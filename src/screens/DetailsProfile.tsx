@@ -10,6 +10,8 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
+import {useTranslation} from 'react-i18next'; // Import useTranslation
+
 // Import necessary components and utilities. Adjust paths based on your project structure.
 import ScreenLayout from '../components/screen-layout';
 import CustomButton from '../components/custom-button';
@@ -67,7 +69,9 @@ export interface AstrologerProfile {
 }
 
 type DetailsProfileRouteProp = RouteProp<RootStackParamList, 'DetailsProfile'>;
+
 const DetailsProfile: React.FC = () => {
+  const {t} = useTranslation(); // Initialize the translation hook
   const route = useRoute<DetailsProfileRouteProp>();
   const id = route.params?.id;
 
@@ -106,36 +110,6 @@ const DetailsProfile: React.FC = () => {
       dispatch(setProfileModelToggle());
     }
   };
-
-  // const requestSession = async () => {
-  //   try {
-  //     const body = {astrologerId: data?.user?.id, duration: 6};
-  //     console.log(body, '----body');
-  //     const payload = await dispatch(sendSessionRequest(body)).unwrap();
-  //     dispatch(setChatUser(data?.user?.id));
-
-  //     console.log(payload);
-  //   } catch (err) {
-  //     console.log('sendSessionRequest Error : ', err);
-  //   }
-  // };
-
-  // const renderStars = (rating: number) => {
-  //   const stars = [];
-  //   for (let i = 0; i < 5; i++) {
-  //     stars.push(
-  //       <Text
-  //         key={i} // Unique key for each star in the list
-  //         style={[
-  //           styles.star, // Base style for all stars
-  //           i < rating ? styles.filledStar : styles.emptyStar, // Conditional styling
-  //         ]}>
-  //         ★
-  //       </Text>,
-  //     );
-  //   }
-  //   return stars;
-  // };
 
   const renderLanguageItem = (text: string, icon: string) => (
     <View style={styles.languageItem}>
@@ -193,7 +167,9 @@ const DetailsProfile: React.FC = () => {
                     '🌐',
                   )}
                   {renderLanguageItem(
-                    `${data.experienceYears} years of experience`,
+                    `${data.experienceYears} ${t(
+                      'detailsProfile.yearsOfExperience',
+                    )}`, // Translated
                     '🎯',
                   )}
                 </View>
@@ -206,13 +182,13 @@ const DetailsProfile: React.FC = () => {
             <View style={styles.consultationLeft}>
               <Text
                 style={[styles.consultationTitle, textStyle.fs_mont_16_700]}>
-                Consultation Charges
+                {t('detailsProfile.Consultation Charges')} {/* Translated */}
               </Text>
 
               <View style={styles.priceContainer}>
                 <View style={[styles.priceWrapper]}>
                   <Text style={[styles.priceText, textStyle.fs_mont_14_400]}>
-                    Chat :
+                    {t('detailsProfile.Chat')} : {/* Translated */}
                   </Text>
                   <View
                     style={{
@@ -226,13 +202,14 @@ const DetailsProfile: React.FC = () => {
                         {color: colors.whiteText},
                         textStyle.fs_mont_14_700,
                       ]}>
-                      ₹{data.pricePerMinuteChat}/min
+                      ₹{data.pricePerMinuteChat}/{t('common.min')}{' '}
+                      {/* Translated */}
                     </Text>
                   </View>
                 </View>
                 <View style={[styles.priceWrapper]}>
                   <Text style={[styles.priceText, textStyle.fs_mont_14_400]}>
-                    Voice Call :
+                    {t('detailsProfile.Voice Call')} : {/* Translated */}
                   </Text>
                   <View
                     style={{
@@ -246,13 +223,14 @@ const DetailsProfile: React.FC = () => {
                         {color: colors.whiteText},
                         textStyle.fs_mont_14_700,
                       ]}>
-                      ₹{data.pricePerMinuteVoice}/min
+                      ₹{data.pricePerMinuteVoice}/{t('common.min')}{' '}
+                      {/* Translated */}
                     </Text>
                   </View>
                 </View>
                 <View style={[styles.priceWrapper]}>
                   <Text style={[styles.priceText, textStyle.fs_mont_14_400]}>
-                    Video Call :
+                    {t('detailsProfile.Video Call')} : {/* Translated */}
                   </Text>
                   <View
                     style={{
@@ -266,7 +244,8 @@ const DetailsProfile: React.FC = () => {
                         {color: colors.whiteText},
                         textStyle.fs_mont_14_700,
                       ]}>
-                      ₹{data.pricePerMinuteVideo}/min
+                      ₹{data.pricePerMinuteVideo}/{t('common.min')}{' '}
+                      {/* Translated */}
                     </Text>
                   </View>
                 </View>
@@ -280,7 +259,7 @@ const DetailsProfile: React.FC = () => {
             <View style={styles.aboutSection}>
               <View style={styles.sectionHeader}>
                 <Text style={[styles.sectionTitle, textStyle.fs_mont_16_700]}>
-                  About Astrologer
+                  {t('detailsProfile.About Astrologer')} {/* Translated */}
                 </Text>
                 {/* Info icon (commented out as per original provided code) */}
                 {/* <View style={styles.orangeInfoIcon}>
@@ -291,12 +270,12 @@ const DetailsProfile: React.FC = () => {
                 <View>
                   <ProfileSectionItem
                     icon={require('../assets/imgs/experience.jpg')}
-                    title="Expertise"
+                    title={t('detailsProfile.Expertise')} // Translated
                     description={data.expertise}
                   />
                 </View>
 
-                {data?.about && expandedAbout && (
+                {data?.about && (
                   <Text
                     style={[styles.aboutText, textStyle.fs_abyss_14_400]}
                     numberOfLines={expandedAbout ? undefined : 4}>
@@ -313,7 +292,10 @@ const DetailsProfile: React.FC = () => {
                         {color: colors.highlight_text},
                         textStyle.fs_mont_14_700,
                       ]}>
-                      {expandedAbout ? 'Read Less' : 'Read More'}
+                      {expandedAbout
+                        ? t('detailsProfile.Read Less')
+                        : t('detailsProfile.Read More')}{' '}
+                      {/* Translated */}
                     </Text>
                   </TouchableOpacity>
                 )}
@@ -335,7 +317,7 @@ const DetailsProfile: React.FC = () => {
             console.log('Call button pressed');
             handleSessionStart(data?.user as UserDetail);
           }}
-          title={'Voice Call'}
+          title={t('detailsProfile.Voice Call')} // Translated
         />
         <CustomButton
           disabled={true}
@@ -347,7 +329,7 @@ const DetailsProfile: React.FC = () => {
             console.log('Call button pressed');
             handleSessionStart(data?.user as UserDetail);
           }}
-          title={'Video Call'}
+          title={t('detailsProfile.Video Call')} // Translated
         />
         <CustomButton
           style={[styles.actionButton, styles.chatButton]}
@@ -359,7 +341,7 @@ const DetailsProfile: React.FC = () => {
             // Handle chat action
             handleSessionStart(data?.user as UserDetail);
           }}
-          title={'Chat'}
+          title={t('detailsProfile.Chat')} // Translated
         />
       </View>
       <RequestSessionModal

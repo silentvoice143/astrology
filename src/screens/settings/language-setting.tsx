@@ -12,10 +12,13 @@ import ScreenLayout from '../../components/screen-layout';
 import {themeColors} from '../../constants/colors';
 import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
 import {setLanguage} from '../../store/reducer/settings';
+import i18n from '../../../i18n';
+import {useTranslation} from 'react-i18next';
 
 const LanguageSetting = () => {
   const selectedLanguage = useAppSelector(state => state.setting.language);
   const dispatch = useAppDispatch();
+  const {t} = useTranslation();
 
   const languages = [
     {code: 'en', name: 'English', nativeName: 'English'},
@@ -24,27 +27,15 @@ const LanguageSetting = () => {
   ];
 
   const handleSelectLanguage = code => {
+    i18n.changeLanguage(code);
     dispatch(setLanguage(code));
-  };
-
-  const handleContinue = () => {
-    Alert.alert(
-      'Language Selected',
-      `You have selected: ${
-        languages.find(lang => lang.code === selectedLanguage)?.name
-      }`,
-      [{text: 'OK'}],
-    );
-    // In a real app, you would save this selection (e.g., AsyncStorage, Context, Redux)
-    // and navigate to the next screen.
   };
 
   return (
     <ScreenLayout headerBackgroundColor={themeColors.surface.background}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.headerContainer}>
-          <Text style={styles.headerTitle}>Select Your Language</Text>
-          <Text style={styles.headerSubtitle}>अपनी भाषा चुनें</Text>
+          <Text style={styles.headerTitle}>{t('selectLanguage')}</Text>
         </View>
 
         <View style={styles.languageOptionsContainer}>
@@ -57,7 +48,9 @@ const LanguageSetting = () => {
               ]}
               onPress={() => handleSelectLanguage(lang.code)}>
               <View style={styles.languageTextContainer}>
-                <Text style={styles.languageName}>{lang.name}</Text>
+                <Text style={styles.languageName}>
+                  {t(lang.name.toLowerCase())}
+                </Text>
                 <Text style={styles.languageNativeName}>{lang.nativeName}</Text>
               </View>
               {selectedLanguage === lang.code && (

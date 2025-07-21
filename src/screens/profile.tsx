@@ -19,33 +19,17 @@ import ScreenLayout from '../components/screen-layout';
 import {moderateScale, scale, scaleFont, verticalScale} from '../utils/sizer';
 import {colors, themeColors} from '../constants/colors';
 import {useUserRole} from '../hooks/use-role';
-import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
-import {textStyle} from '../constants/text-style';
-import CustomDateTimePicker from '../components/custom-date-time-picker';
-import ControlledTagSelector from '../components/controlled-tag-selector';
-import LocationAutoComplete from '../components/location-input-modal-based';
-import CustomInputV2 from '../components/custom-input-v2';
-import {useNavigation} from '@react-navigation/native';
-import {UserPersonalDetail} from '../utils/types';
-import CustomButton from '../components/custom-button';
-import CloseIcon from '../assets/icons/close-icon';
-import {formatTimeToDateString} from '../utils/utils';
-import {launchImageLibrary} from 'react-native-image-picker';
-import {postUserDetail, uploadProfileImage} from '../store/reducer/user';
-import {setUser} from '../store/reducer/auth';
-import Toast from 'react-native-toast-message';
 
-const genderTags = [
-  {id: 'MALE', label: 'Male'},
-  {id: 'FEMALE', label: 'Female'},
-  {id: 'OTHER', label: 'Other'},
-];
+import {useNavigation} from '@react-navigation/native';
+import {useTranslation} from 'react-i18next';
+import {useAppSelector} from '../hooks/redux-hook';
 
 const ProfilePage = () => {
   const role = useUserRole();
   const isAstrologer = role === 'ASTROLOGER';
   const {user, astrologer_detail} = useAppSelector(state => state.auth);
   const navigation = useNavigation<any>();
+  const {t} = useTranslation();
 
   const profileImage =
     user?.gender === 'MALE' || !user?.gender
@@ -76,14 +60,16 @@ const ProfilePage = () => {
             <EditIcon size={16} color="black" />
           </TouchableOpacity>
           <View style={{justifyContent: 'center'}}>
-            <Text style={styles.name}>{user?.name ? user?.name : 'N/A'}</Text>
+            <Text style={styles.name}>
+              {user?.name ? user?.name : t('nameNA')}
+            </Text>
             <Text style={styles.phone}>{`+91 ${user?.mobile}`}</Text>
           </View>
         </View>
         {isAstrologer && (
           <View style={styles.section}>
             <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>About Me</Text>
+              <Text style={styles.sectionTitle}>{t('aboutMe')}</Text>
             </View>
             <View style={styles.aboutBox}>
               <Text style={styles.aboutText}>
@@ -94,30 +80,30 @@ const ProfilePage = () => {
         )}
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>Personal Details</Text>
+          <Text style={styles.sectionTitle}>{t('personalDetails')}</Text>
           <Text style={styles.detailText}>
-            Name: {user?.name ? user?.name : '__'}
+            {t('name')}: {user?.name ? user?.name : '__'}
           </Text>
           <Text style={styles.detailText}>
-            Expertise:{' '}
+            {t('expertise')}:{' '}
             {astrologer_detail?.expertise ? astrologer_detail?.expertise : '__'}
           </Text>
           <Text style={styles.detailText}>
-            Experience:{' '}
+            {t('experience')}:{' '}
             {astrologer_detail?.experienceYears
               ? astrologer_detail?.experienceYears
               : '__'}{' '}
-            Years
+            {t('years')}
           </Text>
           {isAstrologer && (
             <Text style={styles.detailText}>
-              Languages: {astrologer_detail?.languages}
+              {t('languages')}: {astrologer_detail?.languages}
             </Text>
           )}
 
           {!isAstrologer && (
             <Text style={styles.detailText}>
-              DOB: {user?.birthPlace ?? '__'}
+              {t('dob')}: {user?.birthPlace ?? '__'}
             </Text>
           )}
         </View>
@@ -126,7 +112,7 @@ const ProfilePage = () => {
           <View style={styles.section}>
             <View style={styles.cardBox}>
               <Text style={styles.cardTitle}>
-                <HomeIcon size={14} color="red" /> Address
+                <HomeIcon size={14} color="red" /> {t('address')}
               </Text>
               <Text style={styles.cardText}>{user?.birthPlace ?? '__'}</Text>
             </View>
@@ -136,35 +122,33 @@ const ProfilePage = () => {
         {isAstrologer && (
           <View style={styles.section}>
             <View style={styles.cardBox}>
-              <Text style={styles.cardTitle}>Services</Text>
+              <Text style={styles.cardTitle}>{t('services')}</Text>
 
               <View style={styles.serviceItem}>
                 <View style={styles.serviceType}>
                   <ChatIcon size={14} />
-
-                  <Text style={styles.serviceText}>Chat</Text>
+                  <Text style={styles.serviceText}>{t('chat')}</Text>
                 </View>
                 <Text style={styles.servicePrice}>
-                  {astrologer_detail?.pricePerMinuteChat} ₹/min
+                  {astrologer_detail?.pricePerMinuteChat} {t('perMinute')}
                 </Text>
               </View>
               <View style={styles.serviceItem}>
                 <View style={styles.serviceType}>
                   <CallIcon size={14} />
-
-                  <Text style={styles.serviceText}>Audio Call</Text>
+                  <Text style={styles.serviceText}>{t('audioCall')}</Text>
                 </View>
                 <Text style={styles.servicePrice}>
-                  {astrologer_detail?.pricePerMinuteVoice} ₹/min
+                  {astrologer_detail?.pricePerMinuteVoice} {t('perMinute')}
                 </Text>
               </View>
               <View style={styles.serviceItem}>
                 <View style={styles.serviceType}>
                   <VideoCallIcon size={14} />
-                  <Text style={styles.serviceText}>Video Call</Text>
+                  <Text style={styles.serviceText}>{t('videoCall')}</Text>
                 </View>
                 <Text style={styles.servicePrice}>
-                  {astrologer_detail?.pricePerMinuteVideo} ₹/min
+                  {astrologer_detail?.pricePerMinuteVideo} {t('perMinute')}
                 </Text>
               </View>
             </View>

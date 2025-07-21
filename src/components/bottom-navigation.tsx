@@ -11,6 +11,7 @@ import StoreIcon from '../assets/icons/store-icon';
 import {useUserRole} from '../hooks/use-role';
 import {useAppSelector} from '../hooks/redux-hook';
 import {RootState} from '../store';
+import {useTranslation} from 'react-i18next';
 
 const BottomNavigationBar = () => {
   const navigation = useNavigation<any>();
@@ -19,24 +20,25 @@ const BottomNavigationBar = () => {
   const {queueRequestCount} = useAppSelector(
     (state: RootState) => state.session,
   );
+  const {t} = useTranslation();
 
   const navItems = [
-    {label: 'Home', route: 'Home', icon: HomeIcon},
-    {label: 'Kundli', route: 'KundliForm', icon: KundliIcon},
+    {label: t('home'), route: 'Home', icon: HomeIcon},
+    {label: t('kundli'), route: 'KundliForm', icon: KundliIcon},
     role === 'USER'
       ? {
-          label: 'Astrologers',
+          label: t('astrologers'),
           route: 'Astrologers',
           icon: AstrologerIcon,
         }
       : {
-          label: 'Requests',
+          label: t('requests'),
           route: 'session-request',
           icon: PeopleIcon,
           showBadge: true,
         },
-    {label: 'History', route: 'ChatHistory', icon: HistoryIcon},
-    {label: 'Remedies', route: 'Remedies', icon: StoreIcon},
+    {label: t('history'), route: 'ChatHistory', icon: HistoryIcon},
+    {label: t('remedies'), route: 'Remedies', icon: StoreIcon},
   ];
 
   return (
