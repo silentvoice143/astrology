@@ -30,6 +30,7 @@ import PeopleIcon from '../assets/icons/people-icon';
 import {useUserRole} from '../hooks/use-role';
 import HoroscopeIcon from '../assets/icons/horoscope-icon';
 import {useWebSocket} from '../hooks/use-socket';
+import {useTranslation} from 'react-i18next';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -119,6 +120,7 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
   const navigation = useNavigation<any>();
   const {user} = useAppSelector(state => state.auth);
   const {disconnect} = useWebSocket(user.id);
+  const {t} = useTranslation();
 
   useImperativeHandle(ref, () => ({
     open,
@@ -241,7 +243,7 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
                   }
                 }}>
                 <View>{item?.icon}</View>
-                <Text style={styles.navText}>{item.title}</Text>
+                <Text style={styles.navText}>{t(item.title)}</Text>
               </TouchableOpacity>
             ))}
           </View>

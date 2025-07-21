@@ -9,6 +9,7 @@ import * as encoding from 'text-encoding';
 import {SafeAreaProvider, SafeAreaView} from 'react-native-safe-area-context';
 import {colors} from './src/constants/colors';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
+import './i18n';
 
 Object.assign(global, encoding);
 

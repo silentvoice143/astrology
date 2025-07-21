@@ -48,7 +48,9 @@ const ChatHistory = () => {
   const [hasMore, setHasMore] = useState(true);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const role = useUserRole();
-  const activeSessionId = useAppSelector(state => state.session.session?.id);
+  const activeSessionId = useAppSelector(
+    state => state.session.activeSession?.id,
+  );
   const dispatch = useAppDispatch();
   const isFocused = useIsFocused();
 
@@ -183,18 +185,28 @@ const ChatHistory = () => {
           onEndReachedThreshold={0.2}
           ListFooterComponent={
             loading ? (
-              <ActivityIndicator size="small" style={{marginVertical: 10}} />
+              <View
+                style={{
+                  flex: 1,
+                  minHeight: 400,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <ActivityIndicator size="small" style={{marginVertical: 10}} />
+              </View>
             ) : null
           }
           ListEmptyComponent={
-            <View
-              style={{
-                height: verticalScale(400),
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}>
-              <Text style={[textStyle.fs_mont_16_500]}>No Chat History</Text>
-            </View>
+            !loading ? (
+              <View
+                style={{
+                  height: verticalScale(400),
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <Text style={[textStyle.fs_mont_16_500]}>No Chat History</Text>
+              </View>
+            ) : null
           }
         />
       ) : (

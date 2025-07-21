@@ -232,7 +232,7 @@ const Home = () => {
                     source={{uri: item?.imgUrl}}
                     resizeMode="cover"
                     style={{
-                      height: verticalScale(100),
+                      height: verticalScale(120),
                       width: '100%',
                       borderRadius: scale(16),
                     }}

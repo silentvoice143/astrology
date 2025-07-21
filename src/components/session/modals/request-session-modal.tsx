@@ -7,11 +7,12 @@ import {scale, verticalScale} from '../../../utils/sizer';
 import {colors} from '../../../constants/colors';
 import {textStyle} from '../../../constants/text-style';
 import CheckIcon from '../../../assets/icons/checkIcon';
-import {useAppDispatch} from '../../../hooks/redux-hook';
+import {useAppDispatch, useAppSelector} from '../../../hooks/redux-hook';
 import {
   sendSessionRequest,
   setChatUser,
   setOtherUser,
+  setSession,
 } from '../../../store/reducer/session';
 import {useNavigation} from '@react-navigation/native';
 import {Astrologers, UserDetail} from '../../../utils/types';
@@ -37,11 +38,16 @@ const RequestSessionModal = ({
     id: string;
     value: number;
   }>(null);
+  const activeSession = useAppSelector(state => state.session.activeSession);
 
   const dispatch = useAppDispatch();
   const navigation = useNavigation<any>();
 
   const requestSession = async () => {
+    if (activeSession && activeSession?.astrologer?.id === astrologer?.id) {
+      setSession(activeSession);
+      navigation.navigate('chat');
+    }
     try {
       const body = {astrologerId: astrologer?.id, duration: selected?.value};
       const payload = await dispatch(sendSessionRequest(body)).unwrap();

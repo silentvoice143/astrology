@@ -18,6 +18,7 @@ import {decodeMessageBody, formatedDate, getTimeOnly} from '../utils/utils';
 import {Message} from '../utils/types';
 import {
   addMessage,
+  clearActiveSession,
   clearSession,
   getChatMessages,
   prependMessages,
@@ -190,6 +191,7 @@ export const ChatScreenDemo = () => {
                 status: data.status === 'ended' ? 'ENDED' : 'ACTIVE',
               }),
             );
+            dispatch(clearActiveSession());
             Toast.show({
               type: 'info',
               text1: 'Session Ended',

@@ -23,7 +23,11 @@ import {shuffleArray} from '../utils/utils';
 import {textStyle} from '../constants/text-style';
 import {Astrologers as AstrologersType, UserDetail} from '../utils/types';
 import {RouteProp, useRoute} from '@react-navigation/native';
-import {sendSessionRequest, setOtherUser} from '../store/reducer/session';
+import {
+  sendSessionRequest,
+  setOtherUser,
+  setSession,
+} from '../store/reducer/session';
 
 const tags = [
   {id: 'all', label: 'All', icon: '✨'},
@@ -66,8 +70,8 @@ const Astrologers = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const activeSession = useAppSelector(state => state.session.activeSession);
   const fetchAstrologersData = async (pageNumber = 1, append = false) => {
-    console.log(pageNumber, '---page');
     if (loading || isFetchingMore || !hasMore) return;
     try {
       if (append) setIsFetchingMore(true);
@@ -91,6 +95,10 @@ const Astrologers = () => {
   };
 
   const requestSession = async (astrologer: UserDetail) => {
+    if (activeSession && activeSession?.astrologer?.id === astrologer.id) {
+      setSession(activeSession);
+      navigation.navigate('chat');
+    }
     try {
       const body = {astrologerId: astrologer?.id, duration: 2};
       const payload = await dispatch(sendSessionRequest(body)).unwrap();

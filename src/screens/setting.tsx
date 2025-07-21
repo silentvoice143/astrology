@@ -13,9 +13,10 @@ import {moderateScale, scale, scaleFont, verticalScale} from '../utils/sizer';
 import {textStyle} from '../constants/text-style';
 import ScreenLayout from '../components/screen-layout';
 import ChevronRightIcon from '../assets/icons/chevron-right';
-import {useAppDispatch} from '../hooks/redux-hook';
+import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {logout} from '../store/reducer/auth';
 import {clearSession} from '../store/reducer/session';
+import {useTranslation} from 'react-i18next';
 
 const settingsOptions = [
   {title: 'Language', screen: 'Language'},
@@ -30,6 +31,8 @@ const settingsOptions = [
 const Setting = () => {
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
+  const {user} = useAppSelector(state => state.auth);
+  const {t} = useTranslation();
   const handleLogout = async () => {
     try {
       await dispatch(logout());
@@ -46,15 +49,21 @@ const Setting = () => {
     navigation.navigate(screen);
   };
 
+  const profileImage =
+    user?.gender === 'MALE' || !user?.gender
+      ? require('../assets/imgs/male.jpg')
+      : require('../assets/imgs/female.jpg');
+
   return (
     <ScreenLayout headerBackgroundColor={themeColors.surface.background}>
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
           <View style={{}}>
-            <Image
-              source={{uri: 'https://i.pravatar.cc/300?img=5'}}
-              style={styles.profileImage}
-            />
+            {user.imgUri ? (
+              <Image source={{uri: user.imgUri}} style={styles.profileImage} />
+            ) : (
+              <Image source={profileImage} style={styles.profileImage} />
+            )}
           </View>
 
           <View
@@ -69,8 +78,8 @@ const Setting = () => {
               <Text style={styles.phone}>{'+91 1234567890'}</Text>
             </View>
             <View style={{justifyContent: 'center'}}>
-              <TouchableOpacity>
-                <Text style={[textStyle.fs_mont_14_600]}>Manage</Text>
+              <TouchableOpacity onPress={() => navigation.navigate('Profile')}>
+                <Text style={[textStyle.fs_mont_14_600]}>{t('Manage')}</Text>
               </TouchableOpacity>
             </View>
           </View>
@@ -80,14 +89,14 @@ const Setting = () => {
             textStyle.fs_mont_12_400,
             {color: themeColors.text.muted, paddingHorizontal: scale(10)},
           ]}>
-          SETTINGS & PREFERENCES
+          {t('setting&preferences')}
         </Text>
         {settingsOptions.map((item, index) => (
           <React.Fragment key={index}>
             <TouchableOpacity
               style={styles.option}
               onPress={() => handlePress(item.screen)}>
-              <Text style={styles.optionText}>{item.title}</Text>
+              <Text style={styles.optionText}>{t(item.title)}</Text>
               {item.title !== 'Logout' && <ChevronRightIcon strokeWidth={1} />}
             </TouchableOpacity>
 
@@ -124,6 +133,8 @@ const styles = StyleSheet.create({
     width: scale(60),
     height: scale(60),
     borderRadius: scale(24),
+    borderWidth: 1,
+    borderColor: themeColors.border.primary,
   },
   name: {
     fontSize: scaleFont(18),

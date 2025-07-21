@@ -17,6 +17,7 @@ import BackIcon from '../assets/icons/back-icon';
 import LinearGradient from 'react-native-linear-gradient';
 import NotificationIcon from '../assets/icons/notification-icon';
 import ChevronLeftIcon from '../assets/icons/chevron-left';
+import {useTranslation} from 'react-i18next';
 
 const headerTitle = [
   {title: 'Home', href: 'Home'},
@@ -33,7 +34,8 @@ const Header = ({
   headerBackgroundColor?: string;
   onMenuClick: () => void;
 }) => {
-  const route = useRoute(); // <-- ✅ Get the current route
+  const route = useRoute();
+  const {t} = useTranslation();
   const currentHeader = headerTitle.find(item => item.href === route.name);
   const showRouteTitle = route.name !== 'Home';
 
@@ -49,21 +51,21 @@ const Header = ({
   const getName = (name: string) => {
     switch (name) {
       case 'KundliForm':
-        return 'Kundli Form';
+        return t('kundliform');
       case 'about':
-        return 'About Us';
+        return t('aboutus');
       case 'session-request':
-        return 'Session Requests';
+        return t('sessionRequest');
       case 'remedies':
-        return 'Remedies';
+        return t('remedies');
       case 'DetailsProfile':
-        return 'Astrologer';
+        return t('astrologer');
       case 'TermsAndConditions':
-        return 'Terms & Conditions';
+        return t('terms&condition');
       case 'customer-support':
-        return 'Customer Support';
+        return t('customerSupport');
       default:
-        return name;
+        return t(name.toLowerCase().replace(' ', ''));
     }
   };
 
