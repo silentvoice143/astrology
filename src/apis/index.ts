@@ -4,9 +4,9 @@ import {getTokenFromStore} from '../utils/get-token';
 import Toast from 'react-native-toast-message';
 import skipAuthPaths from './skip-path';
 
-// const baseUrl =
-//   process.env.BASE_URL || 'https://quagga-driving-socially.ngrok-free.app';
-const baseUrl = process.env.BASE_URL || 'https://astrosevaa.com';
+const baseUrl =
+  process.env.BASE_URL || 'https://quagga-driving-socially.ngrok-free.app';
+// const baseUrl = 'https://astrosevaa.com';
 // const baseUrl =
 //   process.env.BASE_URL || 'https://gorilla-fitting-feline.ngrok-free.app';
 
@@ -25,6 +25,13 @@ api.interceptors.request.use(
     const shouldSkip = skipAuthPaths.some((path: string) =>
       urlPath.startsWith(path),
     );
+    console.log('🔗 API Request:', {
+      url: config?.baseURL + config?.url,
+      method: config.method?.toUpperCase(),
+      payload: config.data || null,
+    });
+
+
     const token = shouldSkip ? '' : getTokenFromStore();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;

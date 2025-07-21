@@ -11,6 +11,8 @@ import {textStyle} from '../../constants/text-style';
 import {formatPrice} from '../../utils/utils';
 import Avatar from '../avatar';
 
+type SessionType = 'chat' | 'voice' | 'video';
+
 type AstrologerCardProps = {
   id: string;
   name: string;
@@ -22,12 +24,14 @@ type AstrologerCardProps = {
   onCallPress?: () => void;
   onVideoPress?: () => void;
   onChatPress?: () => void;
+  // NEW: Add session type handler
+  onSessionPress?: (sessionType: SessionType) => void;
   pricePerMinuteChat: number;
   pricePerMinuteVideo: number;
   pricePerMinuteVoice: number;
   expertise: string;
   online: boolean;
-  freeChatAvailable: boolean;
+  freeChatAvailable?: boolean;
 };
 
 const AstrologerCard: React.FC<AstrologerCardProps> = ({
@@ -41,12 +45,33 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
   onCallPress,
   onVideoPress,
   onChatPress,
+  onSessionPress, // NEW
   pricePerMinuteChat,
   pricePerMinuteVideo,
   pricePerMinuteVoice,
   online,
   freeChatAvailable,
 }) => {
+  // NEW: Handle session press with type
+  const handleSessionPress = (sessionType: SessionType) => {
+    if (onSessionPress) {
+      onSessionPress(sessionType);
+    } else {
+      // Fallback to old handlers for backward compatibility
+      switch (sessionType) {
+        case 'voice':
+          onCallPress?.();
+          break;
+        case 'video':
+          onVideoPress?.();
+          break;
+        case 'chat':
+          onChatPress?.();
+          break;
+      }
+    }
+  };
+
   return (
     <View style={styles.card}>
       <View style={styles.topSection}>
@@ -106,8 +131,7 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
       <View style={styles.actions}>
         <View onStartShouldSetResponder={() => true}>
           <TouchableOpacity
-            disabled={true}
-            onPress={onCallPress}
+            onPress={() => handleSessionPress('voice')}
             style={styles.button}>
             <View
               style={{
@@ -125,8 +149,7 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
 
         <View onStartShouldSetResponder={() => true}>
           <TouchableOpacity
-            disabled={true}
-            onPress={onVideoPress}
+            onPress={() => handleSessionPress('video')}
             style={styles.button}>
             <View
               style={{
@@ -198,6 +221,7 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
 
 export default AstrologerCard;
 
+// Keep existing styles exactly the same
 const styles = StyleSheet.create({
   card: {
     backgroundColor: '#fff',

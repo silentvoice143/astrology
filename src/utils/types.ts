@@ -161,9 +161,32 @@ export interface OtherUserType {
   imageUri?: string;
 }
 
+export interface CallSession {
+  id: string;
+  user: {
+    id: string;
+    name: string;
+    imgUri?: string;
+  };
+  astrologer: {
+    id: string;
+    name: string;
+    imgUri?: string;
+  };
+  startedAt: string;
+  endedAt: string | null;
+  status: 'ACTIVE' | 'ENDED';
+  sessionType: 'VOICE' | 'VIDEO';
+  totalMinutes: number;
+  totalCost: number;
+  agoraChannelName: string;
+  agoraToken?: string;
+}
+
 export interface SessionState {
   activeSession: ChatSession | null;
   session: ChatSession | null;
+  callSession: CallSession | null;
   user: UserDetail | null;
   otherUser: UserDetail | null;
   sessionEnded: boolean;

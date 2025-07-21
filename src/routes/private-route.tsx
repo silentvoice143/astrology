@@ -14,6 +14,7 @@ import {useNavigation} from '@react-navigation/native';
 import {useUserRole} from '../hooks/use-role';
 import {useSessionEvents} from '../hooks/use-session-events';
 import About from '../screens/about';
+import Call from '../screens/call/call';
 import Setting from '../screens/setting';
 import CustomerSupport from '../screens/customer-support';
 import Remedies from '../screens/remedies';
@@ -59,6 +60,7 @@ export default function PrivateRoutes() {
       <Stack.Screen name="ChatHistory" component={ChatHistory} />
       <Stack.Screen name="Wallet" component={Wallet} />
       <Stack.Screen name="chat" component={ChatScreenDemo} />
+      <Stack.Screen name="call" component={Call} />
       <Stack.Screen name="session-request" component={RequestScreen} />
       <Stack.Screen name="Remedies" component={Remedies} />
       <Stack.Screen name="about" component={About} />

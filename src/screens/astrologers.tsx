@@ -4,10 +4,8 @@ import {
   ScrollView,
   Pressable,
   ActivityIndicator,
-  Keyboard,
-  FlatList,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import AstrologerCard from '../components/astrologers/astrologer-card';
 import {colors} from '../constants/colors';
 import ScreenLayout from '../components/screen-layout';
@@ -22,12 +20,15 @@ import RequestSessionModal from '../components/session/modals/request-session-mo
 import {shuffleArray} from '../utils/utils';
 import {textStyle} from '../constants/text-style';
 import {Astrologers as AstrologersType, UserDetail} from '../utils/types';
-import {RouteProp, useRoute} from '@react-navigation/native';
-import {
-  sendSessionRequest,
-  setOtherUser,
-  setSession,
-} from '../store/reducer/session';
+
+type SessionType = 'chat' | 'voice' | 'video'; // NEW
+
+// NEW: Extended type for astrologer with pricing
+interface AstrologerWithPricing extends UserDetail {
+  pricePerMinuteChat: number;
+  pricePerMinuteVideo: number;
+  pricePerMinuteVoice: number;
+}
 
 const tags = [
   {id: 'all', label: 'All', icon: '✨'},
@@ -41,90 +42,76 @@ const tags = [
   },
 ];
 
-// Define the type for the route parameters for the 'Astrologers' screen
-type AstrologersRouteParams = {
-  initialSearch?: string;
-  sort?: string;
-};
-
-// Define the type for the route object using RouteProp
-type AstrologersScreenRouteProp = RouteProp<
-  {Astrologers: AstrologersRouteParams},
-  'Astrologers'
->;
-
 const Astrologers = () => {
-  const route = useRoute<AstrologersScreenRouteProp>(); // Use useRoute hook to access params
-  const {initialSearch = '', sort = ''} = route.params || {};
-  const [search, setSearch] = useState(initialSearch); // Initialize search state with initialSearch param
   const [selected, setSelected] = useState<string[]>(['all']);
   const [selectedAstrologer, setSelectedAstrologer] =
-    useState<UserDetail | null>(null);
+    useState<AstrologerWithPricing | null>(null); // CHANGED
+  const [selectedSessionType, setSelectedSessionType] =
+    useState<SessionType>('chat'); // NEW
   const [astrologersData, setAstrologersData] = useState<AstrologersType[]>([]);
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const {isProfileComplete} = useAppSelector(state => state.auth);
   const dispatch = useAppDispatch();
   const navigation = useTypedNavigation();
-  const {freeChatUsed} = useAppSelector(state => state.auth.user);
-  const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
-  const [isFetchingMore, setIsFetchingMore] = useState(false);
-  const activeSession = useAppSelector(state => state.session.activeSession);
-  const fetchAstrologersData = async (pageNumber = 1, append = false) => {
-    if (loading || isFetchingMore || !hasMore) return;
-    try {
-      if (append) setIsFetchingMore(true);
-      else setLoading(true);
 
-      const payload = await dispatch(
-        getAllAstrologers(`?page=${pageNumber}&search=&sort=${sort}`),
-      ).unwrap();
+  const fetchAstrologersData = async () => {
+    try {
+      setLoading(true);
+      const payload = await dispatch(getAllAstrologers('?page=1')).unwrap();
+      console.log(payload, 'payload----------------- fetchAstrologersData');
       if (payload.success) {
-        const newData = payload.astrologers || [];
-        setAstrologersData(prev => (append ? [...prev, ...newData] : newData));
-        setPage(payload.currentPage);
-        setHasMore(!payload.isLastPage);
+        const customAstro = payload?.astrologers?.map((astro: any) => {
+          return {
+            online: astro?.online,
+            id: astro?.id,
+            name: astro?.user?.name,
+            userId: astro?.user?.id,
+            user: astro?.user,
+            expertise: astro?.expertise,
+            pricePerMinuteChat: astro?.pricePerMinuteChat || 0, // CHANGED: Use actual numbers
+            pricePerMinuteVideo: astro?.pricePerMinuteVideo || 0,
+            pricePerMinuteVoice: astro?.pricePerMinuteVoice || 0,
+            rating: astro?.rating || null,
+            experience: `${astro?.experienceYears} Years`,
+            languages: astro?.languages,
+            imageUri:
+              astro?.imgUri ||
+              'https://img.freepik.com/free-vector/young-man-orange-hoodie_1308-175788.jpg?ga=GA1.1.1570607994.1749976697&semt=ais_hybrid&w=740',
+          };
+        });
+        setAstrologersData(customAstro);
       }
     } catch (error) {
       console.log('fetchAstrologersData Error : ', error);
     } finally {
-      if (append) setIsFetchingMore(false);
-      else setLoading(false);
+      setLoading(false);
     }
   };
 
-  const requestSession = async (astrologer: UserDetail) => {
-    if (activeSession && activeSession?.astrologer?.id === astrologer.id) {
-      setSession(activeSession);
-      navigation.navigate('chat');
-    }
-    try {
-      const body = {astrologerId: astrologer?.id, duration: 2};
-      const payload = await dispatch(sendSessionRequest(body)).unwrap();
-
-      if (payload.success) {
-        dispatch(setOtherUser(astrologer));
-        navigation.navigate('chat');
-      }
-
-      console.log(payload);
-    } catch (err) {
-      console.log('sendSessionRequest Error : ', err);
-    }
-  };
   useEffect(() => {
-    fetchAstrologersData(1);
+    fetchAstrologersData();
   }, []);
 
-  const handleSessionStart = (astrologer: UserDetail) => {
+  // CHANGED: Handle session start with session type and pricing
+  const handleSessionStart = (
+    astrologer: AstrologersType,
+    sessionType: SessionType,
+  ) => {
     if (isProfileComplete) {
-      if (freeChatUsed) {
-        setSelectedAstrologer(astrologer);
-        setIsRequestModalOpen(true);
-      } else {
-        requestSession(astrologer);
-      }
+      console.log('handling session');
+
+      // Create astrologer with pricing info
+      const astrologerWithPricing: AstrologerWithPricing = {
+        ...astrologer.user,
+        pricePerMinuteChat: astrologer.pricePerMinuteChat,
+        pricePerMinuteVideo: astrologer.pricePerMinuteVideo,
+        pricePerMinuteVoice: astrologer.pricePerMinuteVoice,
+      };
+
+      setSelectedAstrologer(astrologerWithPricing);
+      setSelectedSessionType(sessionType);
+      setIsRequestModalOpen(true);
     } else {
       dispatch(setProfileModelToggle());
     }
@@ -160,10 +147,6 @@ const Astrologers = () => {
             unfocusedBorderColor={colors.primary_border}
             enableShadow={true}
             focusedBorderColor={colors.primary_border}
-            placeholder="Search for astrologers..." // Updated placeholder for clarity
-            value={search} // Controlled component with search state
-            onChangeText={setSearch} // Update search state on text change
-            onSubmitEditing={() => Keyboard.dismiss()} // Dismiss keyboard on submit
           />
         </View>
       </View>
@@ -196,62 +179,43 @@ const Astrologers = () => {
           </Text>
         </View>
       ) : (
-        <FlatList
-          showsVerticalScrollIndicator={false}
-          data={astrologersData}
-          keyExtractor={item => `card-astrologer-${item.id}`}
-          contentContainerStyle={{paddingBottom: verticalScale(20)}}
-          onEndReached={() => {
-            if (hasMore && !isFetchingMore && !loading) {
-              fetchAstrologersData(page + 1, true);
-            }
-          }}
-          onEndReachedThreshold={0.5}
-          ListFooterComponent={
-            isFetchingMore ? (
-              <View style={{paddingVertical: 10}}>
-                <ActivityIndicator />
-                <Text style={[textStyle.fs_mont_12_400, {textAlign: 'center'}]}>
-                  Loading more astrologers...
-                </Text>
-              </View>
-            ) : null
-          }
-          renderItem={({item}) => (
-            <Pressable
-              onPress={() =>
-                navigation.navigate('DetailsProfile', {id: item.id})
-              }
-              style={{marginHorizontal: scale(10)}}
-              key={`card-astrologer-${item.id}`}>
-              <AstrologerCard
-                id={item.id}
-                online={item.online}
-                pricePerMinuteChat={item.pricePerMinuteChat}
-                pricePerMinuteVideo={item.pricePerMinuteVideo}
-                pricePerMinuteVoice={item.pricePerMinuteVoice}
-                expertise={item.expertise}
-                name={item?.user?.name}
-                rate={''}
-                rating={4}
-                experience={item?.experienceYears.toString()}
-                languages={item?.languages}
-                imageUri={item?.user?.imgUri}
-                freeChatAvailable={!freeChatUsed}
-                onCallPress={() => handleSessionStart(item.user)}
-                onVideoPress={() => handleSessionStart(item.user)}
-                onChatPress={() => handleSessionStart(item.user)}
-              />
-            </Pressable>
-          )}
-          ListEmptyComponent={
-            !loading && (
-              <Text style={[textStyle.fs_mont_12_400, {textAlign: 'center'}]}>
-                No astrologers found.
-              </Text>
-            )
-          }
-        />
+        <ScrollView showsVerticalScrollIndicator={false}>
+          <View
+            style={{
+              backgroundColor: colors.primary_surface,
+              flex: 1,
+              paddingHorizontal: scale(12),
+              marginBottom: verticalScale(20),
+            }}>
+            {astrologersData.map((item:any, idx) => (
+              <Pressable
+                onPress={() =>
+                  navigation.navigate('DetailsProfile', {id: item.id})
+                }
+                key={`card-astrologer-${item.id}`}>
+                <AstrologerCard
+                  id={item.id}
+                  online={item.online}
+                  pricePerMinuteChat={item.pricePerMinuteChat}
+                  pricePerMinuteVideo={item.pricePerMinuteVideo}
+                  pricePerMinuteVoice={item.pricePerMinuteVoice}
+                  expertise={item.expertise}
+                  key={`card-astrologer-${idx}`}
+                  name={item?.name}
+                  rate={item?.chatRate}
+                  rating={item?.rating}
+                  experience={item?.experience}
+                  languages={item?.languages}
+                  imageUri={item?.imageUri}
+                  // CHANGED: Use new session handler instead of separate handlers
+                  onSessionPress={sessionType => {
+                    handleSessionStart(item, sessionType);
+                  }}
+                />
+              </Pressable>
+            ))}
+          </View>
+        </ScrollView>
       )}
       <RequestSessionModal
         isOpen={isRequestModalOpen}
@@ -260,6 +224,7 @@ const Astrologers = () => {
           setSelectedAstrologer(null);
         }}
         astrologer={selectedAstrologer}
+        initialSessionType={selectedSessionType} // NEW: Pass initial session type
       />
     </ScreenLayout>
   );

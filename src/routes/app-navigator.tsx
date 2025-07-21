@@ -1,5 +1,7 @@
 import React, {useEffect, useState} from 'react';
 import {NavigationContainer, useNavigation} from '@react-navigation/native';
+import {View, Text} from 'react-native';
+
 import PublicRoutes from './public-route';
 import PrivateRoutes from './private-route';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
@@ -10,18 +12,49 @@ import {
   setAuthentication,
   setUser,
 } from '../store/reducer/auth';
-
-import {Text, View} from 'react-native';
-
 import {useWebSocket} from '../hooks/use-socket';
 import {useSessionEvents} from '../hooks/use-session-events';
+import CallRequestNotification from '../screens/call/call-request-notification';
 
 export default function AppNavigator() {
-  const {token, user} = useAppSelector((state: any) => state.auth);
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(true);
+  const {user, isAuthenticated, token} = useAppSelector(
+    (state: any) => state.auth,
+  );
+  const [localCallRequestVisible, setLocalCallRequestVisible] = useState(false);
+  const [localCallRequest, setLocalCallRequest] = useState<any>(null);
   const {connect} = useWebSocket(user?.id);
-  const isAuthenticated = useAppSelector(state => state.auth.isAuthenticated);
+
+  const {callRequest, callRequestNotification} = useSessionEvents(
+    user?.id,
+    isAuthenticated,
+  );
+
+  console.log(callRequest, callRequestNotification, 'call request hai');
+
+  useEffect(() => {
+    if (callRequestNotification && callRequest) {
+      console.log('Setting local call request state');
+      setLocalCallRequestVisible(true);
+      setLocalCallRequest(callRequest);
+    } else {
+      setLocalCallRequestVisible(false);
+      setLocalCallRequest(null);
+    }
+  }, [callRequestNotification, callRequest]);
+
+  console.log(callRequest, 'call reuiest');
+
+  const handleCloseCallNotification = () => {
+    console.log('Closing call notification');
+    setLocalCallRequestVisible(false);
+    setLocalCallRequest(null);
+  };
+
+  const onAccept = () => {
+    setLocalCallRequest(null);
+  };
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -80,6 +113,17 @@ export default function AppNavigator() {
   return (
     <NavigationContainer>
       {isAuthenticated ? <PrivateRoutes /> : <PublicRoutes />}
+
+      {isAuthenticated &&
+        localCallRequestVisible &&
+        localCallRequest.userId && (
+          <CallRequestNotification
+            visible={localCallRequestVisible}
+            callRequest={localCallRequest}
+            onClose={handleCloseCallNotification}
+            onAccept={onAccept}
+          />
+        )}
     </NavigationContainer>
   );
 }

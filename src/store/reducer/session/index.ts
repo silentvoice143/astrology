@@ -1,5 +1,6 @@
 import {
   Astrologers,
+  CallSession,
   Message,
   OtherUserType,
   UserDetail,
@@ -9,10 +10,12 @@ import {
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {ChatSession, SessionState} from '../../../utils/types';
 import {
+  acceptCallRequest,
   acceptSessionRequest,
   getChatHistory,
   getChatMessages,
   getQueueRequest,
+  sendCallRequest,
   sendSessionRequest,
   skipSessionRequest,
 } from './action';
@@ -20,6 +23,7 @@ import {
 const initialState: SessionState = {
   activeSession: null,
   session: null,
+  callSession: null,
   user: null,
   otherUser: null,
   sessionEnded: true,
@@ -35,6 +39,11 @@ const sessionSlice = createSlice({
     setSession(state, action: PayloadAction<ChatSession>) {
       state.session = action.payload;
     },
+
+    setCallSession(state, action: PayloadAction<CallSession>) {
+      state.callSession = action.payload;
+    },
+
     clearActiveSession(state) {
       state.activeSession = null;
     },
@@ -59,6 +68,9 @@ const sessionSlice = createSlice({
     prependMessages(state, action: PayloadAction<Message[]>) {
       state.messages = [...state.messages, ...action.payload]; // older messages at the start
     },
+    clearCallSession(state) {
+      state.callSession = null;
+    },
     incrementQueueRequest: state => {
       state.queueRequestCount += 1;
     },
@@ -74,11 +86,13 @@ const sessionSlice = createSlice({
   },
   extraReducers: builder => {
     builder.addCase(sendSessionRequest.fulfilled, state => {});
+    builder.addCase(sendCallRequest.fulfilled, state => {});
     builder.addCase(getQueueRequest.fulfilled, state => {});
     builder.addCase(acceptSessionRequest.fulfilled, state => {});
     builder.addCase(skipSessionRequest.fulfilled, state => {});
     builder.addCase(getChatHistory.fulfilled, state => {});
     builder.addCase(getChatMessages.fulfilled, state => {});
+    builder.addCase(acceptCallRequest.fulfilled, state => {});
   },
 });
 
@@ -90,6 +104,8 @@ export const {
   setOtherUser,
   addMessage,
   prependMessages,
+  setCallSession,
+  clearCallSession,
   setMessage,
   setQueueCount,
   incrementQueueRequest,
@@ -104,6 +120,8 @@ export {
   getChatHistory,
   acceptSessionRequest,
   getChatMessages,
+  sendCallRequest,
+  acceptCallRequest,
 };
 
 export default sessionSlice.reducer;
