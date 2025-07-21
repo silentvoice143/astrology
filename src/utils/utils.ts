@@ -1,3 +1,4 @@
+import {format, toZonedTime} from 'date-fns-tz';
 export function shuffleArray<T>(array: T[]): T[] {
   const result = [...array]; // create a copy to avoid mutating the original
   for (let i = result.length - 1; i > 0; i--) {
@@ -48,7 +49,7 @@ export function formatRelativeDate(isoString: string): string {
 }
 
 export function getTimeOnly(
-  isoString: string,
+  isoString: Date,
   use12Hour: boolean = false,
 ): string {
   const dateObj = new Date(isoString);
@@ -63,4 +64,69 @@ export function getDateOnly(isoString: string): string {
   const datePart = isoString.split('T')[0]; // "yyyy-mm-dd"
   const [year, month, day] = datePart.split('-');
   return `${day}/${month}/${year}`; // "dd/mm/yyyy"
+}
+
+export const formatPrice = (
+  value: number,
+  unit: 'min' | 'hr',
+  symbol: string = '₹',
+): string => {
+  return `${symbol}${value}/${unit}`;
+};
+
+// ==================date====================
+export const formatedDate = (date: Date | string) => {
+  const timeZone = 'Asia/Kolkata';
+
+  const dateString: Date | string = date + 'Z';
+  const utcDate = dateString as unknown as Date;
+
+  const zonedDate = toZonedTime(utcDate, timeZone); // Convert to IST
+  return format(zonedDate, 'hh:mm a', {timeZone}); // Format in IST
+};
+
+export const formatDateString = (isoDateString: string | Date): string => {
+  const date = new Date(isoDateString);
+  const options: Intl.DateTimeFormatOptions = {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  };
+  return date.toLocaleDateString('en-IN', options); // e.g., "06 May 2025"
+};
+
+export function formatTimeToDateString(
+  timeStr: string,
+  baseDate: Date = new Date(),
+): string {
+  const [hours, minutes, seconds] = timeStr.split(':').map(Number);
+
+  const date = new Date(
+    baseDate.getFullYear(),
+    baseDate.getMonth(),
+    baseDate.getDate(),
+    hours,
+    minutes,
+    seconds,
+    0, // milliseconds
+  );
+
+  const pad = (n: number, width: number = 2) => String(n).padStart(width, '0');
+
+  const formatted =
+    `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}` +
+    `T${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(
+      date.getSeconds(),
+    )}.000000`;
+
+  return formatted;
+}
+
+export function getFormattedDate() {
+  const date = new Date(); // July 18, 2025 (months are 0-based)
+  return {
+    day: date.getDate(),
+    month: date.getMonth() + 1,
+    year: date.getFullYear(),
+  };
 }

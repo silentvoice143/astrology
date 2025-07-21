@@ -6,15 +6,19 @@ import {scale, verticalScale, moderateScale} from '../../../utils/sizer';
 import {colors} from '../../../constants/colors';
 import {textStyle} from '../../../constants/text-style';
 import CheckIcon from '../../../assets/icons/checkIcon';
+<<<<<<< HEAD
 import CallIcon from '../../../assets/icons/call-icon';
 import VideoCallIcon from '../../../assets/icons/video-call-icon';
 import ChatIcon from '../../../assets/icons/chat-icon';
+=======
+>>>>>>> dev
 import {useAppDispatch, useAppSelector} from '../../../hooks/redux-hook';
 import {
   sendCallRequest,
   sendSessionRequest,
   setChatUser,
   setOtherUser,
+  setSession,
 } from '../../../store/reducer/session';
 import {useNavigation} from '@react-navigation/native';
 import {UserDetail} from '../../../utils/types';

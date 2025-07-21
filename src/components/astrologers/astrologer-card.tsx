@@ -1,13 +1,15 @@
 import React from 'react';
 import {View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
 import {scale, verticalScale, moderateScale} from '../../utils/sizer';
-import {colors} from '../../constants/colors';
+import {colors, themeColors} from '../../constants/colors';
 import LikeIcon from '../../assets/icons/like-icon';
 import StarIcon from '../../assets/icons/star-icon';
 import CallIcon from '../../assets/icons/call-icon';
 import VideoCallIcon from '../../assets/icons/video-call-icon';
 import ChatIcon from '../../assets/icons/chat-icon';
 import {textStyle} from '../../constants/text-style';
+import {formatPrice} from '../../utils/utils';
+import Avatar from '../avatar';
 
 type SessionType = 'chat' | 'voice' | 'video';
 
@@ -29,6 +31,7 @@ type AstrologerCardProps = {
   pricePerMinuteVoice: number;
   expertise: string;
   online: boolean;
+  freeChatAvailable?: boolean;
 };
 
 const AstrologerCard: React.FC<AstrologerCardProps> = ({
@@ -47,6 +50,7 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
   pricePerMinuteVideo,
   pricePerMinuteVoice,
   online,
+  freeChatAvailable,
 }) => {
   // NEW: Handle session press with type
   const handleSessionPress = (sessionType: SessionType) => {
@@ -71,38 +75,35 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
   return (
     <View style={styles.card}>
       <View style={styles.topSection}>
-        <View>
+        <View style={{}}>
           <View
             style={{
               position: 'absolute',
-              right: -2,
+              right: 4,
+              top: 1,
               width: 12,
               height: 12,
               zIndex: 999,
               borderRadius: 6,
+
               backgroundColor: online ? colors.success.base : colors.error.base,
             }}></View>
-          <Image source={{uri: imageUri}} style={styles.avatar} />
+          <Avatar
+            image={{uri: imageUri}}
+            fallbackText={name.charAt(0).toUpperCase()}
+            containerStyle={{
+              borderWidth: 1,
+              borderColor: online ? colors.success.base : colors.error.base,
+              ...styles.avatar,
+            }}
+          />
         </View>
 
         <View style={{flex: 1, marginLeft: scale(12)}}>
           <View style={styles.nameRow}>
             <Text style={styles.name}>{name}</Text>
-            <LikeIcon />
+            {/* <LikeIcon /> */}
           </View>
-
-          {rate && (
-            <View style={styles.rateTag}>
-              <Text style={styles.rateText}>{rate}</Text>
-            </View>
-          )}
-
-          {rating && (
-            <View style={styles.ratingRow}>
-              <StarIcon color={colors.glow_shadow} />
-              <Text style={styles.ratingText}>{rating} / 5</Text>
-            </View>
-          )}
         </View>
       </View>
 
@@ -140,8 +141,9 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
               }}>
               <CallIcon colors={[colors.whiteText]} height={16} width={16} />
             </View>
-            <Text style={styles.buttonText}>₹{pricePerMinuteVoice}/min</Text>
-            {/* CHANGED: Show actual price */}
+            <Text style={styles.buttonText}>
+              {formatPrice(pricePerMinuteVoice, 'min')}
+            </Text>
           </TouchableOpacity>
         </View>
 
@@ -157,23 +159,59 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
               }}>
               <VideoCallIcon size={16} colors={[colors.whiteText]} />
             </View>
-            <Text style={styles.buttonText}>₹{pricePerMinuteVideo}/min</Text>
+
+            <Text style={styles.buttonText}>
+              {formatPrice(pricePerMinuteVideo, 'min')}
+            </Text>
           </TouchableOpacity>
         </View>
 
         <View onStartShouldSetResponder={() => true}>
           <TouchableOpacity
-            onPress={() => handleSessionPress('chat')}
-            style={styles.button}>
+            onPress={onChatPress}
+            style={[
+              styles.button,
+              {
+                backgroundColor: freeChatAvailable
+                  ? themeColors.button.success
+                  : themeColors.surface.background,
+                borderColor: freeChatAvailable
+                  ? themeColors.button.success
+                  : colors.primary_border,
+              },
+            ]}>
             <View
               style={{
                 padding: moderateScale(4),
-                backgroundColor: colors.secondary_Card,
+                backgroundColor: freeChatAvailable
+                  ? themeColors.surface.background
+                  : colors.secondary_Card,
                 borderRadius: scale(12),
               }}>
-              <ChatIcon height={16} width={16} colors={[colors.whiteText]} />
+              <ChatIcon
+                height={16}
+                width={16}
+                colors={[
+                  freeChatAvailable
+                    ? themeColors.text.primary
+                    : colors.whiteText,
+                ]}
+              />
             </View>
-            <Text style={styles.buttonText}>₹{pricePerMinuteChat}/min</Text>
+
+            <Text
+              style={[
+                styles.buttonText,
+                {
+                  color: freeChatAvailable
+                    ? themeColors.text.light
+                    : themeColors.text.primary,
+                },
+              ]}>
+              {freeChatAvailable
+                ? 'Free Chat'
+                : formatPrice(pricePerMinuteChat, 'min')}
+            </Text>
           </TouchableOpacity>
         </View>
       </View>

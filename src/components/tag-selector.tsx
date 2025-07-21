@@ -9,7 +9,7 @@ import {
   TextStyle,
   Image,
 } from 'react-native';
-import {colors} from '../constants/colors';
+import {colors, themeColors} from '../constants/colors';
 import {scaleFont} from '../utils/sizer';
 
 type TagItem = {
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   selectedTag: {
-    backgroundColor: '#1c274c',
+    backgroundColor: themeColors.surface.darkPink,
   },
   tagText: {
     color: '#333',

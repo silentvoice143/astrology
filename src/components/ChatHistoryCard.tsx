@@ -3,12 +3,17 @@ import {View, Text, StyleSheet, ImageSourcePropType} from 'react-native';
 import {scale, verticalScale, scaleFont} from '../utils/sizer';
 import Avatar from './avatar';
 import {textStyle} from '../constants/text-style';
-import {colors} from '../constants/colors';
-import {formatRelativeDate, getTimeOnly} from '../utils/utils';
+import {colors, themeColors} from '../constants/colors';
+import {
+  formatDateString,
+  formatedDate,
+  formatRelativeDate,
+  getTimeOnly,
+} from '../utils/utils';
 
 interface ChatHistoryCardProps {
   name: string;
-  time: string;
+  time: Date;
   avatar: ImageSourcePropType;
   active: boolean;
 }
@@ -23,7 +28,9 @@ const ChatHistoryCard: React.FC<ChatHistoryCardProps> = ({
     <View
       style={[
         styles.card,
-        {borderColor: colors.glow_shadow, borderWidth: active ? 1 : 0},
+        {
+          borderColor: active ? colors.glow_shadow : themeColors.border.primary,
+        },
       ]}>
       <View style={styles.row}>
         <Avatar
@@ -38,12 +45,12 @@ const ChatHistoryCard: React.FC<ChatHistoryCardProps> = ({
         <View style={styles.textContainer}>
           <Text style={[styles.name, textStyle.fs_abyss_16_400]}>{name}</Text>
           <Text style={[styles.name, textStyle.fs_abyss_12_400]}>
-            {getTimeOnly(time, true)}
+            {formatedDate(time)}
           </Text>
         </View>
       </View>
       <Text style={[styles.time, textStyle.fs_mont_12_400]}>
-        {formatRelativeDate(time)}
+        {/* {formatRelativeDate(time)} */}
       </Text>
     </View>
   );
@@ -56,15 +63,8 @@ const styles = StyleSheet.create({
     paddingHorizontal: scale(20),
     paddingVertical: verticalScale(12),
     marginBottom: verticalScale(10),
-
-    // Shadow (iOS)
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-
-    // Shadow (Android)
-    elevation: 3,
+    borderColor: themeColors.border.primary,
+    borderWidth: 1,
     flexDirection: 'row',
   },
   row: {

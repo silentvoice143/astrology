@@ -1,6 +1,6 @@
 import React from 'react';
 import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
-import {colors} from '../../constants/colors';
+import {colors, themeColors} from '../../constants/colors';
 import {textStyle} from '../../constants/text-style';
 import {scale, verticalScale} from '../../utils/sizer';
 
@@ -21,27 +21,46 @@ type Props = {
   data: UserDetail;
   onAccept: () => void;
   onSkip: () => void;
+  showActions: boolean;
 };
 
-const UserRequestCard: React.FC<Props> = ({data, onAccept, onSkip}) => {
+const UserRequestCard: React.FC<Props> = ({
+  data,
+  onAccept,
+  onSkip,
+  showActions,
+}) => {
   return (
-    <View style={styles.card}>
+    <View
+      style={[
+        styles.card,
+        {
+          borderWidth: 1,
+          borderColor: showActions
+            ? themeColors.surface.highlight
+            : themeColors.surface.background,
+        },
+      ]}>
       <Detail label="Name" value={data.name} />
       <Detail label="Gender" value={data.gender} />
       <Detail label="Date of Birth" value={data.birthDate} />
       <Detail label="Time of Birth" value={data.birthTime} />
       <Detail label="Place of Birth" value={data.birthPlace} />
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={[styles.button, styles.accept]}
-          onPress={onAccept}>
-          <Text style={styles.buttonText}>Accept</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={[styles.button, styles.skip]} onPress={onSkip}>
-          <Text style={styles.buttonText}>Skip</Text>
-        </TouchableOpacity>
-      </View>
+      {showActions && (
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.button, styles.accept]}
+            onPress={onAccept}>
+            <Text style={styles.buttonText}>Accept</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={[styles.button, styles.skip]}
+            onPress={onSkip}>
+            <Text style={styles.buttonText}>Skip</Text>
+          </TouchableOpacity>
+        </View>
+      )}
     </View>
   );
 };
@@ -94,7 +113,7 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     paddingVertical: verticalScale(10),
-    borderRadius: 8,
+    borderRadius: verticalScale(28),
     alignItems: 'center',
     marginHorizontal: scale(4),
   },

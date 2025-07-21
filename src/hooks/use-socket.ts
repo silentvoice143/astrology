@@ -13,8 +13,8 @@ export const useWebSocket = (userId: string, socketUrl?: string) => {
     if (!singletonService) {
       singletonService = new WebSocketService(
         userId,
-        // socketUrl || 'https://astrosevaa.com/ws-chat',
-        socketUrl || 'https://quagga-driving-socially.ngrok-free.app/ws-chat',
+        socketUrl || process.env.BASE_URL || 'https://astrosevaa.com/ws-chat',
+        // socketUrl || 'https://quagga-driving-socially.ngrok-free.app/ws-chat',
         // socketUrl || 'https://gorilla-fitting-feline.ngrok-free.app/ws-chat',
       );
 
@@ -46,6 +46,14 @@ export const useWebSocket = (userId: string, socketUrl?: string) => {
     [],
   );
 
+  const unsubscribe = useCallback((destination: string) => {
+    if (!singletonService) {
+      console.warn('[useWebSocket] Tried to unsubscribe before initializing.');
+      return;
+    }
+    singletonService.unsubscribe(destination);
+  }, []);
+
   const send = useCallback(
     (
       destination: string,
@@ -65,6 +73,7 @@ export const useWebSocket = (userId: string, socketUrl?: string) => {
     connect,
     disconnect,
     subscribe,
+    unsubscribe,
     send,
     isConnected: connected,
   };

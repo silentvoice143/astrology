@@ -20,6 +20,7 @@ interface AuthState {
   token: string | null;
   mobile: string | null;
   firstTime: boolean;
+  freeChatModalShown: boolean;
   otp: string;
   user: UserDetail;
   isProfileComplete: boolean;
@@ -57,6 +58,7 @@ const initialState: AuthState = {
   token: null,
   mobile: null,
   firstTime: true,
+  freeChatModalShown: false,
   otp: '',
   user: {
     id: '',
@@ -72,6 +74,8 @@ const initialState: AuthState = {
     walletBalance: 0,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
+    imgUri: '',
+    freeChatUsed: false,
   },
   isProfileComplete: false,
   isProfileModalOpen: false,
@@ -89,6 +93,9 @@ const authSlice = createSlice({
     },
     setFirstTime(state) {
       state.firstTime = false;
+    },
+    setFreeChatModalShown: state => {
+      state.freeChatModalShown = true;
     },
     setUser(state, action) {
       state.user = {...action.payload};
@@ -135,6 +142,7 @@ export const {
   setAstrologer,
   setProfileModelToggle,
   setAuthentication,
+  setFreeChatModalShown,
 } = authSlice.actions;
 export {loginUser, verifyOtp};
 export default authSlice.reducer;

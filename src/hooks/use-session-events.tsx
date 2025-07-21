@@ -5,6 +5,7 @@ import {
   clearSession,
   setCallSession,
   setSession,
+  toggleCountRefresh,
 } from '../store/reducer/session';
 import {useAppDispatch, useAppSelector} from './redux-hook';
 import {decodeMessageBody} from '../utils/utils';
@@ -23,7 +24,7 @@ export const useSessionEvents = (
   userId: string = '',
   active: boolean = false,
 ) => {
-  const {subscribe} = useWebSocket(userId);
+  const {subscribe, unsubscribe} = useWebSocket(userId);
   const dispatch = useAppDispatch();
   const {session} = useAppSelector(state => state.session);
   const role = useUserRole();
@@ -36,15 +37,16 @@ export const useSessionEvents = (
   useEffect(() => {
     // Guard: If already subscribed, don't do it again
     if (!active || !userId || hasSubscribed) return;
+    let queueDest = `/topic/queue/${userId}`;
+    let requestDest = `/topic/chat/${userId}/chatId`;
 
     console.log('[useSessionEvents] Subscribing globally...');
     hasSubscribed = true; // mark as subscribed
 
-    const queueSub = subscribe(`/topic/queue/${userId}`, data => {
+    const queueSub = subscribe(queueDest, msg => {
       try {
-        const res = JSON.parse(decodeMessageBody(data));
-        console.log(res, 'data queue');
-
+        console.log(decodeMessageBody(msg));
+        dispatch(toggleCountRefresh());
         Toast.show({
           type: 'success',
           text1: 'Session',

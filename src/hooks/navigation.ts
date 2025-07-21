@@ -1,12 +1,13 @@
 export type RootStackParamList = {
   Home: undefined;
-  DetailsProfile: {id: string}; // <- ID passed to DetailsProfile
+  DetailsProfile: {id: string};
+  Astrologers: {sort: string; initialSearch: string};
+  chat: undefined;
   // Add other screens here
 };
 
-
-import { useNavigation } from '@react-navigation/native';
-import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import {useNavigation} from '@react-navigation/native';
+import {NativeStackNavigationProp} from '@react-navigation/native-stack';
 
 type TypedNavigation = NativeStackNavigationProp<RootStackParamList>;
 

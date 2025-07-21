@@ -42,6 +42,20 @@ export const sendCallRequest = createAsyncThunk<
   }
 });
 
+export const skipSessionRequest = createAsyncThunk<
+  any,
+  string,
+  {rejectValue: any}
+>('session/post-skip-request', async (userId, {rejectWithValue}) => {
+  try {
+    const response = await api.get(`/api/v1/chat/skip/${userId}`);
+
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});
+
 export const acceptSessionRequest = createAsyncThunk<
   any, // response type as any
   any, // argument type

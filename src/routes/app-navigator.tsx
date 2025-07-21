@@ -63,6 +63,7 @@ export default function AppNavigator() {
           const {payload} = await dispatch(userDetail());
 
           if (payload?.success) {
+            console.log(payload, '------user detail');
             const userDetail: any = payload.user ?? payload.astrologer?.user!;
 
             const astro = payload.astrologer;

@@ -44,8 +44,10 @@ const tags = [
 
 const Astrologers = () => {
   const [selected, setSelected] = useState<string[]>(['all']);
-  const [selectedAstrologer, setSelectedAstrologer] = useState<AstrologerWithPricing | null>(null); // CHANGED
-  const [selectedSessionType, setSelectedSessionType] = useState<SessionType>('chat'); // NEW
+  const [selectedAstrologer, setSelectedAstrologer] =
+    useState<AstrologerWithPricing | null>(null); // CHANGED
+  const [selectedSessionType, setSelectedSessionType] =
+    useState<SessionType>('chat'); // NEW
   const [astrologersData, setAstrologersData] = useState<AstrologersType[]>([]);
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -56,7 +58,7 @@ const Astrologers = () => {
   const fetchAstrologersData = async () => {
     try {
       setLoading(true);
-      const payload = await dispatch(getAllAstrologers()).unwrap();
+      const payload = await dispatch(getAllAstrologers('?page=1')).unwrap();
       console.log(payload, 'payload----------------- fetchAstrologersData');
       if (payload.success) {
         const customAstro = payload?.astrologers?.map((astro: any) => {
@@ -92,7 +94,10 @@ const Astrologers = () => {
   }, []);
 
   // CHANGED: Handle session start with session type and pricing
-  const handleSessionStart = (astrologer: AstrologersType, sessionType: SessionType) => {
+  const handleSessionStart = (
+    astrologer: AstrologersType,
+    sessionType: SessionType,
+  ) => {
     if (isProfileComplete) {
       console.log('handling session');
 
@@ -182,7 +187,7 @@ const Astrologers = () => {
               paddingHorizontal: scale(12),
               marginBottom: verticalScale(20),
             }}>
-            {astrologersData.map((item, idx) => (
+            {astrologersData.map((item:any, idx) => (
               <Pressable
                 onPress={() =>
                   navigation.navigate('DetailsProfile', {id: item.id})
@@ -203,7 +208,7 @@ const Astrologers = () => {
                   languages={item?.languages}
                   imageUri={item?.imageUri}
                   // CHANGED: Use new session handler instead of separate handlers
-                  onSessionPress={(sessionType) => {
+                  onSessionPress={sessionType => {
                     handleSessionStart(item, sessionType);
                   }}
                 />

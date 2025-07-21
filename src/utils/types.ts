@@ -29,25 +29,22 @@ export interface UserDetail {
   walletBalance: number;
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
+  imgUri: string;
+  freeChatUsed: boolean;
 }
 
 export interface Astrologers {
+  about: string | null;
+  blocked: boolean;
+  experienceYears: number;
+  expertise: string;
   id: string;
-  userId: string;
-  name: string;
-  chatRate: string;
-  rating: number;
-  user: UserDetail;
-  experience: string;
   languages: string;
-  imageUri: string;
-  callRate: string;
-  videCallRate: string;
+  online: boolean;
   pricePerMinuteChat: number;
   pricePerMinuteVideo: number;
   pricePerMinuteVoice: number;
-  expertise: string;
-  online: boolean;
+  user: UserDetail;
 }
 
 import {ImageSourcePropType} from 'react-native';
@@ -187,12 +184,15 @@ export interface CallSession {
 }
 
 export interface SessionState {
+  activeSession: ChatSession | null;
   session: ChatSession | null;
   callSession: CallSession | null;
   user: UserDetail | null;
   otherUser: UserDetail | null;
   sessionEnded: boolean;
   messages: Message[];
+  queueRequestCount: number;
+  countRefresh: boolean;
 }
 
 export interface Message {
@@ -201,13 +201,13 @@ export interface Message {
   sessionId: string;
   message: string;
   type: 'TEXT' | 'IMAGE';
-  timestamp: string;
+  timestamp: Date;
 }
 
 export interface ChatSession {
   id: string;
-  startedAt: string;
-  endedAt: string | null;
+  startedAt: Date;
+  endedAt: Date | null;
   status: 'ACTIVE' | 'ENDED';
   totalCost: number;
   totalMinutes: number;
@@ -225,4 +225,33 @@ export interface Transaction {
   amount: number;
   date: string;
   type: TransactionType;
+}
+
+// =============Astrologer thunk===============
+// Payload for create/edit action (JSON part)
+export interface AstrologerFormPayload {
+  name: string;
+  mobile: string;
+  expertise: string;
+  experienceYears: number;
+  pricePerMinuteChat: number;
+  pricePerMinuteVoice: number;
+  pricePerMinuteVideo: number;
+  about?: string;
+  languages?: string;
+}
+
+// Payload for createAstrologer thunk
+export interface CreateAstrologerThunkInput {
+  astrologerData: AstrologerFormPayload;
+  imageFile?: {
+    uri: string;
+    name: string;
+    type: string;
+  } | null;
+}
+
+// Payload for editAstrologer thunk
+export interface EditAstrologerThunkInput extends CreateAstrologerThunkInput {
+  id: string;
 }

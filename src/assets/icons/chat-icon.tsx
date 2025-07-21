@@ -12,23 +12,24 @@ interface ChatIconProps {
   width?: number;
   height?: number;
   colors?: string[]; // one color = solid, multiple = gradient
+  size?: number;
 }
 
 const ChatIcon: React.FC<ChatIconProps> = ({
-  width = 40,
-  height = 40,
-  colors = ['#FAA347', '#EC504A', '#AA1358'],
+  width = 24,
+  height = 24,
+  colors = ['#000'],
+  size,
 }) => {
   const useSolidColor = colors.length === 1;
   const gradientId = 'chatGradient';
 
   return (
     <Svg
-      width={width}
-      height={height}
+      width={size ? size : width}
+      height={size ? size : height}
       viewBox="0 0 40 40"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg">
+      fill="none">
       <Defs>
         {!useSolidColor && (
           <LinearGradient

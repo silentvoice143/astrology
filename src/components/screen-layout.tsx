@@ -1,4 +1,4 @@
-import React, {ReactNode, useRef} from 'react';
+import React, {ReactNode, useRef, useState} from 'react';
 import {View} from 'react-native';
 import Header from './header';
 import Sidebar, {SidebarRef} from './sidebar';
@@ -13,20 +13,24 @@ import {setProfileModelToggle, setUser} from '../store/reducer/auth';
 interface ScreenLayoutProps {
   children: ReactNode;
   headerBackgroundColor?: string;
+  hideHeader?: boolean;
 }
 
 const ScreenLayout: React.FC<ScreenLayoutProps> = ({
   children,
   headerBackgroundColor,
+  hideHeader,
 }) => {
   const sidebarRef = useRef<SidebarRef>(null);
   const {isProfileModalOpen, isProfileComplete} = useAppSelector(
     state => state.auth,
   );
+  const [isSaving, setIsSaving] = useState(false);
 
   const dispatch = useAppDispatch();
 
   const handlePostUserData = async (user: UserPersonalDetail) => {
+    setIsSaving(true);
     try {
       const payload = await dispatch(postUserDetail(user)).unwrap();
 
@@ -36,21 +40,26 @@ const ScreenLayout: React.FC<ScreenLayoutProps> = ({
       }
     } catch (err) {
       console.log(err);
+    } finally {
+      setIsSaving(false);
     }
   };
   return (
     <View style={{flex: 1, backgroundColor: colors.primary_surface}}>
       {/* Global Sidebar */}
       <Sidebar ref={sidebarRef} />
-      <Header
-        onMenuClick={() => sidebarRef.current?.open()}
-        headerBackgroundColor={headerBackgroundColor}
-      />
+      {!hideHeader && (
+        <Header
+          onMenuClick={() => sidebarRef.current?.open()}
+          headerBackgroundColor={headerBackgroundColor}
+        />
+      )}
       <View style={{flex: 1, backgroundColor: colors.primary_surface}}>
         {children}
       </View>
       <BottomNavigationBar />
       <PersonalDetailModal
+        isSaving={isSaving}
         isOpen={isProfileModalOpen}
         onClose={() => {
           if (isProfileModalOpen) {

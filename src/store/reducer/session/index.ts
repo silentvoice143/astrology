@@ -17,15 +17,19 @@ import {
   getQueueRequest,
   sendCallRequest,
   sendSessionRequest,
+  skipSessionRequest,
 } from './action';
 
 const initialState: SessionState = {
+  activeSession: null,
   session: null,
   callSession: null,
   user: null,
   otherUser: null,
   sessionEnded: true,
   messages: [],
+  queueRequestCount: 0,
+  countRefresh: true,
 };
 
 const sessionSlice = createSlice({
@@ -40,6 +44,9 @@ const sessionSlice = createSlice({
       state.callSession = action.payload;
     },
 
+    clearActiveSession(state) {
+      state.activeSession = null;
+    },
     setChatUser(state, action) {
       state.user = action.payload;
     },
@@ -64,12 +71,25 @@ const sessionSlice = createSlice({
     clearCallSession(state) {
       state.callSession = null;
     },
+    incrementQueueRequest: state => {
+      state.queueRequestCount += 1;
+    },
+    clearQueueRequestCount: state => {
+      state.queueRequestCount = 0;
+    },
+    setQueueCount: (state, action) => {
+      state.queueRequestCount = action.payload;
+    },
+    toggleCountRefresh: state => {
+      state.countRefresh = !state.countRefresh;
+    },
   },
   extraReducers: builder => {
     builder.addCase(sendSessionRequest.fulfilled, state => {});
     builder.addCase(sendCallRequest.fulfilled, state => {});
     builder.addCase(getQueueRequest.fulfilled, state => {});
     builder.addCase(acceptSessionRequest.fulfilled, state => {});
+    builder.addCase(skipSessionRequest.fulfilled, state => {});
     builder.addCase(getChatHistory.fulfilled, state => {});
     builder.addCase(getChatMessages.fulfilled, state => {});
     builder.addCase(acceptCallRequest.fulfilled, state => {});
@@ -79,15 +99,23 @@ const sessionSlice = createSlice({
 export const {
   setSession,
   clearSession,
+  clearActiveSession,
   setChatUser,
   setOtherUser,
   addMessage,
   prependMessages,
-  setMessage, setCallSession ,clearCallSession
+  setCallSession,
+  clearCallSession,
+  setMessage,
+  setQueueCount,
+  incrementQueueRequest,
+  clearQueueRequestCount,
+  toggleCountRefresh,
 } = sessionSlice.actions;
 
 export {
   sendSessionRequest,
+  skipSessionRequest,
   getQueueRequest,
   getChatHistory,
   acceptSessionRequest,

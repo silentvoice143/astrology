@@ -16,13 +16,6 @@ import axios from 'axios';
 import {verticalScale, scale, moderateScale} from '../utils/sizer';
 import CustomInput from './custom-input-v2';
 
-interface LocationSuggestion {
-  place_id: string;
-  display_name: string;
-  lat: string;
-  lon: string;
-}
-
 interface Props {
   placeholder?: string;
   onSelectLocation: (location: {
@@ -35,6 +28,8 @@ interface Props {
   modalTitle?: string;
 }
 
+const GOOGLE_API_KEY = 'AIzaSyBJRSfltVasH85IEnXRY6a_UQsVlkB4HAs';
+
 const LocationModalPicker: React.FC<Props> = ({
   placeholder = 'Search location...',
   onSelectLocation,
@@ -45,7 +40,7 @@ const LocationModalPicker: React.FC<Props> = ({
   const [selectedLocation, setSelectedLocation] = useState(value);
   const [modalVisible, setModalVisible] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [results, setResults] = useState<LocationSuggestion[]>([]);
+  const [results, setResults] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -68,25 +63,43 @@ const LocationModalPicker: React.FC<Props> = ({
     setLoading(true);
     try {
       const response = await axios.get(
-        `https://nominatim.openstreetmap.org/search`,
+        'https://maps.googleapis.com/maps/api/place/autocomplete/json',
         {
           params: {
-            q: searchText,
-            format: 'json',
-            addressdetails: 1,
-            limit: 10,
-          },
-          headers: {
-            'Accept-Language': 'en',
+            input: searchText,
+            key: GOOGLE_API_KEY,
+            types: 'geocode', // you can adjust types, e.g. '(regions)', 'address'
+            language: 'en',
           },
         },
       );
-      setResults(response.data);
+      console.log(response);
+      setResults(response.data.predictions);
     } catch (err) {
       console.error('Failed to fetch locations', err);
       setResults([]);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchPlaceDetails = async (placeId: string) => {
+    try {
+      const response = await axios.get(
+        'https://maps.googleapis.com/maps/api/place/details/json',
+        {
+          params: {
+            place_id: placeId,
+            key: GOOGLE_API_KEY,
+            fields: 'geometry,name,formatted_address',
+            language: 'en',
+          },
+        },
+      );
+      return response.data.result;
+    } catch (err) {
+      console.error('Failed to fetch place details', err);
+      return null;
     }
   };
 
@@ -102,27 +115,34 @@ const LocationModalPicker: React.FC<Props> = ({
     setResults([]);
   };
 
-  const handleSelectLocation = (item: LocationSuggestion) => {
-    setSelectedLocation(item.display_name);
+  const handleSelectLocation = async (item: any) => {
+    const details = await fetchPlaceDetails(item.place_id);
+    if (!details) return;
+
+    const name = details.name || item.description;
+    const lat = details.geometry.location.lat;
+    const lon = details.geometry.location.lng;
+
+    setSelectedLocation(item.description);
     onSelectLocation({
-      name: item.display_name,
-      lat: item.lat,
-      lon: item.lon,
+      name,
+      lat: lat.toString(),
+      lon: lon.toString(),
     });
     handleCloseModal();
   };
 
-  const renderLocationItem = ({item}: {item: LocationSuggestion}) => (
+  const renderLocationItem = ({item}: {item: any}) => (
     <TouchableOpacity
       style={styles.locationItem}
       onPress={() => handleSelectLocation(item)}
       activeOpacity={0.7}>
       <View style={styles.locationItemContent}>
         <Text style={styles.locationName} numberOfLines={1}>
-          {item.display_name.split(',')[0]}
+          {item.structured_formatting?.main_text || item.description}
         </Text>
         <Text style={styles.locationAddress} numberOfLines={2}>
-          {item.display_name}
+          {item.description}
         </Text>
       </View>
       <View style={styles.selectIcon}>
