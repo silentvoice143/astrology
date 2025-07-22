@@ -20,7 +20,7 @@ import ChangeIcon from '../../../assets/icons/change-icon';
 import DocumentDownloadIcon from '../../../assets/icons/download-file-icon';
 import ChangeKundliTypeModal from '../modal/change-type-modal';
 
-const BirthChart = ({
+const NavamshaChart = ({
   active,
   chartWidth,
 }: {
@@ -70,10 +70,14 @@ const BirthChart = ({
       const payload: any = dispatch(
         kundliChart({
           body,
-          query: {chartType: 'D1', chartStyle: selectedKundliType.value},
+          query: {
+            chartType: 'D9',
+            chartStyle: selectedKundliType.value,
+            lan: 'en',
+          },
         }),
       ).unwrap();
-      console.log('BirthChart==============', payload);
+      console.log('NAvamshaChart==============', payload);
       if (payload?.success) {
         setChartSvg(payload?.data);
       } else {
@@ -276,4 +280,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BirthChart;
+export default NavamshaChart;

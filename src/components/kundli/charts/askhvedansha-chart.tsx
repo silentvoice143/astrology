@@ -20,7 +20,7 @@ import ChangeIcon from '../../../assets/icons/change-icon';
 import DocumentDownloadIcon from '../../../assets/icons/download-file-icon';
 import ChangeKundliTypeModal from '../modal/change-type-modal';
 
-const BirthChart = ({
+const AkshvedanshaChart = ({
   active,
   chartWidth,
 }: {
@@ -70,7 +70,7 @@ const BirthChart = ({
       const payload: any = dispatch(
         kundliChart({
           body,
-          query: {chartType: 'D1', chartStyle: selectedKundliType.value},
+          query: {chartType: 'D45', chartStyle: selectedKundliType.value},
         }),
       ).unwrap();
       console.log('BirthChart==============', payload);
@@ -276,4 +276,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default BirthChart;
+export default AkshvedanshaChart;

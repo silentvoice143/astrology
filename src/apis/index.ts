@@ -29,8 +29,8 @@ api.interceptors.request.use(
       url: config?.baseURL + config?.url,
       method: config.method?.toUpperCase(),
       payload: config.data || null,
+      params: config.params,
     });
-
 
     const token = shouldSkip ? '' : getTokenFromStore();
     if (token) {

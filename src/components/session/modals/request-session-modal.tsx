@@ -6,12 +6,11 @@ import {scale, verticalScale, moderateScale} from '../../../utils/sizer';
 import {colors} from '../../../constants/colors';
 import {textStyle} from '../../../constants/text-style';
 import CheckIcon from '../../../assets/icons/checkIcon';
-<<<<<<< HEAD
+
 import CallIcon from '../../../assets/icons/call-icon';
 import VideoCallIcon from '../../../assets/icons/video-call-icon';
 import ChatIcon from '../../../assets/icons/chat-icon';
-=======
->>>>>>> dev
+
 import {useAppDispatch, useAppSelector} from '../../../hooks/redux-hook';
 import {
   sendCallRequest,
@@ -24,7 +23,7 @@ import {useNavigation} from '@react-navigation/native';
 import {UserDetail} from '../../../utils/types';
 import Toast from 'react-native-toast-message';
 
-type SessionType = 'chat' | 'voice' | 'video';
+type SessionType = 'chat' | 'audio' | 'video';
 
 interface DurationOption {
   label: string;
@@ -76,7 +75,7 @@ const RequestSessionModal = ({
       priceKey: 'pricePerMinuteChat',
     },
     {
-      id: 'voice',
+      id: 'audio',
       label: 'Voice Call',
       icon: <CallIcon colors={[colors.whiteText]} height={20} width={20} />,
       priceKey: 'pricePerMinuteVoice',
@@ -183,9 +182,6 @@ const RequestSessionModal = ({
       }
 
       console.log(body, payload, '----session request body & response');
-
-      
-      
 
       if (payload.success) {
         dispatch(setOtherUser(astrologer));

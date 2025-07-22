@@ -1,8 +1,6 @@
 import {useEffect, useState} from 'react';
 import {useWebSocket} from './use-socket';
 import {
-  addMessage,
-  clearSession,
   setCallSession,
   setSession,
   toggleCountRefresh,
@@ -46,6 +44,7 @@ export const useSessionEvents = (
     const queueSub = subscribe(queueDest, msg => {
       try {
         console.log(decodeMessageBody(msg));
+        const res = JSON.parse(decodeMessageBody(msg));
         dispatch(toggleCountRefresh());
         Toast.show({
           type: 'success',
@@ -60,6 +59,7 @@ export const useSessionEvents = (
     });
 
     const callSessionSub = subscribe(`/topic/call/${userId}/session`, msg => {
+      console.log('call session received');
       try {
         const sessionData = JSON.parse(decodeMessageBody(msg));
         console.log('Session details received:', sessionData);
@@ -69,8 +69,9 @@ export const useSessionEvents = (
       }
     });
 
-    const chatSub = subscribe(`/topic/chat/${userId}/chatId`, msg => {
+    const chatSub = subscribe(requestDest, msg => {
       try {
+        console.log('chat session received');
         const data = JSON.parse(decodeMessageBody(msg));
         dispatch(setSession(data));
         Toast.show({
@@ -89,42 +90,12 @@ export const useSessionEvents = (
 
     return () => {
       console.log('[useSessionEvents] Cleaning up global subscriptions...');
-      queueSub?.unsubscribe();
-      chatSub?.unsubscribe();
-      callSessionSub?.unsubscribe();
-
+      unsubscribe(queueDest);
+      unsubscribe(requestDest);
+      unsubscribe(`/topic/call/${userId}/session`);
       hasSubscribed = false; // allow re-subscription if needed on remount
     };
   }, [subscribe, userId, active]);
-
-  useEffect(() => {
-    if (!session) return;
-
-    const chatEnd = subscribe(`/topic/chat/${session.id}`, msg => {
-      try {
-        const data = JSON.parse(decodeMessageBody(msg));
-        console.log(data);
-        if (data.status === 'ended') {
-          dispatch(
-            setSession({
-              ...session,
-              status: data.status === 'ended' ? 'ENDED' : 'ACTIVE',
-            }),
-          );
-          Toast.show({
-            type: 'info',
-            text1: 'Session Ended',
-          });
-        }
-      } catch (err) {
-        console.error('Failed to parse chat end message:', err);
-      }
-    });
-
-    return () => {
-      chatEnd?.unsubscribe();
-    };
-  }, [session, subscribe, userId]);
 
   return {callRequest, callRequestNotification};
 };

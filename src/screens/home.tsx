@@ -30,6 +30,7 @@ import Carousel, {ICarouselInstance} from 'react-native-reanimated-carousel';
 import {useSharedValue} from 'react-native-reanimated';
 import IntroCard from '../components/home/intro-card';
 import {getBanner} from '../store/reducer/general';
+import {useUserRole} from '../hooks/use-role';
 
 const width = Dimensions.get('window').width - 40;
 const data = [...new Array(6).keys()];
@@ -43,6 +44,7 @@ const Home = () => {
   const {freeChatModalShown} = useAppSelector(state => state.auth);
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
+  const role = useUserRole();
   const [astrologersData, setAstrologersData] = useState<
     {
       name: string;
@@ -128,7 +130,13 @@ const Home = () => {
   };
 
   useEffect(() => {
-    if (freeChatUsed || isFirstChatModalOpen || freeChatModalShown) return;
+    if (
+      freeChatUsed ||
+      isFirstChatModalOpen ||
+      freeChatModalShown ||
+      role === 'ASTROLOGER'
+    )
+      return;
     const timeout = setTimeout(() => {
       setIsFirstChatModalOpen(true);
       dispatch(setFreeChatModalShown());
@@ -212,10 +220,11 @@ const Home = () => {
             <View
               style={{
                 paddingHorizontal: scale(20),
+                marginVertical: verticalScale(20),
               }}>
               <Carousel
                 ref={ref}
-                height={verticalScale(100)}
+                height={verticalScale(120)}
                 width={width}
                 data={banner}
                 onProgressChange={progress}

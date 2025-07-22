@@ -11,7 +11,7 @@ import {textStyle} from '../../constants/text-style';
 import {formatPrice} from '../../utils/utils';
 import Avatar from '../avatar';
 
-type SessionType = 'chat' | 'voice' | 'video';
+type SessionType = 'chat' | 'audio' | 'video';
 
 type AstrologerCardProps = {
   id: string;
@@ -59,7 +59,7 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
     } else {
       // Fallback to old handlers for backward compatibility
       switch (sessionType) {
-        case 'voice':
+        case 'audio':
           onCallPress?.();
           break;
         case 'video':
@@ -131,7 +131,7 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
       <View style={styles.actions}>
         <View onStartShouldSetResponder={() => true}>
           <TouchableOpacity
-            onPress={() => handleSessionPress('voice')}
+            onPress={() => handleSessionPress('audio')}
             style={styles.button}>
             <View
               style={{
@@ -168,7 +168,9 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
 
         <View onStartShouldSetResponder={() => true}>
           <TouchableOpacity
-            onPress={onChatPress}
+            onPress={() => {
+              handleSessionPress('chat');
+            }}
             style={[
               styles.button,
               {

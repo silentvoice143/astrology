@@ -32,12 +32,12 @@ const ChangeKundliTypeModal = ({
     {
       label: 'South-Indian Style',
       id: 'south_indian_style',
-      value: 'south-indian',
+      value: 'south',
     },
     {
       label: 'North-Indian Style',
       id: 'north_indian_style',
-      value: 'north-indian',
+      value: 'north',
     },
   ];
   const [selected, setSelected] = useState<null | {

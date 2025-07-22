@@ -10,6 +10,9 @@ import {textStyle} from '../constants/text-style';
 import {colors} from '../constants/colors';
 import LagnaChart from '../components/kundli/charts/lagna-chart';
 import RasiChart from '../components/kundli/charts/rasi-chart';
+import BirthChart from '../components/kundli/charts/brith-chart';
+import NavamshaChart from '../components/kundli/charts/navamsha-chart';
+import AkshvedanshaChart from '../components/kundli/charts/askhvedansha-chart';
 export const kundliTabs = [
   {key: 'basic', label: 'Basic Details'},
   {key: 'lagnaChart', label: 'Lagna Chart'},
@@ -26,18 +29,18 @@ const Kundli = () => {
         data={[
           {
             id: 1,
-            screen: 'Lagna Chart',
-            data: <LagnaChart active={selectedTab} />,
+            screen: 'Birth Chart',
+            data: <BirthChart active={selectedTab} />,
           },
           {
             id: 2,
-            screen: 'Rasi Chart',
-            data: <RasiChart active={selectedTab} />,
+            screen: 'Navamsha Chart',
+            data: <NavamshaChart active={selectedTab} />,
           },
           {
             id: 3,
-            screen: 'Basic details',
-            data: <BasicDetails active={selectedTab} />,
+            screen: 'Akshvedansha Chart',
+            data: <AkshvedanshaChart active={selectedTab} />,
           },
           {
             id: 4,
