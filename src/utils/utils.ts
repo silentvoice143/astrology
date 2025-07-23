@@ -21,6 +21,34 @@ export function decodeMessageBody(message: any): string {
   }
 }
 
+export const makeResponsiveSVG = (
+  svgContent: string,
+  width: number,
+  height: number,
+  charttoadjust?: boolean,
+): string => {
+  const viewBoxDefault = charttoadjust ? '0 0 363 363' : '0 0 360 360';
+
+  // Check if <svg> exists
+  const hasSvgTag = svgContent.includes('<svg');
+
+  if (!hasSvgTag) {
+    // Wrap and inject responsive <svg> tag
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${viewBoxDefault}" preserveAspectRatio="xMidYMid meet">
+      ${svgContent}
+    </svg>`;
+  }
+
+  // If SVG tag already exists, inject/replace width/height/viewBox/preserveAspectRatio
+  return svgContent
+    .replace(
+      /<svg([^>]*)>/,
+      `<svg$1 width="${width}" height="${height}" viewBox="${viewBoxDefault}" preserveAspectRatio="xMidYMid meet">`,
+    )
+    .replace(/width="[^"]*"/, `width="${width}"`)
+    .replace(/height="[^"]*"/, `height="${height}"`);
+};
+
 export function formatRelativeDate(isoString: string): string {
   const inputDate = new Date(isoString);
   const today = new Date();

@@ -21,7 +21,7 @@ import Avatar from '../../components/avatar';
 
 interface CallRequest {
   userId: string;
-  type: 'VOICE' | 'VIDEO';
+  type: 'AUDIO' | 'VIDEO';
 }
 
 interface CallRequestNotificationProps {
@@ -34,7 +34,8 @@ interface CallRequestNotificationProps {
 const CallRequestNotification: React.FC<CallRequestNotificationProps> = ({
   visible,
   callRequest,
-  onClose,onAccept
+  onClose,
+  onAccept,
 }) => {
   const [timeLeft, setTimeLeft] = useState(30);
   const [isResponding, setIsResponding] = useState(false);
@@ -101,7 +102,7 @@ const CallRequestNotification: React.FC<CallRequestNotificationProps> = ({
           text2: 'Connecting to the call...',
         });
         console.log(callRequest, 'call request notify');
-        onAccept()
+        onAccept();
         navigation.navigate('call', {
           callType: callRequest?.type || 'VOICE',
           astrologer: {
@@ -180,8 +181,7 @@ const CallRequestNotification: React.FC<CallRequestNotificationProps> = ({
               )}
             </View>
             <Text style={[textStyle.fs_mont_16_700, styles.headerText]}>
-              Incoming {callRequest.type === 'VIDEO' ? 'Video' : 'Voice'}{' '}
-              Call
+              Incoming {callRequest.type === 'VIDEO' ? 'Video' : 'Voice'} Call
             </Text>
           </View>
           <Text style={{color: 'red'}}>{JSON.stringify(callRequest)}</Text>

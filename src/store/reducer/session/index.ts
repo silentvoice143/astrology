@@ -30,6 +30,7 @@ const initialState: SessionState = {
   messages: [],
   queueRequestCount: 0,
   countRefresh: true,
+  sessionRequest: null,
 };
 
 const sessionSlice = createSlice({
@@ -42,6 +43,10 @@ const sessionSlice = createSlice({
 
     setCallSession(state, action: PayloadAction<CallSession>) {
       state.callSession = action.payload;
+    },
+    setRequest(state, action) {
+      console.log(action.payload, '----paylaod coming');
+      state.sessionRequest = action.payload;
     },
 
     clearActiveSession(state) {
@@ -99,6 +104,7 @@ const sessionSlice = createSlice({
 export const {
   setSession,
   clearSession,
+  setRequest,
   clearActiveSession,
   setChatUser,
   setOtherUser,

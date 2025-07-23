@@ -12,7 +12,7 @@ import {
 } from '../../../store/reducer/session';
 import {useNavigation} from '@react-navigation/native';
 import {Astrologers, UserDetail} from '../../../utils/types';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
 import CustomModal from '../../modal';
 import {Pressable, Text, View} from 'react-native';
 
@@ -28,7 +28,7 @@ const ChangeKundliTypeModal = ({
   onChange: (obj: {label: string; id: string; value: string} | null) => void;
 }) => {
   const durationOptions = [
-    {label: 'East-Indian Style', id: 'east_indian_style', value: 'east-indian'},
+    {label: 'East-Indian Style', id: 'east_indian_style', value: 'east'},
     {
       label: 'South-Indian Style',
       id: 'south_indian_style',
@@ -46,6 +46,9 @@ const ChangeKundliTypeModal = ({
     value: string;
   }>(selectedOption);
 
+  useEffect(() => {
+    setSelected(selectedOption);
+  }, [selectedOption]);
   return (
     <CustomModal
       header={{title: 'Chart Type', description: 'Choose the options'}}

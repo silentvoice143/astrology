@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   Image,
   BackHandler,
+  SafeAreaView,
 } from 'react-native';
 import {useWebSocket} from '../hooks/use-socket';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
@@ -369,119 +370,93 @@ export const ChatScreenDemo = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.select({ios: 'padding', android: undefined})}>
-      <>
-        <View
-          style={[
-            styles.header,
-            {flexDirection: 'row', gap: scale(12), alignItems: 'center'},
-          ]}>
-          <TouchableOpacity onPress={() => navigation.replace('ChatHistory')}>
-            <ChevronLeftIcon size={32} />
-          </TouchableOpacity>
-          <View>
-            <Avatar
-              size={50}
-              image={{uri: ''}}
-              fallbackText={otherUser?.name.charAt(0).toUpperCase()}
-            />
-            <View
-              style={{
-                position: 'absolute',
-                top: 6,
-                right: 0,
-                height: scale(10),
-                width: scale(10),
-                backgroundColor:
-                  session?.status === 'ACTIVE'
-                    ? colors.success.base
-                    : colors.error.base,
-                borderRadius: scale(6),
-              }}></View>
-          </View>
-          <View>
-            <View style={{flexDirection: 'row', gap: 8}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: '#EFEFEF'}}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.select({ios: 'padding', android: undefined})}>
+        <>
+          <View
+            style={[
+              styles.header,
+              {flexDirection: 'row', gap: scale(12), alignItems: 'center'},
+            ]}>
+            <TouchableOpacity onPress={() => navigation.replace('ChatHistory')}>
+              <ChevronLeftIcon size={32} />
+            </TouchableOpacity>
+            <View>
+              <Avatar
+                size={50}
+                image={{uri: ''}}
+                fallbackText={otherUser?.name.charAt(0).toUpperCase()}
+              />
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 6,
+                  right: 0,
+                  height: scale(10),
+                  width: scale(10),
+                  backgroundColor:
+                    session?.status === 'ACTIVE'
+                      ? colors.success.base
+                      : colors.error.base,
+                  borderRadius: scale(6),
+                }}></View>
+            </View>
+            <View>
+              <View style={{flexDirection: 'row', gap: 8}}>
+                <Text
+                  style={[
+                    textStyle.fs_mont_20_700,
+                    {marginTop: verticalScale(8)},
+                  ]}>
+                  {otherUser?.name}
+                </Text>
+              </View>
+
               <Text
                 style={[
-                  textStyle.fs_mont_20_700,
-                  {marginTop: verticalScale(8)},
+                  styles.typing,
+                  {
+                    color: otherUserTyping
+                      ? colors.primaryText
+                      : colors.whiteText,
+                  },
                 ]}>
-                {otherUser?.name}
+                Typing...
               </Text>
             </View>
-
-            <Text
-              style={[
-                styles.typing,
-                {
-                  color: otherUserTyping
-                    ? colors.primaryText
-                    : colors.whiteText,
-                },
-              ]}>
-              Typing...
-            </Text>
           </View>
-        </View>
-        {session?.status === 'ACTIVE' && timer && <Timer timer={timer} />}
+          {session?.status === 'ACTIVE' && timer && <Timer timer={timer} />}
 
-        {!session ? (
-          <View style={styles.waitingContainer}>
-            <Text style={styles.waitingText}>
-              Waiting for session to start...
-            </Text>
-          </View>
-        ) : (
-          <FlatList
-            ref={flatListRef}
-            data={messages}
-            inverted
-            keyExtractor={(item, index) => `${item.timestamp}-${index}`}
-            renderItem={renderMessage}
-            contentContainerStyle={styles.messagesArea}
-            onEndReached={info => {
-              getChatMessagesDetails(currentPage + 1);
-            }}
-            onEndReachedThreshold={0.2}
-          />
-        )}
+          {!session ? (
+            <View style={styles.waitingContainer}>
+              <Text style={styles.waitingText}>
+                Waiting for session to start...
+              </Text>
+            </View>
+          ) : (
+            <FlatList
+              ref={flatListRef}
+              data={messages}
+              inverted
+              keyExtractor={(item, index) => `${item.timestamp}-${index}`}
+              renderItem={renderMessage}
+              contentContainerStyle={styles.messagesArea}
+              onEndReached={info => {
+                getChatMessagesDetails(currentPage + 1);
+              }}
+              onEndReachedThreshold={0.2}
+              keyboardShouldPersistTaps="handled"
+            />
+          )}
 
-        <View style={styles.inputArea}>
-          <TouchableOpacity
-            onPress={() =>
-              !!session && session.status === 'ACTIVE'
-                ? setShowCamera(true)
-                : {}
-            }
-            style={{
-              backgroundColor:
-                !!session && session.status === 'ACTIVE'
-                  ? colors.primarybtn
-                  : colors.disabled,
-              height: moderateScale(40),
-              width: moderateScale(40),
-              borderRadius: moderateScale(20),
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginRight: scale(10),
-            }}>
-            <CameraIcon size={16} strokeWidth={1} />
-          </TouchableOpacity>
-          <TextInput
-            style={styles.input}
-            value={input}
-            onChangeText={handleInputChange}
-            placeholder="Type a message..."
-            onSubmitEditing={handleSend}
-            returnKeyType="send"
-            editable={!!session && session.status === 'ACTIVE'}
-          />
-          <View style={{flexDirection: 'row', gap: scale(8)}}>
+          <View style={styles.inputArea}>
             <TouchableOpacity
-              onPress={
-                !!session && session.status === 'ACTIVE' ? handleSend : () => {}
+              onPress={() =>
+                !!session && session.status === 'ACTIVE'
+                  ? setShowCamera(true)
+                  : {}
               }
               style={{
                 backgroundColor:
@@ -493,12 +468,26 @@ export const ChatScreenDemo = () => {
                 borderRadius: moderateScale(20),
                 justifyContent: 'center',
                 alignItems: 'center',
+                marginRight: scale(10),
               }}>
-              <SendIcon />
+              <CameraIcon size={16} strokeWidth={1} />
             </TouchableOpacity>
-            {role === 'ASTROLOGER' && (
+            <TextInput
+              style={styles.input}
+              value={input}
+              onChangeText={handleInputChange}
+              placeholder="Type a message..."
+              onSubmitEditing={handleSend}
+              returnKeyType="send"
+              editable={!!session && session.status === 'ACTIVE'}
+            />
+            <View style={{flexDirection: 'row', gap: scale(8)}}>
               <TouchableOpacity
-                onPress={() => setIsModalOpen(true)}
+                onPress={
+                  !!session && session.status === 'ACTIVE'
+                    ? handleSend
+                    : () => {}
+                }
                 style={{
                   backgroundColor:
                     !!session && session.status === 'ACTIVE'
@@ -510,36 +499,53 @@ export const ChatScreenDemo = () => {
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}>
-                <KundliIcon />
+                <SendIcon />
               </TouchableOpacity>
-            )}
+              {role === 'ASTROLOGER' && (
+                <TouchableOpacity
+                  onPress={() => setIsModalOpen(true)}
+                  style={{
+                    backgroundColor:
+                      !!session && session.status === 'ACTIVE'
+                        ? colors.primarybtn
+                        : colors.disabled,
+                    height: moderateScale(40),
+                    width: moderateScale(40),
+                    borderRadius: moderateScale(20),
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}>
+                  <KundliIcon />
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
-        </View>
-        <SessionKundliModal
-          isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-          }}
+          <SessionKundliModal
+            isOpen={isModalOpen}
+            onClose={() => {
+              setIsModalOpen(false);
+            }}
+          />
+        </>
+        <CameraModal
+          visible={showCamera}
+          onClose={() => setShowCamera(false)}
+          onCapture={handleCaptureImage}
         />
-      </>
-      <CameraModal
-        visible={showCamera}
-        onClose={() => setShowCamera(false)}
-        onCapture={handleCaptureImage}
-      />
-      <Modal
-        isVisible={imageModalVisible}
-        onBackdropPress={() => setImageModalVisible(false)}
-        onBackButtonPress={() => setImageModalVisible(false)}
-        style={{margin: 0}}>
-        <ImageViewer
-          imageUrls={[{url: selectedImage || ''}]}
-          enableSwipeDown
-          onSwipeDown={() => setImageModalVisible(false)}
-          backgroundColor="#000"
-        />
-      </Modal>
-    </KeyboardAvoidingView>
+        <Modal
+          isVisible={imageModalVisible}
+          onBackdropPress={() => setImageModalVisible(false)}
+          onBackButtonPress={() => setImageModalVisible(false)}
+          style={{margin: 0}}>
+          <ImageViewer
+            imageUrls={[{url: selectedImage || ''}]}
+            enableSwipeDown
+            onSwipeDown={() => setImageModalVisible(false)}
+            backgroundColor="#000"
+          />
+        </Modal>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 

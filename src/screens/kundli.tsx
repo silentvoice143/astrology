@@ -44,8 +44,8 @@ const Kundli = () => {
           },
           {
             id: 4,
-            screen: 'Nakshatra',
-            data: <NakshatraAndDosha active={selectedTab} />,
+            screen: 'Basic Detail',
+            data: <BasicDetails active={selectedTab} />,
           },
         ]}
         pagination={false}

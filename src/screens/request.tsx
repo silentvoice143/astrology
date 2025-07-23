@@ -7,6 +7,7 @@ import {
   getQueueRequest,
   setChatUser,
   setOtherUser,
+  setQueueCount,
   setSession,
   skipSessionRequest,
 } from '../store/reducer/session';
@@ -29,6 +30,7 @@ const RequestScreen = () => {
       console.log(payload, '-----all session requests');
       if (payload.success) {
         setReuest(payload?.users);
+        dispatch(setQueueCount(payload?.users.length));
       } else {
         Toast.show({
           type: 'info',

@@ -7,7 +7,7 @@ const Remedies = () => {
   return (
     <ScreenLayout>
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-        <Text style={[textStyle.fs_abyss_32_400]}>Comin soon...</Text>
+        <Text style={[textStyle.fs_abyss_24_400]}>Coming soon...</Text>
       </View>
     </ScreenLayout>
   );

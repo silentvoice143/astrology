@@ -263,7 +263,7 @@ const Home = () => {
                   textAlign: 'center',
                 },
               ]}>
-              Our Astrologers
+              Live Astrologers
             </Text>
             <SlidingCard data={astrologersData} />
           </View>

@@ -19,6 +19,7 @@ import {colors} from '../../../constants/colors';
 import ChangeIcon from '../../../assets/icons/change-icon';
 import DocumentDownloadIcon from '../../../assets/icons/download-file-icon';
 import ChangeKundliTypeModal from '../modal/change-type-modal';
+import {makeResponsiveSVG} from '../../../utils/utils';
 
 const BirthChart = ({
   active,
@@ -66,16 +67,21 @@ const BirthChart = ({
         latitude: 25.317645,
         longitude: 82.973915,
       };
+      console.log('kundli style', selectedKundliType);
 
-      const payload: any = dispatch(
+      const payload: any = await dispatch(
         kundliChart({
           body,
-          query: {chartType: 'D1', chartStyle: selectedKundliType.value},
+          query: {
+            chartType: 'D1',
+            chartStyle: selectedKundliType.value,
+            lan: 'bn',
+          },
         }),
       ).unwrap();
       console.log('BirthChart==============', payload);
-      if (payload?.success) {
-        setChartSvg(payload?.data);
+      if (payload) {
+        setChartSvg(payload);
       } else {
       }
     } catch (err) {
@@ -162,8 +168,23 @@ const BirthChart = ({
         contentContainerStyle={styles.container}>
         {/* Kundli Chart */}
         {chartSvg ? (
-          <SvgXml xml={chartSvg} height={width - 28} width={width - 28} />
-        ) : null}
+          <View style={{width: width - 40, height: width - 40}}>
+            <SvgXml
+              xml={makeResponsiveSVG(
+                chartSvg,
+                width,
+                width,
+                selectedKundliType.value == 'east',
+              )}
+              width="100%"
+              height="100%"
+              preserveAspectRatio="xMidYMid meet"
+              style={{width: '100%', height: '100%'}}
+            />
+          </View>
+        ) : (
+          <Text>No Kundli to show</Text>
+        )}
 
         <Text
           style={[
@@ -173,15 +194,17 @@ const BirthChart = ({
           You can download this kundli with all the additional details usign the
           top right button in pdf format
         </Text>
-        <ChangeKundliTypeModal
-          isOpen={changeKundliOpen}
-          onClose={() => setChangeKundliOpen(false)}
-          selectedOption={selectedKundliType}
-          onChange={kundli => {
-            kundli && setSelectedKundliType(kundli);
-            setChangeKundliOpen(false);
-          }}
-        />
+        {changeKundliOpen && (
+          <ChangeKundliTypeModal
+            isOpen={changeKundliOpen}
+            onClose={() => setChangeKundliOpen(false)}
+            selectedOption={selectedKundliType}
+            onChange={kundli => {
+              kundli && setSelectedKundliType(kundli);
+              setChangeKundliOpen(false);
+            }}
+          />
+        )}
       </ScrollView>
     </View>
   );

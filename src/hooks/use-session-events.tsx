@@ -1,7 +1,8 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {useWebSocket} from './use-socket';
 import {
   setCallSession,
+  setRequest,
   setSession,
   toggleCountRefresh,
 } from '../store/reducer/session';
@@ -16,8 +17,6 @@ interface CallRequest {
   callType: 'VOICE' | 'VIDEO';
 }
 
-let hasSubscribed = false;
-
 export const useSessionEvents = (
   userId: string = '',
   active: boolean = false,
@@ -31,15 +30,14 @@ export const useSessionEvents = (
     userId: '',
     callType: 'VOICE',
   });
+  const hasSubscribed = useRef(false);
 
   useEffect(() => {
     // Guard: If already subscribed, don't do it again
-    if (!active || !userId || hasSubscribed) return;
+    if (!active || !userId || hasSubscribed.current) return;
+
     let queueDest = `/topic/queue/${userId}`;
     let requestDest = `/topic/chat/${userId}/chatId`;
-
-    console.log('[useSessionEvents] Subscribing globally...');
-    hasSubscribed = true; // mark as subscribed
 
     const queueSub = subscribe(queueDest, msg => {
       try {
@@ -51,6 +49,10 @@ export const useSessionEvents = (
           text1: 'Session',
           text2: res.msg,
         });
+        console.log(res, res.userId, res.type, 'get call request');
+        dispatch(
+          setRequest({userId: res.userId, type: res.type as 'AUDIO' | 'VIDEO'}),
+        );
         setCallRequest(res);
         setCallRequestNotification(true);
       } catch (err) {
@@ -88,12 +90,14 @@ export const useSessionEvents = (
       }
     });
 
+    hasSubscribed.current = true;
+
     return () => {
       console.log('[useSessionEvents] Cleaning up global subscriptions...');
       unsubscribe(queueDest);
       unsubscribe(requestDest);
       unsubscribe(`/topic/call/${userId}/session`);
-      hasSubscribed = false; // allow re-subscription if needed on remount
+      hasSubscribed.current = false;
     };
   }, [subscribe, userId, active]);
 

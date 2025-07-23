@@ -19,6 +19,7 @@ import {colors} from '../../../constants/colors';
 import ChangeIcon from '../../../assets/icons/change-icon';
 import DocumentDownloadIcon from '../../../assets/icons/download-file-icon';
 import ChangeKundliTypeModal from '../modal/change-type-modal';
+import {makeResponsiveSVG} from '../../../utils/utils';
 
 const AkshvedanshaChart = ({
   active,
@@ -67,15 +68,19 @@ const AkshvedanshaChart = ({
         longitude: 82.973915,
       };
 
-      const payload: any = dispatch(
+      const payload: any = await dispatch(
         kundliChart({
           body,
-          query: {chartType: 'D45', chartStyle: selectedKundliType.value},
+          query: {
+            chartType: 'D45',
+            chartStyle: selectedKundliType.value,
+            lan: 'bn',
+          },
         }),
       ).unwrap();
-      console.log('BirthChart==============', payload);
-      if (payload?.success) {
-        setChartSvg(payload?.data);
+      // console.log('BirthChart==============', payload);
+      if (payload) {
+        setChartSvg(payload);
       } else {
       }
     } catch (err) {
@@ -162,8 +167,25 @@ const AkshvedanshaChart = ({
         contentContainerStyle={styles.container}>
         {/* Kundli Chart */}
         {chartSvg ? (
-          <SvgXml xml={chartSvg} height={width - 28} width={width - 28} />
-        ) : null}
+          <View style={{width: width - 40, height: width - 40}}>
+            <SvgXml
+              xml={makeResponsiveSVG(
+                chartSvg,
+                width,
+                width,
+                selectedKundliType.value == 'east',
+              )}
+              width="100%"
+              height="100%"
+              preserveAspectRatio="xMidYMid meet"
+              style={{width: '100%', height: '100%'}}
+            />
+          </View>
+        ) : (
+          <Text style={[textStyle.fs_mont_16_400, {textAlign: 'center'}]}>
+            No Kundli to show
+          </Text>
+        )}
 
         <Text
           style={[

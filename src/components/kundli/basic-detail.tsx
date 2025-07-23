@@ -1,10 +1,20 @@
-import React, {useState} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import PersonalDetailModal from '../personal-detail-modal';
-import {scale} from '../../utils/sizer';
+import {scale, verticalScale} from '../../utils/sizer';
 import {colors} from '../../constants/colors';
 import {useAppSelector, useAppDispatch} from '../../hooks/redux-hook';
-import {setKundliPerson, resetToDefaultUser} from '../../store/reducer/kundli';
+import {
+  setKundliPerson,
+  resetToDefaultUser,
+  getPersonKundliDetail,
+} from '../../store/reducer/kundli';
 import {UserPersonalDetail} from '../../utils/types';
 import EditIcon from '../../assets/icons/edit-icon';
 import {textStyle} from '../../constants/text-style';
@@ -13,11 +23,37 @@ import {useRoute} from '@react-navigation/native';
 const BasicDetails = ({active}: {active: number}) => {
   const [openedForOther, setOpenedForOther] = useState(false);
   const dispatch = useAppDispatch();
-
   const kundliPerson = useAppSelector(state => state.kundli.kundliPerson);
-
   const [showModal, setShowModal] = useState(false);
   const route = useRoute();
+
+  const [kundliDetail, setKundliDetail] = useState<any>();
+  const [loading, setLoading] = useState(false);
+  const fetchKundliDetails = async () => {
+    setLoading(true);
+    console.log('fetching kundli data');
+    try {
+      const payload = await dispatch(
+        getPersonKundliDetail({
+          ...kundliPerson,
+          birthPlace: 'Varanasi',
+          latitude: 25.317645,
+          longitude: 82.973915,
+        }),
+      ).unwrap();
+      console.log(payload, '---kundli details');
+      if (payload.success) {
+        setKundliDetail(payload.data.data);
+      }
+    } catch (err) {
+      console.error('Error fetching kundli details:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchKundliDetails();
+  }, [dispatch, kundliPerson]);
 
   const handleUpdate = (updatedDetails: UserPersonalDetail) => {
     dispatch(setKundliPerson(updatedDetails));
@@ -25,7 +61,13 @@ const BasicDetails = ({active}: {active: number}) => {
   };
 
   return (
-    <View style={styles.container}>
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      style={styles.container}
+      contentContainerStyle={{
+        paddingVertical: verticalScale(20),
+        paddingBottom: verticalScale(40),
+      }}>
       <View style={styles.card}>
         <View style={styles.headerRow}>
           <Text style={styles.title}>{kundliPerson.name}</Text>
@@ -59,6 +101,21 @@ const BasicDetails = ({active}: {active: number}) => {
           label="Place of Birth"
           value={kundliPerson.birthPlace || '__'}
         />
+        {kundliDetail &&
+          Object.entries(kundliDetail).map(([key, value]) => {
+            if (typeof value !== 'object' && value !== null) {
+              return (
+                <DetailRow
+                  key={key}
+                  label={key
+                    .replace(/([A-Z])/g, ' $1')
+                    .replace(/^./, str => str.toUpperCase())}
+                  value={String(value)}
+                />
+              );
+            }
+            return null;
+          })}
       </View>
 
       <PersonalDetailModal
@@ -73,7 +130,7 @@ const BasicDetails = ({active}: {active: number}) => {
         existingDetails={kundliPerson}
         onSubmit={handleUpdate}
       />
-    </View>
+    </ScrollView>
   );
 };
 

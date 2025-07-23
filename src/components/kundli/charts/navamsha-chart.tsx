@@ -19,6 +19,7 @@ import {colors} from '../../../constants/colors';
 import ChangeIcon from '../../../assets/icons/change-icon';
 import DocumentDownloadIcon from '../../../assets/icons/download-file-icon';
 import ChangeKundliTypeModal from '../modal/change-type-modal';
+import {makeResponsiveSVG} from '../../../utils/utils';
 
 const NavamshaChart = ({
   active,
@@ -67,19 +68,19 @@ const NavamshaChart = ({
         longitude: 82.973915,
       };
 
-      const payload: any = dispatch(
+      const payload: any = await dispatch(
         kundliChart({
           body,
           query: {
             chartType: 'D9',
             chartStyle: selectedKundliType.value,
-            lan: 'en',
+            lan: 'bn',
           },
         }),
       ).unwrap();
-      console.log('NAvamshaChart==============', payload);
-      if (payload?.success) {
-        setChartSvg(payload?.data);
+      // console.log('NAvamshaChart==============', payload);
+      if (payload) {
+        setChartSvg(payload);
       } else {
       }
     } catch (err) {
@@ -166,7 +167,20 @@ const NavamshaChart = ({
         contentContainerStyle={styles.container}>
         {/* Kundli Chart */}
         {chartSvg ? (
-          <SvgXml xml={chartSvg} height={width - 28} width={width - 28} />
+          <View style={{width: width - 40, height: width - 40}}>
+            <SvgXml
+              xml={makeResponsiveSVG(
+                chartSvg,
+                width,
+                width,
+                selectedKundliType.value == 'east',
+              )}
+              width="100%"
+              height="100%"
+              preserveAspectRatio="xMidYMid meet"
+              style={{width: '100%', height: '100%'}}
+            />
+          </View>
         ) : null}
 
         <Text

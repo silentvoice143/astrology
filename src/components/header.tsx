@@ -64,6 +64,8 @@ const Header = ({
         return t('terms&condition');
       case 'customer-support':
         return t('customerSupport');
+      case 'horoscope':
+        return t('horoscope');
       default:
         return t(name.toLowerCase().replace(' ', ''));
     }
