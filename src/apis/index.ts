@@ -25,12 +25,12 @@ api.interceptors.request.use(
     const shouldSkip = skipAuthPaths.some((path: string) =>
       urlPath.startsWith(path),
     );
-    console.log('🔗 API Request:', {
-      url: config?.baseURL + config?.url,
-      method: config.method?.toUpperCase(),
-      payload: config.data || null,
-      params: config.params,
-    });
+    // console.log('🔗 API Request:', {
+    //   url: config?.baseURL + config?.url,
+    //   method: config.method?.toUpperCase(),
+    //   payload: config.data || null,
+    //   params: config.params,
+    // });
 
     const token = shouldSkip ? '' : getTokenFromStore();
     if (token) {
@@ -52,11 +52,11 @@ api.interceptors.response.use(
   response => response,
   error => {
     const message =
-      error.response?.data?.message || error.message || 'Something went wrong';
+      error.response?.data?.msg || error.message || 'Something went wrong';
 
     Toast.show({
       type: 'error',
-      text1: 'API Error',
+      text1: 'Error',
       text2: message,
     });
 
