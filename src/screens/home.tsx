@@ -171,7 +171,7 @@ const Home = () => {
       />
 
       <ScrollView
-        keyboardShouldPersistTaps="handled"
+        // keyboardShouldPersistTaps="handled"
         scrollEventThrottle={16}
         style={HomeStyle.container}
         showsVerticalScrollIndicator={false}
@@ -229,11 +229,15 @@ const Home = () => {
               style={{
                 paddingHorizontal: scale(20),
                 marginVertical: verticalScale(20),
+                height: verticalScale(120),
+                overflow: 'hidden',
+                borderRadius: scale(24),
               }}>
               <SkeletonItem
                 height={verticalScale(120)}
                 width={width}
                 showAvatar={false}
+                borderRadius={24}
               />
             </View>
           ) : (

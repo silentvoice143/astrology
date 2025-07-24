@@ -222,6 +222,7 @@ const RequestSessionModal = ({
 
   return (
     <CustomModal
+      parent="request-session"
       header={{
         title: 'Start Session',
         description: `Connect with ${astrologer?.name || 'Astrologer'}`,

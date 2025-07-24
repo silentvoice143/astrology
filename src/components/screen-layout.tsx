@@ -44,6 +44,7 @@ const ScreenLayout: React.FC<ScreenLayoutProps> = ({
       setIsSaving(false);
     }
   };
+  console.log(isProfileModalOpen && !isProfileComplete, '---values');
   return (
     <View style={{flex: 1, backgroundColor: colors.primary_surface}}>
       {/* Global Sidebar */}
@@ -58,18 +59,21 @@ const ScreenLayout: React.FC<ScreenLayoutProps> = ({
         {children}
       </View>
       <BottomNavigationBar />
-      <PersonalDetailModal
-        isSaving={isSaving}
-        isOpen={isProfileModalOpen}
-        onClose={() => {
-          if (isProfileModalOpen) {
-            dispatch(setProfileModelToggle());
-          }
-        }}
-        onSubmit={data => {
-          handlePostUserData(data);
-        }}
-      />
+      {!isProfileComplete && isProfileModalOpen && (
+        <PersonalDetailModal
+          parent={'screen layout personal modal'}
+          isSaving={isSaving}
+          isOpen={isProfileModalOpen && !isProfileComplete}
+          onClose={() => {
+            if (isProfileModalOpen) {
+              dispatch(setProfileModelToggle());
+            }
+          }}
+          onSubmit={data => {
+            handlePostUserData(data);
+          }}
+        />
+      )}
     </View>
   );
 };

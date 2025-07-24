@@ -19,6 +19,8 @@ import {scale, verticalScale} from '../utils/sizer';
 import {useNavigation} from '@react-navigation/native';
 import {textStyle} from '../constants/text-style';
 import Toast from 'react-native-toast-message';
+import AboutIcon from '../assets/icons/about-icon';
+import {themeColors} from '../constants/colors';
 
 const RequestScreen = () => {
   const dispatch = useAppDispatch();
@@ -73,7 +75,7 @@ const RequestScreen = () => {
   }, []);
   return (
     <ScreenLayout>
-      <ScrollView>
+      <ScrollView style={{flex: 1}} contentContainerStyle={{flex: 1}}>
         <View
           style={{
             flex: 1,
@@ -97,8 +99,21 @@ const RequestScreen = () => {
             ))
           ) : (
             <View
-              style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-              <Text style={[textStyle.fs_mont_16_500]}>No Request Yet</Text>
+              style={{
+                flex: 1,
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <View
+                style={{
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                  gap: 8,
+                  padding: scale(20),
+                }}>
+                <AboutIcon color={themeColors.status.info.dark} />
+                <Text style={[textStyle.fs_mont_14_400]}>No Request Yet</Text>
+              </View>
             </View>
           )}
         </View>

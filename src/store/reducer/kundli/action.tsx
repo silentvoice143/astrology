@@ -28,3 +28,22 @@ export const kundliChart = createAsyncThunk<
     return rejectWithValue(error.response?.data || error.message);
   }
 });
+
+export const kundliVimshottari = createAsyncThunk<
+  any, // response type as any
+  any, // argument type
+  {rejectValue: any}
+>('kundli/chart-vimshottari', async (payload, {rejectWithValue}) => {
+  try {
+    const response = await api.post(
+      '/api/v1/kundli/vimshottari-dasha',
+      payload.body,
+      {
+        params: payload.query,
+      },
+    );
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});

@@ -7,6 +7,7 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
+import {themeColors} from '../constants/colors';
 
 interface AvatarProps {
   image?: ImageSourcePropType; // require('./img.png') or { uri: '...' }
@@ -48,7 +49,7 @@ const Avatar: React.FC<AvatarProps> = ({
           overflow: 'hidden',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundColor: '#e0e0e0',
+          backgroundColor: themeColors.surface.secondarySurface,
         },
         containerStyle,
       ]}>

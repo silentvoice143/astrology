@@ -27,6 +27,7 @@ import {
   setOtherUser,
   setSession,
 } from '../store/reducer/session';
+import {useDebounce} from '../hooks/use-debounce';
 
 type SessionType = 'chat' | 'audio' | 'video'; // NEW
 
@@ -63,6 +64,7 @@ const Astrologers = () => {
   const route = useRoute<AstrologersScreenRouteProp>(); // Use useRoute hook to access params
   const {initialSearch = '', sort = ''} = route.params || {};
   const [search, setSearch] = useState(initialSearch);
+  const debouncedSearch = useDebounce(search, 500);
   const [selected, setSelected] = useState<string[]>(['all']);
   const [selectedAstrologer, setSelectedAstrologer] =
     useState<AstrologerWithPricing | null>(null); // CHANGED
@@ -80,14 +82,18 @@ const Astrologers = () => {
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const activeSession = useAppSelector(state => state.session.activeSession);
 
-  const fetchAstrologersData = async (pageNumber = 1, append = false) => {
-    if (loading || isFetchingMore || !hasMore) return;
+  const fetchAstrologersData = async (
+    pageNumber = 1,
+    append = false,
+    search = '',
+  ) => {
+    if (loading || isFetchingMore || (!hasMore && append)) return;
     try {
       if (append) setIsFetchingMore(true);
       else setLoading(true);
 
       const payload = await dispatch(
-        getAllAstrologers(`?page=${pageNumber}&search=&sort=${sort}`),
+        getAllAstrologers(`?page=${pageNumber}&search=${search}&sort=${sort}`),
       ).unwrap();
       if (payload.success) {
         const newData = payload.astrologers || [];
@@ -158,8 +164,9 @@ const Astrologers = () => {
   };
 
   useEffect(() => {
-    fetchAstrologersData();
-  }, []);
+    console.log('fetching data');
+    fetchAstrologersData(1, false, debouncedSearch); // reset to page 1 on new search
+  }, [debouncedSearch, sort]);
 
   // CHANGED: Handle session start with session type and pricing
   const handleSessionStart = (
@@ -197,6 +204,25 @@ const Astrologers = () => {
     }, 1000);
   }, [selected]);
 
+  useEffect(() => {
+    setPage(1);
+    setHasMore(true);
+  }, [debouncedSearch]);
+
+  if (loading) {
+    return (
+      <ScreenLayout>
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <ActivityIndicator size={20} />
+          <Text
+            style={[textStyle.fs_mont_14_400, {marginTop: verticalScale(10)}]}>
+            Fetching astrologer data
+          </Text>
+        </View>
+      </ScreenLayout>
+    );
+  }
+
   return (
     <ScreenLayout>
       <View
@@ -215,6 +241,8 @@ const Astrologers = () => {
           }}></View>
         <View style={{paddingHorizontal: scale(24)}}>
           <AnimatedSearchInput
+            value={search}
+            onChangeText={text => setSearch(text)}
             unfocusedBorderColor={colors.primary_border}
             enableShadow={true}
             focusedBorderColor={colors.primary_border}
@@ -242,71 +270,69 @@ const Astrologers = () => {
         multiSelect={false}
       />
 
-      {loading ? (
-        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
-          <ActivityIndicator />
-          <Text style={[textStyle.fs_mont_12_400]}>
-            Loading Astrologer data...
-          </Text>
-        </View>
-      ) : (
-        <FlatList
-          showsVerticalScrollIndicator={false}
-          data={astrologersData}
-          keyExtractor={item => `card-astrologer-${item.id}`}
-          contentContainerStyle={{paddingBottom: verticalScale(20)}}
-          onEndReached={() => {
-            if (hasMore && !isFetchingMore && !loading) {
-              fetchAstrologersData(page + 1, true);
-            }
-          }}
-          onEndReachedThreshold={0.5}
-          ListFooterComponent={
-            isFetchingMore ? (
-              <View style={{paddingVertical: 10}}>
-                <ActivityIndicator />
-                <Text style={[textStyle.fs_mont_12_400, {textAlign: 'center'}]}>
-                  Loading more astrologers...
-                </Text>
-              </View>
-            ) : null
+      <FlatList
+        showsVerticalScrollIndicator={false}
+        data={astrologersData}
+        keyExtractor={item => `card-astrologer-${item.id}`}
+        contentContainerStyle={{paddingBottom: verticalScale(20)}}
+        onEndReached={() => {
+          if (hasMore && !isFetchingMore && !loading) {
+            fetchAstrologersData(page + 1, true, debouncedSearch);
           }
-          renderItem={({item}) => (
-            <Pressable
-              onPress={() =>
-                navigation.navigate('DetailsProfile', {id: item.id})
-              }
-              style={{marginHorizontal: scale(10)}}
-              key={`card-astrologer-${item.id}`}>
-              <AstrologerCard
-                id={item.id}
-                online={item.online}
-                pricePerMinuteChat={item.pricePerMinuteChat}
-                pricePerMinuteVideo={item.pricePerMinuteVideo}
-                pricePerMinuteVoice={item.pricePerMinuteVoice}
-                expertise={item.expertise}
-                name={item?.user?.name}
-                rate={''}
-                rating={4}
-                experience={item?.experienceYears.toString()}
-                languages={item?.languages}
-                imageUri={item?.user?.imgUri}
-                freeChatAvailable={!freeChatUsed}
-                onSessionPress={sessionType => {
-                  handleSessionStart(item, sessionType);
-                }}
-              />
-            </Pressable>
-          )}
-          ListEmptyComponent={
-            !loading && (
+        }}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          isFetchingMore ? (
+            <View style={{paddingVertical: 10}}>
+              <ActivityIndicator />
+              <Text style={[textStyle.fs_mont_12_400, {textAlign: 'center'}]}>
+                Loading more astrologers...
+              </Text>
+            </View>
+          ) : null
+        }
+        renderItem={({item}) => (
+          <Pressable
+            onPress={() => navigation.navigate('DetailsProfile', {id: item.id})}
+            style={{marginHorizontal: scale(10)}}
+            key={`card-astrologer-${item.id}`}>
+            <AstrologerCard
+              id={item.id}
+              online={item.online}
+              pricePerMinuteChat={item.pricePerMinuteChat}
+              pricePerMinuteVideo={item.pricePerMinuteVideo}
+              pricePerMinuteVoice={item.pricePerMinuteVoice}
+              expertise={item.expertise}
+              name={item?.user?.name}
+              rate={''}
+              rating={4}
+              experience={item?.experienceYears.toString()}
+              languages={item?.languages}
+              imageUri={item?.user?.imgUri}
+              freeChatAvailable={!freeChatUsed}
+              onSessionPress={sessionType => {
+                handleSessionStart(item, sessionType);
+              }}
+            />
+          </Pressable>
+        )}
+        ListEmptyComponent={
+          <View
+            style={{
+              height: verticalScale(200),
+
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            {
               <Text style={[textStyle.fs_mont_12_400, {textAlign: 'center'}]}>
                 No astrologers found.
               </Text>
-            )
-          }
-        />
-      )}
+            }
+          </View>
+        }
+      />
+
       {/* <ScrollView showsVerticalScrollIndicator={false}>
           <View
             style={{

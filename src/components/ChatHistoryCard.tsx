@@ -37,7 +37,7 @@ const ChatHistoryCard: React.FC<ChatHistoryCardProps> = ({
           image={avatar}
           fallbackText={name.charAt(0)}
           size={55}
-          borderColor={colors.secondarybtn}
+          borderColor={themeColors.border.secondary}
           borderWidth={2}
           containerStyle={styles.avatar}
         />
@@ -50,7 +50,7 @@ const ChatHistoryCard: React.FC<ChatHistoryCardProps> = ({
         </View>
       </View>
       <Text style={[styles.time, textStyle.fs_mont_12_400]}>
-        {/* {formatRelativeDate(time)} */}
+        {formatRelativeDate(time)}
       </Text>
     </View>
   );

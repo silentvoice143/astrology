@@ -20,11 +20,14 @@ import ChangeIcon from '../../../assets/icons/change-icon';
 import DocumentDownloadIcon from '../../../assets/icons/download-file-icon';
 import ChangeKundliTypeModal from '../modal/change-type-modal';
 import {makeResponsiveSVG} from '../../../utils/utils';
+import {useTranslation} from 'react-i18next';
 
 const AkshvedanshaChart = ({
+  forModal = false,
   active,
   chartWidth,
 }: {
+  forModal?: boolean;
   active: number;
   chartWidth?: number;
 }) => {
@@ -56,6 +59,7 @@ const AkshvedanshaChart = ({
 
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
+  const {t} = useTranslation();
 
   const getKundliChartData = async () => {
     try {
@@ -74,7 +78,7 @@ const AkshvedanshaChart = ({
           query: {
             chartType: 'D45',
             chartStyle: selectedKundliType.value,
-            lan: 'bn',
+            lan: t('lan'),
           },
         }),
       ).unwrap();
@@ -173,7 +177,7 @@ const AkshvedanshaChart = ({
                 chartSvg,
                 width,
                 width,
-                selectedKundliType.value == 'east',
+                !forModal && selectedKundliType.value == 'east',
               )}
               width="100%"
               height="100%"
@@ -195,15 +199,17 @@ const AkshvedanshaChart = ({
           You can download this kundli with all the additional details usign the
           top right button in pdf format
         </Text>
-        <ChangeKundliTypeModal
-          isOpen={changeKundliOpen}
-          onClose={() => setChangeKundliOpen(false)}
-          selectedOption={selectedKundliType}
-          onChange={kundli => {
-            kundli && setSelectedKundliType(kundli);
-            setChangeKundliOpen(false);
-          }}
-        />
+        {changeKundliOpen && (
+          <ChangeKundliTypeModal
+            isOpen={changeKundliOpen}
+            onClose={() => setChangeKundliOpen(false)}
+            selectedOption={selectedKundliType}
+            onChange={kundli => {
+              kundli && setSelectedKundliType(kundli);
+              setChangeKundliOpen(false);
+            }}
+          />
+        )}
       </ScrollView>
     </View>
   );

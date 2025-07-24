@@ -24,6 +24,7 @@ type HeaderObject = {
 type HeaderContent = React.ReactNode | HeaderObject;
 
 type CustomModalProps = {
+  parent: string;
   visible: boolean;
   onClose: (e?: GestureResponderEvent) => void;
   header?: HeaderContent;
@@ -44,6 +45,7 @@ type CustomModalProps = {
 };
 
 const CustomModal: React.FC<CustomModalProps> = ({
+  parent,
   visible,
   onClose,
   header,
@@ -61,7 +63,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
   keyboardVerticalOffset = 0,
   scrollViewProps = {},
 }) => {
-  console.log('opened modal');
+  console.log('opened modal', parent);
   function isHeaderObject(
     headerContent: HeaderContent,
   ): headerContent is HeaderObject {

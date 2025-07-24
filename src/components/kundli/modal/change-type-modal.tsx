@@ -51,6 +51,7 @@ const ChangeKundliTypeModal = ({
   }, [selectedOption]);
   return (
     <CustomModal
+      parent="kundli-type"
       header={{title: 'Chart Type', description: 'Choose the options'}}
       visible={isOpen}
       onClose={onClose}

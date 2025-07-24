@@ -9,6 +9,7 @@ import {
   Dimensions,
   ViewStyle,
   TextStyle,
+  ActivityIndicator,
 } from 'react-native';
 import {useTranslation} from 'react-i18next'; // Import useTranslation
 
@@ -82,11 +83,13 @@ const DetailsProfile: React.FC = () => {
     useState<UserDetail | null>(null);
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const {isProfileComplete} = useAppSelector(state => state.auth);
+  const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
 
   const fetchAstrologersDataById = async (id: string) => {
     if (id) {
       try {
+        setLoading(true);
         const payload = await dispatch(getAllAstrologerById({id})).unwrap();
         console.log(payload, 'fetchAstrologersDataById-----');
         if (payload.success) {
@@ -94,6 +97,8 @@ const DetailsProfile: React.FC = () => {
         }
       } catch (error) {
         console.log('fetchAstrologersDataById Error : ', error);
+      } finally {
+        setLoading(false);
       }
     }
   };
@@ -119,6 +124,20 @@ const DetailsProfile: React.FC = () => {
       </Text>
     </View>
   );
+
+  if (loading) {
+    return (
+      <ScreenLayout>
+        <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+          <ActivityIndicator size={20} />
+          <Text
+            style={[textStyle.fs_mont_14_400, {marginTop: verticalScale(10)}]}>
+            Fetching astrologer data
+          </Text>
+        </View>
+      </ScreenLayout>
+    );
+  }
 
   return (
     // ScreenLayout provides a consistent layout structure for the screen

@@ -118,18 +118,21 @@ const BasicDetails = ({active}: {active: number}) => {
           })}
       </View>
 
-      <PersonalDetailModal
-        isOpen={showModal}
-        onClose={() => {
-          if (openedForOther) {
-            dispatch(resetToDefaultUser());
-            setOpenedForOther(false);
-          }
-          setShowModal(false);
-        }}
-        existingDetails={kundliPerson}
-        onSubmit={handleUpdate}
-      />
+      {showModal && (
+        <PersonalDetailModal
+          parent={'basic detail personal modal'}
+          isOpen={showModal}
+          onClose={() => {
+            if (openedForOther) {
+              dispatch(resetToDefaultUser());
+              setOpenedForOther(false);
+            }
+            setShowModal(false);
+          }}
+          existingDetails={kundliPerson}
+          onSubmit={handleUpdate}
+        />
+      )}
     </ScrollView>
   );
 };

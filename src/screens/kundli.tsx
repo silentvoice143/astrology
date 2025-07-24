@@ -13,6 +13,7 @@ import RasiChart from '../components/kundli/charts/rasi-chart';
 import BirthChart from '../components/kundli/charts/brith-chart';
 import NavamshaChart from '../components/kundli/charts/navamsha-chart';
 import AkshvedanshaChart from '../components/kundli/charts/askhvedansha-chart';
+import VimshottariDasha from '../components/kundli/vimshottari-dasha';
 export const kundliTabs = [
   {key: 'basic', label: 'Basic Details'},
   {key: 'lagnaChart', label: 'Lagna Chart'},
@@ -46,6 +47,11 @@ const Kundli = () => {
             id: 4,
             screen: 'Basic Detail',
             data: <BasicDetails active={selectedTab} />,
+          },
+          {
+            id: 5,
+            screen: 'Vimshottari Dasha',
+            data: <VimshottariDasha />,
           },
         ]}
         pagination={false}

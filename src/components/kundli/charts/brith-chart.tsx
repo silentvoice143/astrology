@@ -20,11 +20,14 @@ import ChangeIcon from '../../../assets/icons/change-icon';
 import DocumentDownloadIcon from '../../../assets/icons/download-file-icon';
 import ChangeKundliTypeModal from '../modal/change-type-modal';
 import {makeResponsiveSVG} from '../../../utils/utils';
+import {useTranslation} from 'react-i18next';
 
 const BirthChart = ({
+  forModal = false,
   active,
   chartWidth,
 }: {
+  forModal?: boolean;
   active: number;
   chartWidth?: number;
 }) => {
@@ -56,6 +59,7 @@ const BirthChart = ({
 
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
+  const {t} = useTranslation();
 
   const getKundliChartData = async () => {
     try {
@@ -75,7 +79,7 @@ const BirthChart = ({
           query: {
             chartType: 'D1',
             chartStyle: selectedKundliType.value,
-            lan: 'bn',
+            lan: t('lan'),
           },
         }),
       ).unwrap();
@@ -174,7 +178,7 @@ const BirthChart = ({
                 chartSvg,
                 width,
                 width,
-                selectedKundliType.value == 'east',
+                !forModal && selectedKundliType.value == 'east',
               )}
               width="100%"
               height="100%"

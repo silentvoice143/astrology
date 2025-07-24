@@ -26,7 +26,7 @@ const SkeletonItem: React.FC<SkeletonItemProps> = ({
     <SkeletonPlaceholder borderRadius={borderRadius}>
       <View
         style={{
-          borderRadius: scale(12),
+          borderRadius: scale(borderRadius),
           height: height,
           width: width,
           position: 'relative',
