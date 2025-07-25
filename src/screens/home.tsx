@@ -234,10 +234,9 @@ const Home = () => {
                 borderRadius: scale(24),
               }}>
               <SkeletonItem
-                height={verticalScale(120)}
                 width={width}
-                showAvatar={false}
-                borderRadius={24}
+                height={verticalScale(120)}
+                borderRadius={8}
               />
             </View>
           ) : (
@@ -302,7 +301,7 @@ const Home = () => {
                 <SkeletonItem
                   height={verticalScale(300)}
                   width={width * 0.7}
-                  showAvatar={false}
+                  borderRadius={8}
                 />
               </View>
             ) : (
@@ -339,7 +338,7 @@ const Home = () => {
               <SkeletonItem
                 height={width / 2 - verticalScale(60)}
                 width={width}
-                showAvatar={false}
+                borderRadius={12}
               />
             ) : (
               <Carousel

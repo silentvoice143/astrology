@@ -105,8 +105,10 @@ const AkshvedanshaChart = ({
   }, []);
 
   useEffect(() => {
-    getKundliChartData();
-  }, [dispatch, kundliPerson, selectedKundliType]);
+    if (active === 2) {
+      getKundliChartData();
+    }
+  }, [dispatch, kundliPerson, selectedKundliType, active]);
 
   if (loading) {
     return (

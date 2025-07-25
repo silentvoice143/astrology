@@ -127,7 +127,7 @@ const SessionKundliModal = ({
               {
                 id: 5,
                 screen: 'Vimshottari Dasha',
-                data: <VimshottariDasha />,
+                data: <VimshottariDasha active={selectedTab} />,
               },
             ]}
             pagination={false}

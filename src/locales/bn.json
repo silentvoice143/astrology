@@ -3,6 +3,12 @@
   "common": {
     "min": "মিনিট"
   },
+  "dasha": {
+    "maha-dasha": "মহাদশা",
+    "antar-dasha": "অন্তরদশা",
+    "pratyantar-dasha": "প্রত্যন্তর দশা",
+    "sookshma-dasha": "সূক্ষ্ম দশা"
+  },
   "home": "হোম",
   "kundli": "কুন্ডলী",
   "astrologers": "জ্যোতিষীগণ",

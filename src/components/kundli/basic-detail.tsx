@@ -21,6 +21,7 @@ import {textStyle} from '../../constants/text-style';
 import {useRoute} from '@react-navigation/native';
 
 const BasicDetails = ({active}: {active: number}) => {
+  console.log(active, '------------------------------active');
   const [openedForOther, setOpenedForOther] = useState(false);
   const dispatch = useAppDispatch();
   const kundliPerson = useAppSelector(state => state.kundli.kundliPerson);
@@ -52,8 +53,10 @@ const BasicDetails = ({active}: {active: number}) => {
     }
   };
   useEffect(() => {
-    fetchKundliDetails();
-  }, [dispatch, kundliPerson]);
+    if (active === 3) {
+      fetchKundliDetails();
+    }
+  }, [dispatch, kundliPerson, active]);
 
   const handleUpdate = (updatedDetails: UserPersonalDetail) => {
     dispatch(setKundliPerson(updatedDetails));

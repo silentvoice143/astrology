@@ -105,8 +105,10 @@ const NavamshaChart = ({
   }, []);
 
   useEffect(() => {
-    getKundliChartData();
-  }, [dispatch, kundliPerson, selectedKundliType]);
+    if (active === 1) {
+      getKundliChartData();
+    }
+  }, [dispatch, kundliPerson, selectedKundliType, active]);
 
   if (loading) {
     return (

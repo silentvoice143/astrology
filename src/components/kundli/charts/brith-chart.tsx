@@ -106,8 +106,10 @@ const BirthChart = ({
   }, []);
 
   useEffect(() => {
-    getKundliChartData();
-  }, [dispatch, kundliPerson, selectedKundliType]);
+    if (active === 0) {
+      getKundliChartData();
+    }
+  }, [dispatch, kundliPerson, selectedKundliType, active]);
 
   if (loading) {
     return (
