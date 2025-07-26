@@ -15,7 +15,7 @@ import {SvgXml} from 'react-native-svg';
 import {customizeSVG} from '../../../utils/customize-svg';
 import {scale, verticalScale} from '../../../utils/sizer';
 import {textStyle} from '../../../constants/text-style';
-import {colors} from '../../../constants/colors';
+import {colors, themeColors} from '../../../constants/colors';
 import ChangeIcon from '../../../assets/icons/change-icon';
 import DocumentDownloadIcon from '../../../assets/icons/download-file-icon';
 import ChangeKundliTypeModal from '../modal/change-type-modal';
@@ -28,38 +28,34 @@ const BirthChart = ({
   chartWidth,
 }: {
   forModal?: boolean;
-  active: number;
+  active?: number;
   chartWidth?: number;
 }) => {
   const [width, setWidth] = useState(
     chartWidth ? chartWidth : Dimensions.get('screen').width,
   );
-  const tags = [
-    {label: 'Retrograde', symbol: '⭒'},
-    {label: 'Exalted', symbol: '+'},
-    {label: 'Debilitated', symbol: '⬇'},
-    {label: 'Combust', symbol: '^'},
-    {label: 'Vargottama', symbol: '¤'},
-  ];
 
-  const planetData = [
-    {planet: 'Lagna', symbol: 'La', position: '08°31\'06"'},
-    {planet: 'Sun', symbol: 'Su', position: '15°12\'24"'},
-    {planet: 'Moon', symbol: 'Mo', position: '21°42\'55"'},
-  ];
   const [changeKundliOpen, setChangeKundliOpen] = useState(false);
   const {kundliPerson} = useAppSelector(state => state.kundli);
   const [chartSvg, setChartSvg] = useState<string | null>(null);
+  const {t} = useTranslation();
 
-  const [selectedKundliType, setSelectedKundliType] = useState({
-    label: 'East-Indian Style',
-    id: 'east_indian_style',
-    value: 'east',
-  });
+  const [selectedKundliType, setSelectedKundliType] = useState(
+    t('lan') === 'bn'
+      ? {
+          label: 'East-Indian Style',
+          id: 'east_indian_style',
+          value: 'east',
+        }
+      : {
+          label: 'North-Indian Style',
+          id: 'north_indian_style',
+          value: 'north',
+        },
+  );
 
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
-  const {t} = useTranslation();
 
   const getKundliChartData = async () => {
     try {
@@ -113,11 +109,14 @@ const BirthChart = ({
 
   if (loading) {
     return (
-      <View style={styles.loader}>
-        <ActivityIndicator size={20} />
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <ActivityIndicator size="large" color={themeColors.surface.darkPink} />
+        <Text>Please wait a moment</Text>
       </View>
     );
   }
+
+  console.log(chartWidth, '---------------cahrt width');
 
   return (
     <View>
@@ -180,7 +179,7 @@ const BirthChart = ({
                 chartSvg,
                 width,
                 width,
-                !forModal && selectedKundliType.value == 'east',
+                selectedKundliType.value == 'east',
               )}
               width="100%"
               height="100%"

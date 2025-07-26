@@ -92,6 +92,7 @@ export const themeColors = {
   text: {
     primary: '#000000',
     secondary: '#494949',
+    tertiary: '#EC504A',
     muted: '#686868',
     light: '#FFFFFF',
     subdued: '#575757',

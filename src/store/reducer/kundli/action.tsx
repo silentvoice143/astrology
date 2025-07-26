@@ -7,7 +7,9 @@ export const getPersonKundliDetail = createAsyncThunk<
   {rejectValue: any}
 >('kundli/detail', async (payload, {rejectWithValue}) => {
   try {
-    const response = await api.post('/api/v1/kundli', payload);
+    const response = await api.post('/api/v1/kundli', payload.data, {
+      params: payload.query,
+    });
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data || error.message);

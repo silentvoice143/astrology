@@ -21,7 +21,7 @@ import Avatar from '../../components/avatar';
 
 interface CallRequest {
   userId: string;
-  type: 'AUDIO' | 'VIDEO';
+  type: 'AUDIO' | 'VIDEO' | 'CHAT';
 }
 
 interface CallRequestNotificationProps {
