@@ -173,6 +173,7 @@ const RequestSessionModal = ({
         duration: selectedDuration.value,
         type: selectedSessionType.toUpperCase(),
       };
+      console.log(body, '---------requesting session type');
 
       let payload;
 

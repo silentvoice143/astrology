@@ -145,6 +145,7 @@ const DetailsProfile: React.FC = () => {
     fetchAstrologersDataById(id);
   }, [id]);
 
+  // CHANGED: Handle session start with session type and pricing
   const handleSessionStart = (
     astrologer: Astrologers,
     sessionType: SessionType,
@@ -434,6 +435,7 @@ const DetailsProfile: React.FC = () => {
             setSelectedAstrologer(null);
           }}
           astrologer={selectedAstrologer}
+          initialSessionType={selectedSessionType}
         />
       )}
     </ScreenLayout>
