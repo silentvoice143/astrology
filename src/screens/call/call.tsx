@@ -214,6 +214,7 @@ const CallScreen = () => {
 
   const handleCallCancel = () => {
     console.log('🚫 Call cancelled by user');
+    handleLeave();
     setCallState('ended');
     stopWaitingTimer();
     dispatch(clearCallSession());
@@ -247,6 +248,18 @@ const CallScreen = () => {
       clearInterval(timerInterval.current);
       timerInterval.current = null;
     }
+  };
+
+  const handleLeave = () => {
+    send(
+      '/app/chat.leave',
+      {},
+      JSON.stringify({
+        userId: userParam?.id,
+        astrologerId: astrologer.id,
+        sessionType: callType,
+      }),
+    );
   };
 
   const handleCallEnd = async (userInitiated = true) => {

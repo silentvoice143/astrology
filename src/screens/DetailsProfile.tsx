@@ -27,18 +27,31 @@ import Avatar from '../components/avatar';
 // import ReviewItem from '../components/Profile/ReviewItem';
 
 // Import interfaces for data types
-import {Review, UserDetail} from '../utils/types';
+import {Astrologers, Review, UserDetail} from '../utils/types';
 import {colors, themeColors} from '../constants/colors';
 import ProfileSectionItem from '../components/Profile/ProfileSectionItem';
-import {RouteProp, useRoute} from '@react-navigation/native';
+import {RouteProp, useNavigation, useRoute} from '@react-navigation/native';
 import {RootStackParamList} from '../hooks/navigation';
 import {getAllAstrologerById} from '../store/reducer/astrologers';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
-import {sendSessionRequest, setChatUser} from '../store/reducer/session';
+import {
+  sendSessionRequest,
+  setChatUser,
+  setOtherUser,
+  setSession,
+} from '../store/reducer/session';
 import VideoCallIcon from '../assets/icons/video-call-icon';
 import {setProfileModelToggle} from '../store/reducer/auth';
 import RequestSessionModal from '../components/session/modals/request-session-modal';
 
+type SessionType = 'chat' | 'audio' | 'video'; // NEW
+
+// NEW: Extended type for astrologer with pricing
+interface AstrologerWithPricing extends UserDetail {
+  pricePerMinuteChat: number;
+  pricePerMinuteVideo: number;
+  pricePerMinuteVoice: number;
+}
 export interface AstrologerUser {
   id: string;
   name: string;
@@ -55,19 +68,19 @@ export interface AstrologerUser {
   updatedAt: string; // ISO timestamp
 }
 
-export interface AstrologerProfile {
-  id: string;
-  user: UserDetail;
-  about: string | null;
-  expertise: string;
-  experienceYears: number;
-  languages: string | null;
-  imgUri: string | null;
-  pricePerMinuteChat: number;
-  pricePerMinuteVoice: number;
-  pricePerMinuteVideo: number;
-  blocked: boolean;
-}
+// export interface AstrologerProfile {
+//   id: string;
+//   user: UserDetail;
+//   about: string | null;
+//   expertise: string;
+//   experienceYears: number;
+//   languages: string | null;
+//   imgUri: string | null;
+//   pricePerMinuteChat: number;
+//   pricePerMinuteVoice: number;
+//   pricePerMinuteVideo: number;
+//   blocked: boolean;
+// }
 
 type DetailsProfileRouteProp = RouteProp<RootStackParamList, 'DetailsProfile'>;
 
@@ -78,13 +91,18 @@ const DetailsProfile: React.FC = () => {
 
   // State to manage the expansion of the 'About Astrologer' section
   const [expandedAbout, setExpandedAbout] = useState<boolean>(false);
-  const [data, setData] = useState<AstrologerProfile>();
+  const [data, setData] = useState<Astrologers>();
   const [selectedAstrologer, setSelectedAstrologer] =
-    useState<UserDetail | null>(null);
+    useState<AstrologerWithPricing | null>(null);
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const {isProfileComplete} = useAppSelector(state => state.auth);
   const [loading, setLoading] = useState(false);
+  const [selectedSessionType, setSelectedSessionType] =
+    useState<SessionType>('chat');
+  const {freeChatUsed} = useAppSelector(state => state.auth.user);
+  const activeSession = useAppSelector(state => state.session.activeSession);
   const dispatch = useAppDispatch();
+  const navigation = useNavigation<any>();
 
   const fetchAstrologersDataById = async (id: string) => {
     if (id) {
@@ -103,14 +121,54 @@ const DetailsProfile: React.FC = () => {
     }
   };
 
+  const requestSession = async (astrologer: AstrologerWithPricing) => {
+    if (activeSession && activeSession?.astrologer?.id === astrologer.id) {
+      setSession(activeSession);
+      navigation.navigate('chat');
+    }
+    try {
+      const body = {astrologerId: astrologer?.id, duration: 2};
+      const payload = await dispatch(sendSessionRequest(body)).unwrap();
+
+      if (payload.success) {
+        dispatch(setOtherUser(astrologer));
+        navigation.navigate('chat');
+      }
+
+      console.log(payload);
+    } catch (err) {
+      console.log('sendSessionRequest Error : ', err);
+    }
+  };
+
   useEffect(() => {
     fetchAstrologersDataById(id);
   }, [id]);
 
-  const handleSessionStart = (astrologer: UserDetail) => {
+  // CHANGED: Handle session start with session type and pricing
+  const handleSessionStart = (
+    astrologer: Astrologers,
+    sessionType: SessionType,
+  ) => {
+    console.log('starting session');
     if (isProfileComplete) {
-      setSelectedAstrologer(astrologer);
-      setIsRequestModalOpen(true);
+      console.log('handling session');
+      const astrologerWithPricing: AstrologerWithPricing = {
+        ...astrologer.user,
+        pricePerMinuteChat: astrologer.pricePerMinuteChat,
+        pricePerMinuteVideo: astrologer.pricePerMinuteVideo,
+        pricePerMinuteVoice: astrologer.pricePerMinuteVoice,
+      };
+      if (freeChatUsed || sessionType === 'audio' || sessionType === 'video') {
+        setSelectedAstrologer(astrologerWithPricing);
+        setSelectedSessionType(sessionType);
+        setIsRequestModalOpen(true);
+      } else {
+        if (sessionType === 'chat') {
+          requestSession(astrologerWithPricing);
+        }
+      }
+      // Create astrologer with pricing info
     } else {
       dispatch(setProfileModelToggle());
     }
@@ -327,26 +385,30 @@ const DetailsProfile: React.FC = () => {
       {/* Bottom Action Buttons for Call and Chat */}
       <View style={styles.bottomActions}>
         <CustomButton
-          disabled={true}
+          // disabled={true}
+          style={[styles.actionButton, styles.callButton]}
+          leftIcon={<CallIcon colors={['#ffffff']} height={18} width={18} />}
+          textStyle={styles.buttonText}
+          onPress={() => {
+            // Handle call action
+            console.log('audio Call button pressed', data);
+            if (data) {
+              handleSessionStart(data, 'audio');
+            }
+          }}
+          title={t('detailsProfile.Voice Call')} // Translated
+        />
+        <CustomButton
+          // disabled={true}
           style={[styles.actionButton, styles.callButton]}
           leftIcon={<VideoCallIcon colors={['#ffffff']} size={18} />}
           textStyle={styles.buttonText}
           onPress={() => {
             // Handle call action
             console.log('Call button pressed');
-            handleSessionStart(data?.user as UserDetail);
-          }}
-          title={t('detailsProfile.Voice Call')} // Translated
-        />
-        <CustomButton
-          disabled={true}
-          style={[styles.actionButton, styles.callButton]}
-          leftIcon={<CallIcon colors={['#ffffff']} height={18} width={18} />}
-          textStyle={styles.buttonText}
-          onPress={() => {
-            // Handle call action
-            console.log('Call button pressed');
-            handleSessionStart(data?.user as UserDetail);
+            if (data) {
+              handleSessionStart(data, 'video');
+            }
           }}
           title={t('detailsProfile.Video Call')} // Translated
         />
@@ -358,19 +420,24 @@ const DetailsProfile: React.FC = () => {
           textStyle={textStyle.fs_mont_14_700}
           onPress={() => {
             // Handle chat action
-            handleSessionStart(data?.user as UserDetail);
+            if (data) {
+              handleSessionStart(data, 'chat');
+            }
           }}
           title={t('detailsProfile.Chat')} // Translated
         />
       </View>
-      <RequestSessionModal
-        isOpen={isRequestModalOpen}
-        onClose={() => {
-          setIsRequestModalOpen(false);
-          setSelectedAstrologer(null);
-        }}
-        astrologer={selectedAstrologer}
-      />
+      {isRequestModalOpen && (
+        <RequestSessionModal
+          isOpen={isRequestModalOpen}
+          onClose={() => {
+            setIsRequestModalOpen(false);
+            setSelectedAstrologer(null);
+          }}
+          astrologer={selectedAstrologer}
+          initialSessionType={selectedSessionType}
+        />
+      )}
     </ScreenLayout>
   );
 };

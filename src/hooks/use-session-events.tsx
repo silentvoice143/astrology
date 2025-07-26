@@ -2,6 +2,7 @@ import {useEffect, useRef, useState} from 'react';
 import {useWebSocket} from './use-socket';
 import {
   setCallSession,
+  setOtherUser,
   setRequest,
   setSession,
   toggleCountRefresh,
@@ -50,11 +51,14 @@ export const useSessionEvents = (
           text2: res.msg,
         });
         console.log(res, res.userId, res.type, 'get call request');
-        dispatch(
-          setRequest({userId: res.userId, type: res.type as 'AUDIO' | 'VIDEO'}),
-        );
-        setCallRequest(res);
-        setCallRequestNotification(true);
+        // dispatch(
+        //   setRequest({
+        //     userId: res.userId,
+        //     type: res.type as 'AUDIO' | 'VIDEO' | 'CHAT',
+        //   }),
+        // );
+        // setCallRequest(res);
+        // setCallRequestNotification(true);
       } catch (err) {
         console.error('Failed to parse queue message:', err);
       }
@@ -73,9 +77,11 @@ export const useSessionEvents = (
 
     const chatSub = subscribe(requestDest, msg => {
       try {
-        console.log('chat session received');
         const data = JSON.parse(decodeMessageBody(msg));
+        console.log('chat session received', data);
+
         dispatch(setSession(data));
+
         Toast.show({
           type: 'success',
           text1: role === 'USER' ? 'Request Accepted' : 'Request Accepted',
