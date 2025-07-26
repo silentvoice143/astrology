@@ -182,12 +182,14 @@ const Astrologers = () => {
         pricePerMinuteVideo: astrologer.pricePerMinuteVideo,
         pricePerMinuteVoice: astrologer.pricePerMinuteVoice,
       };
-      if (freeChatUsed) {
+      if (freeChatUsed || sessionType === 'audio' || sessionType === 'video') {
         setSelectedAstrologer(astrologerWithPricing);
         setSelectedSessionType(sessionType);
         setIsRequestModalOpen(true);
       } else {
-        requestSession(astrologerWithPricing);
+        if (sessionType === 'chat') {
+          requestSession(astrologerWithPricing);
+        }
       }
       // Create astrologer with pricing info
     } else {

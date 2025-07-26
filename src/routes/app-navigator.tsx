@@ -118,14 +118,14 @@ export default function AppNavigator() {
     <NavigationContainer>
       {isAuthenticated ? <PrivateRoutes /> : <PublicRoutes />}
 
-      {isAuthenticated && sessionRequest?.userId && (
+      {/* {isAuthenticated && sessionRequest?.userId && (
         <CallRequestNotification
-          visible={!!sessionRequest?.userId}
+          visible={!!sessionRequest?.userId && sessionRequest.type !== 'CHAT'}
           callRequest={sessionRequest}
           onClose={handleCloseCallNotification}
           onAccept={onAccept}
         />
-      )}
+      )} */}
     </NavigationContainer>
   );
 }

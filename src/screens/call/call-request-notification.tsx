@@ -21,7 +21,7 @@ import Avatar from '../../components/avatar';
 
 interface CallRequest {
   userId: string;
-  type: 'AUDIO' | 'VIDEO';
+  type: 'AUDIO' | 'VIDEO' | 'CHAT';
 }
 
 interface CallRequestNotificationProps {
@@ -157,7 +157,7 @@ const CallRequestNotification: React.FC<CallRequestNotificationProps> = ({
     }
   };
 
-  if (!visible || !callRequest) {
+  if (!visible || !callRequest || callRequest.type === 'CHAT') {
     return null;
   }
 
@@ -184,7 +184,7 @@ const CallRequestNotification: React.FC<CallRequestNotificationProps> = ({
               Incoming {callRequest.type === 'VIDEO' ? 'Video' : 'Voice'} Call
             </Text>
           </View>
-          <Text style={{color: 'red'}}>{JSON.stringify(callRequest)}</Text>
+          {/* <Text style={{color: 'red'}}>{JSON.stringify(callRequest)}</Text> */}
 
           {/* User Info */}
           <View style={styles.userInfo}>

@@ -195,7 +195,7 @@ export interface SessionState {
   countRefresh: boolean;
   sessionRequest: {
     userId: string;
-    type: 'AUDIO' | 'VIDEO';
+    type: 'AUDIO' | 'VIDEO' | 'CHAT';
   } | null;
 }
 

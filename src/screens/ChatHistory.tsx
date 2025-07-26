@@ -54,16 +54,16 @@ const ChatHistory = () => {
   );
   const dispatch = useAppDispatch();
   const isFocused = useIsFocused();
+  console.log(activeSessionId, '----active session id');
 
   const getChatHistoryDetail = async (page: number) => {
-    console.log(page);
     if (loading || !hasMore) return;
     try {
       setLoading(true);
       const payload = await dispatch(
         getChatHistory(`?page=${page}&limit=${5}`),
       ).unwrap();
-      console.log(payload.chatHistory);
+      console.log(payload.chatHistory, '---chat history');
       if (payload.success) {
         setMessageItems(prev => [...prev, ...payload.chatHistory]);
         setCurrentPage(payload.currentPage);
@@ -105,9 +105,7 @@ const ChatHistory = () => {
           navigation.navigate('chat');
         }}>
         <ChatHistoryCard
-          name={data.name}
-          time={item.startedAt}
-          avatar={{uri: ''}}
+          data={item}
           active={item.status === 'ACTIVE' && activeSessionId === item.id}
         />
       </TouchableOpacity>
