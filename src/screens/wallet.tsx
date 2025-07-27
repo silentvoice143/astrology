@@ -1,95 +1,73 @@
-import {View, Text, TouchableOpacity, StyleSheet, FlatList} from 'react-native';
-import React from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  ActivityIndicator,
+} from 'react-native';
+import React, {useEffect, useRef, useState} from 'react';
 import ScreenLayout from '../components/screen-layout';
-import {colors} from '../constants/colors';
+import {colors, themeColors} from '../constants/colors';
 import {moderateScale, scale, verticalScale} from '../utils/sizer';
 import {textStyle} from '../constants/text-style';
 import CustomButton from '../components/custom-button';
 import AnimatedSearchInput from '../components/custom-searchbox';
 import {Transaction} from '../utils/types';
 import WalletTransactionCard from '../components/wallet/transaction-card';
-import {useAppSelector} from '../hooks/redux-hook';
+import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {RootState} from '../store';
-
-const transactions: Transaction[] = [
-  {
-    id: 'txn1',
-    title: 'Money added',
-    description: 'Money added to wallet',
-    amount: 2000,
-    type: 'credit',
-    date: '04 March 2025',
-  },
-  {
-    id: 'txn2',
-    title: 'Payment sent',
-    description: 'Sent to Akash Mehta',
-    amount: -750,
-    type: 'debit',
-    date: '03 March 2025',
-  },
-  {
-    id: 'txn3',
-    title: 'Money added',
-    description: 'Money added via UPI',
-    amount: 1500,
-    type: 'credit',
-    date: '02 March 2025',
-  },
-  {
-    id: 'txn4',
-    title: 'Cashback received',
-    description: 'March offer cashback',
-    amount: 100,
-    type: 'credit',
-    date: '01 March 2025',
-  },
-  {
-    id: 'txn5',
-    title: 'Subscription payment',
-    description: 'Netflix monthly billing',
-    amount: -499,
-    type: 'debit',
-    date: '28 February 2025',
-  },
-  {
-    id: 'txn7',
-    title: 'Subscription payment',
-    description: 'Netflix monthly billing',
-    amount: -499,
-    type: 'debit',
-    date: '28 February 2025',
-  },
-  {
-    id: 'txn6',
-    title: 'Subscription payment',
-    description: 'Netflix monthly billing',
-    amount: -499,
-    type: 'debit',
-    date: '28 February 2025',
-  },
-  {
-    id: 'txn8',
-    title: 'Subscription payment',
-    description: 'Netflix monthly billing',
-    amount: -499,
-    type: 'debit',
-    date: '28 February 2025',
-  },
-  {
-    id: 'txn9',
-    title: 'Subscription payment',
-    description: 'Netflix monthly billing',
-    amount: -499,
-    type: 'debit',
-    date: '28 February 2025',
-  },
-];
+import {getTransactionHistory} from '../store/reducer/payment';
+import {showToast} from '../components/toast';
+import Toast from 'react-native-toast-message';
+import AboutIcon from '../assets/icons/about-icon';
 
 const Wallet = () => {
-  const wallet_balance = useAppSelector(
-    (state: RootState) => state.auth.user.walletBalance,
+  const onEndReachedCalledDuringMomentum = useRef(false);
+  const {walletBalance, id} = useAppSelector(
+    (state: RootState) => state.auth.user,
   );
+
+  const [transactions, setTransations] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const dispatch = useAppDispatch();
+
+  const getTransactionDetails = async (page: number = 1) => {
+    if (loading || !hasMore) return;
+    try {
+      const payload = await dispatch(
+        getTransactionHistory({userId: id, query: `?page=${page}`}),
+      ).unwrap();
+
+      if (payload.success) {
+        if (page === 1) {
+          setTransations(payload?.wallet?.transactions);
+        } else {
+          setTransations(prev => [...prev, ...payload?.wallet?.transactions]);
+        }
+        setCurrentPage(payload.currentPage);
+        setHasMore(!payload.isLastPage);
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Failed to get transactions',
+        });
+      }
+    } catch (err) {
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to get transactions',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    getTransactionDetails(1);
+  }, []);
 
   return (
     <ScreenLayout>
@@ -112,7 +90,7 @@ const Wallet = () => {
             </Text>
             <Text
               style={[textStyle.fs_abyss_24_400, {color: colors.whiteText}]}>
-              ₹{Math.abs(wallet_balance)}
+              ₹{Math.abs(walletBalance)}
             </Text>
           </View>
           <View style={{width: 140, height: 40}}>
@@ -151,6 +129,47 @@ const Wallet = () => {
                 paddingHorizontal: scale(4), // optional
               }}
               showsVerticalScrollIndicator={false}
+              onEndReached={() => {
+                if (!onEndReachedCalledDuringMomentum.current && hasMore) {
+                  getTransactionDetails(currentPage + 1);
+                  onEndReachedCalledDuringMomentum.current = true;
+                }
+              }}
+              onMomentumScrollBegin={() => {
+                onEndReachedCalledDuringMomentum.current = false;
+              }}
+              onEndReachedThreshold={0.2}
+              ListFooterComponent={
+                loading ? (
+                  <View
+                    style={{
+                      flex: 1,
+                      minHeight: 400,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <ActivityIndicator
+                      size="small"
+                      style={{marginVertical: 10}}
+                    />
+                  </View>
+                ) : null
+              }
+              ListEmptyComponent={
+                !loading ? (
+                  <View
+                    style={{
+                      height: verticalScale(400),
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <AboutIcon color={themeColors.status.info.dark} />
+                    <Text style={[textStyle.fs_mont_16_500]}>
+                      No Transaction Yet
+                    </Text>
+                  </View>
+                ) : null
+              }
             />
           </View>
         </View>

@@ -9,70 +9,29 @@ import {
 import {scale, verticalScale} from '../utils/sizer';
 import Avatar from './avatar';
 import {textStyle} from '../constants/text-style';
-import {colors} from '../constants/colors';
+import {colors, themeColors} from '../constants/colors';
 import CallIcon from '../assets/icons/call-icon';
+import {CallSession} from '../utils/types';
+import VideoCallIcon from '../assets/icons/video-call-icon';
+import {formatedDate, formatRelativeDate} from '../utils/utils';
 
 interface CallHistoryCardProps {
-  name: string;
-  callType: 'incoming' | 'outgoing' | 'missed';
-  duration: string;
-  time: string;
-  avatar: ImageSourcePropType;
-  onCallPress?: () => void;
+  data: CallSession;
 }
 
-const CallHistoryCard: React.FC<CallHistoryCardProps> = ({
-  name,
-  callType,
-  duration,
-  time,
-  avatar,
-  onCallPress,
-}) => {
-  const getCallIcon = () => {
-    switch (callType) {
-      case 'incoming':
-        return '↙️'; // You can replace with actual icons
-      case 'outgoing':
-        return '↗️';
-      case 'missed':
-        return '❌';
-      default:
-        return '📞';
+const CallHistoryCard: React.FC<CallHistoryCardProps> = ({data}) => {
+  const getCallIcon = (type: string) => {
+    if (type === 'VIDEO') {
+      return <VideoCallIcon size={scale(20)} />;
+    } else {
+      return <CallIcon size={scale(20)} />;
     }
   };
-
-  const getCallTypeColor = () => {
-    switch (callType) {
-      case 'incoming':
-        return '#4CAF50';
-      case 'outgoing':
-        return colors.primarybtn;
-      case 'missed':
-        return '#F44336';
-      default:
-        return colors.secondaryText;
-    }
-  };
-
-  const getCallTypeText = () => {
-    switch (callType) {
-      case 'incoming':
-        return 'Incoming';
-      case 'outgoing':
-        return 'Outgoing';
-      case 'missed':
-        return 'Missed';
-      default:
-        return '';
-    }
-  };
-
   return (
     <View style={styles.card}>
       <View style={styles.row}>
         <Avatar
-          image={avatar}
+          image={{uri: data?.user?.imgUri}}
           size={55}
           borderColor={colors.secondarybtn}
           borderWidth={2}
@@ -80,31 +39,24 @@ const CallHistoryCard: React.FC<CallHistoryCardProps> = ({
         />
 
         <View style={styles.textContainer}>
-          <Text style={[styles.name, textStyle.fs_abyss_16_400]}>{name}</Text>
-          <View style={styles.callInfo}>
-            <Text style={[styles.callIcon]}>{getCallIcon()}</Text>
-            <Text
-              style={[
-                styles.callType,
-                textStyle.fs_mont_14_400,
-                {color: getCallTypeColor()},
-              ]}>
-              {getCallTypeText()}
-            </Text>
-            {callType !== 'missed' && (
-              <Text style={[styles.duration, textStyle.fs_mont_12_400]}>
-                • {duration}
-              </Text>
-            )}
-          </View>
+          <Text style={[styles.name, textStyle.fs_abyss_16_400]}>
+            {data?.user?.name}
+          </Text>
+          <Text style={[styles.time, textStyle.fs_mont_12_400]}>
+            {formatedDate(data.startedAt)}
+          </Text>
         </View>
       </View>
 
       <View style={styles.rightSection}>
-        <Text style={[styles.time, textStyle.fs_mont_12_400]}>{time}</Text>
-        <TouchableOpacity style={styles.callButton} onPress={onCallPress}>
-          <CallIcon colors={['white']} height={16} width={16} />
-        </TouchableOpacity>
+        <Text style={[styles.time, textStyle.fs_mont_12_400]}>
+          {formatRelativeDate(data.startedAt)}
+        </Text>
+        <View style={styles.callInfo}>
+          <Text style={[styles.callIcon]}>
+            {getCallIcon(data?.sessionType)}
+          </Text>
+        </View>
       </View>
     </View>
   );
@@ -112,22 +64,14 @@ const CallHistoryCard: React.FC<CallHistoryCardProps> = ({
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: '#fff',
+    backgroundColor: colors.primary_surface,
     borderRadius: scale(16),
     paddingHorizontal: scale(20),
     paddingVertical: verticalScale(12),
     marginBottom: verticalScale(10),
-
-    // Shadow (iOS)
-    shadowColor: '#000',
-    shadowOffset: {width: 0, height: 1},
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-
-    // Shadow (Android)
-    elevation: 3,
+    borderColor: themeColors.border.primary,
+    borderWidth: 1,
     flexDirection: 'row',
-    alignItems: 'center',
   },
   row: {
     flexDirection: 'row',

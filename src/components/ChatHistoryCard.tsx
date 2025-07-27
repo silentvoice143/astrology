@@ -30,9 +30,10 @@ const ChatHistoryCard: React.FC<ChatHistoryCardProps> = ({data, active}) => {
       ]}>
       <View style={styles.row}>
         <Avatar
-          image={
-            role === 'ASTROLOGER' ? data.user.imgUri : data.astrologer.imgUri
-          }
+          image={{
+            uri:
+              role === 'ASTROLOGER' ? data.user.imgUri : data.astrologer.imgUri,
+          }}
           fallbackText={
             role === 'ASTROLOGER'
               ? data.user.name.charAt(0)

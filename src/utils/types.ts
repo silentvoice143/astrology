@@ -221,14 +221,12 @@ export interface ChatSession {
 
 // ========================================Wallets===============================
 
-export type TransactionType = 'credit' | 'debit';
 export interface Transaction {
   id: string;
-  title: string;
-  description: string;
   amount: number;
-  date: string;
-  type: TransactionType;
+  type: 'DEBIT' | 'CREDIT';
+  description: string;
+  timestamp: string; // ISO date string
 }
 
 // =============Astrologer thunk===============

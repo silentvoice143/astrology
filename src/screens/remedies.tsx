@@ -16,40 +16,36 @@ const ITEM_WIDTH = (width - scale(48)) / 2;
 
 const remedies = [
   {
-    title: 'Sawan Special Remedies',
-    image: require('../assets/imgs/remedies.jpg'),
+    title: 'Gemstone & Crystal',
+    image: require('../assets/imgs/remedies/gemstones.jpg'),
   },
   {
-    title: 'Sawan Special Combo',
-    image: require('../assets/imgs/remedies.jpg'),
+    title: 'Rudraksha',
+    image: require('../assets/imgs/remedies/rudraksha.jpg'),
   },
   {
-    title: 'Siddh Rakhi',
-    image: require('../assets/imgs/remedies.jpg'),
-  },
-  {
-    title: 'Kashi Siddh Rudraksha',
-    image: require('../assets/imgs/remedies.jpg'),
+    title: 'Palmistry',
+    image: require('../assets/imgs/remedies/palmisty.jpg'),
     badge: 'Flat 10% OFF',
   },
   {
-    title: 'Bracelets & Pendants',
-    image: require('../assets/imgs/remedies.jpg'),
+    title: 'Feng Shui',
+    image: require('../assets/imgs/remedies/feng_sui.jpg'),
     badge: 'Starts at ₹499',
   },
   {
-    title: 'VIP E-Pooja',
-    image: require('../assets/imgs/remedies.jpg'),
+    title: 'Vastu',
+    image: require('../assets/imgs/remedies/vastu.jpg'),
     badge: 'Starts at ₹1100',
   },
   {
-    title: 'Gemstone',
-    image: require('../assets/imgs/remedies.jpg'),
+    title: 'Select Name',
+    image: require('../assets/imgs/remedies/namkaran.jpg'),
     badge: '7 Days Replacement',
   },
   {
-    title: 'Spell',
-    image: require('../assets/imgs/remedies.jpg'),
+    title: 'Numerology',
+    image: require('../assets/imgs/remedies/numerology.jpg'),
     badge: 'Starts at ₹1100',
   },
 ];
@@ -107,14 +103,14 @@ const styles = StyleSheet.create({
   },
   image: {
     flex: 1,
-    justifyContent: 'space-between',
+    justifyContent: 'flex-end',
   },
   imageStyle: {
     borderRadius: scale(12),
     resizeMode: 'cover',
   },
   overlay: {
-    backgroundColor: 'rgba(0,0,0,0.3)',
+    backgroundColor: 'rgba(0,0,0,0.5)',
     padding: scale(8),
   },
   title: {
@@ -123,6 +119,9 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   badgeContainer: {
+    position: 'absolute',
+    top: 2,
+    left: 2,
     backgroundColor: '#E53935',
     paddingVertical: verticalScale(4),
     paddingHorizontal: scale(8),
