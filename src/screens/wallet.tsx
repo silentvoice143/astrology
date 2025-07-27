@@ -144,6 +144,7 @@ const Wallet = () => {
                 inputStyle={{
                   fontSize: scale(14),
                   paddingVertical: 6,
+                  color: "#fff",
                 }}
               />
             </View>
