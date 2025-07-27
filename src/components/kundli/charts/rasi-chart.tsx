@@ -24,7 +24,7 @@ const RasiChart = ({
   active,
   chartWidth,
 }: {
-  active: number;
+  active?: number;
   chartWidth?: number;
 }) => {
   const [width, setWidth] = useState(

@@ -121,7 +121,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
           style={styles.scrollView}
           contentContainerStyle={[
             styles.scrollContentContainer,
-            {flexGrow: 1, minHeight: 200},
+            {flexGrow: 1, minHeight: 100},
             contentStyle,
           ]}
           removeClippedSubviews={false}

@@ -15,7 +15,7 @@ import {SvgXml} from 'react-native-svg';
 import {customizeSVG} from '../../utils/customize-svg';
 import {scale, verticalScale} from '../../utils/sizer';
 import {textStyle} from '../../constants/text-style';
-import {colors} from '../../constants/colors';
+import {colors, themeColors} from '../../constants/colors';
 import ChangeIcon from '../../assets/icons/change-icon';
 import EditIcon from '../../assets/icons/edit-icon';
 import DocumentDownloadIcon from '../../assets/icons/download-file-icon';
@@ -116,8 +116,9 @@ const ChartPage = ({
 
   if (loading) {
     return (
-      <View style={styles.loader}>
-        <ActivityIndicator size={20} />
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <ActivityIndicator size="large" color={themeColors.surface.darkPink} />
+        <Text>Please wait a moment</Text>
       </View>
     );
   }

@@ -6,6 +6,7 @@ import {
   Pressable,
   ScrollView,
   Dimensions,
+  ActivityIndicator,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
@@ -43,7 +44,7 @@ interface ProcessedDashaItem {
   parentPlanet?: string;
 }
 
-const VimshottariDasha = ({active}: {active: number}) => {
+const VimshottariDasha = ({active}: {active?: number}) => {
   const [rawData, setRawData] = useState<DashaData | null>(null);
   const [processedData, setProcessedData] = useState<ProcessedDashaItem[]>([]);
   const [loading, setLoading] = useState(false);
@@ -179,7 +180,7 @@ const VimshottariDasha = ({active}: {active: number}) => {
             latitude: 25.317645,
             longitude: 82.973915,
           },
-          query: {dashaType, lan: 'hi'},
+          query: {dashaType, lan: t('lan')},
         }),
       ).unwrap();
 
@@ -309,7 +310,9 @@ const VimshottariDasha = ({active}: {active: number}) => {
     const activeDasha = getCurrentActiveDasha(processedData);
 
     return (
-      <ScrollView style={styles.overviewContainer}>
+      <ScrollView
+        showsVerticalScrollIndicator={false}
+        style={styles.overviewContainer}>
         {activeDasha && (
           <View style={styles.currentDashaCard}>
             <Text style={styles.currentDashaTitle}>Current Active Period</Text>
@@ -365,8 +368,9 @@ const VimshottariDasha = ({active}: {active: number}) => {
 
   if (loading) {
     return (
-      <View style={styles.loadingContainer}>
-        <Text>Loading Dasha Details...</Text>
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <ActivityIndicator size="large" color={themeColors.surface.darkPink} />
+        <Text>Please wait a moment</Text>
       </View>
     );
   }
@@ -596,7 +600,7 @@ const styles = StyleSheet.create({
     padding: scale(16),
   },
   currentDashaCard: {
-    backgroundColor: themeColors.surface.highlight,
+    backgroundColor: themeColors.surface.darkPink,
     borderRadius: scale(16),
     padding: scale(20),
     marginBottom: verticalScale(20),
@@ -604,7 +608,7 @@ const styles = StyleSheet.create({
   currentDashaTitle: {
     fontSize: scale(16),
     fontWeight: '600',
-    color: themeColors.text.primary,
+    color: themeColors.text.light,
     marginBottom: verticalScale(12),
     textAlign: 'center',
   },
@@ -622,11 +626,11 @@ const styles = StyleSheet.create({
   currentPlanetName: {
     fontSize: scale(20),
     fontWeight: '700',
-    color: themeColors.text.primary,
+    color: themeColors.text.light,
   },
   currentDashaDate: {
     fontSize: scale(14),
-    color: themeColors.text.secondary,
+    color: themeColors.text.light,
     marginTop: verticalScale(4),
   },
   timelineContainer: {
