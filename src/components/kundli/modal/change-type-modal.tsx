@@ -15,6 +15,7 @@ import {Astrologers, UserDetail} from '../../../utils/types';
 import {useEffect, useState} from 'react';
 import CustomModal from '../../modal';
 import {Pressable, Text, View} from 'react-native';
+import {useTranslation} from 'react-i18next';
 
 const ChangeKundliTypeModal = ({
   isOpen,
@@ -27,19 +28,34 @@ const ChangeKundliTypeModal = ({
   onClose: () => void;
   onChange: (obj: {label: string; id: string; value: string} | null) => void;
 }) => {
-  const durationOptions = [
-    {label: 'East-Indian Style', id: 'east_indian_style', value: 'east'},
-    {
-      label: 'South-Indian Style',
-      id: 'south_indian_style',
-      value: 'south',
-    },
-    {
-      label: 'North-Indian Style',
-      id: 'north_indian_style',
-      value: 'north',
-    },
-  ];
+  const {t} = useTranslation();
+  const durationOptions =
+    t('lan') === 'bn'
+      ? [
+          {label: 'East-Indian Style', id: 'east_indian_style', value: 'east'},
+          {
+            label: 'South-Indian Style',
+            id: 'south_indian_style',
+            value: 'south',
+          },
+          {
+            label: 'North-Indian Style',
+            id: 'north_indian_style',
+            value: 'north',
+          },
+        ]
+      : [
+          {
+            label: 'South-Indian Style',
+            id: 'south_indian_style',
+            value: 'south',
+          },
+          {
+            label: 'North-Indian Style',
+            id: 'north_indian_style',
+            value: 'north',
+          },
+        ];
   const [selected, setSelected] = useState<null | {
     label: string;
     id: string;

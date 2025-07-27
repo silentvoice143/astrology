@@ -15,7 +15,7 @@ import {SvgXml} from 'react-native-svg';
 import {customizeSVG} from '../../../utils/customize-svg';
 import {scale, verticalScale} from '../../../utils/sizer';
 import {textStyle} from '../../../constants/text-style';
-import {colors} from '../../../constants/colors';
+import {colors, themeColors} from '../../../constants/colors';
 import ChangeIcon from '../../../assets/icons/change-icon';
 import DocumentDownloadIcon from '../../../assets/icons/download-file-icon';
 import ChangeKundliTypeModal from '../modal/change-type-modal';
@@ -28,7 +28,7 @@ const AkshvedanshaChart = ({
   chartWidth,
 }: {
   forModal?: boolean;
-  active: number;
+  active?: number;
   chartWidth?: number;
 }) => {
   const [width, setWidth] = useState(
@@ -50,16 +50,23 @@ const AkshvedanshaChart = ({
   const [changeKundliOpen, setChangeKundliOpen] = useState(false);
   const {kundliPerson} = useAppSelector(state => state.kundli);
   const [chartSvg, setChartSvg] = useState<string | null>(null);
+  const {t} = useTranslation();
 
-  const [selectedKundliType, setSelectedKundliType] = useState({
-    label: 'East-Indian Style',
-    id: 'east_indian_style',
-    value: 'east',
-  });
-
+  const [selectedKundliType, setSelectedKundliType] = useState(
+    t('lan') === 'bn'
+      ? {
+          label: 'East-Indian Style',
+          id: 'east_indian_style',
+          value: 'east',
+        }
+      : {
+          label: 'North-Indian Style',
+          id: 'north_indian_style',
+          value: 'north',
+        },
+  );
   const [loading, setLoading] = useState(false);
   const dispatch = useAppDispatch();
-  const {t} = useTranslation();
 
   const getKundliChartData = async () => {
     try {
@@ -112,8 +119,9 @@ const AkshvedanshaChart = ({
 
   if (loading) {
     return (
-      <View style={styles.loader}>
-        <ActivityIndicator size={20} />
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <ActivityIndicator size="large" color={themeColors.surface.darkPink} />
+        <Text>Please wait a moment</Text>
       </View>
     );
   }
@@ -179,7 +187,7 @@ const AkshvedanshaChart = ({
                 chartSvg,
                 width,
                 width,
-                !forModal && selectedKundliType.value == 'east',
+                selectedKundliType.value == 'east',
               )}
               width="100%"
               height="100%"
