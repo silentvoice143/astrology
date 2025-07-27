@@ -1,6 +1,13 @@
 {
+  "lan": "hi",
   "common": {
     "min": "मिनट"
+  },
+  "dasha": {
+    "maha-dasha": "महादशा",
+    "antar-dasha": "अंतरदशा",
+    "pratyantar-dasha": "प्रत्यंतर दशा",
+    "sookshma-dasha": "सूक्ष्म दशा"
   },
   "home": "होम",
   "kundli": "कुंडली",
@@ -17,6 +24,7 @@
   "profile": "प्रोफ़ाइल",
   "setting": "सेटिंग",
   "chathistory": "चैट इतिहास",
+  "horoscope": "राशिफल",
 
   "selectLanguage": "अपनी भाषा चुनें",
   "english": "अंग्रेज़ी",

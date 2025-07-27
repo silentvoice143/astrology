@@ -1,6 +1,13 @@
 {
+  "lan": "en",
   "common": {
     "min": "min"
+  },
+  "dasha": {
+    "maha-dasha": "Maha Dasha",
+    "antar-dasha": "Antar Dasha",
+    "pratyantar-dasha": "Pratyantar Dasha",
+    "sookshma-dasha": "Sookshma Dasha"
   },
   "home": "Home",
   "kundli": "Kundli",
@@ -17,6 +24,7 @@
   "profile": "Profile",
   "setting": "Setting",
   "chathistory": "Chat History",
+  "horoscope": "Horoscope",
 
   "selectLanguage": "Select Your Language",
   "english": "English",

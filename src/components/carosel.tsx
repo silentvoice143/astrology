@@ -44,7 +44,7 @@ function Carousel<T>({
   onChange,
 }: CarouselProps<T>) {
   const [screenWidth, setScreenWidth] = useState(
-    Dimensions.get('screen').width,
+    Dimensions.get('window').width,
   );
 
   const [tabLayouts, setTabLayouts] = useState<{width: number; x: number}[]>(

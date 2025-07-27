@@ -4,9 +4,9 @@ import {getTokenFromStore} from '../utils/get-token';
 import Toast from 'react-native-toast-message';
 import skipAuthPaths from './skip-path';
 
-const baseUrl =
-  process.env.BASE_URL || 'https://quagga-driving-socially.ngrok-free.app';
-// const baseUrl = 'https://astrosevaa.com';
+// const baseUrl =
+//   process.env.BASE_URL || 'https://quagga-driving-socially.ngrok-free.app';
+const baseUrl = 'https://astrosevaa.com';
 // const baseUrl =
 //   process.env.BASE_URL || 'https://gorilla-fitting-feline.ngrok-free.app';
 
@@ -29,8 +29,8 @@ api.interceptors.request.use(
       url: config?.baseURL + config?.url,
       method: config.method?.toUpperCase(),
       payload: config.data || null,
+      params: config.params,
     });
-
 
     const token = shouldSkip ? '' : getTokenFromStore();
     if (token) {
@@ -52,11 +52,11 @@ api.interceptors.response.use(
   response => response,
   error => {
     const message =
-      error.response?.data?.message || error.message || 'Something went wrong';
+      error.response?.data?.msg || error.message || 'Something went wrong';
 
     Toast.show({
       type: 'error',
-      text1: 'API Error',
+      text1: 'Error',
       text2: message,
     });
 

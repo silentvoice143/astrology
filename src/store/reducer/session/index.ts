@@ -12,6 +12,8 @@ import {ChatSession, SessionState} from '../../../utils/types';
 import {
   acceptCallRequest,
   acceptSessionRequest,
+  deleteSessionRequest,
+  getCallHistory,
   getChatHistory,
   getChatMessages,
   getQueueRequest,
@@ -30,6 +32,7 @@ const initialState: SessionState = {
   messages: [],
   queueRequestCount: 0,
   countRefresh: true,
+  sessionRequest: null,
 };
 
 const sessionSlice = createSlice({
@@ -42,6 +45,10 @@ const sessionSlice = createSlice({
 
     setCallSession(state, action: PayloadAction<CallSession>) {
       state.callSession = action.payload;
+    },
+    setRequest(state, action) {
+      console.log(action.payload, '----paylaod coming');
+      state.sessionRequest = action.payload;
     },
 
     clearActiveSession(state) {
@@ -91,7 +98,9 @@ const sessionSlice = createSlice({
     builder.addCase(acceptSessionRequest.fulfilled, state => {});
     builder.addCase(skipSessionRequest.fulfilled, state => {});
     builder.addCase(getChatHistory.fulfilled, state => {});
+    builder.addCase(getCallHistory.fulfilled, state => {});
     builder.addCase(getChatMessages.fulfilled, state => {});
+    builder.addCase(deleteSessionRequest.fulfilled, state => {});
     builder.addCase(acceptCallRequest.fulfilled, state => {});
   },
 });
@@ -99,6 +108,7 @@ const sessionSlice = createSlice({
 export const {
   setSession,
   clearSession,
+  setRequest,
   clearActiveSession,
   setChatUser,
   setOtherUser,
@@ -118,10 +128,12 @@ export {
   skipSessionRequest,
   getQueueRequest,
   getChatHistory,
+  getCallHistory,
   acceptSessionRequest,
   getChatMessages,
   sendCallRequest,
   acceptCallRequest,
+  deleteSessionRequest,
 };
 
 export default sessionSlice.reducer;

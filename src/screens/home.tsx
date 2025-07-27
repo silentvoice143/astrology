@@ -30,6 +30,8 @@ import Carousel, {ICarouselInstance} from 'react-native-reanimated-carousel';
 import {useSharedValue} from 'react-native-reanimated';
 import IntroCard from '../components/home/intro-card';
 import {getBanner} from '../store/reducer/general';
+import {useUserRole} from '../hooks/use-role';
+import SkeletonItem from '../components/skeleton';
 
 const width = Dimensions.get('window').width - 40;
 const data = [...new Array(6).keys()];
@@ -42,7 +44,15 @@ const Home = () => {
   const {freeChatUsed} = useAppSelector(state => state.auth.user);
   const {freeChatModalShown} = useAppSelector(state => state.auth);
   const dispatch = useAppDispatch();
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
+  const role = useUserRole();
+  const [loading, setLoading] = useState<{
+    banner: boolean;
+    astrologer: boolean;
+  }>({
+    banner: false,
+    astrologer: false,
+  });
   const [astrologersData, setAstrologersData] = useState<
     {
       name: string;
@@ -57,9 +67,9 @@ const Home = () => {
   const progress = useSharedValue<number>(0);
 
   const fetchAstrologersData = async (pageNumber = 1, append = false) => {
-    if (loading) return;
+    if (loading.astrologer) return;
     try {
-      setLoading(true);
+      setLoading(prev => ({...prev, astrologer: true}));
 
       const payload = await dispatch(getAllAstrologers(`?page=1`)).unwrap();
 
@@ -78,14 +88,14 @@ const Home = () => {
     } catch (error) {
       console.log('fetchAstrologersData Error : ', error);
     } finally {
-      setLoading(false);
+      setLoading(prev => ({...prev, astrologer: false}));
     }
   };
 
   const getBannerData = async () => {
-    if (loading) return;
+    if (loading.banner) return;
     try {
-      setLoading(true);
+      setLoading(prev => ({...prev, banner: true}));
 
       const payload = await dispatch(getBanner()).unwrap();
 
@@ -95,7 +105,7 @@ const Home = () => {
     } catch (error) {
       console.log('getBannerData Error : ', error);
     } finally {
-      setLoading(false);
+      setLoading(prev => ({...prev, banner: false}));
     }
   };
 
@@ -128,7 +138,13 @@ const Home = () => {
   };
 
   useEffect(() => {
-    if (freeChatUsed || isFirstChatModalOpen || freeChatModalShown) return;
+    if (
+      freeChatUsed ||
+      isFirstChatModalOpen ||
+      freeChatModalShown ||
+      role === 'ASTROLOGER'
+    )
+      return;
     const timeout = setTimeout(() => {
       setIsFirstChatModalOpen(true);
       dispatch(setFreeChatModalShown());
@@ -155,7 +171,7 @@ const Home = () => {
       />
 
       <ScrollView
-        keyboardShouldPersistTaps="handled"
+        // keyboardShouldPersistTaps="handled"
         scrollEventThrottle={16}
         style={HomeStyle.container}
         showsVerticalScrollIndicator={false}
@@ -208,38 +224,56 @@ const Home = () => {
           </View>
 
           {/* banner */}
-          {banner.length > 0 && (
+          {loading.banner ? (
             <View
               style={{
                 paddingHorizontal: scale(20),
+                marginVertical: verticalScale(20),
+                height: verticalScale(120),
+                overflow: 'hidden',
+                borderRadius: scale(24),
               }}>
-              <Carousel
-                ref={ref}
-                height={verticalScale(100)}
+              <SkeletonItem
                 width={width}
-                data={banner}
-                onProgressChange={progress}
-                autoPlay={true}
-                scrollAnimationDuration={2000}
-                mode="parallax"
-                modeConfig={{
-                  parallaxScrollingScale: 1,
-                  parallaxScrollingOffset: 10,
-                  parallaxAdjacentItemScale: 0.8,
-                }}
-                renderItem={({index, item}) => (
-                  <Image
-                    source={{uri: item?.imgUrl}}
-                    resizeMode="cover"
-                    style={{
-                      height: verticalScale(120),
-                      width: '100%',
-                      borderRadius: scale(16),
-                    }}
-                  />
-                )}
+                height={verticalScale(120)}
+                borderRadius={8}
               />
             </View>
+          ) : (
+            banner.length > 0 && (
+              <View
+                style={{
+                  paddingHorizontal: scale(20),
+                  marginVertical: verticalScale(20),
+                }}>
+                <Carousel
+                  ref={ref}
+                  height={verticalScale(120)}
+                  width={width}
+                  data={banner}
+                  onProgressChange={progress}
+                  autoPlay={true}
+                  scrollAnimationDuration={2000}
+                  mode="parallax"
+                  modeConfig={{
+                    parallaxScrollingScale: 1,
+                    parallaxScrollingOffset: 10,
+                    parallaxAdjacentItemScale: 0.8,
+                  }}
+                  renderItem={({index, item}) => (
+                    <Image
+                      source={{uri: item?.imgUrl}}
+                      resizeMode="cover"
+                      style={{
+                        height: verticalScale(120),
+                        width: '100%',
+                        borderRadius: scale(16),
+                      }}
+                    />
+                  )}
+                />
+              </View>
+            )
           )}
 
           {/* Our Astrologer  */}
@@ -254,9 +288,25 @@ const Home = () => {
                   textAlign: 'center',
                 },
               ]}>
-              Our Astrologers
+              Live Astrologers
             </Text>
-            <SlidingCard data={astrologersData} />
+            {loading?.astrologer ? (
+              <View
+                style={{
+                  paddingHorizontal: scale(20),
+                  marginVertical: verticalScale(20),
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <SkeletonItem
+                  height={verticalScale(300)}
+                  width={width * 0.7}
+                  borderRadius={8}
+                />
+              </View>
+            ) : (
+              <SlidingCard data={astrologersData} />
+            )}
           </View>
           <View
             style={{
@@ -284,41 +334,43 @@ const Home = () => {
               ]}>
               Top Astrologers
             </Text>
-            <Carousel
-              ref={ref}
-              height={width / 2}
-              width={width}
-              data={astrologersData}
-              onProgressChange={progress}
-              mode="parallax"
-              modeConfig={{
-                parallaxScrollingScale: 1,
-                parallaxScrollingOffset: 10,
-                parallaxAdjacentItemScale: 0.8,
-              }}
-              renderItem={({item, index}) => (
-                <View
-                  style={{
-                    flex: 1,
+            {loading.astrologer ? (
+              <SkeletonItem
+                height={width / 2 - verticalScale(60)}
+                width={width}
+                borderRadius={12}
+              />
+            ) : (
+              <Carousel
+                ref={ref}
+                height={width / 2}
+                width={width}
+                data={astrologersData}
+                onProgressChange={progress}
+                mode="parallax"
+                modeConfig={{
+                  parallaxScrollingScale: 1,
+                  parallaxScrollingOffset: 10,
+                  parallaxAdjacentItemScale: 0.8,
+                }}
+                renderItem={({item, index}) => (
+                  <View
+                    style={{
+                      flex: 1,
 
-                    justifyContent: 'center',
-                  }}>
-                  <IntroCard
-                    id={item.id}
-                    name={item.name}
-                    rate={'21'}
-                    avatar={item.imgUri}
-                    specialty={item.expertise}
-                  />
-                </View>
-              )}
-            />
-            {/* <Carousel
-              data={astrologersData}
-              pagination={true}
-              cardWidthScale={0.9}
-              CardComponent={AstrologerCarosel}
-            /> */}
+                      justifyContent: 'center',
+                    }}>
+                    <IntroCard
+                      id={item.id}
+                      name={item.name}
+                      rate={'21'}
+                      avatar={item.imgUri}
+                      specialty={item.expertise}
+                    />
+                  </View>
+                )}
+              />
+            )}
           </View>
         </View>
       </ScrollView>

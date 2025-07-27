@@ -12,7 +12,7 @@ import {
   Platform,
 } from 'react-native';
 import RNModal from 'react-native-modal';
-import {moderateScale, scale, verticalScale} from '../utils/sizer';
+import {moderateScale, scale} from '../utils/sizer';
 import {textStyle} from '../constants/text-style';
 import {themeColors} from '../constants/colors';
 
@@ -24,6 +24,7 @@ type HeaderObject = {
 type HeaderContent = React.ReactNode | HeaderObject;
 
 type CustomModalProps = {
+  parent: string;
   visible: boolean;
   onClose: (e?: GestureResponderEvent) => void;
   header?: HeaderContent;
@@ -44,6 +45,7 @@ type CustomModalProps = {
 };
 
 const CustomModal: React.FC<CustomModalProps> = ({
+  parent,
   visible,
   onClose,
   header,
@@ -61,6 +63,7 @@ const CustomModal: React.FC<CustomModalProps> = ({
   keyboardVerticalOffset = 0,
   scrollViewProps = {},
 }) => {
+  console.log('opened modal', parent);
   function isHeaderObject(
     headerContent: HeaderContent,
   ): headerContent is HeaderObject {
@@ -116,7 +119,12 @@ const CustomModal: React.FC<CustomModalProps> = ({
         <ScrollView
           nestedScrollEnabled
           style={styles.scrollView}
-          contentContainerStyle={[styles.scrollContentContainer, contentStyle]}
+          contentContainerStyle={[
+            styles.scrollContentContainer,
+            {flexGrow: 1, minHeight: 100},
+            contentStyle,
+          ]}
+          removeClippedSubviews={false}
           keyboardShouldPersistTaps="handled"
           showsVerticalScrollIndicator={false}
           {...scrollViewProps}>
@@ -151,12 +159,16 @@ const CustomModal: React.FC<CustomModalProps> = ({
 
   return (
     <RNModal
-      backdropColor="#000"
-      backdropOpacity={0.3}
       isVisible={visible}
-      onBackdropPress={closeOnBackdropPress ? onClose : undefined}
+      animationIn="bounceIn"
+      animationOut="fadeInDown"
+      animationInTiming={200}
+      animationOutTiming={150}
       backdropTransitionOutTiming={0}
+      backdropOpacity={0.3}
       useNativeDriver
+      propagateSwipe
+      onBackdropPress={closeOnBackdropPress ? onClose : undefined}
       style={[styles.backdrop, backdropStyle]}>
       {modalWrapper}
     </RNModal>

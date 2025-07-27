@@ -62,7 +62,7 @@ const BottomNavigationBar = () => {
               )}
               {/* Badge */}
 
-              {item?.showBadge && (
+              {item?.showBadge && queueRequestCount !== 0 && (
                 <View style={styles.badge}>
                   <Text style={styles.badgeText}>
                     {queueRequestCount > 99 ? '99+' : queueRequestCount}

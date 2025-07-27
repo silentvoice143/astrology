@@ -1,6 +1,13 @@
 {
+  "lan": "bn",
   "common": {
     "min": "মিনিট"
+  },
+  "dasha": {
+    "maha-dasha": "মহাদশা",
+    "antar-dasha": "অন্তরদশা",
+    "pratyantar-dasha": "প্রত্যন্তর দশা",
+    "sookshma-dasha": "সূক্ষ্ম দশা"
   },
   "home": "হোম",
   "kundli": "কুন্ডলী",
@@ -17,6 +24,7 @@
   "profile": "প্রোফাইল",
   "setting": "সেটিংস",
   "chathistory": "চ্যাট ইতিহাস",
+  "horoscope": "রাশিফল",
 
   "selectLanguage": "আপনার ভাষা নির্বাচন করুন",
   "english": "ইংরেজি",

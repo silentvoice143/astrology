@@ -10,20 +10,16 @@ import {
   formatRelativeDate,
   getTimeOnly,
 } from '../utils/utils';
+import {ChatSession} from '../utils/types';
+import {useUserRole} from '../hooks/use-role';
 
 interface ChatHistoryCardProps {
-  name: string;
-  time: Date;
-  avatar: ImageSourcePropType;
+  data: ChatSession;
   active: boolean;
 }
 
-const ChatHistoryCard: React.FC<ChatHistoryCardProps> = ({
-  name,
-  time,
-  avatar,
-  active,
-}) => {
+const ChatHistoryCard: React.FC<ChatHistoryCardProps> = ({data, active}) => {
+  const role = useUserRole();
   return (
     <View
       style={[
@@ -34,23 +30,31 @@ const ChatHistoryCard: React.FC<ChatHistoryCardProps> = ({
       ]}>
       <View style={styles.row}>
         <Avatar
-          image={avatar}
-          fallbackText={name.charAt(0)}
+          image={
+            role === 'ASTROLOGER' ? data.user.imgUri : data.astrologer.imgUri
+          }
+          fallbackText={
+            role === 'ASTROLOGER'
+              ? data.user.name.charAt(0)
+              : data.astrologer.name.charAt(0)
+          }
           size={55}
-          borderColor={colors.secondarybtn}
+          borderColor={themeColors.border.secondary}
           borderWidth={2}
           containerStyle={styles.avatar}
         />
 
         <View style={styles.textContainer}>
-          <Text style={[styles.name, textStyle.fs_abyss_16_400]}>{name}</Text>
+          <Text style={[styles.name, textStyle.fs_abyss_16_400]}>
+            {role === 'ASTROLOGER' ? data.user.name : data.astrologer.name}
+          </Text>
           <Text style={[styles.name, textStyle.fs_abyss_12_400]}>
-            {formatedDate(time)}
+            {formatedDate(data.startedAt)}
           </Text>
         </View>
       </View>
       <Text style={[styles.time, textStyle.fs_mont_12_400]}>
-        {/* {formatRelativeDate(time)} */}
+        {formatRelativeDate(data.startedAt)}
       </Text>
     </View>
   );

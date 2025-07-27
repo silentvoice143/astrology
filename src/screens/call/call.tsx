@@ -31,7 +31,7 @@ const ZEGO_APP_ID = 1648384958;
 const ZEGO_APP_SIGN =
   '6baacf543390ae6c21d16cc29579930e714655c0401d3bdd8337cb4bfd2998b3';
 
-type CallType = 'VOICE' | 'VIDEO';
+type CallType = 'AUDIO' | 'VIDEO';
 type CallState = 'waiting' | 'connecting' | 'connected' | 'ended' | 'rejected';
 
 interface CallScreenParams {
@@ -50,7 +50,7 @@ interface CallSessionDetails {
   startedAt: string;
   endedAt: string | null;
   status: 'ACTIVE' | 'ENDED';
-  sessionType: 'VOICE' | 'VIDEO';
+  sessionType: 'AUDIO' | 'VIDEO';
   totalMinutes: number;
   totalCost: number;
   agoraChannelName: string;
@@ -73,7 +73,7 @@ const CallScreen = () => {
   } = params;
   const {user} = useAppSelector(state => state.auth);
   const callSession = useAppSelector(state => state.session.callSession);
-  const {subscribe, send} = useWebSocket(user?.id || '');
+  const {subscribe, unsubscribe, send} = useWebSocket(user?.id || '');
 
   const [callState, setCallState] = useState<CallState>(
     isAstrologer ? 'connecting' : 'waiting',
@@ -184,18 +184,19 @@ const CallScreen = () => {
       subscriptions.push(endSub);
     }
 
-    
     console.log(`📡 Set up ${subscriptions.length} socket subscriptions`);
 
     return () => {
       console.log('🧹 Cleaning up socket listeners');
-      subscriptions.forEach(sub => {
-        try {
-          sub?.unsubscribe();
-        } catch (error) {
-          console.error('Error unsubscribing:', error);
-        }
-      });
+      // subscriptions.forEach(sub => {
+      //   try {
+      //     sub?.unsubscribe();
+      //   } catch (error) {
+      //     console.error('Error unsubscribing:', error);
+      //   }
+      // });
+      unsubscribe(`/topic/call/${sessionIdToUse}/timer`),
+        unsubscribe(`/topic/call/${sessionIdToUse}`);
     };
   };
 
@@ -213,6 +214,7 @@ const CallScreen = () => {
 
   const handleCallCancel = () => {
     console.log('🚫 Call cancelled by user');
+    handleLeave();
     setCallState('ended');
     stopWaitingTimer();
     dispatch(clearCallSession());
@@ -248,6 +250,18 @@ const CallScreen = () => {
     }
   };
 
+  const handleLeave = () => {
+    send(
+      '/app/chat.leave',
+      {},
+      JSON.stringify({
+        userId: userParam?.id,
+        astrologerId: astrologer.id,
+        sessionType: callType,
+      }),
+    );
+  };
+
   const handleCallEnd = async (userInitiated = true) => {
     if (callState === 'ended') return;
 
@@ -263,8 +277,6 @@ const CallScreen = () => {
         (new Date().getTime() - callStartTime.getTime()) / 1000,
       );
     }
-
-   
 
     dispatch(clearCallSession());
 

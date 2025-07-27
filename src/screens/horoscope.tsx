@@ -18,6 +18,7 @@ import {
 } from '../store/reducer/horoscope';
 import {useAppDispatch} from '../hooks/redux-hook';
 import {getFormattedDate} from '../utils/utils';
+import {WebView} from 'react-native-webview';
 
 const zodiacData = [
   {name: 'Aries', image: require('../assets/imgs/zodiac/Aries.png')},
@@ -75,6 +76,36 @@ const Horoscope = () => {
     demoData,
   );
   const dispatch = useAppDispatch();
+
+  const htmlContent = `
+ <!DOCTYPE html>
+  <html style="height: 100%;">
+    <head>
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <style>
+        html, body {
+          margin: 0;
+          padding: 0;
+          height: 100%;
+          min-height: 100%;
+          overflow: auto; /* allow scrolling */
+        }
+        #content {
+          min-height: 100%;
+        }
+      </style>
+    </head>
+    <body>
+      <div id="content">
+        <div id="wb-widget-divine-horoscope-17529992082" class="open_setting" data-wb_setting="6024"></div>
+        <script id="widget-divine-horoscope-17529992082-script"
+                class="wb_widget_divine_horoscope"
+                src="https://astroapi-6.divineapi.com/widget/divine_horoscope.js?17529992082&widget_token=fa61c48fd29b565b26526c052b846b2b&widget_id=wb-widget-divine-horoscope-17529992082&setting=6024">
+        </script>
+      </div>
+    </body>
+  </html>
+`;
   const getDailyHoroscopeData = async () => {
     try {
       const {day, month, year} = getFormattedDate();
@@ -291,8 +322,8 @@ const Horoscope = () => {
   }
   return (
     <ScreenLayout headerBackgroundColor={themeColors.surface.secondarySurface}>
-      <ScrollView>
-        <View
+      <ScrollView style={{flex: 1}} contentContainerStyle={{flex: 1}}>
+        {/* <View
           style={[
             {
               paddingHorizontal: scale(20),
@@ -343,7 +374,15 @@ const Horoscope = () => {
               />
             ))}
           </View>
-        </View>
+        </View> */}
+        <WebView
+          originWhitelist={['*']}
+          source={{
+            // html: `<iframe id="iframe-horoscope" style="width:100%; height:600px;" frameborder="0" src="https://divineapi.com/load_widget/horoscope/1752999208398011"></iframe>`,
+            html: htmlContent,
+          }}
+          style={{flex: 1}}
+        />
       </ScrollView>
     </ScreenLayout>
   );

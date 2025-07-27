@@ -1,31 +1,90 @@
-import React, {useState} from 'react';
-import {View, Text, StyleSheet, TouchableOpacity} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  ScrollView,
+  ActivityIndicator,
+} from 'react-native';
 import PersonalDetailModal from '../personal-detail-modal';
-import {scale} from '../../utils/sizer';
-import {colors} from '../../constants/colors';
+import {scale, verticalScale} from '../../utils/sizer';
+import {colors, themeColors} from '../../constants/colors';
 import {useAppSelector, useAppDispatch} from '../../hooks/redux-hook';
-import {setKundliPerson, resetToDefaultUser} from '../../store/reducer/kundli';
+import {
+  setKundliPerson,
+  resetToDefaultUser,
+  getPersonKundliDetail,
+} from '../../store/reducer/kundli';
 import {UserPersonalDetail} from '../../utils/types';
 import EditIcon from '../../assets/icons/edit-icon';
 import {textStyle} from '../../constants/text-style';
 import {useRoute} from '@react-navigation/native';
+import {useTranslation} from 'react-i18next';
 
-const BasicDetails = ({active}: {active: number}) => {
+const BasicDetails = ({active}: {active?: number}) => {
   const [openedForOther, setOpenedForOther] = useState(false);
   const dispatch = useAppDispatch();
-
   const kundliPerson = useAppSelector(state => state.kundli.kundliPerson);
-
   const [showModal, setShowModal] = useState(false);
   const route = useRoute();
+  const {t} = useTranslation();
+
+  const [kundliDetail, setKundliDetail] = useState<any>();
+  const [loading, setLoading] = useState(false);
+  const fetchKundliDetails = async () => {
+    setLoading(true);
+    console.log('fetching kundli data');
+    try {
+      const payload = await dispatch(
+        getPersonKundliDetail({
+          data: {
+            ...kundliPerson,
+            birthPlace: 'Varanasi',
+            latitude: 25.317645,
+            longitude: 82.973915,
+          },
+          query: {lan: t('lan')},
+        }),
+      ).unwrap();
+      console.log(payload, '---kundli details');
+      if (payload.success) {
+        setKundliDetail(payload.data.data);
+      }
+    } catch (err) {
+      console.error('Error fetching kundli details:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    if (active === 3) {
+      fetchKundliDetails();
+    }
+  }, [dispatch, kundliPerson, active]);
 
   const handleUpdate = (updatedDetails: UserPersonalDetail) => {
     dispatch(setKundliPerson(updatedDetails));
     setShowModal(false);
   };
 
+  if (loading) {
+    return (
+      <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
+        <ActivityIndicator size="large" color={themeColors.surface.darkPink} />
+        <Text>Please wait a moment</Text>
+      </View>
+    );
+  }
+
   return (
-    <View style={styles.container}>
+    <ScrollView
+      showsVerticalScrollIndicator={false}
+      style={styles.container}
+      contentContainerStyle={{
+        paddingVertical: verticalScale(20),
+        paddingBottom: verticalScale(40),
+      }}>
       <View style={styles.card}>
         <View style={styles.headerRow}>
           <Text style={styles.title}>{kundliPerson.name}</Text>
@@ -45,35 +104,39 @@ const BasicDetails = ({active}: {active: number}) => {
         )}
         <View style={styles.divider} />
 
-        <DetailRow label="Full Name" value={kundliPerson.name || '__'} />
-        <DetailRow label="Gender" value={kundliPerson.gender || '__'} />
-        <DetailRow
-          label="Date of Birth"
-          value={kundliPerson.birthDate || '__'}
-        />
-        <DetailRow
-          label="Time of Birth"
-          value={kundliPerson.birthTime || '__'}
-        />
-        <DetailRow
-          label="Place of Birth"
-          value={kundliPerson.birthPlace || '__'}
-        />
+        {kundliDetail &&
+          Object.entries(kundliDetail).map(([key, value]) => {
+            if (typeof value !== 'object' && value !== null) {
+              return (
+                <DetailRow
+                  key={key}
+                  label={key
+                    .replace(/([A-Z])/g, ' $1')
+                    .replace(/^./, str => str.toUpperCase())}
+                  value={String(value)}
+                />
+              );
+            }
+            return null;
+          })}
       </View>
 
-      <PersonalDetailModal
-        isOpen={showModal}
-        onClose={() => {
-          if (openedForOther) {
-            dispatch(resetToDefaultUser());
-            setOpenedForOther(false);
-          }
-          setShowModal(false);
-        }}
-        existingDetails={kundliPerson}
-        onSubmit={handleUpdate}
-      />
-    </View>
+      {showModal && (
+        <PersonalDetailModal
+          parent={'basic detail personal modal'}
+          isOpen={showModal}
+          onClose={() => {
+            if (openedForOther) {
+              dispatch(resetToDefaultUser());
+              setOpenedForOther(false);
+            }
+            setShowModal(false);
+          }}
+          existingDetails={kundliPerson}
+          onSubmit={handleUpdate}
+        />
+      )}
+    </ScrollView>
   );
 };
 

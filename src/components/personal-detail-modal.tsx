@@ -11,6 +11,7 @@ import {UserPersonalDetail} from '../utils/types';
 import ControlledTagSelector from './controlled-tag-selector';
 
 interface PersonalDetialModalProps {
+  parent: string;
   isSaving?: boolean;
   isOpen: boolean;
   onClose: () => void;
@@ -26,6 +27,7 @@ const genderTags = [
 ];
 
 const PersonalDetailModal = ({
+  parent,
   isSaving,
   isOpen,
   onClose,
@@ -74,6 +76,7 @@ const PersonalDetailModal = ({
 
   return (
     <CustomModal
+      parent={parent}
       showCloseButton={showClosebtn}
       footer={
         <View style={{gap: scale(4)}}>

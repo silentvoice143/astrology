@@ -11,7 +11,7 @@ import ScreenLayout from '../components/screen-layout';
 import ChatHistoryCard from '../components/ChatHistoryCard';
 import CallHistoryCard from '../components/CallHistoryCard';
 import {scale, verticalScale} from '../utils/sizer';
-import {colors} from '../constants/colors';
+import {colors, themeColors} from '../constants/colors';
 import {textStyle} from '../constants/text-style';
 import AnimatedSearchInput from '../components/custom-searchbox';
 import Tab from '../components/tab';
@@ -24,6 +24,7 @@ import {
 } from '../store/reducer/session';
 import {useUserRole} from '../hooks/use-role';
 import {ChatSession, UserDetail} from '../utils/types';
+import AboutIcon from '../assets/icons/about-icon';
 
 interface CallItem {
   id: string;
@@ -53,16 +54,16 @@ const ChatHistory = () => {
   );
   const dispatch = useAppDispatch();
   const isFocused = useIsFocused();
+  console.log(activeSessionId, '----active session id');
 
   const getChatHistoryDetail = async (page: number) => {
-    console.log(page);
     if (loading || !hasMore) return;
     try {
       setLoading(true);
       const payload = await dispatch(
         getChatHistory(`?page=${page}&limit=${5}`),
       ).unwrap();
-      console.log(payload.chatHistory);
+      console.log(payload.chatHistory, '---chat history');
       if (payload.success) {
         setMessageItems(prev => [...prev, ...payload.chatHistory]);
         setCurrentPage(payload.currentPage);
@@ -104,9 +105,7 @@ const ChatHistory = () => {
           navigation.navigate('chat');
         }}>
         <ChatHistoryCard
-          name={data.name}
-          time={item.startedAt}
-          avatar={{uri: ''}}
+          data={item}
           active={item.status === 'ACTIVE' && activeSessionId === item.id}
         />
       </TouchableOpacity>
@@ -140,9 +139,9 @@ const ChatHistory = () => {
         <View style={{paddingHorizontal: scale(24)}}>
           <AnimatedSearchInput
             placeholder={getPlaceholderText()}
-            unfocusedBorderColor={colors.primary_border}
+            unfocusedBorderColor={themeColors.border.secondary}
             enableShadow={true}
-            focusedBorderColor={colors.primary_border}
+            focusedBorderColor={themeColors.border.secondary}
           />
         </View>
       </View>
@@ -204,6 +203,7 @@ const ChatHistory = () => {
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}>
+                <AboutIcon color={themeColors.status.info.dark} />
                 <Text style={[textStyle.fs_mont_16_500]}>No Chat History</Text>
               </View>
             ) : null

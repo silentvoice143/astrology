@@ -21,15 +21,46 @@ export function decodeMessageBody(message: any): string {
   }
 }
 
-export function formatRelativeDate(isoString: string): string {
+export const makeResponsiveSVG = (
+  svgContent: string,
+  width: number,
+  height: number,
+  charttoadjust?: boolean,
+): string => {
+  const viewBoxDefault = charttoadjust ? '0 0 363 363' : '0 0 360 360';
+
+  // Check if <svg> exists
+  const hasSvgTag = svgContent.includes('<svg');
+
+  if (!hasSvgTag) {
+    // Wrap and inject responsive <svg> tag
+    return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="${viewBoxDefault}" preserveAspectRatio="xMidYMid meet">
+      ${svgContent}
+    </svg>`;
+  }
+
+  // If SVG tag already exists, inject/replace width/height/viewBox/preserveAspectRatio
+  return svgContent
+    .replace(
+      /<svg([^>]*)>/,
+      `<svg$1 width="${width}" height="${height}" viewBox="${viewBoxDefault}" preserveAspectRatio="xMidYMid meet">`,
+    )
+    .replace(/width="[^"]*"/, `width="${width}"`)
+    .replace(/height="[^"]*"/, `height="${height}"`);
+};
+
+export function formatRelativeDate(isoString: Date | string): string {
   const inputDate = new Date(isoString);
+  if (isNaN(inputDate.getTime())) return ''; // Handle invalid dates
+
   const today = new Date();
 
-  // Normalize both dates to midnight for accurate day difference
-  const normalize = (d: Date) =>
-    new Date(d.getFullYear(), d.getMonth(), d.getDate());
-  const input = normalize(inputDate);
-  const now = normalize(today);
+  // Normalize both dates to midnight to compare only the date part
+  const normalizeDate = (date: Date) =>
+    new Date(date.getFullYear(), date.getMonth(), date.getDate());
+
+  const input = normalizeDate(inputDate);
+  const now = normalizeDate(today);
 
   const diffMs = input.getTime() - now.getTime();
   const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
@@ -37,14 +68,14 @@ export function formatRelativeDate(isoString: string): string {
   if (diffDays === 0) return 'Today';
   if (diffDays === -1) return 'Yesterday';
   if (diffDays >= -6 && diffDays <= -2) {
-    // For last 7 days (excluding today & yesterday), show weekday
-    return inputDate.toLocaleDateString(undefined, {weekday: 'long'});
+    return input.toLocaleDateString(undefined, {weekday: 'long'}); // e.g., "Monday"
   }
 
-  // For other dates, format as dd/mm/yyyy
-  const dd = String(inputDate.getDate()).padStart(2, '0');
-  const mm = String(inputDate.getMonth() + 1).padStart(2, '0'); // Months start at 0
-  const yyyy = inputDate.getFullYear();
+  // Format as dd/mm/yyyy
+  const dd = String(input.getDate()).padStart(2, '0');
+  const mm = String(input.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+  const yyyy = input.getFullYear();
+
   return `${dd}/${mm}/${yyyy}`;
 }
 

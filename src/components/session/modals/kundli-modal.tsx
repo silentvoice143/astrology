@@ -16,6 +16,10 @@ import {scale, verticalScale} from '../../../utils/sizer';
 import {colors} from '../../../constants/colors';
 import CloseIcon from '../../../assets/icons/close-icon';
 import {textStyle} from '../../../constants/text-style';
+import BirthChart from '../../kundli/charts/brith-chart';
+import NavamshaChart from '../../kundli/charts/navamsha-chart';
+import AkshvedanshaChart from '../../kundli/charts/askhvedansha-chart';
+import VimshottariDasha from '../../kundli/vimshottari-dasha';
 
 const SessionKundliModal = ({
   isOpen,
@@ -26,12 +30,12 @@ const SessionKundliModal = ({
 }) => {
   const [selectedTab, setSelectedTab] = useState<number>(0);
   const [containerWidth, setContainerWidth] = useState<number>(
-    Dimensions.get('screen').width * 0.8,
+    Dimensions.get('screen').width * 0.9,
   );
 
   useEffect(() => {
     const subscription = Dimensions.addEventListener('change', ({screen}) => {
-      setContainerWidth(screen.width * 0.8);
+      setContainerWidth(screen.width * 0.9);
     });
 
     return () => subscription?.remove?.(); // clean up listener
@@ -84,34 +88,50 @@ const SessionKundliModal = ({
             data={[
               {
                 id: 1,
-                screen: 'Lagna Chart',
+                screen: 'Birth Chart',
                 data: (
-                  <LagnaChart
-                    active={selectedTab}
+                  <BirthChart
+                    forModal={true}
                     chartWidth={containerWidth}
+                    active={selectedTab}
+                  />
+                ),
+              },
+              {
+                id: 2,
+                screen: 'Navamsha Chart',
+                data: (
+                  <NavamshaChart
+                    forModal={true}
+                    chartWidth={containerWidth}
+                    active={selectedTab}
+                  />
+                ),
+              },
+              {
+                id: 3,
+                screen: 'Akshvedansha Chart',
+                data: (
+                  <AkshvedanshaChart
+                    forModal={true}
+                    chartWidth={containerWidth}
+                    active={selectedTab}
                   />
                 ),
               },
               {
                 id: 4,
-                screen: 'Rasi Chart',
-                data: (
-                  <RasiChart active={selectedTab} chartWidth={containerWidth} />
-                ),
-              },
-              {
-                id: 2,
-                screen: 'Basic details',
+                screen: 'Basic Detail',
                 data: <BasicDetails active={selectedTab} />,
               },
               {
-                id: 3,
-                screen: 'Nakshatra',
-                data: <NakshatraAndDosha active={selectedTab} />,
+                id: 5,
+                screen: 'Vimshottari Dasha',
+                data: <VimshottariDasha active={selectedTab} />,
               },
             ]}
             pagination={false}
-            cardWidthScale={0.8}
+            cardWidthScale={0.9}
             CardComponent={KundliPage}
             showTabs={true}
             onChange={(index: number) => setSelectedTab(index)}

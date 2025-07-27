@@ -69,6 +69,19 @@ export const acceptSessionRequest = createAsyncThunk<
   }
 });
 
+export const deleteSessionRequest = createAsyncThunk<
+  any, // response type as any
+  void, // argument type
+  {rejectValue: any}
+>('session/delete-request', async (_, {rejectWithValue}) => {
+  try {
+    const response = await api.get(`/api/v1/chat/remove-all`);
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});
+
 // ===================Chat history===================
 export const getChatHistory = createAsyncThunk<
   any, // response type as any
@@ -82,6 +95,20 @@ export const getChatHistory = createAsyncThunk<
     return rejectWithValue(error.response?.data || error.message);
   }
 });
+
+export const getCallHistory = createAsyncThunk<
+  any, // response type as any
+  any,
+  {rejectValue: any}
+>('call-history/get', async (payload: any, {rejectWithValue}) => {
+  try {
+    const response = await api.get(`/api/v1/call/history${payload}`);
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});
+
 export const getChatMessages = createAsyncThunk<
   any, // response type as any
   any,

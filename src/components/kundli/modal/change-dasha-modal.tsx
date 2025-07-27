@@ -15,52 +15,46 @@ import {Astrologers, UserDetail} from '../../../utils/types';
 import {useEffect, useState} from 'react';
 import CustomModal from '../../modal';
 import {Pressable, Text, View} from 'react-native';
-import {useTranslation} from 'react-i18next';
 
-const ChangeKundliTypeModal = ({
+const ChangeDashaModal = ({
   isOpen,
   onClose,
   selectedOption,
   onChange,
 }: {
-  selectedOption: {label: string; id: string; value: string};
+  selectedOption:
+    | 'maha-dasha'
+    | 'antar-dasha'
+    | 'pratyantar-dasha'
+    | 'sookshma-dasha';
   isOpen: boolean;
   onClose: () => void;
-  onChange: (obj: {label: string; id: string; value: string} | null) => void;
+  onChange: (
+    obj: 'maha-dasha' | 'antar-dasha' | 'pratyantar-dasha' | 'sookshma-dasha',
+  ) => void;
 }) => {
-  const {t} = useTranslation();
-  const durationOptions =
-    t('lan') === 'bn'
-      ? [
-          {label: 'East-Indian Style', id: 'east_indian_style', value: 'east'},
-          {
-            label: 'South-Indian Style',
-            id: 'south_indian_style',
-            value: 'south',
-          },
-          {
-            label: 'North-Indian Style',
-            id: 'north_indian_style',
-            value: 'north',
-          },
-        ]
-      : [
-          {
-            label: 'South-Indian Style',
-            id: 'south_indian_style',
-            value: 'south',
-          },
-          {
-            label: 'North-Indian Style',
-            id: 'north_indian_style',
-            value: 'north',
-          },
-        ];
-  const [selected, setSelected] = useState<null | {
-    label: string;
-    id: string;
-    value: string;
-  }>(selectedOption);
+  const dashaOptions = [
+    {
+      label: 'Maha Dasha',
+      value: 'maha-dasha',
+    },
+    {
+      label: 'Antar Dasha',
+      value: 'antar-dasha',
+    },
+    {
+      label: 'Pratyantar Dasha',
+      value: 'pratyantar-dasha',
+    },
+    {
+      label: 'Sookshma Dasha',
+      value: 'sookshma-dasha',
+    },
+  ];
+
+  const [selected, setSelected] = useState<
+    'maha-dasha' | 'antar-dasha' | 'pratyantar-dasha' | 'sookshma-dasha'
+  >(selectedOption);
 
   useEffect(() => {
     setSelected(selectedOption);
@@ -81,24 +75,32 @@ const ChangeKundliTypeModal = ({
       }>
       <Text
         style={[textStyle.fs_mont_14_700, {marginBottom: verticalScale(8)}]}>
-        Choose Kundli Type
+        Choose Dasha Type
       </Text>
       <View style={{flexDirection: 'column', gap: scale(16)}}>
-        {durationOptions.map(item => (
+        {dashaOptions.map(item => (
           <Pressable
-            onPress={() => setSelected(item)}
-            key={item.id}
+            onPress={() =>
+              setSelected(
+                item.value as
+                  | 'maha-dasha'
+                  | 'antar-dasha'
+                  | 'pratyantar-dasha'
+                  | 'sookshma-dasha',
+              )
+            }
+            key={item.label}
             style={{flexDirection: 'row', gap: scale(8), alignItems: 'center'}}>
             <View
               style={{
                 borderRadius: scale(6),
                 borderWidth: 1,
                 borderColor:
-                  selected?.id === item.id
+                  selected === item.value
                     ? colors.success.base
                     : colors.secondaryText,
                 backgroundColor:
-                  selected?.id === item.id
+                  selected === item.value
                     ? colors.success.base
                     : colors.primary_surface,
               }}>
@@ -112,4 +114,4 @@ const ChangeKundliTypeModal = ({
   );
 };
 
-export default ChangeKundliTypeModal;
+export default ChangeDashaModal;

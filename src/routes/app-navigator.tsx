@@ -15,6 +15,7 @@ import {
 import {useWebSocket} from '../hooks/use-socket';
 import {useSessionEvents} from '../hooks/use-session-events';
 import CallRequestNotification from '../screens/call/call-request-notification';
+import {setRequest} from '../store/reducer/session';
 
 export default function AppNavigator() {
   const dispatch = useAppDispatch();
@@ -24,36 +25,39 @@ export default function AppNavigator() {
   );
   const [localCallRequestVisible, setLocalCallRequestVisible] = useState(false);
   const [localCallRequest, setLocalCallRequest] = useState<any>(null);
-  const {connect} = useWebSocket(user?.id);
+  const {connect, isConnected} = useWebSocket(user?.id);
+  const {sessionRequest} = useAppSelector(state => state.session);
 
   const {callRequest, callRequestNotification} = useSessionEvents(
     user?.id,
-    isAuthenticated,
+    isAuthenticated && isConnected,
   );
 
-  console.log(callRequest, callRequestNotification, 'call request hai');
+  console.log(sessionRequest, 'call request hai');
 
-  useEffect(() => {
-    if (callRequestNotification && callRequest) {
-      console.log('Setting local call request state');
-      setLocalCallRequestVisible(true);
-      setLocalCallRequest(callRequest);
-    } else {
-      setLocalCallRequestVisible(false);
-      setLocalCallRequest(null);
-    }
-  }, [callRequestNotification, callRequest]);
+  // useEffect(() => {
+  //   if (callRequestNotification && callRequest.userId) {
+  //     console.log('Setting local call request state');
+  //     setLocalCallRequestVisible(true);
+  //     setLocalCallRequest(callRequest);
+  //   } else {
+  //     setLocalCallRequestVisible(false);
+  //     setLocalCallRequest(null);
+  //   }
+  // }, [callRequestNotification, callRequest]);
 
-  console.log(callRequest, 'call reuiest');
+  // console.log(callRequest, callRequestNotification, 'call reuiest');
 
   const handleCloseCallNotification = () => {
     console.log('Closing call notification');
-    setLocalCallRequestVisible(false);
-    setLocalCallRequest(null);
+    // setLocalCallRequestVisible(false);
+    // setLocalCallRequest(null);
+    dispatch(setRequest(null));
   };
 
   const onAccept = () => {
-    setLocalCallRequest(null);
+    // setLocalCallRequest(null);
+    dispatch(setRequest(null));
   };
 
   useEffect(() => {
@@ -114,16 +118,14 @@ export default function AppNavigator() {
     <NavigationContainer>
       {isAuthenticated ? <PrivateRoutes /> : <PublicRoutes />}
 
-      {isAuthenticated &&
-        localCallRequestVisible &&
-        localCallRequest.userId && (
-          <CallRequestNotification
-            visible={localCallRequestVisible}
-            callRequest={localCallRequest}
-            onClose={handleCloseCallNotification}
-            onAccept={onAccept}
-          />
-        )}
+      {/* {isAuthenticated && sessionRequest?.userId && (
+        <CallRequestNotification
+          visible={!!sessionRequest?.userId && sessionRequest.type !== 'CHAT'}
+          callRequest={sessionRequest}
+          onClose={handleCloseCallNotification}
+          onAccept={onAccept}
+        />
+      )} */}
     </NavigationContainer>
   );
 }

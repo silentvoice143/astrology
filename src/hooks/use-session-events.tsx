@@ -1,9 +1,9 @@
-import {useEffect, useState} from 'react';
+import {useEffect, useRef, useState} from 'react';
 import {useWebSocket} from './use-socket';
 import {
-  addMessage,
-  clearSession,
   setCallSession,
+  setOtherUser,
+  setRequest,
   setSession,
   toggleCountRefresh,
 } from '../store/reducer/session';
@@ -18,8 +18,6 @@ interface CallRequest {
   callType: 'VOICE' | 'VIDEO';
 }
 
-let hasSubscribed = false;
-
 export const useSessionEvents = (
   userId: string = '',
   active: boolean = false,
@@ -33,33 +31,41 @@ export const useSessionEvents = (
     userId: '',
     callType: 'VOICE',
   });
+  const hasSubscribed = useRef(false);
 
   useEffect(() => {
     // Guard: If already subscribed, don't do it again
-    if (!active || !userId || hasSubscribed) return;
+    if (!active || !userId || hasSubscribed.current) return;
+
     let queueDest = `/topic/queue/${userId}`;
     let requestDest = `/topic/chat/${userId}/chatId`;
-
-    console.log('[useSessionEvents] Subscribing globally...');
-    hasSubscribed = true; // mark as subscribed
 
     const queueSub = subscribe(queueDest, msg => {
       try {
         console.log(decodeMessageBody(msg));
+        const res = JSON.parse(decodeMessageBody(msg));
         dispatch(toggleCountRefresh());
         Toast.show({
           type: 'success',
           text1: 'Session',
           text2: res.msg,
         });
-        setCallRequest(res);
-        setCallRequestNotification(true);
+        console.log(res, res.userId, res.type, 'get call request');
+        // dispatch(
+        //   setRequest({
+        //     userId: res.userId,
+        //     type: res.type as 'AUDIO' | 'VIDEO' | 'CHAT',
+        //   }),
+        // );
+        // setCallRequest(res);
+        // setCallRequestNotification(true);
       } catch (err) {
         console.error('Failed to parse queue message:', err);
       }
     });
 
     const callSessionSub = subscribe(`/topic/call/${userId}/session`, msg => {
+      console.log('call session received');
       try {
         const sessionData = JSON.parse(decodeMessageBody(msg));
         console.log('Session details received:', sessionData);
@@ -69,10 +75,13 @@ export const useSessionEvents = (
       }
     });
 
-    const chatSub = subscribe(`/topic/chat/${userId}/chatId`, msg => {
+    const chatSub = subscribe(requestDest, msg => {
       try {
         const data = JSON.parse(decodeMessageBody(msg));
+        console.log('chat session received', data);
+
         dispatch(setSession(data));
+
         Toast.show({
           type: 'success',
           text1: role === 'USER' ? 'Request Accepted' : 'Request Accepted',
@@ -87,44 +96,16 @@ export const useSessionEvents = (
       }
     });
 
+    hasSubscribed.current = true;
+
     return () => {
       console.log('[useSessionEvents] Cleaning up global subscriptions...');
-      queueSub?.unsubscribe();
-      chatSub?.unsubscribe();
-      callSessionSub?.unsubscribe();
-
-      hasSubscribed = false; // allow re-subscription if needed on remount
+      unsubscribe(queueDest);
+      unsubscribe(requestDest);
+      unsubscribe(`/topic/call/${userId}/session`);
+      hasSubscribed.current = false;
     };
   }, [subscribe, userId, active]);
-
-  useEffect(() => {
-    if (!session) return;
-
-    const chatEnd = subscribe(`/topic/chat/${session.id}`, msg => {
-      try {
-        const data = JSON.parse(decodeMessageBody(msg));
-        console.log(data);
-        if (data.status === 'ended') {
-          dispatch(
-            setSession({
-              ...session,
-              status: data.status === 'ended' ? 'ENDED' : 'ACTIVE',
-            }),
-          );
-          Toast.show({
-            type: 'info',
-            text1: 'Session Ended',
-          });
-        }
-      } catch (err) {
-        console.error('Failed to parse chat end message:', err);
-      }
-    });
-
-    return () => {
-      chatEnd?.unsubscribe();
-    };
-  }, [session, subscribe, userId]);
 
   return {callRequest, callRequestNotification};
 };

@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   Image,
   BackHandler,
+  SafeAreaView,
 } from 'react-native';
 import {useWebSocket} from '../hooks/use-socket';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
@@ -45,20 +46,26 @@ import ChevronLeftIcon from '../assets/icons/chevron-left';
 import {useNavigation} from '@react-navigation/native';
 import {StompSubscription} from '@stomp/stompjs';
 import Timer from '../components/session/timer';
+import CustomButton from '../components/custom-button';
 
 export const ChatScreenDemo = () => {
+  const role = useUserRole();
   const userId = useAppSelector(state => state.auth.user.id);
-  const otherUser = useAppSelector(
-    (state: RootState) => state.session.otherUser,
-  );
-  const otherUserId = otherUser?.id;
   const session = useAppSelector(state => state?.session?.session);
+
+  const tempOtherUser = useAppSelector(state => state.session.otherUser);
+  const otherUser =
+    role === 'ASTROLOGER'
+      ? useAppSelector((state: RootState) => state.session.session?.user)
+      : useAppSelector((state: RootState) => state.session.session?.astrologer);
+  const otherUserId = !session ? tempOtherUser?.id : otherUser?.id;
+
   // console.log(session, '----this is session');
   const {subscribe, send, unsubscribe} = useWebSocket(userId);
   const [timer, setTimer] = useState<string>('');
   // const [messages, setMessages] = useState<Message[]>([]);
   const {messages} = useAppSelector(state => state.session);
-  const role = useUserRole();
+
   const [input, setInput] = useState('');
   const [otherUserTyping, setOtherUserTyping] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -71,6 +78,8 @@ export const ChatScreenDemo = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const dispatch = useAppDispatch();
   const navigation = useNavigation<any>();
+
+  // console.log(session, '-----session');
 
   // ==============distinations===============
   const messageSubDest = `/topic/chat/${userId}/messages`;
@@ -153,7 +162,7 @@ export const ChatScreenDemo = () => {
           const data = JSON.parse(decodeMessageBody(msg));
           console.log(data);
           dispatch(addMessage(data));
-          console.log('Adding msgs');
+          // console.log('Adding msgs');
           // You may want to dispatch(addMessage(data)) here if needed
         } catch (err) {
           console.error('Failed to parse chat message:', err);
@@ -164,7 +173,7 @@ export const ChatScreenDemo = () => {
           const data = JSON.parse(decodeMessageBody(msg));
           if (data.senderId === otherUserId) {
             setOtherUserTyping(data.typing);
-            console.log('typing.....');
+            // console.log('typing.....');
           }
           console.log(JSON.parse(decodeMessageBody(msg)));
         } catch (err) {
@@ -183,7 +192,7 @@ export const ChatScreenDemo = () => {
       chatEndSub = subscribe(chatEndDest, msg => {
         try {
           const data = JSON.parse(decodeMessageBody(msg));
-          console.log(data);
+          // console.log(data);
           if (data.status === 'ended') {
             dispatch(
               setSession({
@@ -278,6 +287,19 @@ export const ChatScreenDemo = () => {
     );
   };
 
+  const handleLeave = () => {
+    send(
+      '/app/chat.leave',
+      {},
+      JSON.stringify({
+        userId: userId,
+        astrologerId: otherUserId,
+        sessionType: 'CHAT',
+      }),
+    );
+    navigation.navigate('ChatHistory');
+  };
+
   useEffect(() => {
     if (otherUser) {
       dispatch(setKundliPerson(otherUser));
@@ -294,43 +316,37 @@ export const ChatScreenDemo = () => {
   }, [session]);
 
   // useEffect(() => {
+  //   console.log('back click');
   //   return () => {
+  //     console.log('Leave request sent to /chat.leave');
   //     if (userId && otherUserId && role === 'USER' && !session) {
-  //       send(
-  //         '/chat.leave',
-  //         {},
-  //         JSON.stringify({
-  //           userId: userId, // UUID of the user who cancels
-  //           astrologerId: otherUserId, // UUID of the astrologer
-  //         }),
-  //       );
-  //       console.log('Leave request sent to /chat.leave');
+  //       handleLeave();
   //     }
   //   };
   // }, [userId, otherUserId]);
 
-  useEffect(() => {
-    const backHandler = BackHandler.addEventListener(
-      'hardwareBackPress',
-      () => {
-        console.log('back to chatScreen');
-        if (role === 'USER' && userId && otherUserId && !session) {
-          send(
-            '/chat.leave',
-            {},
-            JSON.stringify({
-              userId: userId,
-              astrologerId: otherUserId,
-            }),
-          );
-          console.log('Leave request sent to /chat.leave');
-        }
-        navigation.replace('ChatHistory');
-        return true;
-      },
-    );
-    return () => backHandler.remove();
-  }, []);
+  // useEffect(() => {
+  //   const backHandler = BackHandler.addEventListener(
+  //     'hardwareBackPress',
+  //     () => {
+  //       console.log('back to chatScreen');
+  //       if (role === 'USER' && userId && otherUserId && !session) {
+  //         send(
+  //           '/chat.leave',
+  //           {},
+  //           JSON.stringify({
+  //             userId: userId,
+  //             astrologerId: otherUserId,
+  //           }),
+  //         );
+  //         console.log('Leave request sent to /chat.leave');
+  //       }
+  //       navigation.replace('ChatHistory');
+  //       return true;
+  //     },
+  //   );
+  //   return () => backHandler.remove();
+  // }, []);
 
   const renderMessage = ({item}: {item: Message}) => {
     const isMine = item.senderId === userId;
@@ -369,119 +385,94 @@ export const ChatScreenDemo = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.select({ios: 'padding', android: undefined})}>
-      <>
-        <View
-          style={[
-            styles.header,
-            {flexDirection: 'row', gap: scale(12), alignItems: 'center'},
-          ]}>
-          <TouchableOpacity onPress={() => navigation.replace('ChatHistory')}>
-            <ChevronLeftIcon size={32} />
-          </TouchableOpacity>
-          <View>
-            <Avatar
-              size={50}
-              image={{uri: ''}}
-              fallbackText={otherUser?.name.charAt(0).toUpperCase()}
-            />
-            <View
-              style={{
-                position: 'absolute',
-                top: 6,
-                right: 0,
-                height: scale(10),
-                width: scale(10),
-                backgroundColor:
-                  session?.status === 'ACTIVE'
-                    ? colors.success.base
-                    : colors.error.base,
-                borderRadius: scale(6),
-              }}></View>
-          </View>
-          <View>
-            <View style={{flexDirection: 'row', gap: 8}}>
+    <SafeAreaView style={{flex: 1, backgroundColor: '#EFEFEF'}}>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.select({ios: 'padding', android: undefined})}>
+        <>
+          <View
+            style={[
+              styles.header,
+              {flexDirection: 'row', gap: scale(12), alignItems: 'center'},
+            ]}>
+            <TouchableOpacity onPress={() => navigation.replace('ChatHistory')}>
+              <ChevronLeftIcon size={32} />
+            </TouchableOpacity>
+            <View>
+              <Avatar
+                size={50}
+                image={{uri: ''}}
+                fallbackText={otherUser?.name.charAt(0).toUpperCase()}
+              />
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 6,
+                  right: 0,
+                  height: scale(10),
+                  width: scale(10),
+                  backgroundColor:
+                    session?.status === 'ACTIVE'
+                      ? colors.success.base
+                      : colors.error.base,
+                  borderRadius: scale(6),
+                }}></View>
+            </View>
+            <View>
+              <View style={{flexDirection: 'row', gap: 8}}>
+                <Text
+                  style={[
+                    textStyle.fs_mont_20_700,
+                    {marginTop: verticalScale(8)},
+                  ]}>
+                  {session ? otherUser?.name : tempOtherUser?.name}
+                </Text>
+              </View>
+
               <Text
                 style={[
-                  textStyle.fs_mont_20_700,
-                  {marginTop: verticalScale(8)},
+                  styles.typing,
+                  {
+                    color: otherUserTyping
+                      ? colors.primaryText
+                      : colors.whiteText,
+                  },
                 ]}>
-                {otherUser?.name}
+                Typing...
               </Text>
             </View>
-
-            <Text
-              style={[
-                styles.typing,
-                {
-                  color: otherUserTyping
-                    ? colors.primaryText
-                    : colors.whiteText,
-                },
-              ]}>
-              Typing...
-            </Text>
           </View>
-        </View>
-        {session?.status === 'ACTIVE' && timer && <Timer timer={timer} />}
+          {session?.status === 'ACTIVE' && timer && <Timer timer={timer} />}
 
-        {!session ? (
-          <View style={styles.waitingContainer}>
-            <Text style={styles.waitingText}>
-              Waiting for session to start...
-            </Text>
-          </View>
-        ) : (
-          <FlatList
-            ref={flatListRef}
-            data={messages}
-            inverted
-            keyExtractor={(item, index) => `${item.timestamp}-${index}`}
-            renderItem={renderMessage}
-            contentContainerStyle={styles.messagesArea}
-            onEndReached={info => {
-              getChatMessagesDetails(currentPage + 1);
-            }}
-            onEndReachedThreshold={0.2}
-          />
-        )}
+          {!session ? (
+            <View style={[styles.waitingContainer, {gap: verticalScale(6)}]}>
+              <Text style={styles.waitingText}>
+                Waiting for session to start...
+              </Text>
+              <CustomButton title="Leave Session" onPress={handleLeave} />
+            </View>
+          ) : (
+            <FlatList
+              ref={flatListRef}
+              data={messages}
+              inverted
+              keyExtractor={(item, index) => `${item.timestamp}-${index}`}
+              renderItem={renderMessage}
+              contentContainerStyle={styles.messagesArea}
+              onEndReached={info => {
+                getChatMessagesDetails(currentPage + 1);
+              }}
+              onEndReachedThreshold={0.2}
+              keyboardShouldPersistTaps="handled"
+            />
+          )}
 
-        <View style={styles.inputArea}>
-          <TouchableOpacity
-            onPress={() =>
-              !!session && session.status === 'ACTIVE'
-                ? setShowCamera(true)
-                : {}
-            }
-            style={{
-              backgroundColor:
-                !!session && session.status === 'ACTIVE'
-                  ? colors.primarybtn
-                  : colors.disabled,
-              height: moderateScale(40),
-              width: moderateScale(40),
-              borderRadius: moderateScale(20),
-              justifyContent: 'center',
-              alignItems: 'center',
-              marginRight: scale(10),
-            }}>
-            <CameraIcon size={16} strokeWidth={1} />
-          </TouchableOpacity>
-          <TextInput
-            style={styles.input}
-            value={input}
-            onChangeText={handleInputChange}
-            placeholder="Type a message..."
-            onSubmitEditing={handleSend}
-            returnKeyType="send"
-            editable={!!session && session.status === 'ACTIVE'}
-          />
-          <View style={{flexDirection: 'row', gap: scale(8)}}>
+          <View style={styles.inputArea}>
             <TouchableOpacity
-              onPress={
-                !!session && session.status === 'ACTIVE' ? handleSend : () => {}
+              onPress={() =>
+                !!session && session.status === 'ACTIVE'
+                  ? setShowCamera(true)
+                  : {}
               }
               style={{
                 backgroundColor:
@@ -493,12 +484,26 @@ export const ChatScreenDemo = () => {
                 borderRadius: moderateScale(20),
                 justifyContent: 'center',
                 alignItems: 'center',
+                marginRight: scale(10),
               }}>
-              <SendIcon />
+              <CameraIcon size={16} strokeWidth={1} />
             </TouchableOpacity>
-            {role === 'ASTROLOGER' && (
+            <TextInput
+              style={styles.input}
+              value={input}
+              onChangeText={handleInputChange}
+              placeholder="Type a message..."
+              onSubmitEditing={handleSend}
+              returnKeyType="send"
+              editable={!!session && session.status === 'ACTIVE'}
+            />
+            <View style={{flexDirection: 'row', gap: scale(8)}}>
               <TouchableOpacity
-                onPress={() => setIsModalOpen(true)}
+                onPress={
+                  !!session && session.status === 'ACTIVE'
+                    ? handleSend
+                    : () => {}
+                }
                 style={{
                   backgroundColor:
                     !!session && session.status === 'ACTIVE'
@@ -510,36 +515,53 @@ export const ChatScreenDemo = () => {
                   justifyContent: 'center',
                   alignItems: 'center',
                 }}>
-                <KundliIcon />
+                <SendIcon />
               </TouchableOpacity>
-            )}
+              {role === 'ASTROLOGER' && (
+                <TouchableOpacity
+                  onPress={() => setIsModalOpen(true)}
+                  style={{
+                    backgroundColor:
+                      !!session && session.status === 'ACTIVE'
+                        ? colors.primarybtn
+                        : colors.disabled,
+                    height: moderateScale(40),
+                    width: moderateScale(40),
+                    borderRadius: moderateScale(20),
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                  }}>
+                  <KundliIcon />
+                </TouchableOpacity>
+              )}
+            </View>
           </View>
-        </View>
-        <SessionKundliModal
-          isOpen={isModalOpen}
-          onClose={() => {
-            setIsModalOpen(false);
-          }}
+          <SessionKundliModal
+            isOpen={isModalOpen}
+            onClose={() => {
+              setIsModalOpen(false);
+            }}
+          />
+        </>
+        <CameraModal
+          visible={showCamera}
+          onClose={() => setShowCamera(false)}
+          onCapture={handleCaptureImage}
         />
-      </>
-      <CameraModal
-        visible={showCamera}
-        onClose={() => setShowCamera(false)}
-        onCapture={handleCaptureImage}
-      />
-      <Modal
-        isVisible={imageModalVisible}
-        onBackdropPress={() => setImageModalVisible(false)}
-        onBackButtonPress={() => setImageModalVisible(false)}
-        style={{margin: 0}}>
-        <ImageViewer
-          imageUrls={[{url: selectedImage || ''}]}
-          enableSwipeDown
-          onSwipeDown={() => setImageModalVisible(false)}
-          backgroundColor="#000"
-        />
-      </Modal>
-    </KeyboardAvoidingView>
+        <Modal
+          isVisible={imageModalVisible}
+          onBackdropPress={() => setImageModalVisible(false)}
+          onBackButtonPress={() => setImageModalVisible(false)}
+          style={{margin: 0}}>
+          <ImageViewer
+            imageUrls={[{url: selectedImage || ''}]}
+            enableSwipeDown
+            onSwipeDown={() => setImageModalVisible(false)}
+            backgroundColor="#000"
+          />
+        </Modal>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 

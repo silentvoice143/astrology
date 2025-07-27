@@ -193,6 +193,10 @@ export interface SessionState {
   messages: Message[];
   queueRequestCount: number;
   countRefresh: boolean;
+  sessionRequest: {
+    userId: string;
+    type: 'AUDIO' | 'VIDEO' | 'CHAT';
+  } | null;
 }
 
 export interface Message {

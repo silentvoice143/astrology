@@ -2,7 +2,7 @@
 
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 import {KundliDetailResponse, UserPersonalDetail} from '../../../utils/types';
-import {getPersonKundliDetail, kundliChart} from './action';
+import {getPersonKundliDetail, kundliChart, kundliVimshottari} from './action';
 
 const now = new Date();
 
@@ -52,6 +52,7 @@ const kundliSlice = createSlice({
     builder
       .addCase(getPersonKundliDetail.pending, state => {})
       .addCase(getPersonKundliDetail.fulfilled, (state, {payload}) => {})
+      .addCase(kundliVimshottari.fulfilled, (state, {payload}) => {})
       .addCase(getPersonKundliDetail.rejected, (state, action) => {})
       .addCase(kundliChart.pending, state => {
         state.isLoading = true;
@@ -64,5 +65,5 @@ const kundliSlice = createSlice({
 
 export const {setKundliPerson, resetToDefaultUser, setDefaultUser} =
   kundliSlice.actions;
-export {getPersonKundliDetail, kundliChart};
+export {getPersonKundliDetail, kundliChart, kundliVimshottari};
 export default kundliSlice.reducer;
