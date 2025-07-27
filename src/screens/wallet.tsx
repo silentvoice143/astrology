@@ -1,4 +1,11 @@
-import {View, Text, TouchableOpacity, StyleSheet, FlatList} from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  Alert,
+} from 'react-native';
 import React from 'react';
 import ScreenLayout from '../components/screen-layout';
 import {colors} from '../constants/colors';
@@ -10,6 +17,9 @@ import {Transaction} from '../utils/types';
 import WalletTransactionCard from '../components/wallet/transaction-card';
 import {useAppSelector} from '../hooks/redux-hook';
 import {RootState} from '../store';
+import {useNavigation} from '@react-navigation/native';
+import RazorpayCheckout from 'react-native-razorpay';
+import CustomInput from '../components/custom-input-v1';
 
 const transactions: Transaction[] = [
   {
@@ -90,6 +100,10 @@ const Wallet = () => {
   const wallet_balance = useAppSelector(
     (state: RootState) => state.auth.user.walletBalance,
   );
+  const [amount, setAmount] = React.useState('');
+  const navigate = useNavigation<any>();
+
+  const {name, mobile} = useAppSelector(store => store.auth);
 
   return (
     <ScreenLayout>
@@ -115,15 +129,63 @@ const Wallet = () => {
               ₹{Math.abs(wallet_balance)}
             </Text>
           </View>
-          <View style={{width: 140, height: 40}}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: verticalScale(12),
+            }}>
+            <View style={{flex: 1, marginRight: scale(8)}}>
+              <CustomInput
+                placeholder="Enter amount"
+                keyboardType="numeric"
+                value={amount}
+                onChangeText={setAmount}
+                inputStyle={{
+                  fontSize: scale(14),
+                  paddingVertical: 6,
+                }}
+              />
+            </View>
             <CustomButton
               style={{
                 backgroundColor: colors.primary_surface,
                 borderRadius: scale(24),
+                paddingHorizontal: scale(16),
+                paddingVertical: verticalScale(10),
               }}
-              textStyle={[{color: colors.primaryText, lineHeight: 20}]}
+              textStyle={{color: colors.primaryText, fontWeight: '600'}}
               title="Add Balance"
-              onPress={() => {}}
+              onPress={() => {
+                const numericAmount = parseFloat(amount);
+                if (isNaN(numericAmount) || numericAmount <= 0) {
+                  Alert.alert('Please enter a valid amount.');
+                  return;
+                }
+
+                const options: any = {
+                  description: 'Credits towards consultation',
+                  image: 'https://astrosevaa-admin.vercel.app/assets/logo-C7bpBiI4.png',
+                  currency: 'INR',
+                  key: 'rzp_test_yauCWFzZA5Tbj3',
+                  amount: numericAmount * 100,
+                  name: 'ASTROSEVAA',
+                  order_id: '',
+                  prefill: {
+                    email: 'example@mail.com',
+                    contact: mobile,
+                    name: name,
+                  },
+                  theme: {color: colors.primarybtn},
+                };
+                RazorpayCheckout.open(options)
+                  .then((data: any) => {
+                    Alert.alert(`Success: ${data.razorpay_payment_id}`);
+                  })
+                  .catch((error: any) => {
+                    Alert.alert(`Error: ${error.code} | ${error.description}`);
+                  });
+              }}
             />
           </View>
         </View>

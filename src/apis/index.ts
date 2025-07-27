@@ -25,12 +25,12 @@ api.interceptors.request.use(
     const shouldSkip = skipAuthPaths.some((path: string) =>
       urlPath.startsWith(path),
     );
-    console.log('🔗 API Request:', {
-      url: config?.baseURL + config?.url,
-      method: config.method?.toUpperCase(),
-      payload: config.data || null,
-      params: config.params,
-    });
+    // console.log('🔗 API Request:', {
+    //   url: config?.baseURL + config?.url,
+    //   method: config.method?.toUpperCase(),
+    //   payload: config.data || null,
+    //   params: config.params,
+    // });
 
     const token = shouldSkip ? '' : getTokenFromStore();
     if (token) {

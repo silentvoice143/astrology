@@ -27,6 +27,7 @@ import TermsAndConditions from '../screens/settings/terms-conditions';
 import PofileEdit from '../screens/pofile-edit';
 import ProfileEdit from '../screens/pofile-edit';
 import {useQueueCountOnResume} from '../hooks/use-queue-count';
+import Payment from '../screens/payment';
 
 const Stack = createNativeStackNavigator();
 
@@ -68,6 +69,7 @@ export default function PrivateRoutes() {
       <Stack.Screen name="Setting" component={Setting} />
       <Stack.Screen name="Language" component={LanguageSetting} />
       <Stack.Screen name="TermsAndConditions" component={TermsAndConditions} />
+      <Stack.Screen name="Payment" component={Payment} />
     </Stack.Navigator>
   );
 }
