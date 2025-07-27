@@ -28,10 +28,7 @@ export default function AppNavigator() {
   const {connect, isConnected} = useWebSocket(user?.id);
   const {sessionRequest} = useAppSelector(state => state.session);
 
-  const {callRequest, callRequestNotification} = useSessionEvents(
-    user?.id,
-    isAuthenticated && isConnected,
-  );
+  useSessionEvents(user?.id, isAuthenticated, isConnected);
 
   console.log(sessionRequest, 'call request hai');
 

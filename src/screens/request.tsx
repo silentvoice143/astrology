@@ -36,6 +36,7 @@ type RequestType = {
   sessionType: 'AUDIO' | 'VIDEO' | 'CHAT';
   requestedMinutes: number;
   queuePosition: number;
+  user: UserDetail;
 };
 
 // Call type icons (you can replace with your custom icons)
@@ -64,7 +65,14 @@ const UserRequestCard = ({
   onSkip,
   showActions,
   isAnimating,
+}: {
+  data: RequestType;
+  onAccept: () => void;
+  onSkip: () => void;
+  showActions: boolean;
+  isAnimating: boolean;
 }) => {
+  console.log(data, '----data in card');
   const slideAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -157,9 +165,9 @@ const UserRequestCard = ({
               borderWidth: 1,
               borderColor: themeColors.border.primary,
             }}>
-            {data?.avatar ? (
+            {data?.user?.imgUri ? (
               <Image
-                source={{uri: data.avatar}}
+                source={{uri: data.user.imgUri}}
                 style={{
                   width: '100%',
                   height: '100%',
@@ -173,7 +181,7 @@ const UserRequestCard = ({
                   fontWeight: 'bold',
                   color: themeColors.text.primary,
                 }}>
-                {data?.name?.charAt(0)?.toUpperCase() || '?'}
+                {data?.user.name?.charAt(0)?.toUpperCase() || '?'}
               </Text>
             )}
           </View>
@@ -193,7 +201,7 @@ const UserRequestCard = ({
                   {color: '#1F2937', maxWidth: '70%'},
                 ]}
                 numberOfLines={1}>
-                {data?.name || 'Anonymous'}
+                {data?.user?.name || 'Anonymous'}
               </Text>
 
               {/* Call Type Badge */}
@@ -220,9 +228,9 @@ const UserRequestCard = ({
 
             {/* Age and Location */}
             <Text style={[textStyle.fs_mont_14_400, {color: '#6B7280'}]}>
-              {data?.age ? `${data.age} years` : ''}
-              {data?.location && data?.age ? ' • ' : ''}
-              {data?.location || ''}
+              {data?.user?.birthDate ? `${data.user.birthDate} years` : ''}
+              {data?.user?.birthPlace && data?.user?.birthPlace ? ' • ' : ''}
+              {data?.user?.birthTime || ''}
             </Text>
 
             {/* Online Status */}

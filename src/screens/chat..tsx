@@ -519,7 +519,11 @@ export const ChatScreenDemo = () => {
               </TouchableOpacity>
               {role === 'ASTROLOGER' && (
                 <TouchableOpacity
-                  onPress={() => setIsModalOpen(true)}
+                  onPress={
+                    !!session && session.status === 'ACTIVE'
+                      ? () => setIsModalOpen(true)
+                      : () => {}
+                  }
                   style={{
                     backgroundColor:
                       !!session && session.status === 'ACTIVE'

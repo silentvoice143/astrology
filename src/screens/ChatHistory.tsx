@@ -40,12 +40,9 @@ const ChatHistory = () => {
   const [hasMore, setHasMore] = useState(true);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const role = useUserRole();
-  const activeSessionId = useAppSelector(
-    state => state.session.activeSession?.id,
-  );
+
   const dispatch = useAppDispatch();
   const isFocused = useIsFocused();
-  console.log(activeSessionId, '----active session id');
 
   const resetPagination = () => {
     setCallItems([]);
@@ -131,10 +128,7 @@ const ChatHistory = () => {
           dispatch(setSession(item));
           navigation.navigate('chat');
         }}>
-        <ChatHistoryCard
-          data={item}
-          active={item.status === 'ACTIVE' && activeSessionId === item.id}
-        />
+        <ChatHistoryCard data={item} active={item.status === 'ACTIVE'} />
       </TouchableOpacity>
     );
   };
