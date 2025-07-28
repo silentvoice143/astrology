@@ -371,6 +371,10 @@ const CallScreen = () => {
         ...baseConfig.topMenuBarConfig,
         isVisible: false,
       },
+      layoutConfig: {
+        ...baseConfig.layoutConfig,
+        showDuration: false,
+      },
       turnOnCameraWhenJoining: callType === 'VIDEO',
       turnOnMicrophoneWhenJoining: true,
       useSpeakerWhenJoining: callType === 'VIDEO',
@@ -720,7 +724,7 @@ const styles = StyleSheet.create({
   },
   timerOverlay: {
     position: 'absolute',
-    top: '10%',
+    top: '5%',
     left: 0,
     right: 0,
     zIndex: 1000,
