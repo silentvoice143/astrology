@@ -5,6 +5,7 @@ import {
   StyleSheet,
   FlatList,
   ActivityIndicator,
+  Alert,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
 import ScreenLayout from '../components/screen-layout';
@@ -20,12 +21,19 @@ import {RootState} from '../store';
 import {getTransactionHistory} from '../store/reducer/payment';
 import Toast from 'react-native-toast-message';
 import AboutIcon from '../assets/icons/about-icon';
+import RazorpayCheckout from 'react-native-razorpay';
+import CustomInputV1 from '../components/custom-input-v1';
+import {useNavigation} from '@react-navigation/native';
+import {postTopUp} from '../store/reducer/payment/action';
 
 const Wallet = () => {
   const onEndReachedCalledDuringMomentum = useRef(false);
-  const {walletBalance, id} = useAppSelector(
-    (state: RootState) => state.auth.user,
-  );
+  const {id} = useAppSelector((state: RootState) => state.auth.user);
+  const [amount, setAmount] = React.useState('');
+  const [walletBalance, setWalletBalance] = React.useState(0);
+  const navigate = useNavigation<any>();
+
+  const {name, mobile} = useAppSelector(store => store.auth);
 
   const [transactions, setTransations] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
@@ -41,6 +49,7 @@ const Wallet = () => {
       ).unwrap();
 
       if (payload.success) {
+        setWalletBalance(payload?.wallet?.balance ?? 0);
         if (page === 1) {
           setTransations(payload?.wallet?.transactions);
         } else {
@@ -64,6 +73,78 @@ const Wallet = () => {
     }
   };
 
+  const paymentHandler = async (amount: number) => {
+    if (isNaN(amount) || amount <= 0) {
+      Toast.show({
+        type: 'error',
+        text1: 'Please enter a valid amount.',
+      });
+      return;
+    }
+
+    try {
+      const payload = await dispatch(postTopUp(amount)).unwrap();
+
+      if (payload.success) {
+        const orderDetails = JSON.parse(payload?.order);
+
+        const options: any = {
+          description: 'Credits towards consultation',
+          image: 'https://astrosevaa-admin.vercel.app/assets/logo-C7bpBiI4.png',
+          currency: 'INR',
+          key: 'rzp_test_yauCWFzZA5Tbj3',
+          amount: orderDetails.amount_due,
+          name: 'ASTROSEVAA',
+          order_id: orderDetails.id,
+          prefill: {
+            email: '',
+            contact: mobile,
+            name: name,
+          },
+          theme: {color: colors.primarybtn},
+          method: {
+            netbanking: true,
+            card: true,
+            upi: true,
+            wallet: true,
+            emi: false,
+            paylater: true,
+          },
+        };
+
+        RazorpayCheckout.open(options)
+          .then((data: any) => {
+            Toast.show({
+              type: 'success',
+              text1: `Payment Successful`,
+              text2: `Payment ID: ${data.razorpay_payment_id}`,
+            });
+            setAmount('');
+            getTransactionDetails(1);
+          })
+          .catch((error: any) => {
+            Toast.show({
+              type: 'error',
+              text1: 'Payment Failed',
+              text2: `${error.code} | ${error.description}`,
+            });
+            setAmount('');
+            getTransactionDetails(1);
+          });
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Failed to initiate top-up',
+        });
+      }
+    } catch (error) {
+      console.error('TopUp Error:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Payment initiation failed',
+      });
+    }
+  };
   useEffect(() => {
     getTransactionDetails(1);
   }, []);
@@ -92,15 +173,38 @@ const Wallet = () => {
               ₹{Math.abs(walletBalance)}
             </Text>
           </View>
-          <View style={{width: 140, height: 40}}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: verticalScale(12),
+            }}>
+            <View style={{flex: 1, marginRight: scale(8)}}>
+              <CustomInputV1
+                placeholder="Enter amount"
+                keyboardType="numeric"
+                value={amount}
+                onChangeText={setAmount}
+                inputStyle={{
+                  fontSize: scale(14),
+                  paddingVertical: 6,
+                  color: '#fff',
+                }}
+              />
+            </View>
             <CustomButton
               style={{
                 backgroundColor: colors.primary_surface,
                 borderRadius: scale(24),
+                paddingHorizontal: scale(16),
+                paddingVertical: verticalScale(10),
               }}
-              textStyle={[{color: colors.primaryText, lineHeight: 20}]}
+              textStyle={{color: colors.primaryText, fontWeight: '600'}}
               title="Add Balance"
-              onPress={() => {}}
+              onPress={() => {
+                const numericAmount = parseFloat(amount);
+                paymentHandler(numericAmount); // Razorpay is now handled inside
+              }}
             />
           </View>
         </View>

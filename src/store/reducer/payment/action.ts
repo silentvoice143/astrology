@@ -17,3 +17,17 @@ export const getTransactionHistory = createAsyncThunk<
     }
   },
 );
+
+export const postTopUp = createAsyncThunk<
+  any, // response type
+  number, // payload must be FormData
+  {rejectValue: any}
+>('post-top-up', async (payload: number, {rejectWithValue}) => {
+  try {
+    const response = await api.post(`/api/v1/payment/topup`, {amount: payload});
+
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});

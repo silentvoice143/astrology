@@ -9,7 +9,7 @@ const WalletTransactionCard = ({transaction}: {transaction: Transaction}) => {
   return (
     <View style={styles.cardContainer}>
       <View style={{flex: 1}}>
-        <Text style={styles.title}>{transaction.id.slice(0, 10) + '...'}</Text>
+        <Text style={styles.title}>{transaction.type}</Text>
         <Text style={styles.description}>{transaction.description}</Text>
       </View>
       <View style={styles.rightSection}>
