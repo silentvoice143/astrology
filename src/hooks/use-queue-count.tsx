@@ -16,11 +16,11 @@ export const useQueueCountOnResume = (
   const dispatch = useAppDispatch();
   const {countRefresh} = useAppSelector(state => state.session);
   const appState = useRef(AppState.currentState);
+  console.log(appState, '----appState');
 
   const fetchQueueCount = async () => {
     try {
       const payload = await dispatch(getQueueRequest()).unwrap();
-      console.log(payload, '-----all session requests');
       if (payload.success) {
         dispatch(setQueueCount(payload?.users.length));
       } else {
@@ -30,7 +30,6 @@ export const useQueueCountOnResume = (
         });
       }
     } catch (err) {
-      console.log(err);
     } finally {
       dispatch(toggleCountRefresh());
     }

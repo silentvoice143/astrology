@@ -5,44 +5,23 @@ import {
   Image,
   ScrollView,
   StyleSheet,
-  TouchableOpacity,
   TouchableWithoutFeedback,
 } from 'react-native';
 import EditIcon from '../../assets/icons/edit-icon';
 import ScreenLayout from '../../components/screen-layout';
-import {
-  moderateScale,
-  scale,
-  scaleFont,
-  verticalScale,
-} from '../../utils/sizer';
-import {colors, themeColors} from '../../constants/colors';
+import {scale, verticalScale} from '../../utils/sizer';
+import {themeColors} from '../../constants/colors';
 import {useUserRole} from '../../hooks/use-role';
 import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
 import {textStyle} from '../../constants/text-style';
-import CustomDateTimePicker from '../../components/custom-date-time-picker';
-import ControlledTagSelector from '../../components/controlled-tag-selector';
-import LocationAutoComplete from '../../components/location-input-modal-based';
 import CustomInputV2 from '../../components/custom-input-v2';
 import {useNavigation} from '@react-navigation/native';
-import {AstrologerFormPayload, UserPersonalDetail} from '../../utils/types';
+import {AstrologerFormPayload} from '../../utils/types';
 import CustomButton from '../../components/custom-button';
-import CloseIcon from '../../assets/icons/close-icon';
-import {formatTimeToDateString} from '../../utils/utils';
 import {launchImageLibrary} from 'react-native-image-picker';
-import {
-  editAstrologerUser,
-  postUserDetail,
-  uploadProfileImage,
-} from '../../store/reducer/user';
+import {editAstrologerUser} from '../../store/reducer/user';
 import {setAstrologer, setUser} from '../../store/reducer/auth';
 import Toast from 'react-native-toast-message';
-
-const genderTags = [
-  {id: 'MALE', label: 'Male'},
-  {id: 'FEMALE', label: 'Female'},
-  {id: 'OTHER', label: 'Other'},
-];
 
 const AstrologerProfileEdit = () => {
   const role = useUserRole();
@@ -195,8 +174,11 @@ const AstrologerProfileEdit = () => {
         }
       } else {
       }
-    } catch (error) {
-      console.error('Form submission error:', error);
+    } catch (error: any) {
+      Toast.show({
+        type: 'error',
+        text1: 'Form submission error',
+      });
     } finally {
       setIsSaving(false);
     }
@@ -218,7 +200,6 @@ const AstrologerProfileEdit = () => {
             <TouchableWithoutFeedback
               onPress={() => {
                 handlePickImage();
-                console.log('picking image');
               }}>
               <View
                 style={{

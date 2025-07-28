@@ -21,6 +21,7 @@ import DocumentDownloadIcon from '../../../assets/icons/download-file-icon';
 import ChangeKundliTypeModal from '../modal/change-type-modal';
 import {makeResponsiveSVG} from '../../../utils/utils';
 import {useTranslation} from 'react-i18next';
+import Toast from 'react-native-toast-message';
 
 const BirthChart = ({
   forModal = false,
@@ -67,7 +68,6 @@ const BirthChart = ({
         latitude: 25.317645,
         longitude: 82.973915,
       };
-      console.log('kundli style', selectedKundliType);
 
       const payload: any = await dispatch(
         kundliChart({
@@ -79,13 +79,16 @@ const BirthChart = ({
           },
         }),
       ).unwrap();
-      console.log('BirthChart==============', payload);
+
       if (payload) {
         setChartSvg(payload);
       } else {
       }
     } catch (err) {
-      console.log(err);
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to fetch chart',
+      });
     } finally {
       setLoading(false);
     }
@@ -115,8 +118,6 @@ const BirthChart = ({
       </View>
     );
   }
-
-  console.log(chartWidth, '---------------cahrt width');
 
   return (
     <View>
@@ -155,7 +156,7 @@ const BirthChart = ({
           onPress={() => setChangeKundliOpen(true)}>
           <ChangeIcon size={30} color={colors.primary_surface} />
         </Pressable>
-        <Pressable
+        {/* <Pressable
           style={{
             height: verticalScale(40),
             width: verticalScale(40),
@@ -166,7 +167,7 @@ const BirthChart = ({
             borderRadius: scale(20),
           }}>
           <DocumentDownloadIcon size={24} color={colors.primary_surface} />
-        </Pressable>
+        </Pressable> */}
       </View>
       <ScrollView
         style={{marginBottom: verticalScale(20)}}

@@ -1,4 +1,10 @@
-import React, {useRef, useState, useImperativeHandle, forwardRef} from 'react';
+import React, {
+  useRef,
+  useState,
+  useImperativeHandle,
+  forwardRef,
+  useEffect,
+} from 'react';
 import {
   View,
   Animated,
@@ -9,9 +15,10 @@ import {
   Easing,
   Image,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
-import {logout} from '../store/reducer/auth';
+import {logout, setBalance} from '../store/reducer/auth';
 import WalletIcon from '../assets/icons/walletIcon';
 import {moderateScale, scale, verticalScale} from '../utils/sizer';
 import {colors, themeColors} from '../constants/colors';
@@ -31,6 +38,8 @@ import {useUserRole} from '../hooks/use-role';
 import HoroscopeIcon from '../assets/icons/horoscope-icon';
 import {useWebSocket} from '../hooks/use-socket';
 import {useTranslation} from 'react-i18next';
+import {getTransactionHistory} from '../store/reducer/payment';
+import Toast from 'react-native-toast-message';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -121,6 +130,7 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
   const {user} = useAppSelector(state => state.auth);
   const {disconnect} = useWebSocket(user.id);
   const {t} = useTranslation();
+  const [loading, setLoading] = useState(false);
 
   useImperativeHandle(ref, () => ({
     open,
@@ -168,16 +178,17 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
   };
 
   const handleLogout = async () => {
+    setLoading(true);
     try {
       await dispatch(logout());
       dispatch(clearSession());
       disconnect();
     } catch (err) {
       console.log(err);
+    } finally {
+      setLoading(false);
     }
   };
-
-  if (!visible) return null;
 
   const handleNavigation = (href: string) => {
     close();
@@ -185,6 +196,39 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
   };
 
   const filteredNavitem = navItems.filter(item => item.allowed?.includes(role));
+
+  const getTransactionDetails = async () => {
+    try {
+      setLoading(true);
+      const payload = await dispatch(
+        getTransactionHistory({userId: user, query: `?page=1`}),
+      ).unwrap();
+
+      if (payload.success) {
+        dispatch(setBalance({balance: payload?.wallet?.balance ?? 0}));
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Failed to get transactions',
+        });
+      }
+    } catch (err) {
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to get transactions',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (visible) {
+      getTransactionDetails();
+    }
+  }, [visible]);
+
+  if (!visible) return null;
 
   return (
     <View style={StyleSheet.absoluteFill}>
@@ -222,9 +266,13 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
               </View>
               <View style={styles.walletContainer}>
                 <WalletIcon />
-                <Text style={styles.walletText}>
-                  ₹ {user?.walletBalance ?? 0}
-                </Text>
+                {loading ? (
+                  <ActivityIndicator size={12} />
+                ) : (
+                  <Text style={styles.walletText}>
+                    ₹ {user?.walletBalance ?? 0}
+                  </Text>
+                )}
               </View>
             </View>
           </View>

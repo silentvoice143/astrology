@@ -8,11 +8,11 @@ import {colors} from '../constants/colors';
 import OtpInput from '../components/otp-input';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {verifyOtp} from '../store/reducer/auth';
-import {setDefaultUser, setKundliPerson} from '../store/reducer/kundli';
 import {UserPersonalDetail} from '../utils/types';
 
 const Otp = () => {
   const {otp, mobile} = useAppSelector((state: any) => state.auth);
+
   const dispatch = useAppDispatch();
   const [otpInput, setOtpInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -36,7 +36,6 @@ const Otp = () => {
         };
       }
     } catch (err) {
-      console.log(err);
     } finally {
       setLoading(false);
     }
@@ -64,7 +63,7 @@ const Otp = () => {
       <View style={styles.formWrapper}>
         <Text style={[textStyle.fs_mont_36_700]}>Otp Verification</Text>
         <Text style={[textStyle.fs_mont_16_400]}>
-          Verify your otp sent to +91 1234567890
+          Verify your otp sent to +91 {mobile}
         </Text>
         <OtpInput
           containerStyle={{marginTop: verticalScale(64)}}

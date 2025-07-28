@@ -7,6 +7,7 @@ import sessionReducer from './reducer/session';
 import settingReducer from './reducer/settings';
 import generalReducer from './reducer/general';
 import horoscopeReducer from './reducer/horoscope';
+import paymentReducer from './reducer/payment';
 const rootReducer = combineReducers({
   auth: authReducer,
   user: userReducer,
@@ -15,6 +16,7 @@ const rootReducer = combineReducers({
   setting: settingReducer,
   general: generalReducer,
   horoscope: horoscopeReducer,
+  payment: paymentReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;

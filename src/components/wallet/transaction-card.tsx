@@ -1,18 +1,21 @@
 import {StyleSheet, Text, View} from 'react-native';
 import {Transaction} from '../../utils/types';
 import {scale, verticalScale} from '../../utils/sizer';
+import {formatRelativeDate} from '../../utils/utils';
 
 const WalletTransactionCard = ({transaction}: {transaction: Transaction}) => {
-  const isCredit = transaction.type === 'credit';
+  const isCredit = transaction.type === 'CREDIT';
 
   return (
     <View style={styles.cardContainer}>
       <View style={{flex: 1}}>
-        <Text style={styles.title}>{transaction.title}</Text>
+        <Text style={styles.title}>{transaction.type}</Text>
         <Text style={styles.description}>{transaction.description}</Text>
       </View>
       <View style={styles.rightSection}>
-        <Text style={styles.dateText}>{transaction.date}</Text>
+        <Text style={styles.dateText}>
+          {formatRelativeDate(transaction.timestamp)}
+        </Text>
         <Text
           style={[styles.amount, {color: isCredit ? '#28a745' : '#d32f2f'}]}>
           ₹{Math.abs(transaction.amount)}

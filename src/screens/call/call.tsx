@@ -88,6 +88,8 @@ const CallScreen = () => {
   const waitingInterval = useRef<NodeJS.Timeout | null>(null);
   const socketUnsubscribe = useRef<(() => void) | null>(null);
 
+  const subscribedTopics = useRef<Set<string>>(new Set());
+
   // Check permissions
   const checkPermissions = async () => {
     if (Platform.OS === 'android') {
@@ -151,15 +153,15 @@ const CallScreen = () => {
       .padStart(2, '0')}`;
   };
 
+  const sessionIdToUse = callSession?.id || sessionId;
+  console.log('🔌 Setting up socket listeners for session:', sessionIdToUse);
+  const timerTopic = `/topic/call/${sessionIdToUse}/timer`;
+  const endTopic = `/topic/call/${sessionIdToUse}`;
+
   // Socket Listeners
   const setupSocketListeners = () => {
-    const sessionIdToUse = callSession?.id || sessionId;
-    console.log('🔌 Setting up socket listeners for session:', sessionIdToUse);
-
-    const subscriptions: any[] = [];
-
     if (sessionIdToUse) {
-      const timerSub = subscribe(`/topic/call/${sessionIdToUse}/timer`, msg => {
+      const timerSub = subscribe(timerTopic, msg => {
         try {
           const timeData = decodeMessageBody(msg);
           console.log('⏱️ Timer update from socket:', timeData);
@@ -168,9 +170,8 @@ const CallScreen = () => {
           console.error('Timer message parse error:', err);
         }
       });
-      subscriptions.push(timerSub);
-
-      const endSub = subscribe(`/topic/call/${sessionIdToUse}`, msg => {
+      subscribedTopics.current.add(timerTopic);
+      const endSub = subscribe(endTopic, msg => {
         try {
           const data = JSON.parse(decodeMessageBody(msg));
           console.log('📞 Call status update:', data);
@@ -181,22 +182,13 @@ const CallScreen = () => {
           console.error('Call end message parse error:', err);
         }
       });
-      subscriptions.push(endSub);
     }
-
-    console.log(`📡 Set up ${subscriptions.length} socket subscriptions`);
+    subscribedTopics.current.add(endTopic);
 
     return () => {
       console.log('🧹 Cleaning up socket listeners');
-      // subscriptions.forEach(sub => {
-      //   try {
-      //     sub?.unsubscribe();
-      //   } catch (error) {
-      //     console.error('Error unsubscribing:', error);
-      //   }
-      // });
-      unsubscribe(`/topic/call/${sessionIdToUse}/timer`),
-        unsubscribe(`/topic/call/${sessionIdToUse}`);
+      subscribedTopics.current.forEach(topic => unsubscribe(topic));
+      subscribedTopics.current.clear();
     };
   };
 
@@ -210,6 +202,16 @@ const CallScreen = () => {
       text2: 'The astrologer did not respond',
     });
     setTimeout(() => navigation.goBack(), 2000);
+  };
+
+  const sendCallEndSignal = () => {
+    send(
+      '/app/call.end',
+      {},
+      JSON.stringify({
+        sessionId: sessionIdToUse,
+      }),
+    );
   };
 
   const handleCallCancel = () => {
@@ -277,7 +279,7 @@ const CallScreen = () => {
         (new Date().getTime() - callStartTime.getTime()) / 1000,
       );
     }
-
+    sendCallEndSignal();
     dispatch(clearCallSession());
 
     // Cleanup socket listeners
@@ -576,6 +578,7 @@ const CallScreen = () => {
       console.log('🧹 Component cleanup');
       stopTimer();
       stopWaitingTimer();
+      console.log(socketUnsubscribe.current);
       if (socketUnsubscribe.current) {
         socketUnsubscribe.current();
       }
@@ -717,7 +720,7 @@ const styles = StyleSheet.create({
   },
   timerOverlay: {
     position: 'absolute',
-    top: verticalScale(50),
+    top: '10%',
     left: 0,
     right: 0,
     zIndex: 1000,

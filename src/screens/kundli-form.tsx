@@ -11,7 +11,6 @@ import CustomButton from '../components/custom-button';
 import {textStyle} from '../constants/text-style';
 import {colors} from '../constants/colors';
 import {useAppDispatch} from '../hooks/redux-hook';
-import {postUserDetail} from '../store/reducer/user';
 import {setKundliPerson} from '../store/reducer/kundli';
 import {useNavigation} from '@react-navigation/native';
 
@@ -31,9 +30,9 @@ const KundliForm = () => {
     gender: '',
     birthDate: now.toISOString().split('T')[0],
     birthTime: now.toTimeString().split(' ')[0],
-    birthPlace: 'heaven',
-    latitude: 34,
-    longitude: 45,
+    birthPlace: '',
+    latitude: 22.5744,
+    longitude: 88.3629,
   });
   const dispatch = useAppDispatch();
   const navigation = useNavigation<any>();
@@ -158,7 +157,7 @@ const KundliForm = () => {
             contentContainerStyle={{paddingHorizontal: 0}}
           />
 
-          <LocationAutoComplete
+          {/* <LocationAutoComplete
             label="Place of Birth"
             value={personalDetail?.birthPlace}
             onSelectLocation={location => {
@@ -169,6 +168,19 @@ const KundliForm = () => {
                 longitude: Number(location.lon),
               }));
             }}
+          /> */}
+          <CustomInputV2
+            label="Place of Birth"
+            placeholder="Enter your birth place"
+            value={personalDetail?.birthPlace}
+            onChangeText={val =>
+              setPersonalDetail(prev => ({
+                ...prev,
+                birthPlace: val,
+                latitude: 22.5744,
+                longitude: 88.3629,
+              }))
+            }
           />
           <View style={{gap: scale(4), marginTop: verticalScale(20)}}>
             <CustomButton

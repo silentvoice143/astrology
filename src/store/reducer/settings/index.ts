@@ -13,7 +13,7 @@ interface SettingState {
 }
 
 const initialState: SettingState = {
-  language: 'en',
+  language: 'bn',
 };
 
 const settingSlice = createSlice({

@@ -18,24 +18,14 @@ import Tab from '../components/tab';
 import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {
+  getCallHistory,
   getChatHistory,
   setOtherUser,
   setSession,
 } from '../store/reducer/session';
 import {useUserRole} from '../hooks/use-role';
-import {ChatSession, UserDetail} from '../utils/types';
+import {CallSession, ChatSession, UserDetail} from '../utils/types';
 import AboutIcon from '../assets/icons/about-icon';
-
-interface CallItem {
-  id: string;
-  name: string;
-  callType: 'incoming' | 'outgoing' | 'missed';
-  duration: string;
-  time: string;
-  avatar: {
-    uri: string;
-  };
-}
 
 const ChatHistory = () => {
   const onEndReachedCalledDuringMomentum = useRef(false);
@@ -44,17 +34,22 @@ const ChatHistory = () => {
   const [activeTab, setActiveTab] = useState('chat');
   const navigation = useNavigation<any>();
   const [messageItems, setMessageItems] = useState<ChatSession[]>([]);
+  const [callItems, setCallItems] = useState<CallSession[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const role = useUserRole();
-  const activeSessionId = useAppSelector(
-    state => state.session.activeSession?.id,
-  );
+
   const dispatch = useAppDispatch();
   const isFocused = useIsFocused();
-  console.log(activeSessionId, '----active session id');
+
+  const resetPagination = () => {
+    setCallItems([]);
+    setMessageItems([]);
+    setCurrentPage(1);
+    setHasMore(true);
+  };
 
   const getChatHistoryDetail = async (page: number) => {
     if (loading || !hasMore) return;
@@ -63,7 +58,7 @@ const ChatHistory = () => {
       const payload = await dispatch(
         getChatHistory(`?page=${page}&limit=${5}`),
       ).unwrap();
-      console.log(payload.chatHistory, '---chat history');
+
       if (payload.success) {
         setMessageItems(prev => [...prev, ...payload.chatHistory]);
         setCurrentPage(payload.currentPage);
@@ -75,7 +70,30 @@ const ChatHistory = () => {
         setMessageItems([]);
       }
     } catch (err) {
-      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const getCallHistoryDetail = async (page: number) => {
+    if (loading || !hasMore) return;
+    try {
+      setLoading(true);
+      const payload = await dispatch(
+        getCallHistory(`?page=${page}&limit=${5}`),
+      ).unwrap();
+
+      if (payload.success) {
+        setCallItems(prev => [...prev, ...payload.chatHistory]);
+        setCurrentPage(payload.currentPage);
+        setHasMore(!payload.isLastPage);
+        if (page === 1) {
+          setInitialLoadDone(true);
+        }
+      } else {
+        setCallItems([]);
+      }
+    } catch (err) {
     } finally {
       setLoading(false);
     }
@@ -83,14 +101,15 @@ const ChatHistory = () => {
 
   useEffect(() => {
     if (isFocused) {
-      setMessageItems([]);
-      setCurrentPage(1);
-      setHasMore(true);
-      setInitialLoadDone(false);
-      setLoading(false);
-      // small delay ensures reset finishes
+      resetPagination();
+
+      // Delay fetching to let reset happen cleanly
       setTimeout(() => {
-        getChatHistoryDetail(1);
+        if (activeTab === 'chat') {
+          getChatHistoryDetail(1);
+        } else {
+          getCallHistoryDetail(1);
+        }
       }, 50);
     }
   }, [isFocused, activeTab]);
@@ -104,23 +123,14 @@ const ChatHistory = () => {
           dispatch(setSession(item));
           navigation.navigate('chat');
         }}>
-        <ChatHistoryCard
-          data={item}
-          active={item.status === 'ACTIVE' && activeSessionId === item.id}
-        />
+        <ChatHistoryCard data={item} active={item.status === 'ACTIVE'} />
       </TouchableOpacity>
     );
   };
 
-  const renderCallItem = ({item}: {item: CallItem}) => (
+  const renderCallItem = ({item}: {item: CallSession}) => (
     <TouchableOpacity>
-      <CallHistoryCard
-        name={item.name}
-        callType={item.callType}
-        duration={item.duration}
-        time={item.time}
-        avatar={item.avatar}
-      />
+      <CallHistoryCard data={item} />
     </TouchableOpacity>
   );
 
@@ -132,10 +142,7 @@ const ChatHistory = () => {
 
   return (
     <ScreenLayout headerBackgroundColor={headerBgColor}>
-      <View style={{paddingTop: verticalScale(20)}}>
-        <View
-          style={{height: 50, width: '100%', position: 'absolute', top: 0}}
-        />
+      {/* <View style={{paddingTop: verticalScale(20)}}>
         <View style={{paddingHorizontal: scale(24)}}>
           <AnimatedSearchInput
             placeholder={getPlaceholderText()}
@@ -144,7 +151,7 @@ const ChatHistory = () => {
             focusedBorderColor={themeColors.border.secondary}
           />
         </View>
-      </View>
+      </View> */}
 
       {/* Tab */}
       <View>
@@ -196,7 +203,7 @@ const ChatHistory = () => {
             ) : null
           }
           ListEmptyComponent={
-            !loading ? (
+            !loading && initialLoadDone ? (
               <View
                 style={{
                   height: verticalScale(400),
@@ -211,11 +218,53 @@ const ChatHistory = () => {
         />
       ) : (
         <FlatList
-          data={[]} // TODO: replace with call data
+          data={callItems}
           renderItem={renderCallItem}
-          keyExtractor={item => item.id}
+          keyExtractor={(item, index) =>
+            `${item.id}-${item.startedAt}-${index}`
+          }
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
+          onEndReached={() => {
+            if (
+              !onEndReachedCalledDuringMomentum.current &&
+              initialLoadDone &&
+              hasMore
+            ) {
+              getChatHistoryDetail(currentPage + 1);
+              onEndReachedCalledDuringMomentum.current = true;
+            }
+          }}
+          onMomentumScrollBegin={() => {
+            onEndReachedCalledDuringMomentum.current = false;
+          }}
+          onEndReachedThreshold={0.2}
+          ListFooterComponent={
+            loading ? (
+              <View
+                style={{
+                  flex: 1,
+                  minHeight: 400,
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <ActivityIndicator size="small" style={{marginVertical: 10}} />
+              </View>
+            ) : null
+          }
+          ListEmptyComponent={
+            !loading && initialLoadDone ? (
+              <View
+                style={{
+                  height: verticalScale(400),
+                  justifyContent: 'center',
+                  alignItems: 'center',
+                }}>
+                <AboutIcon color={themeColors.status.info.dark} />
+                <Text style={[textStyle.fs_mont_16_500]}>No Call History</Text>
+              </View>
+            ) : null
+          }
         />
       )}
     </ScreenLayout>

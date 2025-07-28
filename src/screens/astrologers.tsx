@@ -28,6 +28,7 @@ import {
   setSession,
 } from '../store/reducer/session';
 import {useDebounce} from '../hooks/use-debounce';
+import Toast from 'react-native-toast-message';
 
 type SessionType = 'chat' | 'audio' | 'video'; // NEW
 
@@ -102,46 +103,11 @@ const Astrologers = () => {
         setHasMore(!payload.isLastPage);
       }
     } catch (error) {
-      console.log('fetchAstrologersData Error : ', error);
     } finally {
       if (append) setIsFetchingMore(false);
       else setLoading(false);
     }
   };
-
-  // const fetchAstrologersData = async () => {
-  //   try {
-  //     setLoading(true);
-  //     const payload = await dispatch(getAllAstrologers('?page=1')).unwrap();
-  //     console.log(payload, 'payload----------------- fetchAstrologersData');
-  //     if (payload.success) {
-  //       const customAstro = payload?.astrologers?.map((astro: any) => {
-  //         return {
-  //           online: astro?.online,
-  //           id: astro?.id,
-  //           name: astro?.user?.name,
-  //           userId: astro?.user?.id,
-  //           user: astro?.user,
-  //           expertise: astro?.expertise,
-  //           pricePerMinuteChat: astro?.pricePerMinuteChat || 0, // CHANGED: Use actual numbers
-  //           pricePerMinuteVideo: astro?.pricePerMinuteVideo || 0,
-  //           pricePerMinuteVoice: astro?.pricePerMinuteVoice || 0,
-  //           rating: astro?.rating || null,
-  //           experience: `${astro?.experienceYears} Years`,
-  //           languages: astro?.languages,
-  //           imageUri:
-  //             astro?.imgUri ||
-  //             'https://img.freepik.com/free-vector/young-man-orange-hoodie_1308-175788.jpg?ga=GA1.1.1570607994.1749976697&semt=ais_hybrid&w=740',
-  //         };
-  //       });
-  //       setAstrologersData(customAstro);
-  //     }
-  //   } catch (error) {
-  //     console.log('fetchAstrologersData Error : ', error);
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
 
   const requestSession = async (astrologer: AstrologerWithPricing) => {
     if (activeSession && activeSession?.astrologer?.id === astrologer.id) {
@@ -155,17 +121,17 @@ const Astrologers = () => {
       if (payload.success) {
         dispatch(setOtherUser(astrologer));
         navigation.navigate('chat');
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Failed to send request',
+        });
       }
-
-      console.log(payload);
-    } catch (err) {
-      console.log('sendSessionRequest Error : ', err);
-    }
+    } catch (err) {}
   };
 
   useEffect(() => {
-    console.log('fetching data');
-    fetchAstrologersData(1, false, debouncedSearch); // reset to page 1 on new search
+    fetchAstrologersData(1, false, debouncedSearch);
   }, [debouncedSearch, sort]);
 
   // CHANGED: Handle session start with session type and pricing
@@ -173,9 +139,7 @@ const Astrologers = () => {
     astrologer: AstrologersType,
     sessionType: SessionType,
   ) => {
-    console.log('starting session');
     if (isProfileComplete) {
-      console.log('handling session');
       const astrologerWithPricing: AstrologerWithPricing = {
         ...astrologer.user,
         pricePerMinuteChat: astrologer.pricePerMinuteChat,
@@ -224,6 +188,10 @@ const Astrologers = () => {
       </ScreenLayout>
     );
   }
+
+  const sortedAstrologers = astrologersData.sort((a, b) => {
+    return (b.online === true ? 1 : 0) - (a.online === true ? 1 : 0);
+  });
 
   return (
     <ScreenLayout>
@@ -274,7 +242,7 @@ const Astrologers = () => {
 
       <FlatList
         showsVerticalScrollIndicator={false}
-        data={astrologersData}
+        data={sortedAstrologers}
         keyExtractor={item => `card-astrologer-${item.id}`}
         contentContainerStyle={{paddingBottom: verticalScale(20)}}
         onEndReached={() => {

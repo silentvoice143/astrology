@@ -26,7 +26,7 @@ api.interceptors.request.use(
       urlPath.startsWith(path),
     );
     console.log('🔗 API Request:', {
-      url: config?.baseURL + config?.url,
+      url: (config?.baseURL ?? '') + config?.url,
       method: config.method?.toUpperCase(),
       payload: config.data || null,
       params: config.params,

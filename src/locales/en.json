@@ -3,6 +3,19 @@
   "common": {
     "min": "min"
   },
+  "homePage": {
+    "search_placeholder": "Search here for pandits",
+    "live_astrologers": "Live Astrologers",
+    "top_astrologers": "Top Astrologers",
+    "call_now": "Call Now",
+    "chat_now": "Chat Now",
+    "quick_nav": {
+      "horoscope": "Horoscope",
+      "kundli": "Kundli",
+      "match-making": "Match Making",
+      "tarot": "Tarot"
+    }
+  },
   "dasha": {
     "maha-dasha": "Maha Dasha",
     "antar-dasha": "Antar Dasha",

@@ -42,7 +42,9 @@ const sessionSlice = createSlice({
     setSession(state, action: PayloadAction<ChatSession>) {
       state.session = action.payload;
     },
-
+    setActiveSession(state, action: PayloadAction<ChatSession>) {
+      state.activeSession = action.payload;
+    },
     setCallSession(state, action: PayloadAction<CallSession>) {
       state.callSession = action.payload;
     },
@@ -121,6 +123,7 @@ export const {
   incrementQueueRequest,
   clearQueueRequestCount,
   toggleCountRefresh,
+  setActiveSession,
 } = sessionSlice.actions;
 
 export {

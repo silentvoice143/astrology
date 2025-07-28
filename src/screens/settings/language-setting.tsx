@@ -16,7 +16,9 @@ import i18n from '../../../i18n';
 import {useTranslation} from 'react-i18next';
 
 const LanguageSetting = () => {
-  const selectedLanguage = useAppSelector(state => state.setting.language);
+  const selectedLanguage = useAppSelector(
+    state => state.setting.language ?? 'bn',
+  );
   const dispatch = useAppDispatch();
   const {t} = useTranslation();
 
@@ -26,7 +28,7 @@ const LanguageSetting = () => {
     {code: 'bn', name: 'Bengali', nativeName: 'বাংলা'},
   ];
 
-  const handleSelectLanguage = code => {
+  const handleSelectLanguage = (code: string) => {
     i18n.changeLanguage(code);
     dispatch(setLanguage(code));
   };

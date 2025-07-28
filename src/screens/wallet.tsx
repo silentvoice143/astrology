@@ -1,95 +1,153 @@
-import {View, Text, TouchableOpacity, StyleSheet, FlatList} from 'react-native';
-import React from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  FlatList,
+  ActivityIndicator,
+  Alert,
+} from 'react-native';
+import React, {useEffect, useRef, useState} from 'react';
 import ScreenLayout from '../components/screen-layout';
-import {colors} from '../constants/colors';
+import {colors, themeColors} from '../constants/colors';
 import {moderateScale, scale, verticalScale} from '../utils/sizer';
 import {textStyle} from '../constants/text-style';
 import CustomButton from '../components/custom-button';
 import AnimatedSearchInput from '../components/custom-searchbox';
 import {Transaction} from '../utils/types';
 import WalletTransactionCard from '../components/wallet/transaction-card';
-import {useAppSelector} from '../hooks/redux-hook';
+import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {RootState} from '../store';
-
-const transactions: Transaction[] = [
-  {
-    id: 'txn1',
-    title: 'Money added',
-    description: 'Money added to wallet',
-    amount: 2000,
-    type: 'credit',
-    date: '04 March 2025',
-  },
-  {
-    id: 'txn2',
-    title: 'Payment sent',
-    description: 'Sent to Akash Mehta',
-    amount: -750,
-    type: 'debit',
-    date: '03 March 2025',
-  },
-  {
-    id: 'txn3',
-    title: 'Money added',
-    description: 'Money added via UPI',
-    amount: 1500,
-    type: 'credit',
-    date: '02 March 2025',
-  },
-  {
-    id: 'txn4',
-    title: 'Cashback received',
-    description: 'March offer cashback',
-    amount: 100,
-    type: 'credit',
-    date: '01 March 2025',
-  },
-  {
-    id: 'txn5',
-    title: 'Subscription payment',
-    description: 'Netflix monthly billing',
-    amount: -499,
-    type: 'debit',
-    date: '28 February 2025',
-  },
-  {
-    id: 'txn7',
-    title: 'Subscription payment',
-    description: 'Netflix monthly billing',
-    amount: -499,
-    type: 'debit',
-    date: '28 February 2025',
-  },
-  {
-    id: 'txn6',
-    title: 'Subscription payment',
-    description: 'Netflix monthly billing',
-    amount: -499,
-    type: 'debit',
-    date: '28 February 2025',
-  },
-  {
-    id: 'txn8',
-    title: 'Subscription payment',
-    description: 'Netflix monthly billing',
-    amount: -499,
-    type: 'debit',
-    date: '28 February 2025',
-  },
-  {
-    id: 'txn9',
-    title: 'Subscription payment',
-    description: 'Netflix monthly billing',
-    amount: -499,
-    type: 'debit',
-    date: '28 February 2025',
-  },
-];
+import {getTransactionHistory} from '../store/reducer/payment';
+import Toast from 'react-native-toast-message';
+import AboutIcon from '../assets/icons/about-icon';
+import RazorpayCheckout from 'react-native-razorpay';
+import CustomInputV1 from '../components/custom-input-v1';
+import {useNavigation} from '@react-navigation/native';
+import {postTopUp} from '../store/reducer/payment/action';
 
 const Wallet = () => {
-  const wallet_balance = useAppSelector(
-    (state: RootState) => state.auth.user.walletBalance,
-  );
+  const onEndReachedCalledDuringMomentum = useRef(false);
+  const {id} = useAppSelector((state: RootState) => state.auth.user);
+  const [amount, setAmount] = React.useState('');
+  const [walletBalance, setWalletBalance] = React.useState(0);
+  const navigate = useNavigation<any>();
+
+  const {name, mobile} = useAppSelector(store => store.auth);
+
+  const [transactions, setTransations] = useState<Transaction[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const dispatch = useAppDispatch();
+
+  const getTransactionDetails = async (page: number = 1) => {
+    if (loading || !hasMore) return;
+    try {
+      const payload = await dispatch(
+        getTransactionHistory({userId: id, query: `?page=${page}`}),
+      ).unwrap();
+
+      if (payload.success) {
+        setWalletBalance(payload?.wallet?.balance ?? 0);
+        if (page === 1) {
+          setTransations(payload?.wallet?.transactions);
+        } else {
+          setTransations(prev => [...prev, ...payload?.wallet?.transactions]);
+        }
+        setCurrentPage(payload.currentPage);
+        setHasMore(!payload.isLastPage);
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Failed to get transactions',
+        });
+      }
+    } catch (err) {
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to get transactions',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const paymentHandler = async (amount: number) => {
+    if (isNaN(amount) || amount <= 0) {
+      Toast.show({
+        type: 'error',
+        text1: 'Please enter a valid amount.',
+      });
+      return;
+    }
+
+    try {
+      const payload = await dispatch(postTopUp(amount)).unwrap();
+
+      if (payload.success) {
+        const orderDetails = JSON.parse(payload?.order);
+
+        const options: any = {
+          description: 'Credits towards consultation',
+          image: 'https://astrosevaa-admin.vercel.app/assets/logo-C7bpBiI4.png',
+          currency: 'INR',
+          key: 'rzp_test_yauCWFzZA5Tbj3',
+          amount: orderDetails.amount_due,
+          name: 'ASTROSEVAA',
+          order_id: orderDetails.id,
+          prefill: {
+            email: '',
+            contact: mobile,
+            name: name,
+          },
+          theme: {color: colors.primarybtn},
+          method: {
+            netbanking: true,
+            card: true,
+            upi: true,
+            wallet: true,
+            emi: false,
+            paylater: true,
+          },
+        };
+
+        RazorpayCheckout.open(options)
+          .then((data: any) => {
+            Toast.show({
+              type: 'success',
+              text1: `Payment Successful`,
+              text2: `Payment ID: ${data.razorpay_payment_id}`,
+            });
+            setAmount('');
+            getTransactionDetails(1);
+          })
+          .catch((error: any) => {
+            Toast.show({
+              type: 'error',
+              text1: 'Payment Failed',
+              text2: `${error.code} | ${error.description}`,
+            });
+            setAmount('');
+            getTransactionDetails(1);
+          });
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Failed to initiate top-up',
+        });
+      }
+    } catch (error) {
+      console.error('TopUp Error:', error);
+      Toast.show({
+        type: 'error',
+        text1: 'Payment initiation failed',
+      });
+    }
+  };
+  useEffect(() => {
+    getTransactionDetails(1);
+  }, []);
 
   return (
     <ScreenLayout>
@@ -112,18 +170,41 @@ const Wallet = () => {
             </Text>
             <Text
               style={[textStyle.fs_abyss_24_400, {color: colors.whiteText}]}>
-              ₹{Math.abs(wallet_balance)}
+              ₹{Math.abs(walletBalance)}
             </Text>
           </View>
-          <View style={{width: 140, height: 40}}>
+          <View
+            style={{
+              flexDirection: 'row',
+              alignItems: 'center',
+              marginTop: verticalScale(12),
+            }}>
+            <View style={{flex: 1, marginRight: scale(8)}}>
+              <CustomInputV1
+                placeholder="Enter amount"
+                keyboardType="numeric"
+                value={amount}
+                onChangeText={setAmount}
+                inputStyle={{
+                  fontSize: scale(14),
+                  paddingVertical: 6,
+                  color: '#fff',
+                }}
+              />
+            </View>
             <CustomButton
               style={{
                 backgroundColor: colors.primary_surface,
                 borderRadius: scale(24),
+                paddingHorizontal: scale(16),
+                paddingVertical: verticalScale(10),
               }}
-              textStyle={[{color: colors.primaryText, lineHeight: 20}]}
+              textStyle={{color: colors.primaryText, fontWeight: '600'}}
               title="Add Balance"
-              onPress={() => {}}
+              onPress={() => {
+                const numericAmount = parseFloat(amount);
+                paymentHandler(numericAmount); // Razorpay is now handled inside
+              }}
             />
           </View>
         </View>
@@ -151,6 +232,47 @@ const Wallet = () => {
                 paddingHorizontal: scale(4), // optional
               }}
               showsVerticalScrollIndicator={false}
+              onEndReached={() => {
+                if (!onEndReachedCalledDuringMomentum.current && hasMore) {
+                  getTransactionDetails(currentPage + 1);
+                  onEndReachedCalledDuringMomentum.current = true;
+                }
+              }}
+              onMomentumScrollBegin={() => {
+                onEndReachedCalledDuringMomentum.current = false;
+              }}
+              onEndReachedThreshold={0.2}
+              ListFooterComponent={
+                loading ? (
+                  <View
+                    style={{
+                      flex: 1,
+                      minHeight: 400,
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <ActivityIndicator
+                      size="small"
+                      style={{marginVertical: 10}}
+                    />
+                  </View>
+                ) : null
+              }
+              ListEmptyComponent={
+                !loading ? (
+                  <View
+                    style={{
+                      height: verticalScale(400),
+                      justifyContent: 'center',
+                      alignItems: 'center',
+                    }}>
+                    <AboutIcon color={themeColors.status.info.dark} />
+                    <Text style={[textStyle.fs_mont_16_500]}>
+                      No Transaction Yet
+                    </Text>
+                  </View>
+                ) : null
+              }
             />
           </View>
         </View>

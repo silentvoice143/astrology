@@ -6,7 +6,6 @@ import {
   TouchableOpacity,
   StyleSheet,
   ScrollView,
-  Dimensions,
   ViewStyle,
   TextStyle,
   ActivityIndicator,
@@ -22,9 +21,6 @@ import {textStyle} from '../constants/text-style';
 import {moderateScale, scale, scaleFont, verticalScale} from '../utils/sizer';
 import LinearGradient from 'react-native-linear-gradient';
 import Avatar from '../components/avatar';
-// import ReviewAvatar from '../components/Profile/ReviewAvatar';
-// import CircularRating from '../components/Profile/CircularRating';
-// import ReviewItem from '../components/Profile/ReviewItem';
 
 // Import interfaces for data types
 import {Astrologers, Review, UserDetail} from '../utils/types';
@@ -36,13 +32,13 @@ import {getAllAstrologerById} from '../store/reducer/astrologers';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {
   sendSessionRequest,
-  setChatUser,
   setOtherUser,
   setSession,
 } from '../store/reducer/session';
 import VideoCallIcon from '../assets/icons/video-call-icon';
 import {setProfileModelToggle} from '../store/reducer/auth';
 import RequestSessionModal from '../components/session/modals/request-session-modal';
+import Toast from 'react-native-toast-message';
 
 type SessionType = 'chat' | 'audio' | 'video'; // NEW
 
@@ -67,20 +63,6 @@ export interface AstrologerUser {
   createdAt: string; // ISO timestamp
   updatedAt: string; // ISO timestamp
 }
-
-// export interface AstrologerProfile {
-//   id: string;
-//   user: UserDetail;
-//   about: string | null;
-//   expertise: string;
-//   experienceYears: number;
-//   languages: string | null;
-//   imgUri: string | null;
-//   pricePerMinuteChat: number;
-//   pricePerMinuteVoice: number;
-//   pricePerMinuteVideo: number;
-//   blocked: boolean;
-// }
 
 type DetailsProfileRouteProp = RouteProp<RootStackParamList, 'DetailsProfile'>;
 
@@ -109,12 +91,11 @@ const DetailsProfile: React.FC = () => {
       try {
         setLoading(true);
         const payload = await dispatch(getAllAstrologerById({id})).unwrap();
-        console.log(payload, 'fetchAstrologersDataById-----');
+
         if (payload.success) {
           setData(payload.astrologer);
         }
       } catch (error) {
-        console.log('fetchAstrologersDataById Error : ', error);
       } finally {
         setLoading(false);
       }
@@ -133,12 +114,13 @@ const DetailsProfile: React.FC = () => {
       if (payload.success) {
         dispatch(setOtherUser(astrologer));
         navigation.navigate('chat');
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Failed to get data. Try again!',
+        });
       }
-
-      console.log(payload);
-    } catch (err) {
-      console.log('sendSessionRequest Error : ', err);
-    }
+    } catch (err) {}
   };
 
   useEffect(() => {
@@ -150,9 +132,7 @@ const DetailsProfile: React.FC = () => {
     astrologer: Astrologers,
     sessionType: SessionType,
   ) => {
-    console.log('starting session');
     if (isProfileComplete) {
-      console.log('handling session');
       const astrologerWithPricing: AstrologerWithPricing = {
         ...astrologer.user,
         pricePerMinuteChat: astrologer.pricePerMinuteChat,
@@ -168,7 +148,6 @@ const DetailsProfile: React.FC = () => {
           requestSession(astrologerWithPricing);
         }
       }
-      // Create astrologer with pricing info
     } else {
       dispatch(setProfileModelToggle());
     }
@@ -390,8 +369,6 @@ const DetailsProfile: React.FC = () => {
           leftIcon={<CallIcon colors={['#ffffff']} height={18} width={18} />}
           textStyle={styles.buttonText}
           onPress={() => {
-            // Handle call action
-            console.log('audio Call button pressed', data);
             if (data) {
               handleSessionStart(data, 'audio');
             }
@@ -404,8 +381,6 @@ const DetailsProfile: React.FC = () => {
           leftIcon={<VideoCallIcon colors={['#ffffff']} size={18} />}
           textStyle={styles.buttonText}
           onPress={() => {
-            // Handle call action
-            console.log('Call button pressed');
             if (data) {
               handleSessionStart(data, 'video');
             }

@@ -28,37 +28,7 @@ export default function AppNavigator() {
   const {connect, isConnected} = useWebSocket(user?.id);
   const {sessionRequest} = useAppSelector(state => state.session);
 
-  const {callRequest, callRequestNotification} = useSessionEvents(
-    user?.id,
-    isAuthenticated && isConnected,
-  );
-
-  console.log(sessionRequest, 'call request hai');
-
-  // useEffect(() => {
-  //   if (callRequestNotification && callRequest.userId) {
-  //     console.log('Setting local call request state');
-  //     setLocalCallRequestVisible(true);
-  //     setLocalCallRequest(callRequest);
-  //   } else {
-  //     setLocalCallRequestVisible(false);
-  //     setLocalCallRequest(null);
-  //   }
-  // }, [callRequestNotification, callRequest]);
-
-  // console.log(callRequest, callRequestNotification, 'call reuiest');
-
-  const handleCloseCallNotification = () => {
-    console.log('Closing call notification');
-    // setLocalCallRequestVisible(false);
-    // setLocalCallRequest(null);
-    dispatch(setRequest(null));
-  };
-
-  const onAccept = () => {
-    // setLocalCallRequest(null);
-    dispatch(setRequest(null));
-  };
+  useSessionEvents(user?.id, isAuthenticated, isConnected);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -67,7 +37,6 @@ export default function AppNavigator() {
           const {payload} = await dispatch(userDetail());
 
           if (payload?.success) {
-            console.log(payload, '------user detail');
             const userDetail: any = payload.user ?? payload.astrologer?.user!;
 
             const astro = payload.astrologer;
