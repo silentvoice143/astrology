@@ -82,6 +82,7 @@ const Astrologers = () => {
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const activeSession = useAppSelector(state => state.session.activeSession);
+  const {onlineAstrologer} = useAppSelector(state => state.astrologer);
 
   const fetchAstrologersData = async (
     pageNumber = 1,
@@ -130,10 +131,6 @@ const Astrologers = () => {
     } catch (err) {}
   };
 
-  useEffect(() => {
-    fetchAstrologersData(1, false, debouncedSearch);
-  }, [debouncedSearch, sort]);
-
   // CHANGED: Handle session start with session type and pricing
   const handleSessionStart = (
     astrologer: AstrologersType,
@@ -164,6 +161,7 @@ const Astrologers = () => {
   useEffect(() => {
     setLoading(true);
     const shuffledData = shuffleArray(astrologersData);
+
     setAstrologersData(shuffledData);
     setTimeout(() => {
       setLoading(false);
@@ -171,10 +169,32 @@ const Astrologers = () => {
   }, [selected]);
 
   useEffect(() => {
+    fetchAstrologersData(1, false, debouncedSearch);
+  }, [debouncedSearch, sort]);
+
+  useEffect(() => {
     setPage(1);
     setHasMore(true);
   }, [debouncedSearch]);
 
+  useEffect(() => {
+    if (!astrologersData.length) return;
+
+    const onlineSet = new Set(onlineAstrologer ?? []);
+
+    setAstrologersData(prev =>
+      prev.map(a => ({
+        ...a,
+        online: onlineSet.has(a.user.id),
+      })),
+    );
+  }, [onlineAstrologer, loading]);
+
+  const sortedAstrologers = astrologersData.sort((a, b) => {
+    return (b.online === true ? 1 : 0) - (a.online === true ? 1 : 0);
+  });
+
+  // console.log(sortedAstrologers, onlineAstrologer, '---sorted Astrologer');
   if (loading) {
     return (
       <ScreenLayout>
@@ -188,11 +208,6 @@ const Astrologers = () => {
       </ScreenLayout>
     );
   }
-
-  const sortedAstrologers = astrologersData.sort((a, b) => {
-    return (b.online === true ? 1 : 0) - (a.online === true ? 1 : 0);
-  });
-
   return (
     <ScreenLayout>
       <View

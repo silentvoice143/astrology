@@ -13,6 +13,7 @@ import {decodeMessageBody} from '../utils/utils';
 
 import {useUserRole} from './use-role';
 import Toast from 'react-native-toast-message';
+import {setOnlineAstrologer} from '../store/reducer/astrologers';
 
 interface CallRequest {
   userId: string;
@@ -28,13 +29,10 @@ export const useSessionEvents = (
   const dispatch = useAppDispatch();
   const {session} = useAppSelector(state => state.session);
   const role = useUserRole();
-  const [callRequestNotification, setCallRequestNotification] = useState(false);
-  const [callRequest, setCallRequest] = useState<CallRequest>({
-    userId: '',
-    callType: 'VOICE',
-  });
 
   const hasSubscribed = useRef(false);
+
+  console.log(role, '---role');
 
   useEffect(() => {
     // Guard: If already subscribed, don't do it again
@@ -44,6 +42,7 @@ export const useSessionEvents = (
     let queueDest = `/topic/queue/${userId}`;
     let requestDest = `/topic/chat/${userId}/chatId`;
     let activeSessionDest = `/topic/session/${userId}`;
+    let onlineAstroDest = `/topic/online/astrologer`;
 
     const queueSub = subscribe(queueDest, msg => {
       try {
@@ -101,18 +100,25 @@ export const useSessionEvents = (
       }
     });
 
-    // const activeSessionSub = subscribe(activeSessionDest, msg => {
-    //   console.log(role, '---role');
-    //   if (role !== 'ASTROLOGER') return;
-    //   try {
-    //     const data = JSON.parse(decodeMessageBody(msg));
-    //     console.log('chat session received', data);
+    const onlineAstroSub = subscribe(onlineAstroDest, msg => {
+      try {
+        const data = JSON.parse(decodeMessageBody(msg));
+        dispatch(setOnlineAstrologer(data));
+      } catch (err) {
+        console.error('Failed to parse chat id:', err);
+      }
+    });
 
-    //     console.log(data);
-    //   } catch (err) {
-    //     console.error('Failed to parse chat id:', err);
-    //   }
-    // });
+    if (role === 'ASTROLOGER') {
+      const activeSessionSub = subscribe(activeSessionDest, msg => {
+        try {
+          const data = JSON.parse(decodeMessageBody(msg));
+          console.log('chat session received', data);
+        } catch (err) {
+          console.error('Failed to parse chat id:', err);
+        }
+      });
+    }
 
     hasSubscribed.current = true;
 
@@ -121,10 +127,11 @@ export const useSessionEvents = (
       unsubscribe(queueDest);
       unsubscribe(requestDest);
       unsubscribe(`/topic/call/${userId}/session`);
-      // if (role !== 'ASTROLOGER') {
-      //   unsubscribe(activeSessionDest);
-      // }
+      unsubscribe(onlineAstroDest);
+      if (role !== 'ASTROLOGER') {
+        unsubscribe(activeSessionDest);
+      }
       hasSubscribed.current = false;
     };
-  }, [subscribe, userId, isAuthenticated, isConnected]);
+  }, [subscribe, userId, isAuthenticated, isConnected, role]);
 };
