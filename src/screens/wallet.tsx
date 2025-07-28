@@ -86,7 +86,6 @@ const Wallet = () => {
 
       if (payload.success) {
         const orderDetails = JSON.parse(payload?.order);
-
         const options: any = {
           description: 'Credits towards consultation',
           image: 'https://astrosevaa-admin.vercel.app/assets/logo-C7bpBiI4.png',
