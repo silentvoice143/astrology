@@ -36,11 +36,11 @@ type RequestType = {
   sessionType: 'AUDIO' | 'VIDEO' | 'CHAT';
   requestedMinutes: number;
   queuePosition: number;
+  user: UserDetail;
 };
 
 // Call type icons (you can replace with your custom icons)
 const CallTypeIcon = ({type}: {type: 'AUDIO' | 'VIDEO' | 'CHAT'}) => {
-  console.log(type, '-------------session type');
   const iconStyle = {
     fontSize: 16,
     color: themeColors.text.primary,
@@ -64,6 +64,12 @@ const UserRequestCard = ({
   onSkip,
   showActions,
   isAnimating,
+}: {
+  data: RequestType;
+  onAccept: () => void;
+  onSkip: () => void;
+  showActions: boolean;
+  isAnimating: boolean;
 }) => {
   const slideAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -157,9 +163,9 @@ const UserRequestCard = ({
               borderWidth: 1,
               borderColor: themeColors.border.primary,
             }}>
-            {data?.avatar ? (
+            {data?.user?.imgUri ? (
               <Image
-                source={{uri: data.avatar}}
+                source={{uri: data.user.imgUri}}
                 style={{
                   width: '100%',
                   height: '100%',
@@ -173,7 +179,7 @@ const UserRequestCard = ({
                   fontWeight: 'bold',
                   color: themeColors.text.primary,
                 }}>
-                {data?.name?.charAt(0)?.toUpperCase() || '?'}
+                {data?.user.name?.charAt(0)?.toUpperCase() || '?'}
               </Text>
             )}
           </View>
@@ -193,7 +199,7 @@ const UserRequestCard = ({
                   {color: '#1F2937', maxWidth: '70%'},
                 ]}
                 numberOfLines={1}>
-                {data?.name || 'Anonymous'}
+                {data?.user?.name || 'Anonymous'}
               </Text>
 
               {/* Call Type Badge */}
@@ -220,9 +226,9 @@ const UserRequestCard = ({
 
             {/* Age and Location */}
             <Text style={[textStyle.fs_mont_14_400, {color: '#6B7280'}]}>
-              {data?.age ? `${data.age} years` : ''}
-              {data?.location && data?.age ? ' • ' : ''}
-              {data?.location || ''}
+              {data?.user?.birthDate ? `${data.user.birthDate} years` : ''}
+              {data?.user?.birthPlace && data?.user?.birthPlace ? ' • ' : ''}
+              {data?.user?.birthTime || ''}
             </Text>
 
             {/* Online Status */}
@@ -342,7 +348,7 @@ const RequestScreen = () => {
     try {
       setRefreshing(true);
       const payload = await dispatch(getQueueRequest()).unwrap();
-      console.log(payload, '-----all session requests');
+
       if (payload.success) {
         // Add queue positions and mock call types for demo
         const usersWithExtras = payload?.users.map(
@@ -360,7 +366,6 @@ const RequestScreen = () => {
         });
       }
     } catch (err) {
-      console.log(err);
       Toast.show({
         type: 'error',
         text1: 'Failed to load requests',
@@ -373,8 +378,6 @@ const RequestScreen = () => {
   const handleAcceptCall = async (user: RequestType) => {
     try {
       const response = await dispatch(acceptCallRequest(user.userId)).unwrap();
-
-      console.log(response, 'response of astrologer');
 
       if (response.success) {
         Toast.show({
@@ -403,7 +406,6 @@ const RequestScreen = () => {
         throw new Error('Failed to accept call');
       }
     } catch (error) {
-      console.error('Accept call error:', error);
       Toast.show({
         type: 'error',
         text1: 'Accept Failed',
@@ -448,7 +450,6 @@ const RequestScreen = () => {
         }
       }
     } catch (err) {
-      console.log(err);
       Toast.show({
         type: 'error',
         text1: 'Failed to accept request',
@@ -470,7 +471,6 @@ const RequestScreen = () => {
         getAllRequests();
       }
     } catch (err) {
-      console.log(err);
       Toast.show({
         type: 'error',
         text1: 'Failed to accept request',
@@ -486,7 +486,7 @@ const RequestScreen = () => {
     setIsAnimating(true);
     try {
       const payload = await dispatch(skipSessionRequest(user.userId)).unwrap();
-      console.log(payload, '----skip res');
+
       if (payload.success) {
         dispatch(clearSession());
         // Remove the skipped user and update queue positions
@@ -496,7 +496,6 @@ const RequestScreen = () => {
         setRequest(updatedRequests);
       }
     } catch (err) {
-      console.log(err);
       Toast.show({
         type: 'error',
         text1: 'Failed to skip request',

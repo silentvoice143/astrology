@@ -370,7 +370,7 @@ const VimshottariDasha = ({active}: {active?: number}) => {
     return (
       <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
         <ActivityIndicator size="large" color={themeColors.surface.darkPink} />
-        <Text>Please wait a moment</Text>
+        <Text>Please wait</Text>
       </View>
     );
   }

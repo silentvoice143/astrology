@@ -20,7 +20,6 @@ export const useQueueCountOnResume = (
   const fetchQueueCount = async () => {
     try {
       const payload = await dispatch(getQueueRequest()).unwrap();
-      console.log(payload, '-----all session requests');
       if (payload.success) {
         dispatch(setQueueCount(payload?.users.length));
       } else {
@@ -30,7 +29,6 @@ export const useQueueCountOnResume = (
         });
       }
     } catch (err) {
-      console.log(err);
     } finally {
       dispatch(toggleCountRefresh());
     }

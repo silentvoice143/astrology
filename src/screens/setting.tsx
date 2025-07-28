@@ -17,6 +17,7 @@ import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {logout} from '../store/reducer/auth';
 import {clearSession} from '../store/reducer/session';
 import {useTranslation} from 'react-i18next';
+import Toast from 'react-native-toast-message';
 
 const settingsOptions = [
   {title: 'Language', screen: 'Language'},
@@ -38,7 +39,10 @@ const Setting = () => {
       await dispatch(logout());
       dispatch(clearSession());
     } catch (err) {
-      console.log(err);
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to logout. Try again',
+      });
     }
   };
   const handlePress = (screen: string) => {

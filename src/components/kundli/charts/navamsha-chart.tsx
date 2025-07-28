@@ -21,6 +21,7 @@ import DocumentDownloadIcon from '../../../assets/icons/download-file-icon';
 import ChangeKundliTypeModal from '../modal/change-type-modal';
 import {makeResponsiveSVG} from '../../../utils/utils';
 import {useTranslation} from 'react-i18next';
+import Toast from 'react-native-toast-message';
 
 const NavamshaChart = ({
   forModal = false,
@@ -90,13 +91,16 @@ const NavamshaChart = ({
           },
         }),
       ).unwrap();
-      // console.log('NAvamshaChart==============', payload);
+
       if (payload) {
         setChartSvg(payload);
       } else {
       }
     } catch (err) {
-      console.log(err);
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to fetch chart',
+      });
     } finally {
       setLoading(false);
     }
@@ -164,7 +168,7 @@ const NavamshaChart = ({
           onPress={() => setChangeKundliOpen(true)}>
           <ChangeIcon size={30} color={colors.primary_surface} />
         </Pressable>
-        <Pressable
+        {/* <Pressable
           style={{
             height: verticalScale(40),
             width: verticalScale(40),
@@ -175,7 +179,7 @@ const NavamshaChart = ({
             borderRadius: scale(20),
           }}>
           <DocumentDownloadIcon size={24} color={colors.primary_surface} />
-        </Pressable>
+        </Pressable> */}
       </View>
       <ScrollView
         style={{marginBottom: verticalScale(20)}}

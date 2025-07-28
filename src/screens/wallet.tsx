@@ -19,7 +19,6 @@ import WalletTransactionCard from '../components/wallet/transaction-card';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {RootState} from '../store';
 import {getTransactionHistory} from '../store/reducer/payment';
-import {showToast} from '../components/toast';
 import Toast from 'react-native-toast-message';
 import AboutIcon from '../assets/icons/about-icon';
 import RazorpayCheckout from 'react-native-razorpay';

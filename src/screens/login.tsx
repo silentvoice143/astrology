@@ -24,7 +24,6 @@ const Login = () => {
         dispatch(setMobile({mobile: phone}));
       }
     } catch (err) {
-      console.log(err);
     } finally {
       setLoading(false);
     }

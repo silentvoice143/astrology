@@ -27,21 +27,15 @@ import TermsAndConditions from '../screens/settings/terms-conditions';
 import PofileEdit from '../screens/pofile-edit';
 import ProfileEdit from '../screens/pofile-edit';
 import {useQueueCountOnResume} from '../hooks/use-queue-count';
-import Payment from '../screens/payment';
-import TelegramInterface from '../screens/demo';
+
 
 const Stack = createNativeStackNavigator();
 
 export default function PrivateRoutes() {
   const {user, isAuthenticated} = useAppSelector((state: any) => state.auth);
-  const navigation = useNavigation<any>();
   const role = useUserRole();
-  const sessionEnded = useAppSelector(state => state.session.sessionEnded);
-
-  console.log(user, '----user');
   useSessionEvents(user?.id, isAuthenticated);
   useQueueCountOnResume(isAuthenticated, role);
-  console.log('calling private route ------');
   return (
     <Stack.Navigator
       initialRouteName="Home"
@@ -70,8 +64,6 @@ export default function PrivateRoutes() {
       <Stack.Screen name="Setting" component={Setting} />
       <Stack.Screen name="Language" component={LanguageSetting} />
       <Stack.Screen name="TermsAndConditions" component={TermsAndConditions} />
-      <Stack.Screen name="Payment" component={Payment} />
-      <Stack.Screen name="demo" component={TelegramInterface} />
     </Stack.Navigator>
   );
 }

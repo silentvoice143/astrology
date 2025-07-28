@@ -40,20 +40,17 @@ const ChatHistory = () => {
   const [hasMore, setHasMore] = useState(true);
   const [initialLoadDone, setInitialLoadDone] = useState(false);
   const role = useUserRole();
-  const activeSessionId = useAppSelector(
-    state => state.session.activeSession?.id,
-  );
+
   const dispatch = useAppDispatch();
   const isFocused = useIsFocused();
-  console.log(activeSessionId, '----active session id');
 
   const resetPagination = () => {
+    setInitialLoadDone(false);
+    setLoading(true);
     setCallItems([]);
     setMessageItems([]);
     setCurrentPage(1);
     setHasMore(true);
-    setInitialLoadDone(false);
-    setLoading(true);
   };
 
   const getChatHistoryDetail = async (page: number) => {
@@ -63,7 +60,7 @@ const ChatHistory = () => {
       const payload = await dispatch(
         getChatHistory(`?page=${page}&limit=${5}`),
       ).unwrap();
-      console.log(payload.chatHistory, '---chat history');
+
       if (payload.success) {
         setMessageItems(prev => [...prev, ...payload.chatHistory]);
         setCurrentPage(payload.currentPage);
@@ -75,7 +72,6 @@ const ChatHistory = () => {
         setMessageItems([]);
       }
     } catch (err) {
-      console.log(err);
     } finally {
       setLoading(false);
     }
@@ -88,7 +84,7 @@ const ChatHistory = () => {
       const payload = await dispatch(
         getCallHistory(`?page=${page}&limit=${5}`),
       ).unwrap();
-      console.log(payload.chatHistory, '---call history');
+
       if (payload.success) {
         setCallItems(prev => [...prev, ...payload.chatHistory]);
         setCurrentPage(payload.currentPage);
@@ -100,24 +96,23 @@ const ChatHistory = () => {
         setCallItems([]);
       }
     } catch (err) {
-      console.log(err);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    resetPagination();
     if (isFocused) {
-      setMessageItems([]);
-      setCurrentPage(1);
-      setHasMore(true);
-      setInitialLoadDone(false);
-      setLoading(false);
-      // small delay ensures reset finishes
+      setLoading(true); // Ensure loading is true before resetting
+      resetPagination();
+
+      // Delay fetching to let reset happen cleanly
       setTimeout(() => {
-        if (activeTab === 'chat') getChatHistoryDetail(1);
-        else getCallHistoryDetail(1);
+        if (activeTab === 'chat') {
+          getChatHistoryDetail(1);
+        } else {
+          getCallHistoryDetail(1);
+        }
       }, 50);
     }
   }, [isFocused, activeTab]);
@@ -131,10 +126,7 @@ const ChatHistory = () => {
           dispatch(setSession(item));
           navigation.navigate('chat');
         }}>
-        <ChatHistoryCard
-          data={item}
-          active={item.status === 'ACTIVE' && activeSessionId === item.id}
-        />
+        <ChatHistoryCard data={item} active={item.status === 'ACTIVE'} />
       </TouchableOpacity>
     );
   };
@@ -153,10 +145,7 @@ const ChatHistory = () => {
 
   return (
     <ScreenLayout headerBackgroundColor={headerBgColor}>
-      <View style={{paddingTop: verticalScale(20)}}>
-        <View
-          style={{height: 50, width: '100%', position: 'absolute', top: 0}}
-        />
+      {/* <View style={{paddingTop: verticalScale(20)}}>
         <View style={{paddingHorizontal: scale(24)}}>
           <AnimatedSearchInput
             placeholder={getPlaceholderText()}
@@ -165,7 +154,7 @@ const ChatHistory = () => {
             focusedBorderColor={themeColors.border.secondary}
           />
         </View>
-      </View>
+      </View> */}
 
       {/* Tab */}
       <View>
@@ -217,7 +206,7 @@ const ChatHistory = () => {
             ) : null
           }
           ListEmptyComponent={
-            !loading ? (
+            !loading && initialLoadDone ? (
               <View
                 style={{
                   height: verticalScale(400),
@@ -267,7 +256,7 @@ const ChatHistory = () => {
             ) : null
           }
           ListEmptyComponent={
-            !loading ? (
+            !loading && initialLoadDone ? (
               <View
                 style={{
                   height: verticalScale(400),

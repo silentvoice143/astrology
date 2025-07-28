@@ -64,6 +64,7 @@ export class WebSocketService {
         '[WebSocketService] STOMP Error:',
         frame.headers['message'],
       );
+      this.onDisconnectCallback?.();
     };
   }
 
@@ -158,7 +159,10 @@ export class WebSocketService {
         sub => sub.id !== stompSubscription.id,
       ); // 🔹 Remove from global list
 
-      console.log(`[WebSocketService] Unsubscribed from ${destination}`);
+      console.log(
+        `[WebSocketService] Unsubscribed from ${destination}`,
+        this.activeSubscriptions,
+      );
     } else {
       console.warn(
         `[WebSocketService] No active subscription found for ${destination}`,

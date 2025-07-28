@@ -10,13 +10,8 @@ import {
 } from 'react-native';
 import EditIcon from '../../assets/icons/edit-icon';
 import ScreenLayout from '../../components/screen-layout';
-import {
-  moderateScale,
-  scale,
-  scaleFont,
-  verticalScale,
-} from '../../utils/sizer';
-import {colors, themeColors} from '../../constants/colors';
+import {scale, verticalScale} from '../../utils/sizer';
+import {themeColors} from '../../constants/colors';
 import {useUserRole} from '../../hooks/use-role';
 import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
 import {textStyle} from '../../constants/text-style';
@@ -27,7 +22,6 @@ import CustomInputV2 from '../../components/custom-input-v2';
 import {useNavigation} from '@react-navigation/native';
 import {UserPersonalDetail} from '../../utils/types';
 import CustomButton from '../../components/custom-button';
-import CloseIcon from '../../assets/icons/close-icon';
 import {formatTimeToDateString} from '../../utils/utils';
 import {launchImageLibrary} from 'react-native-image-picker';
 import {postUserDetail, uploadProfileImage} from '../../store/reducer/user';
@@ -75,9 +69,7 @@ const UserProfileEdit = () => {
       },
       async response => {
         if (response.didCancel) {
-          console.log('User cancelled image picker');
         } else if (response.errorCode) {
-          console.error('ImagePicker Error: ', response.errorMessage);
         } else if (response.assets && response.assets.length > 0) {
           const pickedImage = response.assets[0];
           const imageUri = pickedImage.uri || '';
@@ -154,7 +146,10 @@ const UserProfileEdit = () => {
         navigation.navigate('Profile');
       }
     } catch (err) {
-      console.log(err);
+      Toast.show({
+        type: 'error',
+        text1: 'Error while saving user data',
+      });
     } finally {
       setIsSaving(false);
     }
@@ -162,7 +157,7 @@ const UserProfileEdit = () => {
 
   const handleCaptureImage = async (filePath: string) => {
     if (!filePath) return;
-    console.log(filePath, '---------image path');
+
     try {
       const formData = new FormData();
       formData.append('image', {
@@ -180,7 +175,6 @@ const UserProfileEdit = () => {
         });
       }
     } catch (error) {
-      console.log(error);
       Toast.show({
         type: 'error',
         text1: 'Upload profile image failed',
@@ -188,7 +182,6 @@ const UserProfileEdit = () => {
       });
     }
   };
-  console.log(role, '---------role');
 
   const profileImage =
     user?.gender === 'MALE' || !user?.gender
@@ -207,7 +200,6 @@ const UserProfileEdit = () => {
               <TouchableWithoutFeedback
                 onPress={() => {
                   handlePickImage();
-                  console.log('picking image');
                 }}>
                 <View
                   style={{

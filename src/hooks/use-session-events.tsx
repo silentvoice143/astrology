@@ -1,6 +1,7 @@
 import {useEffect, useRef, useState} from 'react';
 import {useWebSocket} from './use-socket';
 import {
+  setActiveSession,
   setCallSession,
   setOtherUser,
   setRequest,
@@ -20,7 +21,8 @@ interface CallRequest {
 
 export const useSessionEvents = (
   userId: string = '',
-  active: boolean = false,
+  isAuthenticated: boolean = false,
+  isConnected: boolean = false,
 ) => {
   const {subscribe, unsubscribe} = useWebSocket(userId);
   const dispatch = useAppDispatch();
@@ -31,14 +33,17 @@ export const useSessionEvents = (
     userId: '',
     callType: 'VOICE',
   });
+
   const hasSubscribed = useRef(false);
 
   useEffect(() => {
     // Guard: If already subscribed, don't do it again
-    if (!active || !userId || hasSubscribed.current) return;
+    if (!isAuthenticated || !isConnected || !userId || hasSubscribed.current)
+      return;
 
     let queueDest = `/topic/queue/${userId}`;
     let requestDest = `/topic/chat/${userId}/chatId`;
+    let activeSessionDest = `/topic/session/${userId}`;
 
     const queueSub = subscribe(queueDest, msg => {
       try {
@@ -79,7 +84,7 @@ export const useSessionEvents = (
       try {
         const data = JSON.parse(decodeMessageBody(msg));
         console.log('chat session received', data);
-
+        dispatch(setActiveSession(data));
         dispatch(setSession(data));
 
         Toast.show({
@@ -96,6 +101,19 @@ export const useSessionEvents = (
       }
     });
 
+    // const activeSessionSub = subscribe(activeSessionDest, msg => {
+    //   console.log(role, '---role');
+    //   if (role !== 'ASTROLOGER') return;
+    //   try {
+    //     const data = JSON.parse(decodeMessageBody(msg));
+    //     console.log('chat session received', data);
+
+    //     console.log(data);
+    //   } catch (err) {
+    //     console.error('Failed to parse chat id:', err);
+    //   }
+    // });
+
     hasSubscribed.current = true;
 
     return () => {
@@ -103,9 +121,10 @@ export const useSessionEvents = (
       unsubscribe(queueDest);
       unsubscribe(requestDest);
       unsubscribe(`/topic/call/${userId}/session`);
+      // if (role !== 'ASTROLOGER') {
+      //   unsubscribe(activeSessionDest);
+      // }
       hasSubscribed.current = false;
     };
-  }, [subscribe, userId, active]);
-
-  return {callRequest, callRequestNotification};
+  }, [subscribe, userId, isAuthenticated, isConnected]);
 };

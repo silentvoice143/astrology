@@ -8,7 +8,6 @@ import {colors} from '../constants/colors';
 import OtpInput from '../components/otp-input';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {verifyOtp} from '../store/reducer/auth';
-import {setDefaultUser, setKundliPerson} from '../store/reducer/kundli';
 import {UserPersonalDetail} from '../utils/types';
 
 const Otp = () => {
@@ -36,7 +35,6 @@ const Otp = () => {
         };
       }
     } catch (err) {
-      console.log(err);
     } finally {
       setLoading(false);
     }

@@ -86,7 +86,6 @@ const Home = () => {
         setAstrologersData(newData);
       }
     } catch (error) {
-      console.log('fetchAstrologersData Error : ', error);
     } finally {
       setLoading(prev => ({...prev, astrologer: false}));
     }
@@ -103,7 +102,6 @@ const Home = () => {
         setBanner(payload.bannars);
       }
     } catch (error) {
-      console.log('getBannerData Error : ', error);
     } finally {
       setLoading(prev => ({...prev, banner: false}));
     }
