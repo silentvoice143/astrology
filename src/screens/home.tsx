@@ -61,6 +61,7 @@ const Home = () => {
       imgUri: string;
       id: string;
       userId: string;
+      online: boolean;
     }[]
   >([]);
   const ref = React.useRef<ICarouselInstance>(null);
@@ -82,6 +83,7 @@ const Home = () => {
             id: item?.id,
             imgUri: item?.user?.imgUri,
             userId: item?.user?.id,
+            online: item?.online,
           })) || [];
         setAstrologersData(newData);
       }
@@ -155,6 +157,10 @@ const Home = () => {
     fetchAstrologersData();
     getBannerData();
   }, []);
+
+  const sortedAstrologers = astrologersData.sort((a, b) => {
+    return (b.online === true ? 1 : 0) - (a.online === true ? 1 : 0);
+  });
 
   return (
     <ScreenLayout>
@@ -303,7 +309,7 @@ const Home = () => {
                 />
               </View>
             ) : (
-              <SlidingCard data={astrologersData} />
+              <SlidingCard data={sortedAstrologers} />
             )}
           </View>
           <View

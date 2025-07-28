@@ -9,6 +9,19 @@
     "pratyantar-dasha": "प्रत्यंतर दशा",
     "sookshma-dasha": "सूक्ष्म दशा"
   },
+  "homePage": {
+    "search_placeholder": "पंडितों के लिए यहाँ खोजें",
+    "live_astrologers": "लाइव ज्योतिषी",
+    "top_astrologers": "शीर्ष ज्योतिषी",
+    "call_now": "अभी कॉल करें",
+    "chat_now": "अभी चैट करें",
+    "quick_nav": {
+      "horoscope": "राशिफल",
+      "kundli": "कुंडली",
+      "match-making": "मैचमेकिंग",
+      "tarot": "टैरो"
+    }
+  },
   "home": "होम",
   "kundli": "कुंडली",
   "astrologers": "ज्योतिषी",

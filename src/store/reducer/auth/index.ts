@@ -91,6 +91,9 @@ const authSlice = createSlice({
     setMobile(state, action) {
       state.mobile = action.payload.mobile;
     },
+    setBalance(state, action) {
+      state.user.walletBalance = action.payload.balance;
+    },
     setFirstTime(state) {
       state.firstTime = false;
     },
@@ -143,6 +146,7 @@ export const {
   setProfileModelToggle,
   setAuthentication,
   setFreeChatModalShown,
+  setBalance,
 } = authSlice.actions;
 export {loginUser, verifyOtp};
 export default authSlice.reducer;

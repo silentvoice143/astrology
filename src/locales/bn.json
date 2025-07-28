@@ -3,6 +3,20 @@
   "common": {
     "min": "মিনিট"
   },
+
+  "homePage": {
+    "search_placeholder": "পণ্ডিতদের জন্য এখানে অনুসন্ধান করুন",
+    "live_astrologers": "লাইভ জ্যোতিষী",
+    "top_astrologers": "শীর্ষ জ্যোতিষী",
+    "call_now": "এখন কল করুন",
+    "chat_now": "এখন চ্যাট করুন",
+    "quick_nav": {
+      "horoscope": "রাশিফল",
+      "kundli": "কুন্ডলি",
+      "match-making": "ম্যাচমেকিং",
+      "tarot": "ট্যারোট"
+    }
+  },
   "dasha": {
     "maha-dasha": "মহাদশা",
     "antar-dasha": "অন্তরদশা",
@@ -52,6 +66,7 @@
   "Kundli": "কুন্ডলী",
   "Astrologers": "জ্যোতিষীগণ",
   "Requests": "অনুরোধ",
+  "requests": "অনুরোধ",
   "Chat History": "চ্যাট ইতিহাস",
   "Wallet": "ওয়ালেট",
   "Customer Support": "গ্রাহক সহায়তা",

@@ -45,8 +45,6 @@ const ChatHistory = () => {
   const isFocused = useIsFocused();
 
   const resetPagination = () => {
-    setInitialLoadDone(false);
-    setLoading(true);
     setCallItems([]);
     setMessageItems([]);
     setCurrentPage(1);
@@ -103,7 +101,6 @@ const ChatHistory = () => {
 
   useEffect(() => {
     if (isFocused) {
-      setLoading(true); // Ensure loading is true before resetting
       resetPagination();
 
       // Delay fetching to let reset happen cleanly
