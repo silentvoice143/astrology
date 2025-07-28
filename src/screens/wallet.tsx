@@ -23,18 +23,17 @@ import Toast from 'react-native-toast-message';
 import AboutIcon from '../assets/icons/about-icon';
 import RazorpayCheckout from 'react-native-razorpay';
 import CustomInputV1 from '../components/custom-input-v1';
-import {useNavigation} from '@react-navigation/native';
-import {postTopUp} from '../store/reducer/payment/action';
+import {getWithdrawalRequest, postTopUp} from '../store/reducer/payment/action';
+import {useUserRole} from '../hooks/use-role';
+import {showToast} from '../components/toast';
 
 const Wallet = () => {
   const onEndReachedCalledDuringMomentum = useRef(false);
   const {id} = useAppSelector((state: RootState) => state.auth.user);
   const [amount, setAmount] = React.useState('');
   const [walletBalance, setWalletBalance] = React.useState(0);
-  const navigate = useNavigation<any>();
-
+  const role = useUserRole();
   const {name, mobile} = useAppSelector(store => store.auth);
-
   const [transactions, setTransations] = useState<Transaction[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -87,7 +86,6 @@ const Wallet = () => {
 
       if (payload.success) {
         const orderDetails = JSON.parse(payload?.order);
-
         const options: any = {
           description: 'Credits towards consultation',
           image: 'https://astrosevaa-admin.vercel.app/assets/logo-C7bpBiI4.png',
@@ -145,6 +143,26 @@ const Wallet = () => {
       });
     }
   };
+
+  const handelWithdraw = async (amount: number) => {
+    try {
+      const payload = await dispatch(getWithdrawalRequest(amount)).unwrap();
+      if (payload?.success) {
+        Toast.show({
+          type: 'success',
+          text1: payload?.msg,
+        });
+        setAmount('');
+        getTransactionDetails(1);
+      }
+    } catch (error: any) {
+      Toast.show({
+        type: 'error',
+        text1: error?.message,
+      });
+    }
+  };
+
   useEffect(() => {
     getTransactionDetails(1);
   }, []);
@@ -173,40 +191,79 @@ const Wallet = () => {
               ₹{Math.abs(walletBalance)}
             </Text>
           </View>
-          <View
-            style={{
-              flexDirection: 'row',
-              alignItems: 'center',
-              marginTop: verticalScale(12),
-            }}>
-            <View style={{flex: 1, marginRight: scale(8)}}>
-              <CustomInputV1
-                placeholder="Enter amount"
-                keyboardType="numeric"
-                value={amount}
-                onChangeText={setAmount}
-                inputStyle={{
-                  fontSize: scale(14),
-                  paddingVertical: 6,
-                  color: '#fff',
+          {role === 'USER' && (
+            <View
+              style={{
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginTop: verticalScale(12),
+              }}>
+              <View style={{flex: 1, marginRight: scale(8)}}>
+                <CustomInputV1
+                  placeholder="Enter amount"
+                  keyboardType="numeric"
+                  value={amount}
+                  onChangeText={setAmount}
+                  inputStyle={{
+                    fontSize: scale(14),
+                    paddingVertical: 6,
+                    color: '#fff',
+                  }}
+                />
+              </View>
+              <CustomButton
+                style={{
+                  backgroundColor: colors.primary_surface,
+                  borderRadius: scale(24),
+                  paddingHorizontal: scale(16),
+                  paddingVertical: verticalScale(10),
+                }}
+                textStyle={{color: colors.primaryText, fontWeight: '600'}}
+                title="Add Balance"
+                onPress={() => {
+                  const numericAmount = parseFloat(amount);
+                  paymentHandler(numericAmount);
                 }}
               />
             </View>
-            <CustomButton
+          )}
+          {role === 'ASTROLOGER' && (
+            <View
               style={{
-                backgroundColor: colors.primary_surface,
-                borderRadius: scale(24),
-                paddingHorizontal: scale(16),
-                paddingVertical: verticalScale(10),
-              }}
-              textStyle={{color: colors.primaryText, fontWeight: '600'}}
-              title="Add Balance"
-              onPress={() => {
-                const numericAmount = parseFloat(amount);
-                paymentHandler(numericAmount); // Razorpay is now handled inside
-              }}
-            />
-          </View>
+                flexDirection: 'row',
+                alignItems: 'center',
+                marginTop: verticalScale(12),
+              }}>
+              <View style={{flex: 1, marginRight: scale(8)}}>
+                <CustomInputV1
+                  placeholder="Enter amount"
+                  keyboardType="numeric"
+                  value={amount}
+                  onChangeText={setAmount}
+                  inputStyle={{
+                    fontSize: scale(14),
+                    paddingVertical: 6,
+                    color: '#fff',
+                  }}
+                />
+              </View>
+              <CustomButton
+                style={{
+                  backgroundColor: colors.primary_surface,
+                  borderRadius: scale(24),
+                  paddingHorizontal: scale(16),
+                  paddingVertical: verticalScale(10),
+                  marginTop: verticalScale(4),
+                }}
+                textStyle={{color: colors.primaryText, fontWeight: '600'}}
+                title="Withdraw"
+                onPress={() => {
+                  const numericAmount = parseFloat(amount);
+                  handelWithdraw(numericAmount);
+                }}
+              />
+            </View>
+          )}
         </View>
         <View style={{marginTop: verticalScale(24), flex: 1}}>
           <Text style={[textStyle.fs_abyss_20_400]}>Transactions</Text>
@@ -229,7 +286,7 @@ const Wallet = () => {
               ItemSeparatorComponent={() => <View style={styles.separator} />}
               contentContainerStyle={{
                 paddingBottom: scale(16),
-                paddingHorizontal: scale(4), // optional
+                paddingHorizontal: scale(4),
               }}
               showsVerticalScrollIndicator={false}
               onEndReached={() => {

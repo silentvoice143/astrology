@@ -18,6 +18,21 @@ export const getTransactionHistory = createAsyncThunk<
   },
 );
 
+export const getWithdrawalRequest = createAsyncThunk<
+  any,
+  any,
+  {rejectValue: any}
+>('get-payment-history', async (payload: number, {rejectWithValue}) => {
+  try {
+    const response = await api.get(
+      `/api/v1/withdraw/request?amount=${payload}`,
+    );
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});
+
 export const postTopUp = createAsyncThunk<
   any, // response type
   number, // payload must be FormData
