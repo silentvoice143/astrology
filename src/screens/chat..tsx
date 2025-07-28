@@ -60,10 +60,8 @@ export const ChatScreenDemo = () => {
       : useAppSelector((state: RootState) => state.session.session?.astrologer);
   const otherUserId = !session ? tempOtherUser?.id : otherUser?.id;
 
-  // console.log(session, '----this is session');
   const {subscribe, send, unsubscribe} = useWebSocket(userId);
   const [timer, setTimer] = useState<string>('');
-  // const [messages, setMessages] = useState<Message[]>([]);
   const {messages} = useAppSelector(state => state.session);
 
   const [input, setInput] = useState('');
@@ -79,8 +77,6 @@ export const ChatScreenDemo = () => {
   const dispatch = useAppDispatch();
   const navigation = useNavigation<any>();
 
-  // console.log(session, '-----session');
-
   // ==============distinations===============
   const messageSubDest = `/topic/chat/${userId}/messages`;
   const typingSubDest = `/topic/chat/${userId}/typing`;
@@ -93,7 +89,6 @@ export const ChatScreenDemo = () => {
       const payload = await dispatch(
         getChatMessages(`/${session?.id}?page=${page}&size=${15}`),
       ).unwrap();
-      // console.log(payload.messages, '----payload');
       if (payload.success) {
         if (page === 1) {
           dispatch(setMessage(payload.messages));
@@ -106,7 +101,6 @@ export const ChatScreenDemo = () => {
         addMessage([]);
       }
     } catch (err) {
-      console.log(err);
     } finally {
       setLoading(false);
     }
@@ -141,7 +135,6 @@ export const ChatScreenDemo = () => {
         dispatch(addMessage(newMsg));
       }
     } catch (error) {
-      console.log(error);
       Toast.show({
         type: 'error',
         text1: 'Upload Failed',
@@ -160,10 +153,7 @@ export const ChatScreenDemo = () => {
       chatMessage = subscribe(messageSubDest, msg => {
         try {
           const data = JSON.parse(decodeMessageBody(msg));
-          console.log(data);
           dispatch(addMessage(data));
-          // console.log('Adding msgs');
-          // You may want to dispatch(addMessage(data)) here if needed
         } catch (err) {
           console.error('Failed to parse chat message:', err);
         }
@@ -173,7 +163,6 @@ export const ChatScreenDemo = () => {
           const data = JSON.parse(decodeMessageBody(msg));
           if (data.senderId === otherUserId) {
             setOtherUserTyping(data.typing);
-            // console.log('typing.....');
           }
           console.log(JSON.parse(decodeMessageBody(msg)));
         } catch (err) {
@@ -192,7 +181,6 @@ export const ChatScreenDemo = () => {
       chatEndSub = subscribe(chatEndDest, msg => {
         try {
           const data = JSON.parse(decodeMessageBody(msg));
-          // console.log(data);
           if (data.status === 'ended') {
             dispatch(
               setSession({
@@ -315,38 +303,20 @@ export const ChatScreenDemo = () => {
     getChatMessagesDetails(1);
   }, [session]);
 
-  // useEffect(() => {
-  //   console.log('back click');
-  //   return () => {
-  //     console.log('Leave request sent to /chat.leave');
-  //     if (userId && otherUserId && role === 'USER' && !session) {
-  //       handleLeave();
-  //     }
-  //   };
-  // }, [userId, otherUserId]);
-
-  // useEffect(() => {
-  //   const backHandler = BackHandler.addEventListener(
-  //     'hardwareBackPress',
-  //     () => {
-  //       console.log('back to chatScreen');
-  //       if (role === 'USER' && userId && otherUserId && !session) {
-  //         send(
-  //           '/chat.leave',
-  //           {},
-  //           JSON.stringify({
-  //             userId: userId,
-  //             astrologerId: otherUserId,
-  //           }),
-  //         );
-  //         console.log('Leave request sent to /chat.leave');
-  //       }
-  //       navigation.replace('ChatHistory');
-  //       return true;
-  //     },
-  //   );
-  //   return () => backHandler.remove();
-  // }, []);
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        if (role === 'USER' && userId && otherUserId && !session) {
+          handleLeave();
+          return;
+        }
+        navigation.replace('ChatHistory');
+        return true;
+      },
+    );
+    return () => backHandler.remove();
+  }, []);
 
   const renderMessage = ({item}: {item: Message}) => {
     const isMine = item.senderId === userId;

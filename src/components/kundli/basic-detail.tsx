@@ -21,6 +21,7 @@ import EditIcon from '../../assets/icons/edit-icon';
 import {textStyle} from '../../constants/text-style';
 import {useRoute} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
+import Toast from 'react-native-toast-message';
 
 const BasicDetails = ({active}: {active?: number}) => {
   const [openedForOther, setOpenedForOther] = useState(false);
@@ -34,7 +35,6 @@ const BasicDetails = ({active}: {active?: number}) => {
   const [loading, setLoading] = useState(false);
   const fetchKundliDetails = async () => {
     setLoading(true);
-    console.log('fetching kundli data');
     try {
       const payload = await dispatch(
         getPersonKundliDetail({
@@ -47,12 +47,15 @@ const BasicDetails = ({active}: {active?: number}) => {
           query: {lan: t('lan')},
         }),
       ).unwrap();
-      console.log(payload, '---kundli details');
+
       if (payload.success) {
         setKundliDetail(payload.data.data);
       }
     } catch (err) {
-      console.error('Error fetching kundli details:', err);
+      Toast.show({
+        type: 'error',
+        text1: 'Error fetching kundli details',
+      });
     } finally {
       setLoading(false);
     }

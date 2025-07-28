@@ -4,11 +4,8 @@ import {
   Text,
   Image,
   ScrollView,
-  Switch,
   StyleSheet,
-  Touchable,
   TouchableOpacity,
-  TouchableWithoutFeedback,
 } from 'react-native';
 import EditIcon from '../assets/icons/edit-icon';
 import HomeIcon from '../assets/icons/home-icon';
@@ -17,7 +14,7 @@ import VideoCallIcon from '../assets/icons/video-call-icon';
 import CallIcon from '../assets/icons/call-icon';
 import ScreenLayout from '../components/screen-layout';
 import {moderateScale, scale, scaleFont, verticalScale} from '../utils/sizer';
-import {colors, themeColors} from '../constants/colors';
+import {themeColors} from '../constants/colors';
 import {useUserRole} from '../hooks/use-role';
 
 import {useNavigation} from '@react-navigation/native';

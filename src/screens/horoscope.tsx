@@ -109,16 +109,13 @@ const Horoscope = () => {
   const getDailyHoroscopeData = async () => {
     try {
       const {day, month, year} = getFormattedDate();
-      console.log(
-        `?sign=${selectedZodiac?.name.toLowerCase()}&day=${day}&month=${month}&year=${year}`,
-      );
+
       const payload = await dispatch(
         getDailyHoroscope(
           `?sign=${selectedZodiac?.name}&day=${day}&month=${month}&year=${year}`,
         ),
       ).unwrap();
       if (payload.success) {
-        console.log(payload, '---horoscope daily');
         setHoroscopeData(payload?.data?.prediction);
       } else {
         Toast.show({
@@ -139,7 +136,7 @@ const Horoscope = () => {
       const payload = await dispatch(
         getDailyHoroscope(`?sign=${selectedZodiac?.name}`),
       ).unwrap();
-      console.log(payload, '---horoscope weekly');
+
       if (payload.success) {
         setHoroscopeData(payload?.data?.prediction);
       } else {
@@ -162,8 +159,6 @@ const Horoscope = () => {
         getMonthlyHoroscope(`?sign=${selectedZodiac?.name}`),
       ).unwrap();
       if (payload.success) {
-        console.log(payload, '---horoscope monthly');
-
         setHoroscopeData(payload?.data?.prediction);
       } else {
         Toast.show({
@@ -172,7 +167,6 @@ const Horoscope = () => {
         });
       }
     } catch (err: any) {
-      console.log(err);
       Toast.show({
         type: 'error',
         text1: err?.msg || 'Something went wrong',

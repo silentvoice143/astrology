@@ -41,7 +41,6 @@ type RequestType = {
 
 // Call type icons (you can replace with your custom icons)
 const CallTypeIcon = ({type}: {type: 'AUDIO' | 'VIDEO' | 'CHAT'}) => {
-  console.log(type, '-------------session type');
   const iconStyle = {
     fontSize: 16,
     color: themeColors.text.primary,
@@ -72,7 +71,6 @@ const UserRequestCard = ({
   showActions: boolean;
   isAnimating: boolean;
 }) => {
-  console.log(data, '----data in card');
   const slideAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
 
@@ -350,7 +348,7 @@ const RequestScreen = () => {
     try {
       setRefreshing(true);
       const payload = await dispatch(getQueueRequest()).unwrap();
-      console.log(payload, '-----all session requests');
+
       if (payload.success) {
         // Add queue positions and mock call types for demo
         const usersWithExtras = payload?.users.map(
@@ -368,7 +366,6 @@ const RequestScreen = () => {
         });
       }
     } catch (err) {
-      console.log(err);
       Toast.show({
         type: 'error',
         text1: 'Failed to load requests',
@@ -381,8 +378,6 @@ const RequestScreen = () => {
   const handleAcceptCall = async (user: RequestType) => {
     try {
       const response = await dispatch(acceptCallRequest(user.userId)).unwrap();
-
-      console.log(response, 'response of astrologer');
 
       if (response.success) {
         Toast.show({
@@ -411,7 +406,6 @@ const RequestScreen = () => {
         throw new Error('Failed to accept call');
       }
     } catch (error) {
-      console.error('Accept call error:', error);
       Toast.show({
         type: 'error',
         text1: 'Accept Failed',
@@ -456,7 +450,6 @@ const RequestScreen = () => {
         }
       }
     } catch (err) {
-      console.log(err);
       Toast.show({
         type: 'error',
         text1: 'Failed to accept request',
@@ -478,7 +471,6 @@ const RequestScreen = () => {
         getAllRequests();
       }
     } catch (err) {
-      console.log(err);
       Toast.show({
         type: 'error',
         text1: 'Failed to accept request',
@@ -494,7 +486,7 @@ const RequestScreen = () => {
     setIsAnimating(true);
     try {
       const payload = await dispatch(skipSessionRequest(user.userId)).unwrap();
-      console.log(payload, '----skip res');
+
       if (payload.success) {
         dispatch(clearSession());
         // Remove the skipped user and update queue positions
@@ -504,7 +496,6 @@ const RequestScreen = () => {
         setRequest(updatedRequests);
       }
     } catch (err) {
-      console.log(err);
       Toast.show({
         type: 'error',
         text1: 'Failed to skip request',

@@ -11,7 +11,6 @@ import CustomButton from '../components/custom-button';
 import {textStyle} from '../constants/text-style';
 import {colors} from '../constants/colors';
 import {useAppDispatch} from '../hooks/redux-hook';
-import {postUserDetail} from '../store/reducer/user';
 import {setKundliPerson} from '../store/reducer/kundli';
 import {useNavigation} from '@react-navigation/native';
 
