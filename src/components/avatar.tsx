@@ -57,7 +57,7 @@ const Avatar: React.FC<AvatarProps> = ({
         <Image
           source={image}
           style={{width: size, height: size, borderRadius: size / 2}}
-          resizeMode="contain"
+          resizeMode="cover"
           onError={() => setLoadError(true)}
         />
       ) : (
