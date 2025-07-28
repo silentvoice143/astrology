@@ -189,6 +189,10 @@ const Astrologers = () => {
     );
   }
 
+  const sortedAstrologers = astrologersData.sort((a, b) => {
+    return (b.online === true ? 1 : 0) - (a.online === true ? 1 : 0);
+  });
+
   return (
     <ScreenLayout>
       <View
@@ -238,7 +242,7 @@ const Astrologers = () => {
 
       <FlatList
         showsVerticalScrollIndicator={false}
-        data={astrologersData}
+        data={sortedAstrologers}
         keyExtractor={item => `card-astrologer-${item.id}`}
         contentContainerStyle={{paddingBottom: verticalScale(20)}}
         onEndReached={() => {

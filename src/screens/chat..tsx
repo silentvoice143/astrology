@@ -34,7 +34,7 @@ import {colors, themeColors} from '../constants/colors';
 import KundliIcon from '../assets/icons/kundli-icon-2';
 import SendIcon from '../assets/icons/sendIcon';
 import SessionKundliModal from '../components/session/modals/kundli-modal';
-import {setKundliPerson} from '../store/reducer/kundli';
+import {setDefaultUser, setKundliPerson} from '../store/reducer/kundli';
 import {useUserRole} from '../hooks/use-role';
 import Toast from 'react-native-toast-message';
 import {uploadImage} from '../store/reducer/general';
@@ -290,7 +290,7 @@ export const ChatScreenDemo = () => {
 
   useEffect(() => {
     if (otherUser) {
-      dispatch(setKundliPerson(otherUser));
+      dispatch(setDefaultUser(otherUser));
     }
     return () => {
       // This runs when ChatScreen unmounts
@@ -489,11 +489,7 @@ export const ChatScreenDemo = () => {
               </TouchableOpacity>
               {role === 'ASTROLOGER' && (
                 <TouchableOpacity
-                  onPress={
-                    !!session && session.status === 'ACTIVE'
-                      ? () => setIsModalOpen(true)
-                      : () => {}
-                  }
+                  onPress={() => setIsModalOpen(true)}
                   style={{
                     backgroundColor:
                       !!session && session.status === 'ACTIVE'

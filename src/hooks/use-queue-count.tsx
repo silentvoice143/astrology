@@ -16,6 +16,7 @@ export const useQueueCountOnResume = (
   const dispatch = useAppDispatch();
   const {countRefresh} = useAppSelector(state => state.session);
   const appState = useRef(AppState.currentState);
+  console.log(appState, '----appState');
 
   const fetchQueueCount = async () => {
     try {

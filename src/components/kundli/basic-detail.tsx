@@ -22,16 +22,17 @@ import {textStyle} from '../../constants/text-style';
 import {useRoute} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
 import Toast from 'react-native-toast-message';
+import CustomButton from '../custom-button';
 
 const BasicDetails = ({active}: {active?: number}) => {
   const [openedForOther, setOpenedForOther] = useState(false);
   const dispatch = useAppDispatch();
-  const kundliPerson = useAppSelector(state => state.kundli.kundliPerson);
+  const {kundliPerson, defaultUser} = useAppSelector(state => state.kundli);
   const [showModal, setShowModal] = useState(false);
   const route = useRoute();
   const {t} = useTranslation();
 
-  const [kundliDetail, setKundliDetail] = useState<any>();
+  const [kundliDetail, setKundliDetail] = useState<any>({});
   const [loading, setLoading] = useState(false);
   const fetchKundliDetails = async () => {
     setLoading(true);
@@ -80,6 +81,8 @@ const BasicDetails = ({active}: {active?: number}) => {
     );
   }
 
+  console.log(kundliPerson, kundliDetail, '---kundli');
+
   return (
     <ScrollView
       showsVerticalScrollIndicator={false}
@@ -91,6 +94,15 @@ const BasicDetails = ({active}: {active?: number}) => {
       <View style={styles.card}>
         <View style={styles.headerRow}>
           <Text style={styles.title}>{kundliPerson.name}</Text>
+          <CustomButton
+            style={{
+              height: verticalScale(36),
+              paddingVertical: verticalScale(4),
+            }}
+            textStyle={{lineHeight: 16, fontSize: 14}}
+            title={'Reset'}
+            onPress={() => dispatch(setKundliPerson(defaultUser))}
+          />
         </View>
 
         {route.name === 'chat' && (

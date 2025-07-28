@@ -16,7 +16,7 @@ import Animated, {
 } from 'react-native-reanimated';
 import {moderateScale, scale, verticalScale} from '../../utils/sizer';
 import LinearGradient from 'react-native-linear-gradient';
-import {colors} from '../../constants/colors';
+import {colors, themeColors} from '../../constants/colors';
 import Avatar from '../avatar';
 import {textStyle} from '../../constants/text-style';
 import ChatIcon from '../../assets/icons/chat-icon';
@@ -68,7 +68,11 @@ function Card({
         ]}>
         <View style={{justifyContent: 'center', alignItems: 'center'}}>
           <Avatar
-            borderColor={colors.glow_shadow}
+            borderColor={
+              !item.online
+                ? themeColors.status.error.base
+                : themeColors.status.success.base
+            }
             containerStyle={{
               height: moderateScale(80),
               width: moderateScale(80),
@@ -157,6 +161,7 @@ const SlidingCard = ({
     name: string;
     expertise: string;
     about: string;
+    online: boolean;
   }[];
 }) => {
   const scrollX = useSharedValue(0);

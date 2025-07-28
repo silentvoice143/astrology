@@ -20,7 +20,7 @@ const Login = () => {
       setLoading(true);
       const payload = await dispatch(loginUser({mobile: phone})).unwrap();
       if (payload.success) {
-        navigation.navigate('Otp');
+        navigation.navigate('Otp', {mobile: phone});
         dispatch(setMobile({mobile: phone}));
       }
     } catch (err) {
