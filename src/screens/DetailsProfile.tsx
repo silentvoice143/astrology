@@ -39,6 +39,7 @@ import VideoCallIcon from '../assets/icons/video-call-icon';
 import {setProfileModelToggle} from '../store/reducer/auth';
 import RequestSessionModal from '../components/session/modals/request-session-modal';
 import Toast from 'react-native-toast-message';
+import {useWebSocket} from '../hooks/use-socket';
 
 type SessionType = 'chat' | 'audio' | 'video'; // NEW
 
@@ -70,6 +71,8 @@ const DetailsProfile: React.FC = () => {
   const {t} = useTranslation(); // Initialize the translation hook
   const route = useRoute<DetailsProfileRouteProp>();
   const id = route.params?.id;
+  const {user} = useAppSelector(state => state.auth);
+  const {isConnected} = useWebSocket(user?.id);
 
   // State to manage the expansion of the 'About Astrologer' section
   const [expandedAbout, setExpandedAbout] = useState<boolean>(false);
@@ -103,6 +106,10 @@ const DetailsProfile: React.FC = () => {
   };
 
   const requestSession = async (astrologer: AstrologerWithPricing) => {
+    if (!isConnected) {
+      Toast.show({type: 'info', text1: 'Wait for connection, please.'});
+      return;
+    }
     if (activeSession && activeSession?.astrologer?.id === astrologer.id) {
       setSession(activeSession);
       navigation.navigate('chat');

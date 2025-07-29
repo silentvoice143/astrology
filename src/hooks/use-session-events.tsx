@@ -1,6 +1,6 @@
 import {useEffect, useRef} from 'react';
 import {AppState, AppStateStatus} from 'react-native';
-import {useWebSocket} from './use-socket';
+import {useWebSocket} from './use-socket-new';
 import {
   setActiveSession,
   setCallSession,
@@ -145,22 +145,9 @@ export const useSessionEvents = (
       subscribeAll();
     }
 
-    const handleAppStateChange = (nextState: AppStateStatus) => {
-      if (nextState === 'active') {
-        console.log('[useSessionEvents] App resumed — resubscribing...');
-        subscribeAll();
-      }
-    };
-
-    const appStateListener = AppState.addEventListener(
-      'change',
-      handleAppStateChange,
-    );
-
     return () => {
       console.log('[useSessionEvents] Cleaning up...');
       unsubscribeAll();
-      appStateListener.remove();
     };
   }, [userId, isAuthenticated, isConnected, role]);
 };

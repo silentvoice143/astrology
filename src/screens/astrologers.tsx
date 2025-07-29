@@ -29,6 +29,7 @@ import {
 } from '../store/reducer/session';
 import {useDebounce} from '../hooks/use-debounce';
 import Toast from 'react-native-toast-message';
+import {useWebSocket} from '../hooks/use-socket-new';
 
 type SessionType = 'chat' | 'audio' | 'video'; // NEW
 
@@ -83,6 +84,8 @@ const Astrologers = () => {
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const activeSession = useAppSelector(state => state.session.activeSession);
   const {onlineAstrologer} = useAppSelector(state => state.astrologer);
+  const {user} = useAppSelector(state => state.auth);
+  const {send} = useWebSocket(user.id);
 
   const fetchAstrologersData = async (
     pageNumber = 1,
@@ -169,6 +172,7 @@ const Astrologers = () => {
   }, [selected]);
 
   useEffect(() => {
+    send('/app/online.user');
     fetchAstrologersData(1, false, debouncedSearch);
   }, [debouncedSearch, sort]);
 

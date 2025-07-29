@@ -48,7 +48,7 @@ const BasicDetails = ({active}: {active?: number}) => {
           query: {lan: t('lan')},
         }),
       ).unwrap();
-
+      console.log(payload.data, '-----------response from api');
       if (payload.success) {
         setKundliDetail(payload.data.data);
       }
@@ -94,15 +94,17 @@ const BasicDetails = ({active}: {active?: number}) => {
       <View style={styles.card}>
         <View style={styles.headerRow}>
           <Text style={styles.title}>{kundliPerson.name}</Text>
-          <CustomButton
-            style={{
-              height: verticalScale(36),
-              paddingVertical: verticalScale(4),
-            }}
-            textStyle={{lineHeight: 16, fontSize: 14}}
-            title={'Reset'}
-            onPress={() => dispatch(setKundliPerson(defaultUser))}
-          />
+          {route.name === 'chat' && (
+            <CustomButton
+              style={{
+                height: verticalScale(36),
+                paddingVertical: verticalScale(4),
+              }}
+              textStyle={{lineHeight: 16, fontSize: 14}}
+              title={'Reset'}
+              onPress={() => dispatch(setKundliPerson(defaultUser))}
+            />
+          )}
         </View>
 
         {route.name === 'chat' && (

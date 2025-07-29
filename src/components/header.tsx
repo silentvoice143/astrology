@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -13,11 +13,12 @@ import MenuIcon from '../assets/icons/menu-icon';
 import {moderateScale, scale, verticalScale} from '../utils/sizer';
 import {colors, themeColors} from '../constants/colors';
 import {textStyle} from '../constants/text-style';
-import BackIcon from '../assets/icons/back-icon';
 import LinearGradient from 'react-native-linear-gradient';
-import NotificationIcon from '../assets/icons/notification-icon';
 import ChevronLeftIcon from '../assets/icons/chevron-left';
 import {useTranslation} from 'react-i18next';
+import ConnectionStatusIndicator from './connection-indicator';
+import {useAppSelector} from '../hooks/redux-hook';
+import {useWebSocket} from '../hooks/use-socket-new';
 
 const headerTitle = [
   {title: 'Home', href: 'Home'},
@@ -38,6 +39,9 @@ const Header = ({
   const {t} = useTranslation();
   const currentHeader = headerTitle.find(item => item.href === route.name);
   const showRouteTitle = route.name !== 'Home';
+  const {user, isAuthenticated} = useAppSelector((state: any) => state.auth);
+  const [isSaving, setIsSaving] = useState(false);
+  const {isConnected, isConnecting} = useWebSocket(user.id);
 
   const showMenuIcon =
     route.name !== 'Home' &&
@@ -127,6 +131,12 @@ const Header = ({
             </View>
           </View>
         </View>
+        <View style={{position: 'absolute', top: 20, right: 20}}>
+          <ConnectionStatusIndicator
+            isConnected={isConnected}
+            isConnecting={isConnecting}
+          />
+        </View>
       </View>
     );
   }
@@ -193,6 +203,12 @@ const Header = ({
             }}></View>
           <NotificationIcon size={20} />
         </TouchableOpacity> */}
+      </View>
+      <View style={{position: 'absolute', top: 20, right: 20}}>
+        <ConnectionStatusIndicator
+          isConnected={isConnected}
+          isConnecting={isConnecting}
+        />
       </View>
     </LinearGradient>
   );
