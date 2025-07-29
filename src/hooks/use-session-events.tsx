@@ -14,6 +14,8 @@ import {decodeMessageBody} from '../utils/utils';
 import {useUserRole} from './use-role';
 import Toast from 'react-native-toast-message';
 import {setOnlineAstrologer} from '../store/reducer/astrologers';
+import {setBalance} from '../store/reducer/auth';
+import {getTransactionHistory} from '../store/reducer/payment';
 
 interface CallRequest {
   userId: string;
@@ -32,7 +34,28 @@ export const useSessionEvents = (
 
   const hasSubscribed = useRef(false);
 
-  console.log(role, '---role');
+  const getTransactionDetails = async () => {
+    try {
+      const payload = await dispatch(
+        getTransactionHistory({userId: userId, query: `?page=1`}),
+      ).unwrap();
+
+      if (payload.success) {
+        dispatch(setBalance({balance: payload?.wallet?.balance ?? 0}));
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Failed to get transactions',
+        });
+      }
+    } catch (err) {
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to get transactions',
+      });
+    } finally {
+    }
+  };
 
   useEffect(() => {
     // Guard: If already subscribed, don't do it again
@@ -54,7 +77,7 @@ export const useSessionEvents = (
           text1: 'Session',
           text2: res.msg,
         });
-        console.log(res, res.userId, res.type, 'get call request');
+        // console.log(res, res.userId, res.type, 'get call request');
         // dispatch(
         //   setRequest({
         //     userId: res.userId,
@@ -74,6 +97,7 @@ export const useSessionEvents = (
         const sessionData = JSON.parse(decodeMessageBody(msg));
         console.log('Session details received:', sessionData);
         dispatch(setCallSession(sessionData));
+        getTransactionDetails();
       } catch (err) {
         console.error('Session details parse error:', err);
       }
@@ -85,6 +109,7 @@ export const useSessionEvents = (
         console.log('chat session received', data);
         dispatch(setActiveSession(data));
         dispatch(setSession(data));
+        getTransactionDetails();
 
         Toast.show({
           type: 'success',
