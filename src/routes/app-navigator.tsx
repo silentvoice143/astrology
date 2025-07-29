@@ -23,12 +23,8 @@ export default function AppNavigator() {
   const {user, isAuthenticated, token} = useAppSelector(
     (state: any) => state.auth,
   );
-  const [localCallRequestVisible, setLocalCallRequestVisible] = useState(false);
-  const [localCallRequest, setLocalCallRequest] = useState<any>(null);
-  const {connect, isConnected} = useWebSocket(user?.id);
-  const {sessionRequest} = useAppSelector(state => state.session);
 
-  useSessionEvents(user?.id, isAuthenticated, isConnected);
+  const {connect, isConnected} = useWebSocket(user?.id);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -58,7 +54,9 @@ export default function AppNavigator() {
             dispatch(setAuthentication(true));
             dispatch(setUser(userDetail));
             if (astrologer_detail) dispatch(setAstrologer(astrologer_detail));
-            connect();
+            if (!isConnected) {
+              connect();
+            }
           } else {
             dispatch(logout());
           }
@@ -73,7 +71,7 @@ export default function AppNavigator() {
     };
 
     checkAuth();
-  }, [token, dispatch]);
+  }, [token, dispatch, isConnected]);
 
   if (loading) {
     return (

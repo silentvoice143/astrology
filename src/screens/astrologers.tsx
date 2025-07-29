@@ -194,7 +194,7 @@ const Astrologers = () => {
     return (b.online === true ? 1 : 0) - (a.online === true ? 1 : 0);
   });
 
-  // console.log(sortedAstrologers, onlineAstrologer, '---sorted Astrologer');
+  console.log(sortedAstrologers, onlineAstrologer, '---sorted Astrologer');
   if (loading) {
     return (
       <ScreenLayout>

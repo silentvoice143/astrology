@@ -583,6 +583,8 @@ const CallScreen = () => {
       stopTimer();
       stopWaitingTimer();
       console.log(socketUnsubscribe.current);
+      unsubscribe(timerTopic);
+      unsubscribe(endTopic);
       if (socketUnsubscribe.current) {
         socketUnsubscribe.current();
       }

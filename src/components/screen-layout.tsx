@@ -1,5 +1,5 @@
 import React, {ReactNode, useRef, useState} from 'react';
-import {View} from 'react-native';
+import {Text, View} from 'react-native';
 import Header from './header';
 import Sidebar, {SidebarRef} from './sidebar';
 import {colors} from '../constants/colors';
@@ -9,6 +9,8 @@ import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {postUserDetail} from '../store/reducer/user';
 import {UserPersonalDetail} from '../utils/types';
 import {setProfileModelToggle, setUser} from '../store/reducer/auth';
+import {useWebSocket} from '../hooks/use-socket';
+import {useSessionEvents} from '../hooks/use-session-events';
 
 interface ScreenLayoutProps {
   children: ReactNode;
@@ -25,7 +27,11 @@ const ScreenLayout: React.FC<ScreenLayoutProps> = ({
   const {isProfileModalOpen, isProfileComplete} = useAppSelector(
     state => state.auth,
   );
+  const {user, isAuthenticated} = useAppSelector((state: any) => state.auth);
   const [isSaving, setIsSaving] = useState(false);
+  const {isConnected, isConnecting} = useWebSocket(user.id);
+
+  useSessionEvents(user?.id, isAuthenticated, isConnected);
 
   const dispatch = useAppDispatch();
 
@@ -44,7 +50,13 @@ const ScreenLayout: React.FC<ScreenLayoutProps> = ({
       setIsSaving(false);
     }
   };
-  console.log(isProfileModalOpen && !isProfileComplete, '---values');
+  console.log(isConnected, '-----isconnected in screen layout');
+  const renderConnectionStatus = () => {
+    if (isConnecting)
+      return <Text style={{color: 'orange'}}>Connecting...</Text>;
+    if (isConnected) return <Text style={{color: 'green'}}>Connected</Text>;
+    return <Text style={{color: 'red'}}>Disconnected</Text>;
+  };
   return (
     <View style={{flex: 1, backgroundColor: colors.primary_surface}}>
       {/* Global Sidebar */}
@@ -56,6 +68,7 @@ const ScreenLayout: React.FC<ScreenLayoutProps> = ({
         />
       )}
       <View style={{flex: 1, backgroundColor: colors.primary_surface}}>
+        <View style={{padding: 8}}>{renderConnectionStatus()}</View>
         {children}
       </View>
       <BottomNavigationBar />
