@@ -18,7 +18,7 @@ const WalletTransactionCard = ({transaction}: {transaction: Transaction}) => {
         </Text>
         <Text
           style={[styles.amount, {color: isCredit ? '#28a745' : '#d32f2f'}]}>
-          ₹{Math.abs(transaction.amount)}
+          ₹{Math.abs(transaction.amount).toFixed(2)}
         </Text>
       </View>
     </View>
