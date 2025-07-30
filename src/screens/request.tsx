@@ -30,6 +30,7 @@ import Toast from 'react-native-toast-message';
 import AboutIcon from '../assets/icons/about-icon';
 import {themeColors} from '../constants/colors';
 import CheckIcon from '../assets/icons/checkIcon';
+import {useWebSocket} from '../hooks/use-socket-new';
 
 type RequestType = {
   userId: string;
@@ -254,17 +255,6 @@ const UserRequestCard = ({
           </View>
         </View>
 
-        {/* Interest Tags (if available) */}
-        {data?.interests && data.interests.length > 0 && (
-          <View
-            style={{
-              flexDirection: 'row',
-              flexWrap: 'wrap',
-              marginBottom: verticalScale(16),
-              gap: scale(8),
-            }}></View>
-        )}
-
         {/* Action Buttons - Only for first card */}
         {showActions && (
           <View
@@ -343,6 +333,7 @@ const RequestScreen = () => {
   );
   const astrologer_detail = useAppSelector(state => state.auth.user);
   const {activeSession} = useAppSelector(state => state.session);
+  const {send} = useWebSocket(astrologer_detail?.id);
 
   const getAllRequests = async () => {
     try {
@@ -506,6 +497,7 @@ const RequestScreen = () => {
   };
 
   useEffect(() => {
+    send('/app/session.active');
     getAllRequests();
   }, [quequeRequestCount]);
 

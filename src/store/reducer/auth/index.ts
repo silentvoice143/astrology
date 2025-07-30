@@ -97,6 +97,9 @@ const authSlice = createSlice({
     setFirstTime(state) {
       state.firstTime = false;
     },
+    setFreeChatUsed(state) {
+      state.user.freeChatUsed = true;
+    },
     setFreeChatModalShown: state => {
       state.freeChatModalShown = true;
     },
@@ -147,6 +150,7 @@ export const {
   setAuthentication,
   setFreeChatModalShown,
   setBalance,
+  setFreeChatUsed,
 } = authSlice.actions;
 export {loginUser, verifyOtp};
 export default authSlice.reducer;

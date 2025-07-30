@@ -63,11 +63,12 @@ export const useSessionEvents = (
       requestDest,
       callSessionDest,
       onlineAstroDest,
+      activeSessionDest,
     ];
 
-    if (role === 'ASTROLOGER') {
-      subscriptionsRef.current.push(activeSessionDest);
-    }
+    // if (role === 'ASTROLOGER') {
+    //   subscriptionsRef.current.push(activeSessionDest);
+    // }
 
     subscribe(queueDest, msg => {
       try {
@@ -79,7 +80,7 @@ export const useSessionEvents = (
           text2: res.msg,
         });
       } catch (err) {
-        console.error('Failed to parse queue message:', err);
+        console.log('Failed to parse queue message:', err);
       }
     });
 
@@ -89,7 +90,7 @@ export const useSessionEvents = (
         dispatch(setCallSession(sessionData));
         getTransactionDetails();
       } catch (err) {
-        console.error('Session details parse error:', err);
+        console.log('Session details parse error:', err);
       }
     });
 
@@ -108,29 +109,30 @@ export const useSessionEvents = (
               : 'Session will start soon',
         });
       } catch (err) {
-        console.error('Failed to parse chat id:', err);
+        console.log('Failed to parse chat id:', err);
       }
     });
 
     subscribe(onlineAstroDest, msg => {
       try {
         const data = JSON.parse(decodeMessageBody(msg));
+        console.log('Online astrologer---------------------------:', data);
+
         dispatch(setOnlineAstrologer(data));
       } catch (err) {
-        console.error('Failed to parse online astrologer list:', err);
+        console.log('Failed to parse online astrologer list:', err);
       }
     });
 
-    if (role === 'ASTROLOGER') {
-      subscribe(activeSessionDest, msg => {
-        try {
-          const data = JSON.parse(decodeMessageBody(msg));
-          console.log('Active session update:', data);
-        } catch (err) {
-          console.error('Failed to parse active session data:', err);
-        }
-      });
-    }
+    subscribe(activeSessionDest, msg => {
+      try {
+        const data = JSON.parse(decodeMessageBody(msg));
+
+        console.log('Active session update---------------------------:', data);
+      } catch (err) {
+        console.log('Failed to parse active session data:', err);
+      }
+    });
   };
 
   const unsubscribeAll = () => {

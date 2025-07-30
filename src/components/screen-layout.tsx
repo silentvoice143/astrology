@@ -9,9 +9,6 @@ import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {postUserDetail} from '../store/reducer/user';
 import {UserPersonalDetail} from '../utils/types';
 import {setProfileModelToggle, setUser} from '../store/reducer/auth';
-import {useWebSocket} from '../hooks/use-socket';
-import {useSessionEvents} from '../hooks/use-session-events';
-import ConnectionStatusIndicator from './connection-indicator';
 
 interface ScreenLayoutProps {
   children: ReactNode;

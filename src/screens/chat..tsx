@@ -13,7 +13,7 @@ import {
   BackHandler,
   SafeAreaView,
 } from 'react-native';
-import {useWebSocket} from '../hooks/use-socket';
+import {useWebSocket} from '../hooks/use-socket-new';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {decodeMessageBody, formatedDate, getTimeOnly} from '../utils/utils';
 import {Message} from '../utils/types';

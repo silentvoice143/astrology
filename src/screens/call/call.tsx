@@ -19,7 +19,7 @@ import {
 import {useRoute, useNavigation} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
-import {useWebSocket} from '../../hooks/use-socket';
+import {useWebSocket} from '../../hooks/use-socket-new';
 import {decodeMessageBody} from '../../utils/utils';
 import {clearCallSession} from '../../store/reducer/session';
 import Avatar from '../../components/avatar';

@@ -30,7 +30,7 @@ export const useWebSocket = (userId: string, socketUrl?: string) => {
     // We add a check here to ensure TypeScript understands it's non-null
     // for the rest of this effect's scope.
     if (!singletonService) {
-      console.error(
+      console.log(
         '[useWebSocket] Fatal: WebSocketService singleton failed to initialize.',
       );
       return; // Exit if initialization failed unexpectedly

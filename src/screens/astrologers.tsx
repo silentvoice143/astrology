@@ -16,7 +16,7 @@ import {scale, verticalScale} from '../utils/sizer';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {getAllAstrologers} from '../store/reducer/astrologers';
 import {useTypedNavigation} from '../hooks/navigation';
-import {setProfileModelToggle} from '../store/reducer/auth';
+import {setFreeChatUsed, setProfileModelToggle} from '../store/reducer/auth';
 import RequestSessionModal from '../components/session/modals/request-session-modal';
 import {shuffleArray} from '../utils/utils';
 import {textStyle} from '../constants/text-style';
@@ -123,6 +123,9 @@ const Astrologers = () => {
       const payload = await dispatch(sendSessionRequest(body)).unwrap();
 
       if (payload.success) {
+        if (!freeChatUsed) {
+          dispatch(setFreeChatUsed());
+        }
         dispatch(setOtherUser(astrologer));
         navigation.navigate('chat');
       } else {
@@ -172,6 +175,7 @@ const Astrologers = () => {
   }, [selected]);
 
   useEffect(() => {
+    // send('/app/session.active');
     send('/app/online.user');
     fetchAstrologersData(1, false, debouncedSearch);
   }, [debouncedSearch, sort]);

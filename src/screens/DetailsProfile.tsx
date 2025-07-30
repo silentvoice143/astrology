@@ -36,10 +36,10 @@ import {
   setSession,
 } from '../store/reducer/session';
 import VideoCallIcon from '../assets/icons/video-call-icon';
-import {setProfileModelToggle} from '../store/reducer/auth';
+import {setFreeChatUsed, setProfileModelToggle} from '../store/reducer/auth';
 import RequestSessionModal from '../components/session/modals/request-session-modal';
 import Toast from 'react-native-toast-message';
-import {useWebSocket} from '../hooks/use-socket';
+import {useWebSocket} from '../hooks/use-socket-new';
 
 type SessionType = 'chat' | 'audio' | 'video'; // NEW
 
@@ -119,6 +119,9 @@ const DetailsProfile: React.FC = () => {
       const payload = await dispatch(sendSessionRequest(body)).unwrap();
 
       if (payload.success) {
+        if (!freeChatUsed) {
+          dispatch(setFreeChatUsed());
+        }
         dispatch(setOtherUser(astrologer));
         navigation.navigate('chat');
       } else {
