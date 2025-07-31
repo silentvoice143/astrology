@@ -1,4 +1,4 @@
-package com.astrology
+package com.insapimarketing.astrosevaa
 
 import android.app.Application
 import com.facebook.react.PackageList

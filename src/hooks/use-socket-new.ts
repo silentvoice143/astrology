@@ -14,7 +14,7 @@ export const useWebSocket = (userId: string, socketUrl?: string) => {
   const initService = useCallback(() => {
     if (!singletonService) {
       const url =
-        socketUrl || process.env.BASE_URL || 'https://astrosevaa.com/ws-chat';
+        socketUrl || process.env.BASE_URL || 'https://backend.astrosevaa.com/ws-chat';
       // 'https://quagga-driving-socially.ngrok-free.app/ws-chat';
 
       singletonService = new WebSocketService(userId, url);
