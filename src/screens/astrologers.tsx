@@ -82,6 +82,7 @@ const Astrologers = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+
   const activeSession = useAppSelector(state => state.session.activeSession);
   const {onlineAstrologer} = useAppSelector(state => state.astrologer);
   const {user} = useAppSelector(state => state.auth);
@@ -175,7 +176,7 @@ const Astrologers = () => {
   }, [selected]);
 
   useEffect(() => {
-    // send('/app/session.active');
+    send('/app/session.active');
     send('/app/online.user');
     fetchAstrologersData(1, false, debouncedSearch);
   }, [debouncedSearch, sort]);
@@ -196,13 +197,12 @@ const Astrologers = () => {
         online: onlineSet.has(a.user.id),
       })),
     );
-  }, [onlineAstrologer, loading]);
+  }, [onlineAstrologer, loading, isFetchingMore]);
 
   const sortedAstrologers = astrologersData.sort((a, b) => {
     return (b.online === true ? 1 : 0) - (a.online === true ? 1 : 0);
   });
 
-  console.log(sortedAstrologers, onlineAstrologer, '---sorted Astrologer');
   if (loading) {
     return (
       <ScreenLayout>

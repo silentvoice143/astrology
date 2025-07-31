@@ -59,8 +59,8 @@ const RequestSessionModal = ({
   initialSessionType?: SessionType;
 }) => {
   const durationOptions: DurationOption[] = [
-    {label: '1 min', id: '1m', value: 1},
-    {label: '2 min', id: '2m', value: 2},
+    // {label: '1 min', id: '1m', value: 1},
+    // {label: '2 min', id: '2m', value: 2},
     {label: '5 min', id: '5m', value: 5},
     {label: '10 min', id: '10m', value: 10},
     {label: '15 min', id: '15m', value: 15},
@@ -182,7 +182,7 @@ const RequestSessionModal = ({
         payload = await dispatch(sendCallRequest(body)).unwrap();
       }
 
-      console.log(body, payload, '----session request body & response');
+      // console.log(body, payload, '----session request body & response');
 
       if (payload.success) {
         dispatch(setOtherUser(astrologer));

@@ -42,13 +42,13 @@ const Otp = () => {
   };
   return (
     <View style={styles.mainContainer}>
-      <Text
+      {/* <Text
         style={[
           {position: 'absolute', top: 20, left: 40},
           textStyle.fs_abyss_24_400,
         ]}>
         {otp}
-      </Text>
+      </Text> */}
       <View
         style={{
           marginTop: verticalScale(40),
