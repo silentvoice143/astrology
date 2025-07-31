@@ -110,25 +110,39 @@ const Wallet = () => {
           },
         };
 
-        RazorpayCheckout.open(options)
-          .then((data: any) => {
-            Toast.show({
-              type: 'success',
-              text1: `Payment Successful`,
-              text2: `Payment ID: ${data.razorpay_payment_id}`,
+        
+
+        try {
+          RazorpayCheckout.open(options)
+            .then((data: any) => {
+              Toast.show({
+                type: 'success',
+                text1: `Payment Successful`,
+                text2: `Payment ID: ${data.razorpay_payment_id}`,
+              });
+              setAmount('');
+              getTransactionDetails(1);
+            })
+            .catch((error: any) => {
+              console.log('Razorpay Error:', error);
+              Toast.show({
+                type: 'error',
+                text1: 'Payment Failed',
+                text2: `${error?.code || 'No Code'} | ${
+                  error?.description || 'No Description'
+                }`,
+              });
+              setAmount('');
+              getTransactionDetails(1);
             });
-            setAmount('');
-            getTransactionDetails(1);
-          })
-          .catch((error: any) => {
-            Toast.show({
-              type: 'error',
-              text1: 'Payment Failed',
-              text2: `${error.code} | ${error.description}`,
-            });
-            setAmount('');
-            getTransactionDetails(1);
+        } catch (error) {
+          console.error('Razorpay Setup Error:', error);
+          Toast.show({
+            type: 'error',
+            text1: 'Unexpected Error',
+            text2: `${error}`,
           });
+        }
       } else {
         Toast.show({
           type: 'error',
