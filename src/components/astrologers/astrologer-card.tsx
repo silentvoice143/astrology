@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import {View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
 import {scale, verticalScale, moderateScale} from '../../utils/sizer';
 import {colors, themeColors} from '../../constants/colors';
@@ -10,6 +10,9 @@ import ChatIcon from '../../assets/icons/chat-icon';
 import {textStyle} from '../../constants/text-style';
 import {formatPrice} from '../../utils/utils';
 import Avatar from '../avatar';
+import {useWebSocket} from '../../hooks/use-socket-new';
+import {useAppSelector} from '../../hooks/redux-hook';
+import Toast from 'react-native-toast-message';
 
 type SessionType = 'chat' | 'audio' | 'video';
 
@@ -35,6 +38,7 @@ type AstrologerCardProps = {
 };
 
 const AstrologerCard: React.FC<AstrologerCardProps> = ({
+  id,
   name,
   rate,
   rating,
@@ -52,8 +56,15 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
   online,
   freeChatAvailable,
 }) => {
+  const {user} = useAppSelector(state => state.auth);
+  const {isConnected, send} = useWebSocket(user?.id);
+
   // NEW: Handle session press with type
   const handleSessionPress = (sessionType: SessionType) => {
+    if (!isConnected) {
+      Toast.show({type: 'info', text1: 'Wait for connection, please.'});
+      return;
+    }
     if (onSessionPress) {
       onSessionPress(sessionType);
     } else {
@@ -71,6 +82,10 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
       }
     }
   };
+
+  useEffect(() => {
+    send('/app/session.active');
+  }, [id]);
 
   return (
     <View style={styles.card}>

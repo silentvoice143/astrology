@@ -19,7 +19,7 @@ import {
 import {useRoute, useNavigation} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
 import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
-import {useWebSocket} from '../../hooks/use-socket';
+import {useWebSocket} from '../../hooks/use-socket-new';
 import {decodeMessageBody} from '../../utils/utils';
 import {clearCallSession} from '../../store/reducer/session';
 import Avatar from '../../components/avatar';
@@ -27,9 +27,9 @@ import {scale, verticalScale} from '../../utils/sizer';
 import {colors} from '../../constants/colors';
 import {textStyle} from '../../constants/text-style';
 
-const ZEGO_APP_ID = 1648384958;
+const ZEGO_APP_ID = 1553526806;
 const ZEGO_APP_SIGN =
-  '6baacf543390ae6c21d16cc29579930e714655c0401d3bdd8337cb4bfd2998b3';
+  'b985f8cb84adfc6ddc1d056344e456aca54d35191a800fa5dab99e1f11304569';
 
 type CallType = 'AUDIO' | 'VIDEO';
 type CallState = 'waiting' | 'connecting' | 'connected' | 'ended' | 'rejected';
@@ -583,6 +583,8 @@ const CallScreen = () => {
       stopTimer();
       stopWaitingTimer();
       console.log(socketUnsubscribe.current);
+      unsubscribe(timerTopic);
+      unsubscribe(endTopic);
       if (socketUnsubscribe.current) {
         socketUnsubscribe.current();
       }

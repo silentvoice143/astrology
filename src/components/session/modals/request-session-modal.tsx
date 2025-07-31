@@ -182,7 +182,7 @@ const RequestSessionModal = ({
         payload = await dispatch(sendCallRequest(body)).unwrap();
       }
 
-      console.log(body, payload, '----session request body & response');
+      // console.log(body, payload, '----session request body & response');
 
       if (payload.success) {
         dispatch(setOtherUser(astrologer));

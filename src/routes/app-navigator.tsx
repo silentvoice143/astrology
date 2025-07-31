@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
-import {NavigationContainer, useNavigation} from '@react-navigation/native';
-import {View, Text} from 'react-native';
+import {NavigationContainer} from '@react-navigation/native';
+import {View, Text, AppStateStatus, AppState} from 'react-native';
 
 import PublicRoutes from './public-route';
 import PrivateRoutes from './private-route';
@@ -12,10 +12,8 @@ import {
   setAuthentication,
   setUser,
 } from '../store/reducer/auth';
-import {useWebSocket} from '../hooks/use-socket';
+import {useWebSocket} from '../hooks/use-socket-new';
 import {useSessionEvents} from '../hooks/use-session-events';
-import CallRequestNotification from '../screens/call/call-request-notification';
-import {setRequest} from '../store/reducer/session';
 
 export default function AppNavigator() {
   const dispatch = useAppDispatch();
@@ -23,10 +21,8 @@ export default function AppNavigator() {
   const {user, isAuthenticated, token} = useAppSelector(
     (state: any) => state.auth,
   );
-  const [localCallRequestVisible, setLocalCallRequestVisible] = useState(false);
-  const [localCallRequest, setLocalCallRequest] = useState<any>(null);
-  const {connect, isConnected} = useWebSocket(user?.id);
-  const {sessionRequest} = useAppSelector(state => state.session);
+
+  const {connect, isConnected, disconnect, send} = useWebSocket(user?.id);
 
   useSessionEvents(user?.id, isAuthenticated, isConnected);
 
@@ -58,7 +54,11 @@ export default function AppNavigator() {
             dispatch(setAuthentication(true));
             dispatch(setUser(userDetail));
             if (astrologer_detail) dispatch(setAstrologer(astrologer_detail));
-            connect();
+            if (!isConnected) {
+              connect();
+            } else {
+              send('/app/online.user');
+            }
           } else {
             dispatch(logout());
           }
@@ -73,7 +73,25 @@ export default function AppNavigator() {
     };
 
     checkAuth();
-  }, [token, dispatch]);
+  }, [token, dispatch, isConnected]);
+
+  const handleAppStateChange = (nextState: AppStateStatus) => {
+    if (nextState === 'active') {
+      console.log('[useSessionEvents] App resumed — resubscribing...');
+    }
+  };
+
+  useEffect(() => {
+    const appStateListener = AppState.addEventListener(
+      'change',
+      handleAppStateChange,
+    );
+
+    return () => {
+      disconnect();
+      appStateListener.remove();
+    };
+  }, []);
 
   if (loading) {
     return (
@@ -86,15 +104,6 @@ export default function AppNavigator() {
   return (
     <NavigationContainer>
       {isAuthenticated ? <PrivateRoutes /> : <PublicRoutes />}
-
-      {/* {isAuthenticated && sessionRequest?.userId && (
-        <CallRequestNotification
-          visible={!!sessionRequest?.userId && sessionRequest.type !== 'CHAT'}
-          callRequest={sessionRequest}
-          onClose={handleCloseCallNotification}
-          onAccept={onAccept}
-        />
-      )} */}
     </NavigationContainer>
   );
 }

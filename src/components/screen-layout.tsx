@@ -1,8 +1,8 @@
 import React, {ReactNode, useRef, useState} from 'react';
-import {View} from 'react-native';
+import {Text, View} from 'react-native';
 import Header from './header';
 import Sidebar, {SidebarRef} from './sidebar';
-import {colors} from '../constants/colors';
+import {colors, themeColors} from '../constants/colors';
 import BottomNavigationBar from './bottom-navigation';
 import PersonalDetailModal from './personal-detail-modal';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
@@ -25,7 +25,10 @@ const ScreenLayout: React.FC<ScreenLayoutProps> = ({
   const {isProfileModalOpen, isProfileComplete} = useAppSelector(
     state => state.auth,
   );
+  const {user, isAuthenticated} = useAppSelector((state: any) => state.auth);
   const [isSaving, setIsSaving] = useState(false);
+  // const {isConnected} = useWebSocket(user.id);
+  // useSessionEvents(user?.id, isAuthenticated, isConnected);
 
   const dispatch = useAppDispatch();
 
@@ -44,7 +47,7 @@ const ScreenLayout: React.FC<ScreenLayoutProps> = ({
       setIsSaving(false);
     }
   };
-  console.log(isProfileModalOpen && !isProfileComplete, '---values');
+
   return (
     <View style={{flex: 1, backgroundColor: colors.primary_surface}}>
       {/* Global Sidebar */}

@@ -48,7 +48,7 @@ const Wallet = () => {
       ).unwrap();
 
       if (payload.success) {
-        setWalletBalance(payload?.wallet?.balance ?? 0);
+        setWalletBalance(payload?.wallet?.balance.toFixed(2) ?? 0);
         if (page === 1) {
           setTransations(payload?.wallet?.transactions);
         } else {
@@ -188,7 +188,7 @@ const Wallet = () => {
             </Text>
             <Text
               style={[textStyle.fs_abyss_24_400, {color: colors.whiteText}]}>
-              ₹{Math.abs(walletBalance)}
+              ₹{Math.abs(walletBalance).toFixed(2)}
             </Text>
           </View>
           {role === 'USER' && (

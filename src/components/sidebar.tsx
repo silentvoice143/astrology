@@ -36,7 +36,7 @@ import LogoutIcon from '../assets/icons/logout-icon';
 import PeopleIcon from '../assets/icons/people-icon';
 import {useUserRole} from '../hooks/use-role';
 import HoroscopeIcon from '../assets/icons/horoscope-icon';
-import {useWebSocket} from '../hooks/use-socket';
+import {useWebSocket} from '../hooks/use-socket-new';
 import {useTranslation} from 'react-i18next';
 import {getTransactionHistory} from '../store/reducer/payment';
 import Toast from 'react-native-toast-message';
@@ -270,7 +270,7 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
                   <ActivityIndicator size={12} />
                 ) : (
                   <Text style={styles.walletText}>
-                    ₹ {user?.walletBalance ?? 0}
+                    ₹ {user?.walletBalance.toFixed(2) ?? 0}
                   </Text>
                 )}
               </View>

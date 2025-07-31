@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, {useEffect, useState, useRef} from 'react';
 import {
   View,
   Text,
@@ -16,17 +16,17 @@ import {
   ChannelProfileType,
   ClientRoleType,
 } from 'react-native-agora';
-import { useRoute, useNavigation } from '@react-navigation/native';
+import {useRoute, useNavigation} from '@react-navigation/native';
 import Toast from 'react-native-toast-message';
-import { useAppDispatch, useAppSelector } from '../../hooks/redux-hook';
-import { useWebSocket } from '../../hooks/use-socket';
-import { decodeMessageBody } from '../../utils/utils';
-import { clearCallSession } from '../../store/reducer/session';
+import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
+import {useWebSocket} from '../../hooks/use-socket-new';
+import {decodeMessageBody} from '../../utils/utils';
+import {clearCallSession} from '../../store/reducer/session';
 import Avatar from '../../components/avatar';
-import { scale, verticalScale } from '../../utils/sizer';
-import { colors } from '../../constants/colors';
-import { textStyle } from '../../constants/text-style';
-import { BackHandler } from 'react-native';
+import {scale, verticalScale} from '../../utils/sizer';
+import {colors} from '../../constants/colors';
+import {textStyle} from '../../constants/text-style';
+import {BackHandler} from 'react-native';
 
 const AGORA_APP_ID = 'f9093c98d1fe45cf85db5ef91a0cce33';
 
@@ -35,8 +35,8 @@ type CallState = 'waiting' | 'connecting' | 'connected' | 'ended' | 'rejected';
 
 interface CallScreenParams {
   callType: CallType;
-  astrologer: { id: string; name: string; imageUri?: string };
-  user?: { id: string; name: string; imageUri?: string };
+  astrologer: {id: string; name: string; imageUri?: string};
+  user?: {id: string; name: string; imageUri?: string};
   duration: number;
   sessionId?: string;
   isAstrologer?: boolean;
@@ -44,8 +44,8 @@ interface CallScreenParams {
 
 interface CallSessionDetails {
   id: string;
-  user: { id: string; name: string; imgUri?: string };
-  astrologer: { id: string; name: string; imgUri?: string };
+  user: {id: string; name: string; imgUri?: string};
+  astrologer: {id: string; name: string; imgUri?: string};
   startedAt: string;
   endedAt: string | null;
   status: 'ACTIVE' | 'ENDED';
@@ -61,18 +61,29 @@ const CallScreen = () => {
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
   const params = route.params as CallScreenParams;
-  const { callType, astrologer, user: userParam, duration, sessionId, isAstrologer = false } = params;
-  const { user } = useAppSelector(state => state.auth);
+  const {
+    callType,
+    astrologer,
+    user: userParam,
+    duration,
+    sessionId,
+    isAstrologer = false,
+  } = params;
+  const {user} = useAppSelector(state => state.auth);
   const callSession = useAppSelector(state => state.session.callSession);
-  const { subscribe, send } = useWebSocket(user?.id || '');
+  const {subscribe, send} = useWebSocket(user?.id || '');
 
-  const [callState, setCallState] = useState<CallState>(isAstrologer ? 'connecting' : 'waiting');
+  const [callState, setCallState] = useState<CallState>(
+    isAstrologer ? 'connecting' : 'waiting',
+  );
   const [waitingTime, setWaitingTime] = useState(0);
   const [isJoined, setIsJoined] = useState(false);
   const [remoteUid, setRemoteUid] = useState<number | null>(null);
   const [isMuted, setIsMuted] = useState(false);
   const [isVideoEnabled, setIsVideoEnabled] = useState(callType === 'VIDEO');
-  const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(callType === 'VIDEO');
+  const [isSpeakerEnabled, setIsSpeakerEnabled] = useState(
+    callType === 'VIDEO',
+  );
   const [timer, setTimer] = useState('00:00');
   const [callStartTime, setCallStartTime] = useState<Date | null>(null);
   const [networkConnected, setNetworkConnected] = useState(true);
@@ -85,9 +96,12 @@ const CallScreen = () => {
   const checkPermissions = async () => {
     if (Platform.OS === 'android') {
       const permissions = [PermissionsAndroid.PERMISSIONS.RECORD_AUDIO];
-      if (callType === 'VIDEO') permissions.push(PermissionsAndroid.PERMISSIONS.CAMERA);
+      if (callType === 'VIDEO')
+        permissions.push(PermissionsAndroid.PERMISSIONS.CAMERA);
       const results = await PermissionsAndroid.requestMultiple(permissions);
-      const granted = Object.values(results).every(status => status === 'granted');
+      const granted = Object.values(results).every(
+        status => status === 'granted',
+      );
       if (!granted) {
         Toast.show({
           type: 'error',
@@ -117,7 +131,12 @@ const CallScreen = () => {
 
       engine.registerEventHandler({
         onJoinChannelSuccess: (connection, elapsed) => {
-          console.log('✅ Joined channel:', connection.channelId, 'Elapsed:', elapsed);
+          console.log(
+            '✅ Joined channel:',
+            connection.channelId,
+            'Elapsed:',
+            elapsed,
+          );
           setIsJoined(true);
           setCallState('connected');
         },
@@ -138,27 +157,44 @@ const CallScreen = () => {
         },
         onError: (err, msg) => {
           console.error('❌ Agora error:', err, msg);
-          Toast.show({ type: 'error', text1: 'Call Error', text2: `Error: ${msg} (${err})` });
+          Toast.show({
+            type: 'error',
+            text1: 'Call Error',
+            text2: `Error: ${msg} (${err})`,
+          });
         },
         onTokenPrivilegeWillExpire: () => {
           console.log('⚠️ Token will expire soon');
-          Toast.show({ type: 'warning', text1: 'Token Expiring', text2: 'Token will expire soon' });
+          Toast.show({
+            type: 'warning',
+            text1: 'Token Expiring',
+            text2: 'Token will expire soon',
+          });
         },
         onRequestToken: () => {
           console.log('⚠️ Token expired');
-          Toast.show({ type: 'error', text1: 'Token Expired', text2: 'Please reconnect' });
+          Toast.show({
+            type: 'error',
+            text1: 'Token Expired',
+            text2: 'Please reconnect',
+          });
           handleCallEnd(false);
         },
         onConnectionStateChanged: (connection, state, reason) => {
           console.log('🔄 Connection state:', state, 'Reason:', reason);
         },
         onNetworkQuality: (connection, localQuality, remoteQuality) => {
-          console.log('🌐 Network quality - Local:', localQuality, 'Remote:', remoteQuality);
+          console.log(
+            '🌐 Network quality - Local:',
+            localQuality,
+            'Remote:',
+            remoteQuality,
+          );
           setNetworkConnected(localQuality < 4 && remoteQuality < 4);
         },
       });
 
-      engine.initialize({ appId: AGORA_APP_ID });
+      engine.initialize({appId: AGORA_APP_ID});
       console.log('✅ Agora engine initialized');
 
       engine.setChannelProfile(ChannelProfileType.ChannelProfileCommunication);
@@ -168,7 +204,11 @@ const CallScreen = () => {
       }
     } catch (e) {
       console.error('❌ Agora setup error:', e);
-      Toast.show({ type: 'error', text1: 'Setup Failed', text2: 'Failed to initialize call' });
+      Toast.show({
+        type: 'error',
+        text1: 'Setup Failed',
+        text2: 'Failed to initialize call',
+      });
       navigation.goBack();
     }
   };
@@ -176,26 +216,39 @@ const CallScreen = () => {
   // Join Channel
   const joinChannel = async (sessionData: CallSessionDetails) => {
     try {
-      console.log('🔗 Joining channel:', sessionData.agoraChannelName, 'Token:', sessionData.agoraToken);
+      console.log(
+        '🔗 Joining channel:',
+        sessionData.agoraChannelName,
+        'Token:',
+        sessionData.agoraToken,
+      );
       if (!engineRef.current) {
         console.error('❌ Engine not initialized');
-        Toast.show({ type: 'error', text1: 'Call Failed', text2: 'Engine not initialized' });
+        Toast.show({
+          type: 'error',
+          text1: 'Call Failed',
+          text2: 'Engine not initialized',
+        });
         return;
       }
 
-      const token = sessionData.agoraToken && sessionData.agoraToken.trim() !== '' ? sessionData.agoraToken : null;
+      const token =
+        sessionData.agoraToken && sessionData.agoraToken.trim() !== ''
+          ? sessionData.agoraToken
+          : null;
       console.log('🔑 Using token:', token ? 'Valid token' : 'No token');
 
-      engineRef.current.joinChannel(
-        token,
-        sessionData.agoraChannelName,
-        null,
-        { clientRoleType: ClientRoleType.ClientRoleBroadcaster }
-      );
+      engineRef.current.joinChannel(token, sessionData.agoraChannelName, null, {
+        clientRoleType: ClientRoleType.ClientRoleBroadcaster,
+      });
       console.log('✅ Join channel initiated');
     } catch (error) {
       console.error('❌ Join channel error:', error);
-      Toast.show({ type: 'error', text1: 'Call Failed', text2: 'Unable to join call' });
+      Toast.show({
+        type: 'error',
+        text1: 'Call Failed',
+        text2: 'Unable to join call',
+      });
       setCallState('rejected');
       navigation.goBack();
     }
@@ -224,30 +277,38 @@ const CallScreen = () => {
   const formatWaitingTime = (seconds: number): string => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
-    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    return `${mins.toString().padStart(2, '0')}:${secs
+      .toString()
+      .padStart(2, '0')}`;
   };
 
   // Socket Listeners
   const setupLocalSocketListeners = () => {
-    const timerSub = subscribe(`/topic/call/${callSession?.id || sessionId}/timer`, msg => {
-      try {
-        const timeData = decodeMessageBody(msg);
-        setTimer(timeData);
-      } catch (err) {
-        console.error('Timer message parse error:', err);
-      }
-    });
-
-    const endSub = subscribe(`/topic/call/${callSession?.id || sessionId}`, msg => {
-      try {
-        const data = JSON.parse(decodeMessageBody(msg));
-        if (data.status === 'ended') {
-          handleCallEnd(false);
+    const timerSub = subscribe(
+      `/topic/call/${callSession?.id || sessionId}/timer`,
+      msg => {
+        try {
+          const timeData = decodeMessageBody(msg);
+          setTimer(timeData);
+        } catch (err) {
+          console.error('Timer message parse error:', err);
         }
-      } catch (err) {
-        console.error('Call end message parse error:', err);
-      }
-    });
+      },
+    );
+
+    const endSub = subscribe(
+      `/topic/call/${callSession?.id || sessionId}`,
+      msg => {
+        try {
+          const data = JSON.parse(decodeMessageBody(msg));
+          if (data.status === 'ended') {
+            handleCallEnd(false);
+          }
+        } catch (err) {
+          console.error('Call end message parse error:', err);
+        }
+      },
+    );
 
     const rejectSub = subscribe(`/topic/call/${user?.id}/rejected`, msg => {
       try {
@@ -286,7 +347,6 @@ const CallScreen = () => {
   };
 
   const handleCallCancel = () => {
-    
     dispatch(clearCallSession());
     navigation.goBack();
   };
@@ -297,10 +357,14 @@ const CallScreen = () => {
     timerInterval.current = setInterval(() => {
       if (callStartTime) {
         const now = new Date();
-        const diff = Math.floor((now.getTime() - callStartTime.getTime()) / 1000);
+        const diff = Math.floor(
+          (now.getTime() - callStartTime.getTime()) / 1000,
+        );
         const minutes = Math.floor(diff / 60);
         const seconds = diff % 60;
-        const localTimer = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        const localTimer = `${minutes.toString().padStart(2, '0')}:${seconds
+          .toString()
+          .padStart(2, '0')}`;
         if (!timer || timer === '00:00') setTimer(localTimer);
       }
     }, 1000);
@@ -371,10 +435,11 @@ const CallScreen = () => {
 
     let actualDuration = 0;
     if (callStartTime) {
-      actualDuration = Math.floor((new Date().getTime() - callStartTime.getTime()) / 1000);
+      actualDuration = Math.floor(
+        (new Date().getTime() - callStartTime.getTime()) / 1000,
+      );
     }
 
-    
     dispatch(clearCallSession());
     await cleanup();
     navigation.goBack();
@@ -406,13 +471,15 @@ const CallScreen = () => {
   const getOtherPersonData = () => {
     if (!callSession) {
       if (isAstrologer) {
-        return { name: userParam?.name || 'User', imageUri: userParam?.imageUri };
+        return {name: userParam?.name || 'User', imageUri: userParam?.imageUri};
       } else {
-        return { name: astrologer.name, imageUri: astrologer.imageUri };
+        return {name: astrologer.name, imageUri: astrologer.imageUri};
       }
     }
-    const otherPerson = isAstrologer ? callSession.user : callSession.astrologer;
-    return { name: otherPerson.name, imageUri: otherPerson.imgUri };
+    const otherPerson = isAstrologer
+      ? callSession.user
+      : callSession.astrologer;
+    return {name: otherPerson.name, imageUri: otherPerson.imgUri};
   };
 
   // Render Functions
@@ -421,15 +488,19 @@ const CallScreen = () => {
     return (
       <View style={styles.waitingContainer}>
         <Avatar
-          image={otherPerson.imageUri ? { uri: otherPerson.imageUri } : undefined}
+          image={otherPerson.imageUri ? {uri: otherPerson.imageUri} : undefined}
           fallbackText={otherPerson.name.charAt(0)}
           size={scale(120)}
           borderColor={colors.primary_surface}
           borderWidth={3}
         />
-        <Text style={[textStyle.fs_mont_24_700, styles.astrologerName]}>{otherPerson.name}</Text>
+        <Text style={[textStyle.fs_mont_24_700, styles.astrologerName]}>
+          {otherPerson.name}
+        </Text>
         <Text style={[textStyle.fs_mont_16_400, styles.waitingText]}>
-          {isAstrologer ? 'Connecting to user...' : 'Waiting for astrologer to accept...'}
+          {isAstrologer
+            ? 'Connecting to user...'
+            : 'Waiting for astrologer to accept...'}
         </Text>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.primary_surface} />
@@ -439,8 +510,12 @@ const CallScreen = () => {
             <Text style={[textStyle.fs_mont_14_400, styles.waitingTimeText]}>
               Waiting: {formatWaitingTime(waitingTime)}
             </Text>
-            <TouchableOpacity style={styles.cancelButton} onPress={handleCallCancel}>
-              <Text style={[textStyle.fs_mont_16_600, styles.cancelButtonText]}>Cancel Call</Text>
+            <TouchableOpacity
+              style={styles.cancelButton}
+              onPress={handleCallCancel}>
+              <Text style={[textStyle.fs_mont_16_600, styles.cancelButtonText]}>
+                Cancel Call
+              </Text>
             </TouchableOpacity>
           </>
         )}
@@ -453,14 +528,18 @@ const CallScreen = () => {
     return (
       <View style={styles.waitingContainer}>
         <Avatar
-          image={otherPerson.imageUri ? { uri: otherPerson.imageUri } : undefined}
+          image={otherPerson.imageUri ? {uri: otherPerson.imageUri} : undefined}
           fallbackText={otherPerson.name.charAt(0)}
           size={scale(120)}
           borderColor={colors.success.base}
           borderWidth={3}
         />
-        <Text style={[textStyle.fs_mont_24_700, styles.astrologerName]}>{otherPerson.name}</Text>
-        <Text style={[textStyle.fs_mont_16_400, styles.waitingText]}>Connecting to call...</Text>
+        <Text style={[textStyle.fs_mont_24_700, styles.astrologerName]}>
+          {otherPerson.name}
+        </Text>
+        <Text style={[textStyle.fs_mont_16_400, styles.waitingText]}>
+          Connecting to call...
+        </Text>
         <View style={styles.loadingContainer}>
           <ActivityIndicator size="large" color={colors.success.base} />
         </View>
@@ -473,14 +552,18 @@ const CallScreen = () => {
     return (
       <View style={styles.waitingContainer}>
         <Avatar
-          image={otherPerson.imageUri ? { uri: otherPerson.imageUri } : undefined}
+          image={otherPerson.imageUri ? {uri: otherPerson.imageUri} : undefined}
           fallbackText={otherPerson.name.charAt(0)}
           size={scale(120)}
           borderColor={colors.error.base}
           borderWidth={3}
         />
-        <Text style={[textStyle.fs_mont_24_700, styles.astrologerName]}>{otherPerson.name}</Text>
-        <Text style={[textStyle.fs_mont_16_400, styles.rejectedText]}>Call was declined</Text>
+        <Text style={[textStyle.fs_mont_24_700, styles.astrologerName]}>
+          {otherPerson.name}
+        </Text>
+        <Text style={[textStyle.fs_mont_16_400, styles.rejectedText]}>
+          Call was declined
+        </Text>
         <Text style={[textStyle.fs_mont_14_400, styles.rejectedSubText]}>
           The astrologer is currently unavailable
         </Text>
@@ -494,11 +577,17 @@ const CallScreen = () => {
       return (
         <View style={styles.videoContainer}>
           {remoteUid ? (
-            <RtcSurfaceView style={styles.remoteVideo} canvas={{ uid: remoteUid }} zOrderMediaOverlay={false} />
+            <RtcSurfaceView
+              style={styles.remoteVideo}
+              canvas={{uid: remoteUid}}
+              zOrderMediaOverlay={false}
+            />
           ) : (
             <View style={styles.connectingContainer}>
               <Avatar
-                image={otherPerson.imageUri ? { uri: otherPerson.imageUri } : undefined}
+                image={
+                  otherPerson.imageUri ? {uri: otherPerson.imageUri} : undefined
+                }
                 fallbackText={otherPerson.name.charAt(0)}
                 size={scale(80)}
               />
@@ -510,7 +599,7 @@ const CallScreen = () => {
           {isVideoEnabled && (
             <RtcSurfaceView
               style={styles.localVideo}
-              canvas={{ uid: 0 }}
+              canvas={{uid: 0}}
               zOrderMediaOverlay={true}
             />
           )}
@@ -520,13 +609,17 @@ const CallScreen = () => {
       return (
         <View style={styles.audioCallContainer}>
           <Avatar
-            image={otherPerson.imageUri ? { uri: otherPerson.imageUri } : undefined}
+            image={
+              otherPerson.imageUri ? {uri: otherPerson.imageUri} : undefined
+            }
             fallbackText={otherPerson.name.charAt(0)}
             size={scale(120)}
             borderColor={remoteUid ? colors.success.base : colors.grey300}
             borderWidth={3}
           />
-          <Text style={[textStyle.fs_mont_24_700, styles.astrologerName]}>{otherPerson.name}</Text>
+          <Text style={[textStyle.fs_mont_24_700, styles.astrologerName]}>
+            {otherPerson.name}
+          </Text>
           <Text style={[textStyle.fs_mont_16_400, styles.callStatusText]}>
             {remoteUid ? 'Connected' : 'Connecting...'}
           </Text>
@@ -541,30 +634,41 @@ const CallScreen = () => {
       <View style={styles.controls}>
         <TouchableOpacity
           style={[styles.controlButton, isMuted && styles.activeButton]}
-          onPress={toggleMute}
-        >
+          onPress={toggleMute}>
           <Text style={styles.controlIcon}>{isMuted ? '🔇' : '🎤'}</Text>
         </TouchableOpacity>
         <TouchableOpacity
-          style={[styles.controlButton, isSpeakerEnabled && styles.activeButton]}
-          onPress={toggleSpeaker}
-        >
-          <Text style={styles.controlIcon}>{isSpeakerEnabled ? '🔊' : '🔈'}</Text>
+          style={[
+            styles.controlButton,
+            isSpeakerEnabled && styles.activeButton,
+          ]}
+          onPress={toggleSpeaker}>
+          <Text style={styles.controlIcon}>
+            {isSpeakerEnabled ? '🔊' : '🔈'}
+          </Text>
         </TouchableOpacity>
         {callType === 'VIDEO' && (
           <>
-            <TouchableOpacity style={styles.controlButton} onPress={switchCamera}>
+            <TouchableOpacity
+              style={styles.controlButton}
+              onPress={switchCamera}>
               <Text style={styles.controlIcon}>🔄</Text>
             </TouchableOpacity>
             <TouchableOpacity
-              style={[styles.controlButton, !isVideoEnabled && styles.activeButton]}
-              onPress={toggleVideo}
-            >
-              <Text style={styles.controlIcon}>{isVideoEnabled ? '📹' : '📷'}</Text>
+              style={[
+                styles.controlButton,
+                !isVideoEnabled && styles.activeButton,
+              ]}
+              onPress={toggleVideo}>
+              <Text style={styles.controlIcon}>
+                {isVideoEnabled ? '📹' : '📷'}
+              </Text>
             </TouchableOpacity>
           </>
         )}
-        <TouchableOpacity style={styles.endCallButton} onPress={() => handleCallEnd(true)}>
+        <TouchableOpacity
+          style={styles.endCallButton}
+          onPress={() => handleCallEnd(true)}>
           <Text style={styles.endCallIcon}>📞</Text>
         </TouchableOpacity>
       </View>
@@ -578,10 +682,13 @@ const CallScreen = () => {
     setupLocalSocketListeners();
     if (!isAstrologer) startWaitingTimer();
 
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
-      handleCallCancel();
-      return true;
-    });
+    const backHandler = BackHandler.addEventListener(
+      'hardwareBackPress',
+      () => {
+        handleCallCancel();
+        return true;
+      },
+    );
 
     return () => {
       cleanup();
@@ -604,15 +711,22 @@ const CallScreen = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar barStyle="light-content" backgroundColor={colors.primaryText} />
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={colors.primaryText}
+      />
       <View style={styles.header}>
         <Text style={[textStyle.fs_mont_18_600, styles.headerText]}>
           {callType === 'VIDEO' ? 'Video Call' : 'Voice Call'}
         </Text>
         {callState === 'connected' && (
-          <Text style={[textStyle.fs_mont_16_400, styles.timerText]}>{timer}</Text>
+          <Text style={[textStyle.fs_mont_16_400, styles.timerText]}>
+            {timer}
+          </Text>
         )}
-        {!networkConnected && <Text style={styles.networkStatus}>Poor Connection</Text>}
+        {!networkConnected && (
+          <Text style={styles.networkStatus}>Poor Connection</Text>
+        )}
       </View>
       <View style={styles.content}>
         {callState === 'waiting' && renderWaitingScreen()}
@@ -772,7 +886,7 @@ const styles = StyleSheet.create({
   },
   endCallIcon: {
     fontSize: scale(28),
-    transform: [{ rotate: '135deg' }],
+    transform: [{rotate: '135deg'}],
   },
 });
 

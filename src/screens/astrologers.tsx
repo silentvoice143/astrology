@@ -16,7 +16,7 @@ import {scale, verticalScale} from '../utils/sizer';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import {getAllAstrologers} from '../store/reducer/astrologers';
 import {useTypedNavigation} from '../hooks/navigation';
-import {setProfileModelToggle} from '../store/reducer/auth';
+import {setFreeChatUsed, setProfileModelToggle} from '../store/reducer/auth';
 import RequestSessionModal from '../components/session/modals/request-session-modal';
 import {shuffleArray} from '../utils/utils';
 import {textStyle} from '../constants/text-style';
@@ -29,6 +29,7 @@ import {
 } from '../store/reducer/session';
 import {useDebounce} from '../hooks/use-debounce';
 import Toast from 'react-native-toast-message';
+import {useWebSocket} from '../hooks/use-socket-new';
 
 type SessionType = 'chat' | 'audio' | 'video'; // NEW
 
@@ -81,8 +82,11 @@ const Astrologers = () => {
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
+
   const activeSession = useAppSelector(state => state.session.activeSession);
   const {onlineAstrologer} = useAppSelector(state => state.astrologer);
+  const {user} = useAppSelector(state => state.auth);
+  const {send} = useWebSocket(user.id);
 
   const fetchAstrologersData = async (
     pageNumber = 1,
@@ -120,6 +124,9 @@ const Astrologers = () => {
       const payload = await dispatch(sendSessionRequest(body)).unwrap();
 
       if (payload.success) {
+        if (!freeChatUsed) {
+          dispatch(setFreeChatUsed());
+        }
         dispatch(setOtherUser(astrologer));
         navigation.navigate('chat');
       } else {
@@ -169,6 +176,8 @@ const Astrologers = () => {
   }, [selected]);
 
   useEffect(() => {
+    send('/app/session.active');
+    send('/app/online.user');
     fetchAstrologersData(1, false, debouncedSearch);
   }, [debouncedSearch, sort]);
 
@@ -188,13 +197,12 @@ const Astrologers = () => {
         online: onlineSet.has(a.user.id),
       })),
     );
-  }, [onlineAstrologer, loading]);
+  }, [onlineAstrologer, loading, isFetchingMore]);
 
   const sortedAstrologers = astrologersData.sort((a, b) => {
     return (b.online === true ? 1 : 0) - (a.online === true ? 1 : 0);
   });
 
-  // console.log(sortedAstrologers, onlineAstrologer, '---sorted Astrologer');
   if (loading) {
     return (
       <ScreenLayout>

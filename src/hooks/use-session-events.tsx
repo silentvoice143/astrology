@@ -1,26 +1,19 @@
-import {useEffect, useRef, useState} from 'react';
-import {useWebSocket} from './use-socket';
+import {useEffect, useRef} from 'react';
+import {AppState, AppStateStatus} from 'react-native';
+import {useWebSocket} from './use-socket-new';
 import {
   setActiveSession,
   setCallSession,
-  setOtherUser,
-  setRequest,
   setSession,
   toggleCountRefresh,
 } from '../store/reducer/session';
 import {useAppDispatch, useAppSelector} from './redux-hook';
 import {decodeMessageBody} from '../utils/utils';
-
 import {useUserRole} from './use-role';
 import Toast from 'react-native-toast-message';
 import {setOnlineAstrologer} from '../store/reducer/astrologers';
 import {setBalance} from '../store/reducer/auth';
 import {getTransactionHistory} from '../store/reducer/payment';
-
-interface CallRequest {
-  userId: string;
-  callType: 'VOICE' | 'VIDEO';
-}
 
 export const useSessionEvents = (
   userId: string = '',
@@ -29,10 +22,8 @@ export const useSessionEvents = (
 ) => {
   const {subscribe, unsubscribe} = useWebSocket(userId);
   const dispatch = useAppDispatch();
-  const {session} = useAppSelector(state => state.session);
   const role = useUserRole();
-
-  const hasSubscribed = useRef(false);
+  const subscriptionsRef = useRef<string[]>([]);
 
   const getTransactionDetails = async () => {
     try {
@@ -53,23 +44,34 @@ export const useSessionEvents = (
         type: 'error',
         text1: 'Failed to get transactions',
       });
-    } finally {
     }
   };
 
-  useEffect(() => {
-    // Guard: If already subscribed, don't do it again
-    if (!isAuthenticated || !isConnected || !userId || hasSubscribed.current)
-      return;
+  const subscribeAll = () => {
+    if (!isAuthenticated || !isConnected || !userId) return;
 
-    let queueDest = `/topic/queue/${userId}`;
-    let requestDest = `/topic/chat/${userId}/chatId`;
-    let activeSessionDest = `/topic/session/${userId}`;
-    let onlineAstroDest = `/topic/online/astrologer`;
+    const queueDest = `/topic/queue/${userId}`;
+    const requestDest = `/topic/chat/${userId}/chatId`;
+    const callSessionDest = `/topic/call/${userId}/session`;
+    const onlineAstroDest = `/topic/online/astrologer`;
+    const activeSessionDest = `/topic/session/${userId}`;
 
-    const queueSub = subscribe(queueDest, msg => {
+    unsubscribeAll();
+
+    subscriptionsRef.current = [
+      queueDest,
+      requestDest,
+      callSessionDest,
+      onlineAstroDest,
+      activeSessionDest,
+    ];
+
+    // if (role === 'ASTROLOGER') {
+    //   subscriptionsRef.current.push(activeSessionDest);
+    // }
+
+    subscribe(queueDest, msg => {
       try {
-        console.log(decodeMessageBody(msg));
         const res = JSON.parse(decodeMessageBody(msg));
         dispatch(toggleCountRefresh());
         Toast.show({
@@ -77,40 +79,27 @@ export const useSessionEvents = (
           text1: 'Session',
           text2: res.msg,
         });
-        // console.log(res, res.userId, res.type, 'get call request');
-        // dispatch(
-        //   setRequest({
-        //     userId: res.userId,
-        //     type: res.type as 'AUDIO' | 'VIDEO' | 'CHAT',
-        //   }),
-        // );
-        // setCallRequest(res);
-        // setCallRequestNotification(true);
       } catch (err) {
-        console.error('Failed to parse queue message:', err);
+        console.log('Failed to parse queue message:', err);
       }
     });
 
-    const callSessionSub = subscribe(`/topic/call/${userId}/session`, msg => {
-      console.log('call session received');
+    subscribe(callSessionDest, msg => {
       try {
         const sessionData = JSON.parse(decodeMessageBody(msg));
-        console.log('Session details received:', sessionData);
         dispatch(setCallSession(sessionData));
         getTransactionDetails();
       } catch (err) {
-        console.error('Session details parse error:', err);
+        console.log('Session details parse error:', err);
       }
     });
 
-    const chatSub = subscribe(requestDest, msg => {
+    subscribe(requestDest, msg => {
       try {
         const data = JSON.parse(decodeMessageBody(msg));
-        console.log('chat session received', data);
         dispatch(setActiveSession(data));
         dispatch(setSession(data));
         getTransactionDetails();
-
         Toast.show({
           type: 'success',
           text1: role === 'USER' ? 'Request Accepted' : 'Request Accepted',
@@ -119,44 +108,48 @@ export const useSessionEvents = (
               ? 'Request accepted by the astrologer'
               : 'Session will start soon',
         });
-        console.log(data);
       } catch (err) {
-        console.error('Failed to parse chat id:', err);
+        console.log('Failed to parse chat id:', err);
       }
     });
 
-    const onlineAstroSub = subscribe(onlineAstroDest, msg => {
+    subscribe(onlineAstroDest, msg => {
       try {
         const data = JSON.parse(decodeMessageBody(msg));
+        console.log('Online astrologer---------------------------:', data);
+
         dispatch(setOnlineAstrologer(data));
       } catch (err) {
-        console.error('Failed to parse chat id:', err);
+        console.log('Failed to parse online astrologer list:', err);
       }
     });
 
-    if (role === 'ASTROLOGER') {
-      const activeSessionSub = subscribe(activeSessionDest, msg => {
-        try {
-          const data = JSON.parse(decodeMessageBody(msg));
-          console.log('chat session received', data);
-        } catch (err) {
-          console.error('Failed to parse chat id:', err);
-        }
-      });
+    subscribe(activeSessionDest, msg => {
+      try {
+        const data = JSON.parse(decodeMessageBody(msg));
+
+        console.log('Active session update---------------------------:', data);
+      } catch (err) {
+        console.log('Failed to parse active session data:', err);
+      }
+    });
+  };
+
+  const unsubscribeAll = () => {
+    subscriptionsRef.current.forEach(dest => {
+      unsubscribe(dest);
+    });
+    subscriptionsRef.current = [];
+  };
+
+  useEffect(() => {
+    if (isAuthenticated && isConnected && userId) {
+      subscribeAll();
     }
 
-    hasSubscribed.current = true;
-
     return () => {
-      console.log('[useSessionEvents] Cleaning up global subscriptions...');
-      unsubscribe(queueDest);
-      unsubscribe(requestDest);
-      unsubscribe(`/topic/call/${userId}/session`);
-      unsubscribe(onlineAstroDest);
-      if (role !== 'ASTROLOGER') {
-        unsubscribe(activeSessionDest);
-      }
-      hasSubscribed.current = false;
+      console.log('[useSessionEvents] Cleaning up...');
+      unsubscribeAll();
     };
-  }, [subscribe, userId, isAuthenticated, isConnected, role]);
+  }, [userId, isAuthenticated, isConnected, role]);
 };
