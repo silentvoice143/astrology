@@ -95,7 +95,7 @@ export const useWebSocket = (userId: string, socketUrl?: string) => {
       await singletonService.connect();
       // States will be updated by handleConnect callback if successful
     } catch (error) {
-      console.error('[useWebSocket] Connection failed:', error);
+      console.log('[useWebSocket] Connection failed:', error);
       setConnecting(false);
       setConnected(false);
     }

@@ -23,6 +23,32 @@ export const loginUser = createAsyncThunk<
   }
 });
 
+export const registerUser = createAsyncThunk<
+  any, // response type as any
+  any, // argument type
+  {rejectValue: any}
+>('auth/register-via-password', async (payload, {rejectWithValue}) => {
+  try {
+    const response = await api.post('/api/v1/auth/register', payload);
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});
+
+export const loginUserPassword = createAsyncThunk<
+  any, // response type as any
+  any, // argument type
+  {rejectValue: any}
+>('auth/login-via-password', async (payload, {rejectWithValue}) => {
+  try {
+    const response = await api.post('/api/v1/auth/login-by-password', payload);
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});
+
 export const verifyOtp = createAsyncThunk<
   any, // response type as any
   verifyPayload, // argument type
