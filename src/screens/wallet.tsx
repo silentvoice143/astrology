@@ -90,7 +90,7 @@ const Wallet = () => {
           description: 'Credits towards consultation',
           image: 'https://astrosevaa-admin.vercel.app/assets/logo-C7bpBiI4.png',
           currency: 'INR',
-          key: 'rzp_test_yauCWFzZA5Tbj3',
+          key: 'rzp_live_cWSq5X8OBRaUWt',
           amount: orderDetails.amount_due,
           name: 'ASTROSEVAA',
           order_id: orderDetails.id,

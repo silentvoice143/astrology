@@ -17,7 +17,7 @@ function App(): React.JSX.Element {
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <GestureHandlerRootView>
+        <GestureHandlerRootView style={{flex: 1}}>
           <SafeAreaProvider>
             <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
               <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />

@@ -1,5 +1,5 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {loginUser, verifyOtp} from './action';
+import {loginUser, loginUserPassword, registerUser, verifyOtp} from './action';
 import {UserDetail} from '../../../utils/types';
 const isProfileComplete = (user: UserDetail): boolean => {
   return Boolean(
@@ -136,7 +136,17 @@ const authSlice = createSlice({
           state.name = payload?.user?.name;
           state.isProfileComplete = isProfileComplete(payload.user);
         }
-      });
+      })
+      .addCase(loginUserPassword.fulfilled, (state, {payload}) => {
+        if (payload?.success) {
+          state.token = payload.token;
+          state.mobile = payload?.user?.mobile;
+          state.user = {...payload?.user};
+          state.name = payload?.user?.name;
+          state.isProfileComplete = isProfileComplete(payload.user);
+        }
+      })
+      .addCase(registerUser.fulfilled, (state, {payload}) => {});
   },
 });
 

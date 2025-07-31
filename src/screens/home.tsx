@@ -164,15 +164,17 @@ const Home = () => {
 
   return (
     <ScreenLayout>
-      <FirstChatFreePopup
-        isOpen={isFirstChatModalOpen}
-        onClose={() => {
-          setIsFirstChatModalOpen(false);
-        }}
-        onClaimPress={() => {
-          navigation.navigate('Astrologers');
-        }}
-      />
+      {isFirstChatModalOpen && (
+        <FirstChatFreePopup
+          isOpen={isFirstChatModalOpen}
+          onClose={() => {
+            setIsFirstChatModalOpen(false);
+          }}
+          onClaimPress={() => {
+            navigation.navigate('Astrologers');
+          }}
+        />
+      )}
 
       <ScrollView
         // keyboardShouldPersistTaps="handled"
