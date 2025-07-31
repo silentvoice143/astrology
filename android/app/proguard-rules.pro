@@ -8,3 +8,8 @@
 #   http://developer.android.com/guide/developing/tools/proguard.html
 
 # Add any project specific keep options here:
+# Razorpay SDK
+-keep class com.razorpay.** { *; }
+-keep class org.apache.commons.** { *; }
+-keepattributes Signature
+-keepattributes *Annotation*
