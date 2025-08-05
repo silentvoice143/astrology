@@ -9,7 +9,11 @@
 
 # Add any project specific keep options here:
 # Razorpay SDK
--keep class com.razorpay.** { *; }
--keep class org.apache.commons.** { *; }
--keepattributes Signature
 -keepattributes *Annotation*
+-dontwarn com.razorpay.**
+-keep class com.razorpay.** {*;}
+-optimizations !method/inlining/
+-keepclasseswithmembers class * {
+  public void onPayment*(...);
+}
+ 

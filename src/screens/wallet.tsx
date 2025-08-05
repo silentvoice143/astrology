@@ -91,6 +91,7 @@ const Wallet = () => {
           image: 'https://astrosevaa-admin.vercel.app/assets/logo-C7bpBiI4.png',
           currency: 'INR',
           key: 'rzp_live_cWSq5X8OBRaUWt',
+          // key: 'rzp_test_yauCWFzZA5Tbj3',
           amount: orderDetails.amount_due,
           name: 'ASTROSEVAA',
           order_id: orderDetails.id,
@@ -110,10 +111,8 @@ const Wallet = () => {
           },
         };
 
-        
-
         try {
-          RazorpayCheckout.open(options)
+          RazorpayCheckout?.open(options)
             .then((data: any) => {
               Toast.show({
                 type: 'success',

@@ -20,7 +20,6 @@ export const sendSessionRequest = createAsyncThunk<
   {rejectValue: any}
 >('session/post-request', async (payload, {rejectWithValue}) => {
   try {
-    console.log(payload, '-----bodyyy');
     const response = await api.post('/api/v1/chat/request', payload);
     return response.data;
   } catch (error: any) {
@@ -61,6 +60,21 @@ export const getChatMessages = createAsyncThunk<
 >('chat-messages/get', async (payload, {rejectWithValue}) => {
   try {
     const response = await api.get(`/api/v1/chat/messages${payload}`);
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});
+
+// ===================password reset==================
+
+export const passwordReset = createAsyncThunk<
+  any, // response type as any
+  any, // argument type
+  {rejectValue: any}
+>('/api/v1/users/change-password', async (payload, {rejectWithValue}) => {
+  try {
+    const response = await api.post('/api/v1/users/change-password', payload);
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data || error.message);

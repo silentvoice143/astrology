@@ -126,6 +126,12 @@ const Login = () => {
           <Text style={styles.footerLink}> Register</Text>
         </Pressable>
       </View>
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>Forgot Password?</Text>
+        <Pressable onPress={() => navigation.navigate('CustomerSupport')}>
+          <Text style={styles.footerLink}> Need Help</Text>
+        </Pressable>
+      </View>
     </View>
   );
 };

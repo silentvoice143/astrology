@@ -105,6 +105,7 @@ export const themeColors = {
     warning: '#FFD700',
     danger: '#DC3545',
     info: '#00C9F0',
+    muted: '#686868',
   },
   card: {
     default: '#f8f7f1',
