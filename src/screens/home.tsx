@@ -43,7 +43,9 @@ const Home = () => {
   const [isFirstChatModalOpen, setIsFirstChatModalOpen] = useState(false);
   const {freeChatUsed} = useAppSelector(state => state.auth.user);
   const {freeChatModalShown} = useAppSelector(state => state.auth);
+  const {onlineAstrologerDetails} = useAppSelector(state => state.astrologer);
   const dispatch = useAppDispatch();
+  console.log(onlineAstrologerDetails, '----details');
   // const [loading, setLoading] = useState(false);
   const role = useUserRole();
   const [loading, setLoading] = useState<{
@@ -158,9 +160,25 @@ const Home = () => {
     getBannerData();
   }, []);
 
-  const sortedAstrologers = astrologersData.sort((a, b) => {
+  const sortedAstrologerData = astrologersData.sort((a, b) => {
     return (b.online === true ? 1 : 0) - (a.online === true ? 1 : 0);
   });
+
+  const astrologerModifiedData = () => {
+    if (onlineAstrologerDetails.length === 0) {
+      return sortedAstrologerData;
+    } else {
+      return onlineAstrologerDetails.map(item => ({
+        name: item?.user?.name,
+        expertise: item?.expertise,
+        about: item?.about,
+        id: item?.id,
+        imgUri: item?.user?.imgUri,
+        userId: item?.user?.id,
+        online: item?.online,
+      }));
+    }
+  };
 
   return (
     <ScreenLayout>
@@ -311,7 +329,7 @@ const Home = () => {
                 />
               </View>
             ) : (
-              <SlidingCard data={sortedAstrologers} />
+              <SlidingCard data={astrologerModifiedData()} />
             )}
           </View>
           <View

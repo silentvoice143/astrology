@@ -31,3 +31,17 @@ export const getAllAstrologerById = createAsyncThunk<
     return rejectWithValue(error.response?.data || error.message);
   }
 });
+
+export const getOnlineAstrologer = createAsyncThunk<
+  UserResponse,
+  {id: string},
+  ThunkApiConfig
+>('astrologers/getOnlineAstrologer', async (id, {rejectWithValue}) => {
+  try {
+    const response = await api.get(`/api/v1/astrologers/online/list`);
+
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});
