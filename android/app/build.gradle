@@ -78,13 +78,13 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
     compileSdk rootProject.ext.compileSdkVersion
 
-    namespace "com.insapimarketing.astrosevaa"
+    namespace "com.insapimarketing.astrosevaa2"
     defaultConfig {
-        applicationId "com.insapimarketing.astrosevaa"
+        applicationId "com.insapimarketing.astrosevaa2"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 11
-        versionName "1.1.0"
+        versionCode 1
+        versionName "1.0"
     }
     
     signingConfigs {

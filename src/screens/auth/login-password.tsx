@@ -64,6 +64,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     if (!validateForm()) return;
+    console.log('login..................');
 
     try {
       setLoading(true);

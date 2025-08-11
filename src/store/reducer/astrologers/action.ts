@@ -34,9 +34,9 @@ export const getAllAstrologerById = createAsyncThunk<
 
 export const getOnlineAstrologer = createAsyncThunk<
   UserResponse,
-  {id: string},
+  void,
   ThunkApiConfig
->('astrologers/getOnlineAstrologer', async (id, {rejectWithValue}) => {
+>('astrologers/getOnlineAstrologer', async (_, {rejectWithValue}) => {
   try {
     const response = await api.get(`/api/v1/astrologers/online/list`);
 

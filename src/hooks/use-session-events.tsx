@@ -120,7 +120,7 @@ export const useSessionEvents = (
     subscribe(onlineAstroDest, msg => {
       try {
         const data = JSON.parse(decodeMessageBody(msg));
-        // console.log('Online astrologer---------------------------:', data);
+        console.log('Online astrologer---------------------------:', data);
 
         dispatch(setOnlineAstrologer(data));
       } catch (err) {
@@ -131,7 +131,10 @@ export const useSessionEvents = (
     subscribe(onlineAstrologerDest, msg => {
       try {
         const data = JSON.parse(decodeMessageBody(msg));
-        // console.log('Online astrologer---------------------------:', data);
+        console.log(
+          'Online astrologer full details---------------------------:',
+          data,
+        );
 
         dispatch(setOnlineAstrologerDetails(data));
       } catch (err) {
