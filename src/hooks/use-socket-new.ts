@@ -16,8 +16,8 @@ export const useWebSocket = (userId: string, socketUrl?: string) => {
       const url =
         socketUrl ||
         process.env.BASE_URL ||
-        // 'https://backend.astrosevaa.com/ws-chat';
-        'https://quagga-driving-socially.ngrok-free.app/ws-chat';
+        'https://backend.astrosevaa.com/ws-chat';
+      // 'https://quagga-driving-socially.ngrok-free.app/ws-chat';
 
       singletonService = new WebSocketService(userId, url);
       console.log('[useWebSocket] Service initialized with URL:', url);

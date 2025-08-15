@@ -68,6 +68,7 @@ export const useSessionEvents = (
       callSessionDest,
       onlineAstroDest,
       activeSessionDest,
+      onlineAstrologerDest,
     ];
 
     // if (role === 'ASTROLOGER') {

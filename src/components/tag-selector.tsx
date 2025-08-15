@@ -77,7 +77,7 @@ const TagSelector: React.FC<AdvancedTagSelectorProps> = ({
     setSelected(updated);
     onChange?.(updated);
   };
-  console.log(selected, '---selected');
+
   const labelColor = selected.length > 0 ? '#007BFF' : '#000'; // Blue if selected, black otherwise
 
   return (

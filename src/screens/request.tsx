@@ -31,6 +31,7 @@ import AboutIcon from '../assets/icons/about-icon';
 import {themeColors} from '../constants/colors';
 import CheckIcon from '../assets/icons/checkIcon';
 import {useWebSocket} from '../hooks/use-socket-new';
+import {useSelector} from 'react-redux';
 
 type RequestType = {
   userId: string;
@@ -334,6 +335,7 @@ const RequestScreen = () => {
   const astrologer_detail = useAppSelector(state => state.auth.user);
   const {activeSession} = useAppSelector(state => state.session);
   const {send, isConnected} = useWebSocket(astrologer_detail?.id);
+  const {user} = useAppSelector(state => state.auth);
 
   const getAllRequests = async () => {
     try {
@@ -520,7 +522,7 @@ const RequestScreen = () => {
   };
 
   useEffect(() => {
-    send('/app/session.active');
+    send('/app/session.active', {}, JSON.stringify({astrologerId: user?.id}));
     getAllRequests();
   }, [quequeRequestCount]);
 

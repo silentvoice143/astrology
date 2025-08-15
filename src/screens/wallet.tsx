@@ -149,11 +149,11 @@ const Wallet = () => {
         });
       }
     } catch (error) {
-      console.error('TopUp Error:', error);
-      Toast.show({
-        type: 'error',
-        text1: 'Payment initiation failed',
-      });
+      // console.error('TopUp Error:', error);
+      // Toast.show({
+      //   type: 'error',
+      //   text1: 'Payment initiation failed',
+      // });
     }
   };
 
@@ -169,10 +169,10 @@ const Wallet = () => {
         getTransactionDetails(1);
       }
     } catch (error: any) {
-      Toast.show({
-        type: 'error',
-        text1: error?.message,
-      });
+      // Toast.show({
+      //   type: 'error',
+      //   text1: error?.message,
+      // });
     }
   };
 

@@ -176,7 +176,7 @@ const Astrologers = () => {
   }, [selected]);
 
   useEffect(() => {
-    send('/app/session.active');
+    send('/app/session.active', {}, JSON.stringify({astrologerId: user?.id}));
     send('/app/online.user');
     fetchAstrologersData(1, false, debouncedSearch);
   }, [debouncedSearch, sort]);

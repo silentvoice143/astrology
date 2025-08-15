@@ -84,7 +84,7 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
   };
 
   useEffect(() => {
-    send('/app/session.active');
+    send('/app/session.active', {}, JSON.stringify({astrologerId: user?.id}));
   }, [id]);
 
   return (

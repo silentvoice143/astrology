@@ -7,7 +7,7 @@ import {
 } from './action';
 import {UserDetail, UserPersonalDetail} from '../../../utils/types';
 
-const initialState: UserDetail = {
+const initialState: Partial<UserDetail> = {
   id: '',
   name: '',
   gender: 'MALE',

@@ -60,7 +60,7 @@ const Home = () => {
     }[]
   >([]);
   const dispatch = useAppDispatch();
-  console.log(onlineAstrologerDetails, '----details');
+  // console.log(onlineAstrologerDetails, '----details');
   // const [loading, setLoading] = useState(false);
   const role = useUserRole();
   const [loading, setLoading] = useState<{
@@ -118,7 +118,7 @@ const Home = () => {
       setLoading(prev => ({...prev, onlineAstrologer: true}));
 
       const payload = await dispatch(getOnlineAstrologer()).unwrap();
-      console.log(payload, '---------online astrologers');
+      // console.log(payload, '---------online astrologers');
       if (payload.success) {
         const newData =
           payload.astrologers.map((item: AstrologersType) => ({
