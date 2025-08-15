@@ -1,4 +1,4 @@
-package com.insapimarketing.astrosevaa
+package com.insapimarketing.astrosevaa2
 
 import android.os.Bundle;
 import com.facebook.react.ReactActivity

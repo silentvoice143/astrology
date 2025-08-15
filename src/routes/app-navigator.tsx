@@ -75,23 +75,23 @@ export default function AppNavigator() {
     checkAuth();
   }, [token, dispatch, isConnected]);
 
-  const handleAppStateChange = (nextState: AppStateStatus) => {
-    if (nextState === 'active') {
-      console.log('[useSessionEvents] App resumed — resubscribing...');
-    }
-  };
+  // const handleAppStateChange = (nextState: AppStateStatus) => {
+  //   if (nextState === 'active') {
+  //     console.log('[useSessionEvents] App resumed — resubscribing...');
+  //   }
+  // };
 
-  useEffect(() => {
-    const appStateListener = AppState.addEventListener(
-      'change',
-      handleAppStateChange,
-    );
+  // useEffect(() => {
+  //   const appStateListener = AppState.addEventListener(
+  //     'change',
+  //     handleAppStateChange,
+  //   );
 
-    return () => {
-      disconnect();
-      appStateListener.remove();
-    };
-  }, []);
+  //   return () => {
+  //     disconnect();
+  //     appStateListener.remove();
+  //   };
+  // }, []);
 
   if (loading) {
     return (

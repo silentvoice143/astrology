@@ -64,6 +64,7 @@ const Login = () => {
 
   const handleLogin = async () => {
     if (!validateForm()) return;
+    console.log('login..................');
 
     try {
       setLoading(true);
@@ -124,6 +125,12 @@ const Login = () => {
         <Text style={styles.footerText}>Don't have an account?</Text>
         <Pressable onPress={() => navigation.navigate('Register')}>
           <Text style={styles.footerLink}> Register</Text>
+        </Pressable>
+      </View>
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>Forgot Password?</Text>
+        <Pressable onPress={() => navigation.navigate('CustomerSupport')}>
+          <Text style={styles.footerLink}> Need Help</Text>
         </Pressable>
       </View>
     </View>

@@ -51,9 +51,9 @@ const UserProfileEdit = () => {
     gender: user?.gender,
     birthDate: user?.birthDate,
     birthTime: user?.birthTime ?? now.toTimeString().split(' ')[0],
-    birthPlace: 'heaven',
-    latitude: 34,
-    longitude: 45,
+    birthPlace: '',
+    latitude: 22.5744,
+    longitude: 88.3629,
   });
 
   const dispatch = useAppDispatch();
@@ -281,7 +281,7 @@ const UserProfileEdit = () => {
             contentContainerStyle={{paddingHorizontal: 0}}
           />
 
-          <LocationAutoComplete
+          {/* <LocationAutoComplete
             label="Place of Birth"
             value={personalDetail?.birthPlace}
             onSelectLocation={location => {
@@ -292,6 +292,19 @@ const UserProfileEdit = () => {
                 longitude: Number(location.lon),
               }));
             }}
+          /> */}
+          <CustomInputV2
+            label="Birth Place"
+            placeholder="Enter your birth place"
+            value={personalDetail.birthPlace}
+            onChangeText={val =>
+              setPersonalDetail(prev => ({
+                ...prev,
+                birthPlace: val,
+                latitude: 22.5744,
+                longitude: 88.3629,
+              }))
+            }
           />
           <View style={{gap: scale(4), marginTop: verticalScale(20)}}>
             <CustomButton

@@ -90,7 +90,8 @@ const Wallet = () => {
           description: 'Credits towards consultation',
           image: 'https://astrosevaa-admin.vercel.app/assets/logo-C7bpBiI4.png',
           currency: 'INR',
-          key: 'rzp_live_cWSq5X8OBRaUWt',
+          key: 'rzp_live_SDcBtxcz0DjXsq',
+          // key: 'rzp_test_yauCWFzZA5Tbj3',
           amount: orderDetails.amount_due,
           name: 'ASTROSEVAA',
           order_id: orderDetails.id,
@@ -110,10 +111,8 @@ const Wallet = () => {
           },
         };
 
-        
-
         try {
-          RazorpayCheckout.open(options)
+          RazorpayCheckout?.open(options)
             .then((data: any) => {
               Toast.show({
                 type: 'success',
@@ -150,11 +149,11 @@ const Wallet = () => {
         });
       }
     } catch (error) {
-      console.error('TopUp Error:', error);
-      Toast.show({
-        type: 'error',
-        text1: 'Payment initiation failed',
-      });
+      // console.error('TopUp Error:', error);
+      // Toast.show({
+      //   type: 'error',
+      //   text1: 'Payment initiation failed',
+      // });
     }
   };
 
@@ -170,10 +169,10 @@ const Wallet = () => {
         getTransactionDetails(1);
       }
     } catch (error: any) {
-      Toast.show({
-        type: 'error',
-        text1: error?.message,
-      });
+      // Toast.show({
+      //   type: 'error',
+      //   text1: error?.message,
+      // });
     }
   };
 
@@ -235,7 +234,14 @@ const Wallet = () => {
                 textStyle={{color: colors.primaryText, fontWeight: '600'}}
                 title="Add Balance"
                 onPress={() => {
-                  const numericAmount = parseFloat(amount);
+                  const numericAmount = Number(amount);
+                  if (numericAmount === 0) {
+                    Toast.show({
+                      type: 'info',
+                      text1: 'Please enter valid amount',
+                    });
+                    return;
+                  }
                   paymentHandler(numericAmount);
                 }}
               />

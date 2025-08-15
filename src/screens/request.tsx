@@ -31,6 +31,7 @@ import AboutIcon from '../assets/icons/about-icon';
 import {themeColors} from '../constants/colors';
 import CheckIcon from '../assets/icons/checkIcon';
 import {useWebSocket} from '../hooks/use-socket-new';
+import {useSelector} from 'react-redux';
 
 type RequestType = {
   userId: string;
@@ -333,7 +334,8 @@ const RequestScreen = () => {
   );
   const astrologer_detail = useAppSelector(state => state.auth.user);
   const {activeSession} = useAppSelector(state => state.session);
-  const {send} = useWebSocket(astrologer_detail?.id);
+  const {send, isConnected} = useWebSocket(astrologer_detail?.id);
+  const {user} = useAppSelector(state => state.auth);
 
   const getAllRequests = async () => {
     try {
@@ -367,6 +369,14 @@ const RequestScreen = () => {
   };
 
   const handleAcceptCall = async (user: RequestType) => {
+    if (!isConnected) {
+      Toast.show({
+        type: 'error',
+        text1: 'Server not connected',
+        text2: 'Please try again later.',
+      });
+      return;
+    }
     try {
       const response = await dispatch(acceptCallRequest(user.userId)).unwrap();
 
@@ -410,6 +420,14 @@ const RequestScreen = () => {
 
   const handleAcceptChat = async (user: RequestType) => {
     if (isAnimating) return;
+    if (!isConnected) {
+      Toast.show({
+        type: 'error',
+        text1: 'Server not connected',
+        text2: 'Please try again later.',
+      });
+      return;
+    }
 
     setIsAnimating(true);
     try {
@@ -473,7 +491,14 @@ const RequestScreen = () => {
 
   const handleSkip = async (user: RequestType) => {
     if (isAnimating) return;
-
+    if (!isConnected) {
+      Toast.show({
+        type: 'error',
+        text1: 'Server not connected',
+        text2: 'Please try again later.',
+      });
+      return;
+    }
     setIsAnimating(true);
     try {
       const payload = await dispatch(skipSessionRequest(user.userId)).unwrap();
@@ -497,7 +522,7 @@ const RequestScreen = () => {
   };
 
   useEffect(() => {
-    send('/app/session.active');
+    send('/app/session.active', {}, JSON.stringify({astrologerId: user?.id}));
     getAllRequests();
   }, [quequeRequestCount]);
 

@@ -1,12 +1,18 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {getAllAstrologerById, getAllAstrologers} from './action';
+import {
+  getAllAstrologerById,
+  getAllAstrologers,
+  getOnlineAstrologer,
+} from './action';
 
 export interface AstrologersState {
   onlineAstrologer: string[];
+  onlineAstrologerDetails: any[];
 }
 
 const initialState: AstrologersState = {
   onlineAstrologer: [],
+  onlineAstrologerDetails: [],
 };
 
 const userSlice = createSlice({
@@ -18,6 +24,9 @@ const userSlice = createSlice({
     },
     setOnlineAstrologer: (state, action) => {
       state.onlineAstrologer = action.payload;
+    },
+    setOnlineAstrologerDetails: (state, action) => {
+      state.onlineAstrologerDetails = action.payload;
     },
   },
   extraReducers: builder => {
@@ -31,9 +40,18 @@ const userSlice = createSlice({
         return payload.data;
       }
     });
+    builder.addCase(getOnlineAstrologer.fulfilled, (state, {payload}) => {
+      if (payload?.success) {
+        return payload.data;
+      }
+    });
   },
 });
 
-export const {setInitialUserData, setOnlineAstrologer} = userSlice.actions;
-export {getAllAstrologers, getAllAstrologerById};
+export const {
+  setInitialUserData,
+  setOnlineAstrologer,
+  setOnlineAstrologerDetails,
+} = userSlice.actions;
+export {getAllAstrologers, getAllAstrologerById, getOnlineAstrologer};
 export default userSlice.reducer;

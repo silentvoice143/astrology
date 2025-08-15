@@ -30,7 +30,7 @@ export interface UserDetail {
   createdAt: string; // ISO date string
   updatedAt: string; // ISO date string
   imgUri: string;
-  freeChatUsed: boolean;
+  freeChatUsed?: boolean;
 }
 
 export interface Astrologers {

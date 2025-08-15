@@ -7,6 +7,7 @@ import {
 // store/slices/sessionSlice.ts
 
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
+import {passwordReset} from './action';
 
 interface SettingState {
   language: string;
@@ -25,10 +26,12 @@ const settingSlice = createSlice({
     },
   },
   extraReducers: builder => {
-    // builder.addCase(sendSessionRequest.fulfilled, state => {});
+    builder.addCase(passwordReset.fulfilled, state => {});
   },
 });
 
 export const {setLanguage} = settingSlice.actions;
+
+export {passwordReset};
 
 export default settingSlice.reducer;

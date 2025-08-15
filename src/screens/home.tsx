@@ -24,7 +24,10 @@ import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 import QuickNavigation from '../components/home/quick-navigation';
 import FirstChatFreePopup from '../components/free-chat-popup';
 import {setFreeChatModalShown} from '../store/reducer/auth';
-import {getAllAstrologers} from '../store/reducer/astrologers';
+import {
+  getAllAstrologers,
+  getOnlineAstrologer,
+} from '../store/reducer/astrologers';
 import {Astrologers as AstrologersType, UserDetail} from '../utils/types';
 import Carousel, {ICarouselInstance} from 'react-native-reanimated-carousel';
 import {useSharedValue} from 'react-native-reanimated';
@@ -43,15 +46,31 @@ const Home = () => {
   const [isFirstChatModalOpen, setIsFirstChatModalOpen] = useState(false);
   const {freeChatUsed} = useAppSelector(state => state.auth.user);
   const {freeChatModalShown} = useAppSelector(state => state.auth);
+  const [hasFetchedInitialData, setHasFetchedInitialData] = useState(false);
+  const {onlineAstrologerDetails} = useAppSelector(state => state.astrologer);
+  const [onlineAstrologerDetailsApi, setOnlineAstrologerDetailApi] = useState<
+    {
+      name: string;
+      expertise: string;
+      about: string;
+      imgUri: string;
+      id: string;
+      userId: string;
+      online: boolean;
+    }[]
+  >([]);
   const dispatch = useAppDispatch();
+  // console.log(onlineAstrologerDetails, '----details');
   // const [loading, setLoading] = useState(false);
   const role = useUserRole();
   const [loading, setLoading] = useState<{
     banner: boolean;
     astrologer: boolean;
+    onlineAstrologer: boolean;
   }>({
     banner: false,
     astrologer: false,
+    onlineAstrologer: false,
   });
   const [astrologersData, setAstrologersData] = useState<
     {
@@ -90,6 +109,32 @@ const Home = () => {
     } catch (error) {
     } finally {
       setLoading(prev => ({...prev, astrologer: false}));
+    }
+  };
+
+  const fetchOnlineAstrologersData = async () => {
+    if (loading.astrologer) return;
+    try {
+      setLoading(prev => ({...prev, onlineAstrologer: true}));
+
+      const payload = await dispatch(getOnlineAstrologer()).unwrap();
+      // console.log(payload, '---------online astrologers');
+      if (payload.success) {
+        const newData =
+          payload.astrologers.map((item: AstrologersType) => ({
+            name: item?.user?.name,
+            expertise: item?.expertise,
+            about: item?.about,
+            id: item?.id,
+            imgUri: item?.user?.imgUri,
+            userId: item?.user?.id,
+            online: item?.online,
+          })) || [];
+        setOnlineAstrologerDetailApi(newData);
+      }
+    } catch (error) {
+    } finally {
+      setLoading(prev => ({...prev, onlineAstrologer: false}));
     }
   };
 
@@ -154,13 +199,49 @@ const Home = () => {
   }, []);
 
   useEffect(() => {
-    fetchAstrologersData();
-    getBannerData();
-  }, []);
+    if (!hasFetchedInitialData) {
+      fetchOnlineAstrologersData();
+      fetchAstrologersData();
+      getBannerData();
+      setHasFetchedInitialData(true);
+    }
+  }, [hasFetchedInitialData]);
 
-  const sortedAstrologers = astrologersData.sort((a, b) => {
+  const sortedAstrologerData = astrologersData.sort((a, b) => {
     return (b.online === true ? 1 : 0) - (a.online === true ? 1 : 0);
   });
+
+  const finalAstrologerList = React.useMemo(() => {
+    // 1. Use socket data if it exists and initial data has been fetched
+    if (
+      hasFetchedInitialData &&
+      onlineAstrologerDetails &&
+      onlineAstrologerDetails.length > 0
+    ) {
+      return onlineAstrologerDetails.map(item => ({
+        name: item?.user?.name,
+        expertise: item?.expertise,
+        about: item?.about,
+        id: item?.id,
+        imgUri: item?.user?.imgUri,
+        userId: item?.user?.id,
+        online: item?.online,
+      }));
+    }
+
+    // 2. Use API's online astrologers if available
+    if (onlineAstrologerDetailsApi && onlineAstrologerDetailsApi.length > 0) {
+      return onlineAstrologerDetailsApi;
+    }
+
+    // 3. Fallback to all astrologers list (sorted)
+    return sortedAstrologerData;
+  }, [
+    onlineAstrologerDetails,
+    onlineAstrologerDetailsApi,
+    sortedAstrologerData,
+    hasFetchedInitialData,
+  ]);
 
   return (
     <ScreenLayout>
@@ -311,7 +392,7 @@ const Home = () => {
                 />
               </View>
             ) : (
-              <SlidingCard data={sortedAstrologers} />
+              <SlidingCard data={finalAstrologerList} />
             )}
           </View>
           <View

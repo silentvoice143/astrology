@@ -21,11 +21,11 @@ import Toast from 'react-native-toast-message';
 
 const settingsOptions = [
   {title: 'Language', screen: 'Language'},
+  {title: 'Change Password', screen: 'ChangePassword'},
   // {title: 'Notifications', screen: 'Notifications'},
   {title: 'Terms & Conditions', screen: 'TermsAndConditions'},
   {title: 'Rate the App', screen: 'RateApp'},
   {title: 'Help / Contact Support', screen: 'customer-support'},
-
   {title: 'Logout', screen: 'Logout'},
 ];
 

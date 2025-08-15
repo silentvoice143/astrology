@@ -11,7 +11,10 @@ import {useAppDispatch, useAppSelector} from './redux-hook';
 import {decodeMessageBody} from '../utils/utils';
 import {useUserRole} from './use-role';
 import Toast from 'react-native-toast-message';
-import {setOnlineAstrologer} from '../store/reducer/astrologers';
+import {
+  setOnlineAstrologer,
+  setOnlineAstrologerDetails,
+} from '../store/reducer/astrologers';
 import {setBalance} from '../store/reducer/auth';
 import {getTransactionHistory} from '../store/reducer/payment';
 
@@ -55,6 +58,7 @@ export const useSessionEvents = (
     const callSessionDest = `/topic/call/${userId}/session`;
     const onlineAstroDest = `/topic/online/astrologer`;
     const activeSessionDest = `/topic/session/${userId}`;
+    const onlineAstrologerDest = '/topic/online/astrologer/list';
 
     unsubscribeAll();
 
@@ -64,6 +68,7 @@ export const useSessionEvents = (
       callSessionDest,
       onlineAstroDest,
       activeSessionDest,
+      onlineAstrologerDest,
     ];
 
     // if (role === 'ASTROLOGER') {
@@ -119,6 +124,20 @@ export const useSessionEvents = (
         console.log('Online astrologer---------------------------:', data);
 
         dispatch(setOnlineAstrologer(data));
+      } catch (err) {
+        console.log('Failed to parse online astrologer list:', err);
+      }
+    });
+
+    subscribe(onlineAstrologerDest, msg => {
+      try {
+        const data = JSON.parse(decodeMessageBody(msg));
+        console.log(
+          'Online astrologer full details---------------------------:',
+          data,
+        );
+
+        dispatch(setOnlineAstrologerDetails(data));
       } catch (err) {
         console.log('Failed to parse online astrologer list:', err);
       }
