@@ -6,6 +6,7 @@ import {
   Text,
   TextStyle,
   TouchableOpacity,
+  View,
   ViewStyle,
 } from 'react-native';
 
@@ -17,6 +18,9 @@ type CustomButtonProps = {
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
   loaderColor?: string;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+  iconStyle?: StyleProp<ViewStyle>;
 };
 
 const CustomButton: React.FC<CustomButtonProps> = ({
@@ -27,13 +31,17 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   style,
   textStyle,
   loaderColor = '#fff',
+  leftIcon,
+  rightIcon,
+  iconStyle,
 }) => {
   return (
     <TouchableOpacity
       style={[
         {
           backgroundColor: disabled ? '#ccc' : '#007bff',
-          padding: 12,
+          paddingVertical: 12,
+          paddingHorizontal: 16,
           borderRadius: 8,
           alignItems: 'center',
           justifyContent: 'center',
@@ -44,20 +52,35 @@ const CustomButton: React.FC<CustomButtonProps> = ({
       onPress={onPress}
       disabled={disabled || loading}
       activeOpacity={0.8}>
+      {/* Left: Spinner if loading, otherwise leftIcon */}
       {loading ? (
-        <ActivityIndicator size="small" color={loaderColor} />
+        <ActivityIndicator
+          size="small"
+          color={loaderColor}
+          style={{marginRight: 8}}
+        />
       ) : (
-        <Text
-          style={[
-            {
-              color: '#fff',
-              fontSize: 16,
-              fontWeight: '600',
-            },
-            textStyle,
-          ]}>
-          {title}
-        </Text>
+        leftIcon && (
+          <View style={[{marginRight: 8}, iconStyle]}>{leftIcon}</View>
+        )
+      )}
+
+      {/* Title */}
+      <Text
+        style={[
+          {
+            color: '#fff',
+            fontSize: 16,
+            fontWeight: '600',
+          },
+          textStyle,
+        ]}>
+        {title}
+      </Text>
+
+      {/* Right icon */}
+      {rightIcon && (
+        <View style={[{marginLeft: 8}, iconStyle]}>{rightIcon}</View>
       )}
     </TouchableOpacity>
   );

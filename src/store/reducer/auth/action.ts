@@ -1,15 +1,63 @@
 import {createAsyncThunk} from '@reduxjs/toolkit';
 import api from '../../../apis';
 
-// Login thunk
-export const loginUserThunk = createAsyncThunk(
-  'auth/login',
-  async ({email, password}: {email: string; password: string}, thunkAPI) => {
-    try {
-      const response = await api.post('/auth/login', {email, password});
-      return response.data; // Usually includes token, user info
-    } catch (error: any) {
-      return thunkAPI.rejectWithValue(error.response?.data || error.message);
-    }
-  },
-);
+type LoginPayload = {
+  mobile: string;
+};
+
+type verifyPayload = {
+  mobile: string;
+  otp: string;
+};
+
+export const loginUser = createAsyncThunk<
+  any, // response type as any
+  LoginPayload, // argument type
+  {rejectValue: any}
+>('auth/login', async (payload, {rejectWithValue}) => {
+  try {
+    const response = await api.post('/api/v1/auth/login', payload);
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});
+
+export const registerUser = createAsyncThunk<
+  any, // response type as any
+  any, // argument type
+  {rejectValue: any}
+>('auth/register-via-password', async (payload, {rejectWithValue}) => {
+  try {
+    const response = await api.post('/api/v1/auth/register', payload);
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});
+
+export const loginUserPassword = createAsyncThunk<
+  any, // response type as any
+  any, // argument type
+  {rejectValue: any}
+>('auth/login-via-password', async (payload, {rejectWithValue}) => {
+  try {
+    const response = await api.post('/api/v1/auth/login-by-password', payload);
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});
+
+export const verifyOtp = createAsyncThunk<
+  any, // response type as any
+  verifyPayload, // argument type
+  {rejectValue: any}
+>('auth/login/verify', async (payload, {rejectWithValue}) => {
+  try {
+    const response = await api.post('/api/v1/auth/verify-otp', payload);
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});

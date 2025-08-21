@@ -6,26 +6,44 @@ import {textStyle} from '../constants/text-style';
 import CustomButton from '../components/custom-button';
 import {colors} from '../constants/colors';
 import {useNavigation} from '@react-navigation/native';
+import {useAppDispatch} from '../hooks/redux-hook';
+import {loginUser} from '../store/reducer/auth/action';
+import {setMobile} from '../store/reducer/auth';
 
 const Login = () => {
   const navigation = useNavigation<any>();
+  const dispatch = useAppDispatch();
   const [phone, setPhone] = useState('');
+  const [loading, setLoading] = useState(false);
+  const handleLogin = async () => {
+    try {
+      setLoading(true);
+      const payload = await dispatch(loginUser({mobile: phone})).unwrap();
+      if (payload.success) {
+        navigation.navigate('Otp', {mobile: phone});
+        dispatch(setMobile({mobile: phone}));
+      }
+    } catch (err) {
+    } finally {
+      setLoading(false);
+    }
+  };
   return (
     <View style={styles.mainContainer}>
       <View
         style={{
-          marginTop: (40),
+          marginTop: 40,
           flexDirection: 'row',
           justifyContent: 'center',
         }}>
         <Image
-          style={{height: moderateScale(110), width: moderateScale(158)}}
+          style={{height: moderateScale(160), width: moderateScale(158)}}
           source={require('../assets/imgs/logo.png')}
         />
       </View>
       <View style={styles.formWrapper}>
         <Text style={[textStyle.fs_mont_36_700]}>Login</Text>
-        <Text style={[textStyle.fs_mont_16_400]}>Welcome to Astrologer</Text>
+        <Text style={[textStyle.fs_mont_16_400]}>Welcome to Astrosevaa</Text>
 
         <CustomInputV1
           preText="+91"
@@ -37,12 +55,14 @@ const Login = () => {
           maxLength={10}
         />
         <CustomButton
+          loaderColor={colors.primaryText}
+          loading={loading}
           style={{
             marginTop: verticalScale(40),
             backgroundColor: colors.primarybtn,
           }}
           textStyle={{color: colors.primaryText}}
-          onPress={() => navigation.navigate('Home')}
+          onPress={() => handleLogin()}
           title="Login"
         />
       </View>

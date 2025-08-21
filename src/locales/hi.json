@@ -1,0 +1,96 @@
+{
+  "lan": "hi",
+  "common": {
+    "min": "मिनट"
+  },
+  "dasha": {
+    "maha-dasha": "महादशा",
+    "antar-dasha": "अंतरदशा",
+    "pratyantar-dasha": "प्रत्यंतर दशा",
+    "sookshma-dasha": "सूक्ष्म दशा"
+  },
+  "homePage": {
+    "search_placeholder": "पंडितों के लिए यहाँ खोजें",
+    "live_astrologers": "लाइव ज्योतिषी",
+    "top_astrologers": "शीर्ष ज्योतिषी",
+    "call_now": "अभी कॉल करें",
+    "chat_now": "अभी चैट करें",
+    "quick_nav": {
+      "horoscope": "राशिफल",
+      "kundli": "कुंडली",
+      "match-making": "मैचमेकिंग",
+      "tarot": "टैरो"
+    }
+  },
+  "home": "होम",
+  "kundli": "कुंडली",
+  "astrologers": "ज्योतिषी",
+  "history": "इतिहास",
+  "remedies": "उपाय",
+  "kundliform": "कुंडली फॉर्म",
+  "aboutus": "हमारे बारे में",
+  "astrologer": "ज्योतिषी",
+  "sessionRequest": "सत्र अनुरोध",
+  "terms&condition": "नियम और शर्तें",
+  "customerSupport": "ग्राहक सहायता",
+  "language": "भाषा",
+  "profile": "प्रोफ़ाइल",
+  "setting": "सेटिंग",
+  "chathistory": "चैट इतिहास",
+  "horoscope": "राशिफल",
+
+  "selectLanguage": "अपनी भाषा चुनें",
+  "english": "अंग्रेज़ी",
+  "hindi": "हिंदी",
+  "bengali": "बंगाली",
+
+  "nameNA": "उपलब्ध नहीं",
+  "aboutMe": "मेरे बारे में",
+  "personalDetails": "व्यक्तिगत विवरण",
+  "name": "नाम",
+  "expertise": "विशेषज्ञता",
+  "experience": "अनुभव",
+  "years": "वर्ष",
+  "languages": "भाषाएँ",
+  "dob": "जन्मतिथि",
+  "address": "पता",
+  "services": "सेवाएं",
+  "chat": "चैट",
+  "audioCall": "ऑडियो कॉल",
+  "videoCall": "वीडियो कॉल",
+  "perMinute": "₹/मिनट",
+
+  "Home": "होम",
+  "Horoscope": "राशिफल",
+  "Kundli": "कुंडली",
+  "Astrologers": "ज्योतिषी",
+  "Requests": "अनुरोध",
+  "Chat History": "चैट इतिहास",
+  "Wallet": "वॉलेट",
+  "Customer Support": "ग्राहक सहायता",
+  "Setting": "सेटिंग",
+  "About": "के बारे में",
+  "Logout": "लॉगआउट",
+  "profileedit": "प्रोफ़ाइल संपादित करें",
+  "changepassword": "पासवर्ड बदलें",
+  "Change Password": "पासवर्ड बदलें",
+
+  "Language": "भाषा",
+  "Terms & Conditions": "नियम और शर्तें",
+  "Rate the App": "ऐप को रेट करें",
+  "Help / Contact Support": "सहायता / संपर्क सहायता",
+  "Manage": "प्रबंधन करें",
+  "setting&preferences": "सेटिंग्स और प्राथमिकताएं",
+
+  "detailsProfile": {
+    "yearsOfExperience": "वर्षों का अनुभव",
+    "Consultation Charges": "परामर्श शुल्क",
+    "Chat": "चैट",
+    "Voice Call": "वॉयस कॉल",
+    "Video Call": "वीडियो कॉल",
+    "About Astrologer": "ज्योतिषी के बारे में",
+    "Expertise": "विशेषज्ञता",
+    "Read Less": "कम पढ़ें",
+    "Read More": "और पढ़ें"
+  }
+}

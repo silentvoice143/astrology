@@ -1,0 +1,98 @@
+{
+  "lan": "bn",
+  "common": {
+    "min": "মিনিট"
+  },
+
+  "homePage": {
+    "search_placeholder": "পণ্ডিতদের জন্য এখানে অনুসন্ধান করুন",
+    "live_astrologers": "লাইভ জ্যোতিষী",
+    "top_astrologers": "শীর্ষ জ্যোতিষী",
+    "call_now": "এখন কল করুন",
+    "chat_now": "এখন চ্যাট করুন",
+    "quick_nav": {
+      "horoscope": "রাশিফল",
+      "kundli": "কুন্ডলি",
+      "match-making": "ম্যাচমেকিং",
+      "tarot": "ট্যারোট"
+    }
+  },
+  "dasha": {
+    "maha-dasha": "মহাদশা",
+    "antar-dasha": "অন্তরদশা",
+    "pratyantar-dasha": "প্রত্যন্তর দশা",
+    "sookshma-dasha": "সূক্ষ্ম দশা"
+  },
+  "home": "হোম",
+  "kundli": "কুন্ডলী",
+  "astrologers": "জ্যোতিষীগণ",
+  "history": "ইতিহাস",
+  "remedies": "প্রতিকার",
+  "kundliform": "কুন্ডলী ফর্ম",
+  "aboutus": "আমাদের সম্পর্কে",
+  "astrologer": "জ্যোতিষী",
+  "sessionRequest": "সেশনের অনুরোধ",
+  "terms&condition": "শর্তাবলী",
+  "customerSupport": "গ্রাহক সহায়তা",
+  "language": "ভাষা",
+  "profile": "প্রোফাইল",
+  "setting": "সেটিংস",
+  "chathistory": "চ্যাট ইতিহাস",
+  "horoscope": "রাশিফল",
+
+  "selectLanguage": "আপনার ভাষা নির্বাচন করুন",
+  "english": "ইংরেজি",
+  "hindi": "হিন্দি",
+  "bengali": "বাংলা",
+
+  "nameNA": "উপলব্ধ নয়",
+  "aboutMe": "আমার সম্পর্কে",
+  "personalDetails": "ব্যক্তিগত বিবরণ",
+  "name": "নাম",
+  "expertise": "বিশেষজ্ঞতা",
+  "experience": "অভিজ্ঞতা",
+  "years": "বছর",
+  "languages": "ভাষা",
+  "dob": "জন্ম তারিখ",
+  "address": "ঠিকানা",
+  "services": "পরিষেবাসমূহ",
+  "chat": "চ্যাট",
+  "audioCall": "অডিও কল",
+  "videoCall": "ভিডিও কল",
+  "perMinute": "₹/মিনিট",
+
+  "Home": "হোম",
+  "Horoscope": "রাশিফল",
+  "Kundli": "কুন্ডলী",
+  "Astrologers": "জ্যোতিষীগণ",
+  "Requests": "অনুরোধ",
+  "requests": "অনুরোধ",
+  "Chat History": "চ্যাট ইতিহাস",
+  "Wallet": "ওয়ালেট",
+  "Customer Support": "গ্রাহক সহায়তা",
+  "Setting": "সেটিংস",
+  "About": "সম্পর্কে",
+  "Logout": "লগআউট",
+  "profileedit": "প্রোফাইল সম্পাদনা করুন",
+  "changepassword": "পাসওয়ার্ড পরিবর্তন করুন",
+  "Change Password": "পাসওয়ার্ড পরিবর্তন করুন",
+
+  "Language": "ভাষা",
+  "Terms & Conditions": "শর্তাবলী",
+  "Rate the App": "অ্যাপ রেট করুন",
+  "Help / Contact Support": "সাহায্য / সহায়তা যোগাযোগ",
+  "Manage": "পরিচালনা করুন",
+  "setting&preferences": "সেটিংস এবং পছন্দ",
+
+  "detailsProfile": {
+    "yearsOfExperience": "বছরের অভিজ্ঞতা",
+    "Consultation Charges": "পরামর্শ চার্জ",
+    "Chat": "চ্যাট",
+    "Voice Call": "ভয়েস কল",
+    "Video Call": "ভিডিও কল",
+    "About Astrologer": "জ্যোতিষী সম্পর্কে",
+    "Expertise": "বিশেষজ্ঞতা",
+    "Read Less": "কম পড়ুন",
+    "Read More": "আরও পড়ুন"
+  }
+}

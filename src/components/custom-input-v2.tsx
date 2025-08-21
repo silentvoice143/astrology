@@ -1,18 +1,18 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState} from 'react';
 import {
+  TextInput,
   View,
   Text,
-  TextInput,
   StyleSheet,
-  Animated,
-  StyleProp,
-  ViewStyle,
   TextStyle,
-  TextInputProps,
+  ViewStyle,
+  StyleProp,
   TouchableOpacity,
+  TextInputProps,
 } from 'react-native';
+import {scale, scaleFont, verticalScale} from '../utils/sizer';
 
-type CustomInputV2Props = {
+type CustomInputProps = TextInputProps & {
   label?: string;
   value: string;
   onChangeText: (text: string) => void;
@@ -25,9 +25,11 @@ type CustomInputV2Props = {
   secureToggle?: boolean;
   showError?: boolean;
   errorMessage?: string;
-} & TextInputProps;
+  placeholder?: string;
+  editable?: boolean; // ✅ New prop
+};
 
-const CustomInputV2: React.FC<CustomInputV2Props> = ({
+const CustomInput: React.FC<CustomInputProps> = ({
   label,
   value,
   onChangeText,
@@ -40,151 +42,107 @@ const CustomInputV2: React.FC<CustomInputV2Props> = ({
   secureToggle = false,
   showError = false,
   errorMessage,
-  ...rest
+  placeholder,
+  editable = true, // ✅ Default true
+  ...props
 }) => {
   const [focused, setFocused] = useState(false);
-  const [secureText, setSecureText] = useState(secureToggle);
+  const [secure, setSecure] = useState(secureToggle);
 
-  const borderColorAnim = useState(new Animated.Value(0))[0];
-  const labelAnim = useState(new Animated.Value(value ? 1 : 0))[0];
-
-  useEffect(() => {
-    Animated.timing(labelAnim, {
-      toValue: focused || value ? 1 : 0,
-      duration: 150,
-      useNativeDriver: false,
-    }).start();
-  }, [focused, value]);
-
-  const handleFocus = () => {
-    setFocused(true);
-    Animated.timing(borderColorAnim, {
-      toValue: 1,
-      duration: 150,
-      useNativeDriver: false,
-    }).start();
-  };
-
-  const handleBlur = () => {
-    setFocused(false);
-    Animated.timing(borderColorAnim, {
-      toValue: 0,
-      duration: 150,
-      useNativeDriver: false,
-    }).start();
-  };
-
-  const borderColor = borderColorAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: ['#ccc', '#6200ee'],
-  });
-
-  const labelTop = labelAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [14, -10],
-  });
-
-  const labelFontSize = labelAnim.interpolate({
-    inputRange: [0, 1],
-    outputRange: [16, 12],
-  });
+  const handleFocus = () => setFocused(true);
+  const handleBlur = () => setFocused(false);
 
   return (
     <View style={[styles.container, containerStyle]}>
-      <View style={styles.wrapper}>
-        {leftIcon && <View style={styles.icon}>{leftIcon}</View>}
-        {preText && <Text style={styles.preText}>{preText}</Text>}
-        <View style={styles.inputWrapper}>
-          {label && (
-            <Animated.Text
-              style={[
-                styles.label,
-                labelStyle,
-                {
-                  top: labelTop,
-                  fontSize: labelFontSize,
-                },
-              ]}>
-              {label}
-            </Animated.Text>
-          )}
+      {label && (
+        <Text
+          style={[
+            styles.label,
+            {color: focused ? '#007bff' : '#000'},
+            labelStyle,
+          ]}>
+          {label}
+        </Text>
+      )}
 
-          <TextInput
-            value={value}
-            onChangeText={onChangeText}
-            secureTextEntry={secureText}
-            style={[styles.input, inputStyle]}
-            onFocus={handleFocus}
-            onBlur={handleBlur}
-            {...rest}
-          />
-        </View>
-        {secureToggle ? (
-          <TouchableOpacity
-            onPress={() => setSecureText(prev => !prev)}
-            style={styles.icon}>
-            {rightIcon}
+      <View
+        style={[
+          styles.inputWrapper,
+          {borderColor: focused ? '#007bff' : '#ccc'},
+        ]}>
+        {leftIcon && <View style={styles.icon}>{leftIcon}</View>}
+
+        {preText && <Text style={styles.preText}>{preText}</Text>}
+
+        <TextInput
+          value={value}
+          onChangeText={onChangeText}
+          onFocus={handleFocus}
+          onBlur={handleBlur}
+          secureTextEntry={secure}
+          placeholder={placeholder}
+          editable={editable} // ✅ Used here
+          style={[styles.input, inputStyle]}
+          {...props}
+        />
+
+        {secureToggle && (
+          <TouchableOpacity onPress={() => setSecure(!secure)}>
+            <Text style={styles.toggle}>{secure ? 'Show' : 'Hide'}</Text>
           </TouchableOpacity>
-        ) : (
-          rightIcon && <View style={styles.icon}>{rightIcon}</View>
         )}
+
+        {rightIcon && <View style={styles.icon}>{rightIcon}</View>}
       </View>
 
-      <Animated.View
-        style={[styles.underline, {backgroundColor: borderColor}]}
-      />
-
-      {showError && errorMessage ? (
-        <Text style={styles.errorText}>{errorMessage}</Text>
-      ) : null}
+      {showError && errorMessage && (
+        <Text style={styles.error}>{errorMessage}</Text>
+      )}
     </View>
   );
 };
+
+export default CustomInput;
 
 const styles = StyleSheet.create({
   container: {
     marginVertical: 12,
   },
-  wrapper: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 4,
-  },
-  icon: {
-    paddingHorizontal: 6,
-  },
-  preText: {
-    fontSize: 16,
-    color: '#666',
-    paddingRight: 6,
+  label: {
+    fontSize: scaleFont(14),
+    marginBottom: 6,
+    fontWeight: '500',
   },
   inputWrapper: {
-    flex: 1,
-    position: 'relative',
-    justifyContent: 'center',
-  },
-  label: {
-    position: 'absolute',
-    left: 0,
-    color: '#888',
+    borderWidth: 1,
+    borderRadius: 8,
+    paddingHorizontal: scale(12),
+    paddingVertical: verticalScale(4),
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#fff',
   },
   input: {
-    fontSize: 16,
-    paddingVertical: 8,
-    paddingHorizontal: 0,
+    flex: 1,
+    fontSize: scaleFont(16),
     color: '#000',
-    borderBottomWidth: 0,
   },
-  underline: {
-    height: 2,
-    marginTop: 2,
-    borderRadius: 1,
+  icon: {
+    marginHorizontal: 4,
   },
-  errorText: {
-    color: '#d32f2f',
-    fontSize: 13,
+  preText: {
+    marginRight: 8,
+    fontSize: 16,
+    color: '#666',
+  },
+  toggle: {
+    marginLeft: 8,
+    color: '#007bff',
+    fontWeight: '500',
+  },
+  error: {
+    color: 'red',
     marginTop: 4,
+    fontSize: 12,
   },
 });
-
-export default CustomInputV2;

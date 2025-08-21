@@ -1,0 +1,96 @@
+{
+  "lan": "en",
+  "common": {
+    "min": "min"
+  },
+  "homePage": {
+    "search_placeholder": "Search here for pandits",
+    "live_astrologers": "Live Astrologers",
+    "top_astrologers": "Top Astrologers",
+    "call_now": "Call Now",
+    "chat_now": "Chat Now",
+    "quick_nav": {
+      "horoscope": "Horoscope",
+      "kundli": "Kundli",
+      "match-making": "Match Making",
+      "tarot": "Tarot"
+    }
+  },
+  "dasha": {
+    "maha-dasha": "Maha Dasha",
+    "antar-dasha": "Antar Dasha",
+    "pratyantar-dasha": "Pratyantar Dasha",
+    "sookshma-dasha": "Sookshma Dasha"
+  },
+  "home": "Home",
+  "kundli": "Kundli",
+  "astrologers": "Astrologers",
+  "history": "History",
+  "remedies": "Remedies",
+  "kundliform": "Kundli Form",
+  "aboutus": "About Us",
+  "astrologer": "Astrologer",
+  "sessionRequest": "Session Requests",
+  "terms&condition": "Terms & Conditions",
+  "customerSupport": "Customer Support",
+  "language": "Language",
+  "profile": "Profile",
+  "setting": "Setting",
+  "chathistory": "Chat History",
+  "horoscope": "Horoscope",
+
+  "selectLanguage": "Select Your Language",
+  "english": "English",
+  "hindi": "Hindi",
+  "bengali": "Bengali",
+
+  "nameNA": "N/A",
+  "aboutMe": "About Me",
+  "personalDetails": "Personal Details",
+  "name": "Name",
+  "expertise": "Expertise",
+  "experience": "Experience",
+  "years": "Years",
+  "languages": "Languages",
+  "dob": "DOB",
+  "address": "Address",
+  "services": "Services",
+  "chat": "Chat",
+  "audioCall": "Audio Call",
+  "videoCall": "Video Call",
+  "perMinute": "₹/min",
+
+  "Home": "Home",
+  "Horoscope": "Horoscope",
+  "Kundli": "Kundli",
+  "Astrologers": "Astrologers",
+  "Requests": "Requests",
+  "Chat History": "Chat History",
+  "Wallet": "Wallet",
+  "Customer Support": "Customer Support",
+  "Setting": "Setting",
+  "About": "About",
+  "Logout": "Logout",
+  "profileedit": "Profile Edit",
+  "changepassword": "Change Password",
+  "Change Password": "Change Password",
+
+  "Language": "Language",
+  "Terms & Conditions": "Terms & Conditions",
+  "Rate the App": "Rate the App",
+  "Help / Contact Support": "Help / Contact Support",
+  "Manage": "Manage",
+  "setting&preferences": "Settings & Preferences",
+
+  "detailsProfile": {
+    "yearsOfExperience": "years of experience",
+    "Consultation Charges": "Consultation Charges",
+    "Chat": "Chat",
+    "Voice Call": "Voice Call",
+    "Video Call": "Video Call",
+    "About Astrologer": "About Astrologer",
+    "Expertise": "Expertise",
+    "Read Less": "Read Less",
+    "Read More": "Read More"
+  }
+}

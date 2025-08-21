@@ -1,60 +1,253 @@
-import {View, Text, Pressable, StyleSheet, Image} from 'react-native';
-import React from 'react';
+import React, {useEffect, useRef, useState} from 'react';
+import {
+  View,
+  Text,
+  Pressable,
+  StyleSheet,
+  Image,
+  Animated,
+  TouchableOpacity,
+} from 'react-native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import MenuIcon from '../assets/icons/menu-icon';
-import {scale, verticalScale} from '../utils/sizer';
-import {colors} from '../constants/colors';
+import {moderateScale, scale, verticalScale} from '../utils/sizer';
+import {colors, themeColors} from '../constants/colors';
+import {textStyle} from '../constants/text-style';
+import LinearGradient from 'react-native-linear-gradient';
+import ChevronLeftIcon from '../assets/icons/chevron-left';
+import {useTranslation} from 'react-i18next';
+import ConnectionStatusIndicator from './connection-indicator';
+import {useAppSelector} from '../hooks/redux-hook';
+import {useWebSocket} from '../hooks/use-socket-new';
 
-const Header = () => {
-  return (
-    <View style={styles.container}>
-      {/* Background Image positioned absolutely and centered */}
-      <Image
-        source={require('../assets/imgs/bg-img.png')}
-        style={styles.bgImage}
-        resizeMode="contain"
-      />
+const headerTitle = [
+  {title: 'Home', href: 'Home'},
+  {title: 'Kundli', href: 'Kundli'},
+  {title: 'Astrologers', href: 'Astrologers'},
+  {title: 'Chat History', href: 'ChatHistory', params: {type: 'user'}},
+  {title: 'Settings', href: 'Settings'},
+];
 
-      {/* Foreground content */}
-      <Pressable>
-        <MenuIcon />
-      </Pressable>
-      <Pressable
+const Header = ({
+  headerBackgroundColor,
+  onMenuClick,
+}: {
+  headerBackgroundColor?: string;
+  onMenuClick: () => void;
+}) => {
+  const route = useRoute();
+  const {t} = useTranslation();
+  const currentHeader = headerTitle.find(item => item.href === route.name);
+  const showRouteTitle = route.name !== 'Home';
+  const {user, isAuthenticated} = useAppSelector((state: any) => state.auth);
+  const [isSaving, setIsSaving] = useState(false);
+  const {isConnected, isConnecting} = useWebSocket(user.id);
+
+  const showMenuIcon =
+    route.name !== 'Home' &&
+    route.name !== 'Astrologers' &&
+    route.name !== 'ChatHistory' &&
+    route.name !== 'Remedies' &&
+    route.name !== 'KundliForm';
+  const headerText = currentHeader?.title || route.name;
+  const navigation = useNavigation<any>();
+
+  const getName = (name: string) => {
+    switch (name) {
+      case 'KundliForm':
+        return t('kundliform');
+      case 'about':
+        return t('aboutus');
+      case 'session-request':
+        return t('sessionRequest');
+      case 'remedies':
+        return t('remedies');
+      case 'DetailsProfile':
+        return t('astrologer');
+      case 'TermsAndConditions':
+        return t('terms&condition');
+      case 'customer-support':
+        return t('customerSupport');
+      case 'horoscope':
+        return t('horoscope');
+      default:
+        return t(name.toLowerCase().replace(' ', ''));
+    }
+  };
+
+  const exceptionArray = [
+    'Kundli',
+    'KundliForm',
+    'Wallet',
+    'remedies',
+    'ChatHistory',
+    'Profile',
+    'Horoscope',
+    'Remedies',
+    'session-request',
+  ];
+
+  const headerWhite = exceptionArray.includes(route.name);
+
+  if (headerBackgroundColor) {
+    // ✅ If headerbgcolor prop exists, use plain View
+    return (
+      <View
         style={{
-          height: 60,
-          width: 60,
-          borderRadius: 30,
-          backgroundColor: 'white',
-          justifyContent: 'center',
-          alignItems: 'center',
-          flexDirection: 'row',
+          backgroundColor: headerBackgroundColor,
+          borderBottomWidth: 1,
+          borderColor: themeColors.surface.border,
         }}>
-        <Text>SK</Text>
-      </Pressable>
-    </View>
+        <View style={[styles.container]}>
+          <TouchableOpacity
+            style={{
+              position: 'absolute',
+              left: 10,
+              height: moderateScale(40),
+              width: moderateScale(40),
+              borderRadius: 12,
+              justifyContent: 'center',
+              alignItems: 'center',
+              marginRight: scale(8),
+            }}
+            onPress={() => {
+              showMenuIcon
+                ? route.name === 'Profile'
+                  ? navigation.navigate('Home')
+                  : navigation.goBack()
+                : onMenuClick();
+            }}>
+            {showMenuIcon ? (
+              <ChevronLeftIcon size={32} color={themeColors.text.primary} />
+            ) : (
+              <MenuIcon color={themeColors.text.primary} />
+            )}
+          </TouchableOpacity>
+          <View style={{flexDirection: 'row'}}>
+            <View style={{marginTop: moderateScale(8)}}>
+              {showRouteTitle && (
+                <Text style={styles.title}>{getName(headerText)}</Text>
+              )}
+            </View>
+          </View>
+        </View>
+        <View style={{position: 'absolute', top: 20, right: 20}}>
+          <ConnectionStatusIndicator
+            isConnected={isConnected}
+            isConnecting={isConnecting}
+          />
+        </View>
+      </View>
+    );
+  }
+
+  return (
+    <LinearGradient
+      colors={[
+        colors.primary_surface,
+        headerWhite ? colors.primary_surface : colors.secondary_surface,
+      ]}
+      style={{
+        borderBottomWidth: !headerWhite ? 0 : 1,
+        borderColor: themeColors.surface.border,
+      }}>
+      <View style={[styles.container]}>
+        <TouchableOpacity
+          style={{
+            position: 'absolute',
+            left: 10,
+            height: moderateScale(40),
+            width: moderateScale(40),
+            // backgroundColor: 'red',
+            borderRadius: 12,
+            justifyContent: 'center',
+            alignItems: 'center',
+            marginRight: scale(8),
+          }}
+          onPress={() => {
+            {
+              showMenuIcon
+                ? route.name === 'Profile'
+                  ? navigation.navigate('Home')
+                  : navigation.goBack()
+                : onMenuClick();
+            }
+          }}>
+          {showMenuIcon ? (
+            <ChevronLeftIcon size={32} color={themeColors.text.primary} />
+          ) : (
+            <MenuIcon color={themeColors.text.primary} />
+          )}
+        </TouchableOpacity>
+        <View style={{flexDirection: 'row'}}>
+          {/* <Text>hello</Text> */}
+
+          <View style={{marginTop: moderateScale(8)}}>
+            {showRouteTitle && (
+              <Text style={styles.title}>{getName(headerText)}</Text>
+            )}
+          </View>
+        </View>
+
+        {/* <TouchableOpacity style={{padding: scale(4)}}>
+          <View
+            style={{
+              zIndex: 999,
+              position: 'absolute',
+              right: scale(4),
+              borderRadius: scale(6),
+              top: verticalScale(4),
+              height: moderateScale(8),
+              width: moderateScale(8),
+              backgroundColor: colors.success.base,
+            }}></View>
+          <NotificationIcon size={20} />
+        </TouchableOpacity> */}
+      </View>
+      <View style={{position: 'absolute', top: 20, right: 20}}>
+        <ConnectionStatusIndicator
+          isConnected={isConnected}
+          isConnecting={isConnecting}
+        />
+      </View>
+    </LinearGradient>
   );
 };
 
 export default Header;
 
-const IMAGE_WIDTH = scale(216); // adjust this to your desired width
-const IMAGE_HEIGHT = verticalScale(80); // adjust this to your desired height
-
 const styles = StyleSheet.create({
+  title: {
+    ...textStyle.fs_mont_16_700,
+    color: colors.primaryText ?? '#000',
+    textAlign: 'center',
+  },
+
   container: {
-    backgroundColor: colors.secondary_surface,
-    paddingHorizontal: scale(24),
-    paddingVertical: verticalScale(24),
-    justifyContent: 'space-between',
+    paddingHorizontal: scale(10),
+    height: verticalScale(80),
+    // backgroundColor: colors.secondary_surface,
+    gap: scale(8),
     alignItems: 'center',
     flexDirection: 'row',
+    justifyContent: 'center',
   },
   bgImage: {
     position: 'absolute',
     top: 0,
     left: '60%',
-    width: IMAGE_WIDTH,
-    height: IMAGE_HEIGHT,
-    transform: [{translateX: -IMAGE_WIDTH / 2}],
-    zIndex: 3, // send behind other elements
+    width: scale(216),
+    height: verticalScale(80),
+    transform: [{translateX: -scale(216) / 2}],
+    zIndex: 3,
+  },
+  avatar: {
+    height: 60,
+    width: 60,
+    borderRadius: 30,
+    backgroundColor: themeColors.surface.background,
+    justifyContent: 'center',
+    alignItems: 'center',
+    flexDirection: 'row',
   },
 });

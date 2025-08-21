@@ -73,7 +73,7 @@ const AnimatedSearchInput: React.FC<AnimatedSearchInputProps> = ({
         useNativeDriver: false,
       }),
       Animated.timing(scaleValue, {
-        toValue: 1.02,
+        toValue: 1,
         duration: animationDuration,
         useNativeDriver: false,
       }),
@@ -108,7 +108,7 @@ const AnimatedSearchInput: React.FC<AnimatedSearchInputProps> = ({
   });
 
   const animatedBorderWidth = animatedValue.interpolate({
-    inputRange: [0, 1],
+    inputRange: [1, 1],
     outputRange: [unfocusedBorderWidth, focusedBorderWidth],
   });
 
@@ -127,7 +127,7 @@ const AnimatedSearchInput: React.FC<AnimatedSearchInputProps> = ({
 
   const renderIcon = () => (
     <View style={[styles.icon, iconStyle]}>
-      <SearchIcon />
+      <SearchIcon color={iconColor} />
     </View>
   );
 
@@ -140,6 +140,7 @@ const AnimatedSearchInput: React.FC<AnimatedSearchInputProps> = ({
             borderColor: animatedBorderColor,
             borderWidth: animatedBorderWidth,
             shadowOpacity: animatedShadowOpacity,
+            shadowColor: finalShadowColor,
             elevation: animatedElevation,
             transform: [{scale: scaleValue}],
           },
