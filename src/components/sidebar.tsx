@@ -224,7 +224,10 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
 
   useEffect(() => {
     if (visible) {
-      getTransactionDetails();
+      const timer = setTimeout(() => {
+        getTransactionDetails();
+      }, 50); // small delay to avoid insertion phase
+      return () => clearTimeout(timer);
     }
   }, [visible]);
 

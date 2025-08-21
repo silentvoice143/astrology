@@ -26,6 +26,30 @@ export default function AppNavigator() {
 
   useSessionEvents(user?.id, isAuthenticated, isConnected);
 
+//  async function setupPush() {
+//   try {
+//     const token = await getFcmToken();
+//     if (token) {
+//       // send to backend
+//       const res = await fetch("http://10.0.2.2:4000/register", {
+//         method: "POST",
+//         headers: { "Content-Type": "application/json" },
+//         body: JSON.stringify({ token, userId: "123" }),
+//       });
+
+//       if (!res.ok) {
+//         console.error("Failed to register push token", res.status);
+//       } else {
+//         console.log("Push token registered successfully");
+//       }
+//     } else {
+//       console.warn("No FCM token retrieved");
+//     }
+//   } catch (err) {
+//     console.error("Error while setting up push notifications:", err);
+//   }
+// }
+
   useEffect(() => {
     const checkAuth = async () => {
       if (token) {
@@ -59,6 +83,7 @@ export default function AppNavigator() {
             } else {
               send('/app/online.user');
             }
+
           } else {
             dispatch(logout());
           }
@@ -75,23 +100,41 @@ export default function AppNavigator() {
     checkAuth();
   }, [token, dispatch, isConnected]);
 
-  // const handleAppStateChange = (nextState: AppStateStatus) => {
-  //   if (nextState === 'active') {
-  //     console.log('[useSessionEvents] App resumed — resubscribing...');
-  //   }
-  // };
+//   useEffect(() => {
+//   // Run push setup once when authenticated
+//   if (isAuthenticated) {
+//     setupPush();
+//   }
 
-  // useEffect(() => {
-  //   const appStateListener = AppState.addEventListener(
-  //     'change',
-  //     handleAppStateChange,
-  //   );
+//   // Foreground notification
+//   const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
+//     console.log("Foreground Notification:", remoteMessage);
+//     Alert.alert(
+//       remoteMessage.notification?.title ?? "New Message",
+//       remoteMessage.notification?.body ?? ""
+//     );
+//   });
 
-  //   return () => {
-  //     disconnect();
-  //     appStateListener.remove();
-  //   };
-  // }, []);
+//   // App opened from background
+//   const unsubscribeOnNotificationOpened = messaging().onNotificationOpenedApp(remoteMessage => {
+//     console.log("App opened from background:", remoteMessage.notification);
+//     // Navigate user to specific screen if needed
+//   });
+
+//   // App opened from quit state
+//   messaging().getInitialNotification().then(remoteMessage => {
+//     if (remoteMessage) {
+//       console.log("App opened from quit state:", remoteMessage.notification);
+//       // Navigate user here as well
+//     }
+//   });
+
+//   return () => {
+//     unsubscribeOnMessage();
+//     unsubscribeOnNotificationOpened();
+//   };
+// }, [isAuthenticated]);
+
 
   if (loading) {
     return (

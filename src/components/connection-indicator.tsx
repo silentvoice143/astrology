@@ -10,45 +10,92 @@ const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
   isConnected,
   isConnecting,
 }) => {
-  const blinkAnim = useRef(new Animated.Value(1)).current;
+  const wave1 = useRef(new Animated.Value(0)).current;
+  const wave2 = useRef(new Animated.Value(0)).current;
+  const wave3 = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    if (isConnecting) {
-      Animated.loop(
-        Animated.sequence([
-          Animated.timing(blinkAnim, {
-            toValue: 0,
-            duration: 500,
-            useNativeDriver: true,
-          }),
-          Animated.timing(blinkAnim, {
-            toValue: 1,
-            duration: 500,
-            useNativeDriver: true,
-          }),
-        ]),
-      ).start();
-    } else {
-      blinkAnim.setValue(1); // Reset opacity to 1 when not connecting
-    }
-  }, [isConnecting]);
+    if (isConnecting || isConnected) {
+      // Create wave animations with staggered timing
+      const createWaveAnimation = (
+        animatedValue: Animated.Value,
+        delay: number,
+      ) => {
+        return Animated.loop(
+          Animated.sequence([
+            Animated.delay(delay),
+            Animated.timing(animatedValue, {
+              toValue: 1,
+              duration: 600,
+              useNativeDriver: true,
+            }),
+            Animated.timing(animatedValue, {
+              toValue: 0,
+              duration: 600,
+              useNativeDriver: true,
+            }),
+          ]),
+        );
+      };
 
-  if (isConnecting) {
+      Animated.parallel([
+        createWaveAnimation(wave1, 0),
+        createWaveAnimation(wave2, 200),
+        createWaveAnimation(wave3, 400),
+      ]).start();
+    } else {
+      // Reset all waves when disconnected
+      wave1.setValue(0);
+      wave2.setValue(0);
+      wave3.setValue(0);
+    }
+  }, [isConnecting, isConnected, wave1, wave2, wave3]);
+
+  // If connecting or connected → show wave animation
+  if (isConnecting || isConnected) {
+    const color = isConnected ? 'green' : 'orange';
     return (
-      <Animated.View
-        style={[styles.dotBase, styles.dotConnecting, {opacity: blinkAnim}]}
-      />
+      <View style={styles.waveContainer}>
+        <View style={[styles.dotBase, {backgroundColor: color, zIndex: 10}]} />
+        {[wave1, wave2, wave3].map((wave, index) => (
+          <Animated.View
+            key={index}
+            style={[
+              styles.waveRing,
+              {
+                borderColor: color,
+                opacity: wave.interpolate({
+                  inputRange: [0, 1],
+                  outputRange: [0.7 - index * 0.2, 0],
+                }),
+                transform: [
+                  {
+                    scale: wave.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [1, 2.5],
+                    }),
+                  },
+                ],
+              },
+            ]}
+          />
+        ))}
+      </View>
     );
   }
 
-  if (isConnected) {
-    return <View style={[styles.dotBase, styles.dotConnected]} />;
-  }
-
+  // If disconnected
   return <View style={[styles.dotBase, styles.dotDisconnected]} />;
 };
 
 const styles = StyleSheet.create({
+  waveContainer: {
+    width: 40,
+    height: 40,
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center',
+  },
   dotBase: {
     width: 12,
     height: 12,
@@ -56,14 +103,15 @@ const styles = StyleSheet.create({
     margin: 5,
     alignSelf: 'center',
   },
-  dotConnecting: {
-    backgroundColor: 'orange',
-  },
-  dotConnected: {
-    backgroundColor: 'green',
-  },
   dotDisconnected: {
     backgroundColor: 'red',
+  },
+  waveRing: {
+    position: 'absolute',
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 2,
   },
 });
 

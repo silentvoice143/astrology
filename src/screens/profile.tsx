@@ -97,10 +97,19 @@ const ProfilePage = () => {
               {t('languages')}: {astrologer_detail?.languages}
             </Text>
           )}
-
           {!isAstrologer && (
             <Text style={styles.detailText}>
-              {t('dob')}: {user?.birthPlace ?? '__'}
+              {t('dob')}: {user?.birthDate ?? '__'}
+            </Text>
+          )}
+          {!isAstrologer && (
+            <Text style={styles.detailText}>
+              {t('tob')}: {user?.birthTime ?? '__'}
+            </Text>
+          )}
+          {!isAstrologer && (
+            <Text style={styles.detailText}>
+              {t('pob')}: {user?.birthPlace ?? '__'}
             </Text>
           )}
         </View>

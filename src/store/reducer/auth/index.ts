@@ -38,6 +38,11 @@ export interface AstrologerProfile {
   pricePerMinuteChat: number;
   pricePerMinuteVoice: number;
   pricePerMinuteVideo: number;
+  online?: {
+    video: boolean;
+    chat: boolean;
+    voice: boolean;
+  };
 }
 
 const initialState: AuthState = {
@@ -54,6 +59,11 @@ const initialState: AuthState = {
     pricePerMinuteChat: 0,
     pricePerMinuteVoice: 0,
     pricePerMinuteVideo: 0,
+    online: {
+      chat: false,
+      video: false,
+      voice: false,
+    },
   },
   token: null,
   mobile: null,
@@ -120,6 +130,15 @@ const authSlice = createSlice({
     setAuthentication(state, action) {
       state.isAuthenticated = action.payload;
     },
+    setOnline(
+      state,
+      action: PayloadAction<{type: 'video' | 'chat' | 'voice'; value: boolean}>,
+    ) {
+      if (state.astrologer_detail?.online) {
+        state.astrologer_detail.online[action.payload.type] =
+          action.payload.value;
+      }
+    },
   },
   extraReducers: builder => {
     builder
@@ -161,6 +180,7 @@ export const {
   setFreeChatModalShown,
   setBalance,
   setFreeChatUsed,
+  setOnline,
 } = authSlice.actions;
 export {loginUser, verifyOtp};
 export default authSlice.reducer;

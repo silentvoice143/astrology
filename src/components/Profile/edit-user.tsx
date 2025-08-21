@@ -51,7 +51,7 @@ const UserProfileEdit = () => {
     gender: user?.gender,
     birthDate: user?.birthDate,
     birthTime: user?.birthTime ?? now.toTimeString().split(' ')[0],
-    birthPlace: '',
+    birthPlace: user?.birthPlace,
     latitude: 22.5744,
     longitude: 88.3629,
   });

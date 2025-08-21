@@ -6,6 +6,7 @@ import {
   StyleSheet,
   ScrollView,
   Image,
+  Switch,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {colors, themeColors} from '../constants/colors';
@@ -14,7 +15,7 @@ import {textStyle} from '../constants/text-style';
 import ScreenLayout from '../components/screen-layout';
 import ChevronRightIcon from '../assets/icons/chevron-right';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
-import {logout} from '../store/reducer/auth';
+import {logout, setOnline} from '../store/reducer/auth';
 import {clearSession} from '../store/reducer/session';
 import {useTranslation} from 'react-i18next';
 import Toast from 'react-native-toast-message';
@@ -33,7 +34,9 @@ const Setting = () => {
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
   const {user} = useAppSelector(state => state.auth);
+  const {online} = useAppSelector(state => state.auth.astrologer_detail);
   const {t} = useTranslation();
+
   const handleLogout = async () => {
     try {
       await dispatch(logout());
@@ -57,6 +60,12 @@ const Setting = () => {
     user?.gender === 'MALE' || !user?.gender
       ? require('../assets/imgs/male.jpg')
       : require('../assets/imgs/female.jpg');
+
+  const handleToggle = (type: 'chat' | 'voice' | 'video', value: boolean) => {
+    console.log(type, value, '----value switch');
+    dispatch(setOnline({type, value}));
+    console.log(`${type} =>`, value);
+  };
 
   return (
     <ScreenLayout headerBackgroundColor={themeColors.surface.background}>
@@ -88,6 +97,41 @@ const Setting = () => {
             </View>
           </View>
         </View>
+        <Text
+          style={[
+            textStyle.fs_mont_12_400,
+            {
+              color: themeColors.text.muted,
+              paddingHorizontal: scale(10),
+              marginBottom: verticalScale(12),
+            },
+          ]}>
+          Online Status
+        </Text>
+        <View style={styles.option}>
+          <Text>Chat</Text>
+          <Switch
+            value={online.chat}
+            onValueChange={value => handleToggle('chat', value)}
+          />
+        </View>
+
+        <View style={styles.option}>
+          <Text>Voice Call</Text>
+          <Switch
+            value={online.voice}
+            onValueChange={value => handleToggle('voice', value)}
+          />
+        </View>
+
+        <View style={styles.option}>
+          <Text>Video Call</Text>
+          <Switch
+            value={online.video}
+            onValueChange={value => handleToggle('video', value)}
+          />
+        </View>
+        <View style={[styles.separator, {marginBottom: verticalScale(20)}]} />
         <Text
           style={[
             textStyle.fs_mont_12_400,
@@ -151,6 +195,15 @@ const styles = StyleSheet.create({
   option: {
     backgroundColor: themeColors.surface.background ?? '#FFFFFF',
     paddingVertical: verticalScale(16),
+    paddingHorizontal: scale(20),
+    borderRadius: scale(10),
+    marginBottom: verticalScale(6),
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+  },
+  online_option: {
+    backgroundColor: themeColors.surface.background ?? '#FFFFFF',
+    paddingVertical: verticalScale(8),
     paddingHorizontal: scale(20),
     borderRadius: scale(10),
     marginBottom: verticalScale(6),
