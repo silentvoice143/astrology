@@ -84,7 +84,7 @@ const Astrologers = () => {
   const [isFetchingMore, setIsFetchingMore] = useState(false);
 
   const activeSession = useAppSelector(state => state.session.activeSession);
-  const {onlineAstrologer} = useAppSelector(state => state.astrologer);
+  const {onlineAstrologerDetails} = useAppSelector(state => state.astrologer);
   const {user} = useAppSelector(state => state.auth);
   const {send} = useWebSocket(user.id);
 
@@ -187,21 +187,40 @@ const Astrologers = () => {
   }, [debouncedSearch]);
 
   useEffect(() => {
-    if (!astrologersData.length) return;
+    // if (!onlineAstrologerDetails.length) return;
 
-    const onlineSet = new Set(onlineAstrologer ?? []);
+    // Map astrologer.id → astrologer object for quick lookup
+    const onlineMap = new Map(
+      onlineAstrologerDetails.map(astro => [astro.user.id, astro]),
+    );
 
     setAstrologersData(prev =>
-      prev.map(a => ({
-        ...a,
-        online: onlineSet.has(a.user.id),
-      })),
+      prev.map(a => {
+        const onlineAstro = onlineMap.get(a.user.id);
+        return onlineAstro
+          ? {
+              ...a,
+              isChatOnline: onlineAstro.isChatOnline,
+              isAudioOnline: onlineAstro.isAudioOnline,
+              isVideoOnline: onlineAstro.isVideoOnline,
+              online: onlineAstro.online, // keep global online status too
+            }
+          : {
+              ...a,
+              isChatOnline: false,
+              isAudioOnline: false,
+              isVideoOnline: false,
+              online: false,
+            };
+      }),
     );
-  }, [onlineAstrologer, loading, isFetchingMore]);
+  }, [onlineAstrologerDetails, loading, isFetchingMore]);
 
   const sortedAstrologers = astrologersData.sort((a, b) => {
     return (b.online === true ? 1 : 0) - (a.online === true ? 1 : 0);
   });
+
+  console.log(sortedAstrologers, '---astrologer data');
 
   if (loading) {
     return (
@@ -292,6 +311,9 @@ const Astrologers = () => {
             <AstrologerCard
               id={item.id}
               online={item.online}
+              isChatAvailable={item.isChatOnline}
+              isVideoAvailable={item.isVideoOnline}
+              isAudioAvailable={item.isAudioOnline}
               pricePerMinuteChat={item.pricePerMinuteChat}
               pricePerMinuteVideo={item.pricePerMinuteVideo}
               pricePerMinuteVoice={item.pricePerMinuteVoice}

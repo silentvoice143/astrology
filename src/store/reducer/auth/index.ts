@@ -1,5 +1,13 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
-import {loginUser, loginUserPassword, registerUser, verifyOtp} from './action';
+import {
+  loginUser,
+  loginUserPassword,
+  logoutDevice,
+  onlineStatus,
+  registerDevice,
+  registerUser,
+  verifyOtp,
+} from './action';
 import {UserDetail} from '../../../utils/types';
 const isProfileComplete = (user: UserDetail): boolean => {
   return Boolean(
@@ -38,11 +46,9 @@ export interface AstrologerProfile {
   pricePerMinuteChat: number;
   pricePerMinuteVoice: number;
   pricePerMinuteVideo: number;
-  online?: {
-    video: boolean;
-    chat: boolean;
-    voice: boolean;
-  };
+  isAudioOnline: boolean;
+  isVideoOnline: boolean;
+  isChatOnline: boolean;
 }
 
 const initialState: AuthState = {
@@ -59,11 +65,9 @@ const initialState: AuthState = {
     pricePerMinuteChat: 0,
     pricePerMinuteVoice: 0,
     pricePerMinuteVideo: 0,
-    online: {
-      chat: false,
-      video: false,
-      voice: false,
-    },
+    isAudioOnline: false,
+    isChatOnline: false,
+    isVideoOnline: false,
   },
   token: null,
   mobile: null,
@@ -132,11 +136,23 @@ const authSlice = createSlice({
     },
     setOnline(
       state,
-      action: PayloadAction<{type: 'video' | 'chat' | 'voice'; value: boolean}>,
+      action: PayloadAction<{
+        type: 'VIDEOONLINE' | 'CHATONLINE' | 'AUDIOONLINE';
+        value: boolean;
+      }>,
     ) {
-      if (state.astrologer_detail?.online) {
-        state.astrologer_detail.online[action.payload.type] =
-          action.payload.value;
+      if (!state.astrologer_detail) return;
+
+      switch (action.payload.type) {
+        case 'VIDEOONLINE':
+          state.astrologer_detail.isVideoOnline = action.payload.value;
+          break;
+        case 'CHATONLINE':
+          state.astrologer_detail.isChatOnline = action.payload.value;
+          break;
+        case 'AUDIOONLINE':
+          state.astrologer_detail.isAudioOnline = action.payload.value;
+          break;
       }
     },
   },
@@ -165,7 +181,10 @@ const authSlice = createSlice({
           state.isProfileComplete = isProfileComplete(payload.user);
         }
       })
-      .addCase(registerUser.fulfilled, (state, {payload}) => {});
+      .addCase(registerUser.fulfilled, (state, {payload}) => {})
+      .addCase(onlineStatus.fulfilled, (state, {payload}) => {})
+      .addCase(logoutDevice.fulfilled, (state, {payload}) => {})
+      .addCase(registerDevice.fulfilled, (state, {payload}) => {});
   },
 });
 
@@ -182,5 +201,5 @@ export const {
   setFreeChatUsed,
   setOnline,
 } = authSlice.actions;
-export {loginUser, verifyOtp};
+export {loginUser, verifyOtp, onlineStatus, registerDevice, logoutDevice};
 export default authSlice.reducer;

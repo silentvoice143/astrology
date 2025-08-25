@@ -85,7 +85,11 @@ const ConnectionStatusIndicator: React.FC<ConnectionStatusIndicatorProps> = ({
   }
 
   // If disconnected
-  return <View style={[styles.dotBase, styles.dotDisconnected]} />;
+  return (
+    <View style={styles.waveContainer}>
+      <View style={[styles.dotBase, styles.dotDisconnected]} />
+    </View>
+  );
 };
 
 const styles = StyleSheet.create({
@@ -97,11 +101,10 @@ const styles = StyleSheet.create({
     alignSelf: 'center',
   },
   dotBase: {
+    position: 'absolute',
     width: 12,
     height: 12,
     borderRadius: 6,
-    margin: 5,
-    alignSelf: 'center',
   },
   dotDisconnected: {
     backgroundColor: 'red',

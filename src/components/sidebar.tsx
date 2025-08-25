@@ -18,7 +18,12 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
-import {logout, setBalance} from '../store/reducer/auth';
+import {
+  logout,
+  logoutDevice,
+  onlineStatus,
+  setBalance,
+} from '../store/reducer/auth';
 import WalletIcon from '../assets/icons/walletIcon';
 import {moderateScale, scale, verticalScale} from '../utils/sizer';
 import {colors, themeColors} from '../constants/colors';
@@ -178,17 +183,46 @@ const Sidebar = forwardRef<SidebarRef>((_, ref) => {
   };
 
   const handleLogout = async () => {
-    setLoading(true);
+    console.log('checkauth logout-----------');
     try {
-      await dispatch(logout());
-      dispatch(clearSession());
-      disconnect();
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setLoading(false);
-    }
+      if (role === 'ASTROLOGER') {
+        const payload = await dispatch(logoutDevice()).unwrap();
+
+        if (payload.success) {
+          Toast.show({
+            type: 'success',
+            text1: 'Online status changed successfully!',
+          });
+
+          // 🔑 finally do logout
+          dispatch(clearSession());
+          disconnect();
+          dispatch(logout());
+        } else {
+          Toast.show({
+            type: 'error',
+            text1: 'Try again later',
+          });
+        }
+      } else {
+        dispatch(clearSession());
+        disconnect();
+        dispatch(logout());
+      }
+    } catch (err) {}
   };
+  // const handleLogout = async () => {
+  //   setLoading(true);
+  //   try {
+  //     await dispatch(logout());
+  //     dispatch(clearSession());
+  //     disconnect();
+  //   } catch (err) {
+  //     console.log(err);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
 
   const handleNavigation = (href: string) => {
     close();

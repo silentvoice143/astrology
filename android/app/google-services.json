@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "178759375808",
+    "project_id": "astrosevaa-57e76",
+    "storage_bucket": "astrosevaa-57e76.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:178759375808:android:36421e05a23d7385bf0625",
+        "android_client_info": {
+          "package_name": "com.insapimarketing.astrosevaa2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCiXRRTRbtHH_jCXRoolarbJSd1h2kdC4o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

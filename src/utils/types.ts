@@ -45,6 +45,9 @@ export interface Astrologers {
   pricePerMinuteVideo: number;
   pricePerMinuteVoice: number;
   user: UserDetail;
+  isChatOnline: boolean;
+  isAudioOnline: boolean;
+  isVideoOnline: boolean;
 }
 
 import {ImageSourcePropType} from 'react-native';

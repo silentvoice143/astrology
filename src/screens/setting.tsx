@@ -15,10 +15,16 @@ import {textStyle} from '../constants/text-style';
 import ScreenLayout from '../components/screen-layout';
 import ChevronRightIcon from '../assets/icons/chevron-right';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
-import {logout, setOnline} from '../store/reducer/auth';
+import {
+  logout,
+  onlineStatus,
+  setAstrologer,
+  setOnline,
+} from '../store/reducer/auth';
 import {clearSession} from '../store/reducer/session';
 import {useTranslation} from 'react-i18next';
 import Toast from 'react-native-toast-message';
+import {useUserRole} from '../hooks/use-role';
 
 const settingsOptions = [
   {title: 'Language', screen: 'Language'},
@@ -33,8 +39,17 @@ const settingsOptions = [
 const Setting = () => {
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
-  const {user} = useAppSelector(state => state.auth);
-  const {online} = useAppSelector(state => state.auth.astrologer_detail);
+  const {user, astrologer_detail} = useAppSelector(state => state.auth);
+  const role = useUserRole();
+  const isChatOnline = useAppSelector(
+    state => state.auth.astrologer_detail?.isChatOnline,
+  );
+  const isAudioOnline = useAppSelector(
+    state => state.auth.astrologer_detail?.isAudioOnline,
+  );
+  const isVideoOnline = useAppSelector(
+    state => state.auth.astrologer_detail?.isVideoOnline,
+  );
   const {t} = useTranslation();
 
   const handleLogout = async () => {
@@ -61,10 +76,42 @@ const Setting = () => {
       ? require('../assets/imgs/male.jpg')
       : require('../assets/imgs/female.jpg');
 
-  const handleToggle = (type: 'chat' | 'voice' | 'video', value: boolean) => {
-    console.log(type, value, '----value switch');
-    dispatch(setOnline({type, value}));
-    console.log(`${type} =>`, value);
+  const handleToggle = async (
+    type: 'CHATONLINE' | 'AUDIOONLINE' | 'VIDEOONLINE',
+    value: boolean,
+  ) => {
+    try {
+      dispatch(setOnline({type, value}));
+      const payload = await dispatch(
+        onlineStatus({onlineType: type, status: value}),
+      ).unwrap();
+      console.log(payload, '----setting payload');
+      if (payload.success) {
+        const astro = payload.astrologer;
+        const astrologerData: any = astro
+          ? {
+              ...astrologer_detail,
+              isAudioOnline:
+                astro.isAudioOnline ?? astrologer_detail?.isAudioOnline,
+              isChatOnline:
+                astro.isChatOnline ?? astrologer_detail?.isChatOnline,
+              isVideoOnline:
+                astro.isVideoOnline ?? astrologer_detail?.isVideoOnline,
+            }
+          : null;
+        dispatch(setAstrologer(astrologerData));
+        Toast.show({
+          type: 'success',
+          text1: 'Online Status changed successfully!',
+        });
+      } else {
+        dispatch(setOnline({type, value: !value}));
+
+        Toast.show({type: 'error', text1: 'Try again later'});
+      }
+    } catch (err) {
+      dispatch(setOnline({type, value: !value}));
+    }
   };
 
   return (
@@ -97,40 +144,44 @@ const Setting = () => {
             </View>
           </View>
         </View>
-        <Text
-          style={[
-            textStyle.fs_mont_12_400,
-            {
-              color: themeColors.text.muted,
-              paddingHorizontal: scale(10),
-              marginBottom: verticalScale(12),
-            },
-          ]}>
-          Online Status
-        </Text>
-        <View style={styles.option}>
-          <Text>Chat</Text>
-          <Switch
-            value={online.chat}
-            onValueChange={value => handleToggle('chat', value)}
-          />
-        </View>
+        {role === 'ASTROLOGER' && (
+          <View>
+            <Text
+              style={[
+                textStyle.fs_mont_12_400,
+                {
+                  color: themeColors.text.muted,
+                  paddingHorizontal: scale(10),
+                  marginBottom: verticalScale(12),
+                },
+              ]}>
+              Online Status
+            </Text>
+            <View style={styles.option}>
+              <Text>Chat</Text>
+              <Switch
+                value={isChatOnline}
+                onValueChange={value => handleToggle('CHATONLINE', value)}
+              />
+            </View>
 
-        <View style={styles.option}>
-          <Text>Voice Call</Text>
-          <Switch
-            value={online.voice}
-            onValueChange={value => handleToggle('voice', value)}
-          />
-        </View>
+            <View style={styles.option}>
+              <Text>Voice Call</Text>
+              <Switch
+                value={isAudioOnline}
+                onValueChange={value => handleToggle('AUDIOONLINE', value)}
+              />
+            </View>
 
-        <View style={styles.option}>
-          <Text>Video Call</Text>
-          <Switch
-            value={online.video}
-            onValueChange={value => handleToggle('video', value)}
-          />
-        </View>
+            <View style={styles.option}>
+              <Text>Video Call</Text>
+              <Switch
+                value={isVideoOnline}
+                onValueChange={value => handleToggle('VIDEOONLINE', value)}
+              />
+            </View>
+          </View>
+        )}
         <View style={[styles.separator, {marginBottom: verticalScale(20)}]} />
         <Text
           style={[

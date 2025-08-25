@@ -61,3 +61,47 @@ export const verifyOtp = createAsyncThunk<
     return rejectWithValue(error.response?.data || error.message);
   }
 });
+
+export const onlineStatus = createAsyncThunk<
+  any, // response type as any
+  {onlineType: 'CHATONLINE' | 'AUDIOONLINE' | 'VIDEOONLINE'; status: boolean}, // argument type
+  {rejectValue: any}
+>('auth/online-status', async (payload, {rejectWithValue}) => {
+  try {
+    const response = await api.post(
+      '/api/v1/astrologers/change-online',
+      payload,
+    );
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});
+
+export const registerDevice = createAsyncThunk<
+  any, // response type as any
+  {deviceToken: string},
+  {rejectValue: any}
+>('auth/register-device', async (payload, {rejectWithValue}) => {
+  try {
+    const response = await api.post('/api/v1/device-token/register', payload);
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});
+
+export const logoutDevice = createAsyncThunk<
+  any, // response type as any
+  void,
+  {rejectValue: any}
+>('auth/logout', async (_, {rejectWithValue}) => {
+  try {
+    const response = await api.get('/api/v1/auth/logout');
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});
+
+//

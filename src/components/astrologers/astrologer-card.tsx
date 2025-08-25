@@ -35,6 +35,9 @@ type AstrologerCardProps = {
   expertise: string;
   online: boolean;
   freeChatAvailable?: boolean;
+  isVideoAvailable: boolean;
+  isChatAvailable: boolean;
+  isAudioAvailable: boolean;
 };
 
 const AstrologerCard: React.FC<AstrologerCardProps> = ({
@@ -55,6 +58,9 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
   pricePerMinuteVoice,
   online,
   freeChatAvailable,
+  isVideoAvailable,
+  isChatAvailable,
+  isAudioAvailable,
 }) => {
   const {user} = useAppSelector(state => state.auth);
   const {isConnected, send} = useWebSocket(user?.id);
@@ -146,8 +152,9 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
       <View style={styles.actions}>
         <View onStartShouldSetResponder={() => true}>
           <TouchableOpacity
+            disabled={!isAudioAvailable}
             onPress={() => handleSessionPress('audio')}
-            style={styles.button}>
+            style={[styles.button, !isAudioAvailable && styles.buttonDisabled]}>
             <View
               style={{
                 padding: moderateScale(4),
@@ -164,8 +171,9 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
 
         <View onStartShouldSetResponder={() => true}>
           <TouchableOpacity
+            disabled={!isVideoAvailable}
             onPress={() => handleSessionPress('video')}
-            style={styles.button}>
+            style={[styles.button, !isVideoAvailable && styles.buttonDisabled]}>
             <View
               style={{
                 padding: moderateScale(4),
@@ -183,11 +191,13 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
 
         <View onStartShouldSetResponder={() => true}>
           <TouchableOpacity
+            disabled={!isChatAvailable}
             onPress={() => {
               handleSessionPress('chat');
             }}
             style={[
               styles.button,
+              !isChatAvailable && styles.buttonDisabled,
               {
                 backgroundColor: freeChatAvailable
                   ? themeColors.button.success
@@ -320,5 +330,13 @@ const styles = StyleSheet.create({
     marginLeft: scale(6),
     color: colors.primaryText,
     fontWeight: '600',
+  },
+  buttonDisabled: {
+    backgroundColor: themeColors.surface.mutedSurface, // light gray bg
+    borderColor: themeColors.border.primary, // softer border
+    opacity: 0.5, // fade effect
+  },
+  buttonTextDisabled: {
+    color: themeColors.button.muted, // gray text
   },
 });
