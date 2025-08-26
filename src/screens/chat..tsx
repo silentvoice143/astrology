@@ -365,9 +365,12 @@ export const ChatScreenDemo = () => {
               styles.header,
               {flexDirection: 'row', gap: scale(12), alignItems: 'center'},
             ]}>
-            <TouchableOpacity onPress={() => navigation.replace('ChatHistory')}>
-              <ChevronLeftIcon size={32} />
-            </TouchableOpacity>
+            {session && (
+              <TouchableOpacity
+                onPress={() => navigation.replace('ChatHistory')}>
+                <ChevronLeftIcon size={32} />
+              </TouchableOpacity>
+            )}
             <View>
               <Avatar
                 size={50}
