@@ -5,7 +5,7 @@ import {textStyle} from '../constants/text-style';
 import {themeColors} from '../constants/colors';
 
 const CustomerSupport = () => {
-  const supportNumber = '+1-800-123-4567'; // Replace with your actual support number
+  const supportNumber = '+91 9239295959'; // Replace with your actual support number
 
   const handleCallPress = () => {
     const phoneNumber = `tel:${supportNumber}`;

@@ -4,6 +4,7 @@ import {useWebSocket} from './use-socket-new';
 import {
   setActiveSession,
   setCallSession,
+  setRequestList,
   setSession,
   toggleCountRefresh,
 } from '../store/reducer/session';
@@ -59,6 +60,7 @@ export const useSessionEvents = (
     const onlineAstroDest = `/topic/online/astrologer`;
     const activeSessionDest = `/topic/session/${userId}`;
     const onlineAstrologerDest = '/topic/online/astrologer/list';
+    const requestListDest = `/topic/requests/${userId}`;
 
     unsubscribeAll();
 
@@ -71,9 +73,10 @@ export const useSessionEvents = (
       onlineAstrologerDest,
     ];
 
-    // if (role === 'ASTROLOGER') {
-    //   subscriptionsRef.current.push(activeSessionDest);
-    // }
+    if (role === 'ASTROLOGER') {
+      // subscriptionsRef.current.push(activeSessionDest);
+      subscriptionsRef.current.push(requestListDest);
+    }
 
     subscribe(queueDest, msg => {
       try {
@@ -118,16 +121,28 @@ export const useSessionEvents = (
       }
     });
 
-    subscribe(onlineAstroDest, msg => {
-      try {
-        const data = JSON.parse(decodeMessageBody(msg));
-        console.log('Online astrologer---------------------------:', data);
+    // subscribe(onlineAstroDest, msg => {
+    //   try {
+    //     const data = JSON.parse(decodeMessageBody(msg));
+    //     // console.log('Online astrologer---------------------------:', data);
 
-        dispatch(setOnlineAstrologer(data));
-      } catch (err) {
-        console.log('Failed to parse online astrologer list:', err);
-      }
-    });
+    //     dispatch(setOnlineAstrologer(data));
+    //   } catch (err) {
+    //     console.log('Failed to parse online astrologer list:', err);
+    //   }
+    // });
+
+    if (role === 'ASTROLOGER') {
+      subscribe(requestListDest, msg => {
+        try {
+          const data = JSON.parse(decodeMessageBody(msg));
+          console.log('Request---------------------------:', data);
+          dispatch(setRequestList(data));
+        } catch (err) {
+          console.log('Failed to parse online astrologer list:', err);
+        }
+      });
+    }
 
     subscribe(onlineAstrologerDest, msg => {
       try {

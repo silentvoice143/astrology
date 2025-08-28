@@ -66,12 +66,14 @@ const UserRequestCard = ({
   onSkip,
   showActions,
   isAnimating,
+  isConnected,
 }: {
   data: RequestType;
   onAccept: () => void;
   onSkip: () => void;
   showActions: boolean;
   isAnimating: boolean;
+  isConnected: boolean;
 }) => {
   const slideAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(1)).current;
@@ -85,6 +87,9 @@ const UserRequestCard = ({
   }, []);
 
   const handleAcceptPress = () => {
+    if (!isConnected) {
+      return;
+    }
     Animated.sequence([
       Animated.timing(scaleAnim, {
         toValue: 0.95,
@@ -284,16 +289,23 @@ const UserRequestCard = ({
 
             <TouchableOpacity
               onPress={handleAcceptPress}
-              style={{
-                flex: 1,
-                backgroundColor: themeColors.button.success,
-                paddingVertical: verticalScale(12),
-                borderRadius: scale(12),
-                alignItems: 'center',
-              }}
-              disabled={isAnimating}>
+              style={[
+                {
+                  flex: 1,
+                  backgroundColor: themeColors.button.success,
+                  paddingVertical: verticalScale(12),
+                  borderRadius: scale(12),
+                  alignItems: 'center',
+                },
+                !isConnected && {
+                  backgroundColor: themeColors.surface.mutedSurface, // light gray bg
+                  borderColor: themeColors.border.primary, // softer border
+                  opacity: 0.5, // fade effect
+                },
+              ]}
+              disabled={isAnimating || !isConnected}>
               <Text style={[textStyle.fs_mont_14_600, {color: '#fff'}]}>
-                Accept
+                {isConnected ? 'Accept' : 'Please wait'}
               </Text>
             </TouchableOpacity>
           </View>
@@ -336,6 +348,8 @@ const RequestScreen = () => {
   const {activeSession} = useAppSelector(state => state.session);
   const {send, isConnected} = useWebSocket(astrologer_detail?.id);
   const {user} = useAppSelector(state => state.auth);
+  const [initialLoad, setInitialLoad] = useState(false);
+  const {requests} = useAppSelector(state => state.session);
 
   const getAllRequests = async () => {
     try {
@@ -365,6 +379,7 @@ const RequestScreen = () => {
       });
     } finally {
       setRefreshing(false);
+      setInitialLoad(true);
     }
   };
 
@@ -522,9 +537,17 @@ const RequestScreen = () => {
   };
 
   useEffect(() => {
-    send('/app/session.active', {}, JSON.stringify({astrologerId: user?.id}));
     getAllRequests();
-  }, [quequeRequestCount]);
+  }, []);
+
+  useEffect(() => {
+    send('/app/session.active', {}, JSON.stringify({astrologerId: user?.id}));
+    if (initialLoad) {
+      setRequest(requests);
+    }
+  }, [initialLoad, requests, isConnected]);
+
+  console.log(request, '==============requests in page');
 
   return (
     <ScreenLayout>
@@ -574,6 +597,7 @@ const RequestScreen = () => {
                   onSkip={() => handleSkip(user)}
                   showActions={index === 0}
                   isAnimating={isAnimating}
+                  isConnected={isConnected}
                 />
               ))}
             </>

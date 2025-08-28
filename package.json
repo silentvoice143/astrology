@@ -34,6 +34,7 @@
     "react-native-image-picker": "^8.2.1",
     "react-native-image-zoom-viewer": "^3.0.1",
     "react-native-keep-awake": "^4.0.0",
+    "react-native-keyboard-aware-scroll-view": "^0.9.5",
     "react-native-linear-gradient": "^2.8.3",
     "react-native-localize": "^3.5.1",
     "react-native-modal": "^14.0.0-rc.1",

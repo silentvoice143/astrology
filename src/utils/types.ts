@@ -200,6 +200,7 @@ export interface SessionState {
     userId: string;
     type: 'AUDIO' | 'VIDEO' | 'CHAT';
   } | null;
+  requests: any;
 }
 
 export interface Message {

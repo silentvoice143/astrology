@@ -33,6 +33,7 @@ const initialState: SessionState = {
   queueRequestCount: 0,
   countRefresh: true,
   sessionRequest: null,
+  requests: [],
 };
 
 const sessionSlice = createSlice({
@@ -92,6 +93,9 @@ const sessionSlice = createSlice({
     toggleCountRefresh: state => {
       state.countRefresh = !state.countRefresh;
     },
+    setRequestList: (state, action) => {
+      state.requests = action.payload;
+    },
   },
   extraReducers: builder => {
     builder.addCase(sendSessionRequest.fulfilled, state => {});
@@ -124,6 +128,7 @@ export const {
   clearQueueRequestCount,
   toggleCountRefresh,
   setActiveSession,
+  setRequestList,
 } = sessionSlice.actions;
 
 export {

@@ -310,7 +310,9 @@ const Astrologers = () => {
             key={`card-astrologer-${item.id}`}>
             <AstrologerCard
               id={item.id}
-              online={item.online}
+              online={
+                item.isChatOnline || item.isVideoOnline || item.isAudioOnline
+              }
               isChatAvailable={item.isChatOnline}
               isVideoAvailable={item.isVideoOnline}
               isAudioAvailable={item.isAudioOnline}

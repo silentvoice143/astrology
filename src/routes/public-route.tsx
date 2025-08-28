@@ -5,6 +5,7 @@ import Otp from '../screens/otp';
 import Register from '../screens/auth/register';
 // import Login from '../screens/auth/login-password';
 import CustomerSupportPublic from '../screens/customer-support-public';
+// import Login from '../screens/auth/login-password';
 import Login from '../screens/login';
 
 const Stack = createNativeStackNavigator();

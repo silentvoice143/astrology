@@ -47,6 +47,8 @@ import {useNavigation} from '@react-navigation/native';
 import {StompSubscription} from '@stomp/stompjs';
 import Timer from '../components/session/timer';
 import CustomButton from '../components/custom-button';
+import {KeyboardAwareFlatList} from 'react-native-keyboard-aware-scroll-view';
+import useKeyboardStatus from '../hooks/use-keyboard';
 
 export const ChatScreenDemo = () => {
   const role = useUserRole();
@@ -76,6 +78,7 @@ export const ChatScreenDemo = () => {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const dispatch = useAppDispatch();
   const navigation = useNavigation<any>();
+  const isKeyboardOpen = useKeyboardStatus();
 
   // ==============distinations===============
   const messageSubDest = `/topic/chat/${userId}/messages`;
@@ -193,6 +196,9 @@ export const ChatScreenDemo = () => {
               type: 'info',
               text1: 'Session Ended',
             });
+            if (role === 'ASTROLOGER') {
+              navigation.replace('session-request');
+            }
           }
         } catch (err) {
           console.error('Failed to parse chat end message:', err);
@@ -276,16 +282,19 @@ export const ChatScreenDemo = () => {
   };
 
   const handleLeave = () => {
-    send(
-      '/app/chat.leave',
-      {},
-      JSON.stringify({
-        userId: userId,
-        astrologerId: otherUserId,
-        sessionType: 'CHAT',
-      }),
-    );
-    navigation.navigate('ChatHistory');
+    console.log(session, '--------------handling leave session');
+    if (!session) {
+      send(
+        '/app/chat.leave',
+        {},
+        JSON.stringify({
+          userId: userId,
+          astrologerId: otherUserId,
+          sessionType: 'CHAT',
+        }),
+      );
+    }
+    navigation.replace('ChatHistory');
   };
 
   useEffect(() => {
@@ -307,16 +316,19 @@ export const ChatScreenDemo = () => {
     const backHandler = BackHandler.addEventListener(
       'hardwareBackPress',
       () => {
-        if (role === 'USER' && userId && otherUserId && !session) {
+        if (role === 'USER' && !session) {
           handleLeave();
           return;
+        } else {
+          navigation.replace('ChatHistory');
         }
-        navigation.replace('ChatHistory');
         return true;
       },
     );
     return () => backHandler.remove();
-  }, []);
+  }, [session]);
+
+  console.log(session, '=====================chat session');
 
   const renderMessage = ({item}: {item: Message}) => {
     const isMine = item.senderId === userId;
@@ -355,66 +367,61 @@ export const ChatScreenDemo = () => {
   };
 
   return (
-    <SafeAreaView style={{flex: 1, backgroundColor: '#EFEFEF'}}>
+    <View style={{flex: 1, backgroundColor: '#EFEFEF'}}>
+      <View
+        style={[
+          styles.header,
+          {flexDirection: 'row', gap: scale(12), alignItems: 'center'},
+        ]}>
+        {session && (
+          <TouchableOpacity onPress={() => navigation.replace('ChatHistory')}>
+            <ChevronLeftIcon size={32} />
+          </TouchableOpacity>
+        )}
+        <View>
+          <Avatar
+            size={50}
+            image={{uri: ''}}
+            fallbackText={otherUser?.name.charAt(0).toUpperCase()}
+          />
+          <View
+            style={{
+              position: 'absolute',
+              top: 6,
+              right: 0,
+              height: scale(10),
+              width: scale(10),
+              backgroundColor:
+                session?.status === 'ACTIVE'
+                  ? colors.success.base
+                  : colors.error.base,
+              borderRadius: scale(6),
+            }}></View>
+        </View>
+        <View>
+          <View style={{flexDirection: 'row', gap: 8}}>
+            <Text
+              style={[textStyle.fs_mont_20_700, {marginTop: verticalScale(8)}]}>
+              {session ? otherUser?.name : tempOtherUser?.name}
+            </Text>
+          </View>
+
+          <Text
+            style={[
+              styles.typing,
+              {
+                color: otherUserTyping ? colors.primaryText : colors.whiteText,
+              },
+            ]}>
+            Typing...
+          </Text>
+        </View>
+      </View>
       <KeyboardAvoidingView
         style={styles.container}
-        behavior={Platform.select({ios: 'padding', android: undefined})}>
+        behavior={Platform.select({ios: 'padding', android: 'height'})}
+        keyboardVerticalOffset={isKeyboardOpen ? 32 : 0}>
         <>
-          <View
-            style={[
-              styles.header,
-              {flexDirection: 'row', gap: scale(12), alignItems: 'center'},
-            ]}>
-            {session && (
-              <TouchableOpacity
-                onPress={() => navigation.replace('ChatHistory')}>
-                <ChevronLeftIcon size={32} />
-              </TouchableOpacity>
-            )}
-            <View>
-              <Avatar
-                size={50}
-                image={{uri: ''}}
-                fallbackText={otherUser?.name.charAt(0).toUpperCase()}
-              />
-              <View
-                style={{
-                  position: 'absolute',
-                  top: 6,
-                  right: 0,
-                  height: scale(10),
-                  width: scale(10),
-                  backgroundColor:
-                    session?.status === 'ACTIVE'
-                      ? colors.success.base
-                      : colors.error.base,
-                  borderRadius: scale(6),
-                }}></View>
-            </View>
-            <View>
-              <View style={{flexDirection: 'row', gap: 8}}>
-                <Text
-                  style={[
-                    textStyle.fs_mont_20_700,
-                    {marginTop: verticalScale(8)},
-                  ]}>
-                  {session ? otherUser?.name : tempOtherUser?.name}
-                </Text>
-              </View>
-
-              <Text
-                style={[
-                  styles.typing,
-                  {
-                    color: otherUserTyping
-                      ? colors.primaryText
-                      : colors.whiteText,
-                  },
-                ]}>
-                Typing...
-              </Text>
-            </View>
-          </View>
           {session?.status === 'ACTIVE' && timer && <Timer timer={timer} />}
 
           {!session ? (
@@ -425,18 +432,30 @@ export const ChatScreenDemo = () => {
               <CustomButton title="Leave Session" onPress={handleLeave} />
             </View>
           ) : (
-            <FlatList
-              ref={flatListRef}
+            // <FlatList
+            //   ref={flatListRef}
+            //   data={messages}
+            //   inverted
+            //   keyExtractor={(item, index) => `${item.timestamp}-${index}`}
+            //   renderItem={renderMessage}
+            //   contentContainerStyle={styles.messagesArea}
+            //   onEndReached={info => {
+            //     getChatMessagesDetails(currentPage + 1);
+            //   }}
+            //   onEndReachedThreshold={0.2}
+            //   keyboardShouldPersistTaps="handled"
+            // />
+            <KeyboardAwareFlatList
+              // ref={flatListRef}
               data={messages}
               inverted
               keyExtractor={(item, index) => `${item.timestamp}-${index}`}
               renderItem={renderMessage}
               contentContainerStyle={styles.messagesArea}
-              onEndReached={info => {
-                getChatMessagesDetails(currentPage + 1);
-              }}
+              onEndReached={() => getChatMessagesDetails(currentPage + 1)}
               onEndReachedThreshold={0.2}
               keyboardShouldPersistTaps="handled"
+              extraScrollHeight={20} // pushes list up when keyboard appears
             />
           )}
 
@@ -538,7 +557,7 @@ export const ChatScreenDemo = () => {
           />
         </Modal>
       </KeyboardAvoidingView>
-    </SafeAreaView>
+    </View>
   );
 };
 
