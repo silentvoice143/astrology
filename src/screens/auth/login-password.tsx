@@ -129,7 +129,11 @@ const Login = () => {
       </View>
       <View style={styles.footer}>
         <Text style={styles.footerText}>Forgot Password?</Text>
-        <Pressable onPress={() => navigation.navigate('CustomerSupport')}>
+        <Pressable
+          onPress={() => {
+            // navigation.navigate('CustomerSupport')
+            navigation.navigate('HomeNew');
+          }}>
           <Text style={styles.footerLink}> Need Help</Text>
         </Pressable>
       </View>

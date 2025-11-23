@@ -5,8 +5,10 @@ import Otp from '../screens/otp';
 import Register from '../screens/auth/register';
 // import Login from '../screens/auth/login-password';
 import CustomerSupportPublic from '../screens/customer-support-public';
-// import Login from '../screens/auth/login-password';
-import Login from '../screens/login';
+import Login from '../screens/auth/login-password';
+import HomeNew from '../screens/home/index';
+
+// import Login from '../screens/login';
 
 const Stack = createNativeStackNavigator();
 
@@ -20,6 +22,7 @@ export default function PublicRoutes() {
       }}>
       <Stack.Screen name="Login" component={Login} />
       <Stack.Screen name="Register" component={Register} />
+      <Stack.Screen name="HomeNew" component={HomeNew} />
       <Stack.Screen name="Otp" component={Otp} />
       <Stack.Screen name="CustomerSupport" component={CustomerSupportPublic} />
     </Stack.Navigator>
