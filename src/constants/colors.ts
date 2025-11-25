@@ -155,6 +155,10 @@ export const COLORS = {
     secondary: '#F7B900',
     white: '#ffffff',
     black: '#000000',
+    gray: {
+      light: '#E3E3E3',
+      text: '#444444ff',
+    },
   },
   status: {
     success: {

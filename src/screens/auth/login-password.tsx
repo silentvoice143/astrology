@@ -7,8 +7,7 @@ import CustomButton from '../../components/custom-button';
 import {colors, themeColors} from '../../constants/colors';
 import {useNavigation} from '@react-navigation/native';
 import {useAppDispatch} from '../../hooks/redux-hook';
-import {loginUser, setMobile} from '../../store/reducer/auth';
-import Toast from 'react-native-toast-message';
+
 import {loginUserPassword} from '../../store/reducer/auth/action';
 
 const Login = () => {

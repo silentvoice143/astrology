@@ -9,6 +9,7 @@ import {
   View,
   ViewStyle,
 } from 'react-native';
+import {COLORS} from '../../constants/colors';
 
 type CustomButtonProps = {
   title: string;
@@ -39,7 +40,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
     <TouchableOpacity
       style={[
         {
-          backgroundColor: disabled ? '#ccc' : '#007bff',
+          backgroundColor: disabled ? '#ccc' : COLORS.theme.primary,
           borderRadius: 8,
           alignItems: 'center',
           justifyContent: 'center',

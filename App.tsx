@@ -11,6 +11,8 @@ import {colors} from './src/constants/colors';
 import {GestureHandlerRootView} from 'react-native-gesture-handler';
 import './i18n';
 import notifee, {AndroidImportance} from '@notifee/react-native';
+import RootNavigator from './src/routes/root-navigator';
+import {NavigationContainer} from '@react-navigation/native';
 
 Object.assign(global, encoding);
 
@@ -58,7 +60,11 @@ function App(): React.JSX.Element {
           <SafeAreaProvider>
             <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
               <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
-              <AppNavigator />
+              {/* <AppNavigator /> */}
+              <NavigationContainer>
+                <RootNavigator />
+              </NavigationContainer>
+
               <Toast />
             </SafeAreaView>
           </SafeAreaProvider>

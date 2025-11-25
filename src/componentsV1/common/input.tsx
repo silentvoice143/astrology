@@ -14,6 +14,7 @@ import {COLORS} from '../../constants/colors';
 interface InputProps extends TextInputProps {
   label?: string;
   value?: string;
+  preText?: string;
   onChangeText?: (text: string) => void;
   placeholder?: string;
   required?: boolean;
@@ -36,6 +37,7 @@ interface InputProps extends TextInputProps {
 const Input: React.FC<InputProps> = ({
   label,
   value,
+  preText,
   onChangeText,
   placeholder,
   required = false,
@@ -75,7 +77,7 @@ const Input: React.FC<InputProps> = ({
           inputContainerStyle,
         ]}>
         {leftIcon && <View style={styles.leftIcon}>{leftIcon}</View>}
-
+        {preText && <Text style={styles.preText}>{preText}</Text>}
         <TextInput
           style={[
             styles.input,
@@ -125,6 +127,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: '#333',
   },
+  preText: {
+    color: 'gray',
+    fontSize: 18,
+    marginRight: 8,
+  },
   required: {
     color: '#ef4444',
     fontWeight: '700',
@@ -133,7 +140,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     borderRadius: 8,
-    backgroundColor: '#fff',
+    backgroundColor: COLORS.theme.gray.light,
     paddingHorizontal: 12,
     minHeight: 48,
     borderColor: 'transparent',
