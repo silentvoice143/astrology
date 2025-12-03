@@ -1,9 +1,12 @@
 import {View, Text, TouchableOpacity} from 'react-native';
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {Calendar} from 'react-native-calendars';
 import PageWithHeader from '../../componentsV1/layout/page-with-header';
 import {scale, verticalScale, scaleFont} from '../../utils/sizer';
 import {COLORS} from '../../constants/colors';
+import {useRoute} from '@react-navigation/native';
+import ControlledTagSelector from '../../components/controlled-tag-selector';
+import {set} from 'date-fns';
 
 const TIME_SLOTS = [
   {label: '5 min', value: 5},
@@ -16,9 +19,23 @@ const TIME_SLOTS = [
 
 const COST_PER_MINUTE = 20; // Example: ₹20/min
 
+const availabilityTags = [
+  {id: 'online', label: 'Online', icon: '🟢'},
+  {id: 'offline', label: 'Offline', icon: '🔴'},
+];
+
 const Booking = () => {
+  const route = useRoute();
+  const category =
+    (route.params as {category: string; mode: 'online' | 'offline'})
+      ?.category || 'General';
+  const mode =
+    (route.params as {mode: 'online' | 'offline'; category: string})?.mode ||
+    '';
+  console.log('Booking route params:', route.params);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedSlots, setSelectedSlots] = useState<number[]>([]);
+  const [bookinType, setBookingType] = useState(mode ? [mode] : ['online']);
 
   const toggleSlot = (value: number) => {
     if (selectedSlots.includes(value)) {
@@ -31,8 +48,25 @@ const Booking = () => {
   const totalMinutes = selectedSlots.reduce((a, b) => a + b, 0);
   const totalCost = totalMinutes * COST_PER_MINUTE;
 
+  useEffect(() => {
+    if (mode) {
+      setBookingType([mode]);
+    }
+  }, [route.params]);
+
+  const handleBooking = async () => {
+    // Implement booking logic here
+    const body = {
+      date: selectedDate,
+      slots: selectedSlots,
+      type: bookinType[0],
+      category: category,
+    };
+    console.log('Booking details:', body);
+  };
+
   return (
-    <PageWithHeader themeMode="light">
+    <PageWithHeader themeMode="light" title="Appointment">
       <View
         style={{
           paddingHorizontal: scale(20),
@@ -70,6 +104,14 @@ const Booking = () => {
             Selected Date: {selectedDate}
           </Text>
         ) : null}
+
+        <ControlledTagSelector
+          tags={availabilityTags}
+          selectedTags={bookinType}
+          onChange={setBookingType}
+          multiSelect={false} // 👉 Only allow one selection
+          label="Select Status"
+        />
 
         {/* Time Slot Selection */}
         <Text
@@ -145,6 +187,7 @@ const Booking = () => {
 
         {/* Button */}
         <TouchableOpacity
+          onPress={handleBooking}
           disabled={selectedSlots.length === 0 || !selectedDate}
           style={{
             marginTop: verticalScale(24),

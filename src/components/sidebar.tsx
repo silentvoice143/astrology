@@ -374,9 +374,9 @@ const styles = StyleSheet.create({
     borderRadius: scale(16),
     marginRight: scale(16),
   },
-  // New style for the container holding username and wallet
+
   userInfoTextAndWalletContainer: {
-    flex: 1, // Allows this container to take remaining space
+    flex: 1,
     justifyContent: 'center',
   },
   // New style for username wrapper to handle truncation

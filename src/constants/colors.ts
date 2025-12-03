@@ -166,7 +166,7 @@ export const COLORS = {
       light: '#D4EDDA',
     },
     error: {
-      base: '##ef4444',
+      base: '#ef4444',
       light: '#F8D7DA',
     },
     warning: {

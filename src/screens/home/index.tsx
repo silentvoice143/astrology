@@ -1,5 +1,12 @@
-import React from 'react';
-import {View, Text, Image} from 'react-native';
+import React, {useState} from 'react';
+import {
+  View,
+  Text,
+  Image,
+  Dimensions,
+  Touchable,
+  TouchableOpacity,
+} from 'react-native';
 import PageWithHeader from '../../componentsV1/layout/page-with-header';
 import Input from '../../componentsV1/common/input';
 import CustomButton from '../../componentsV1/common/custom-button';
@@ -7,16 +14,49 @@ import {scale, scaleFont, verticalScale} from '../../utils/sizer';
 import {COLORS} from '../../constants/colors';
 import SearchIcon from '../../assets/icons/search-icon';
 import {categories} from './categories-data'; // Move array into separate file
+import {useNavigation} from '@react-navigation/native';
+import {useAppDispatch} from '../../hooks/redux-hook';
+import {getBanner} from '../../store/reducer/general';
+import Carousel from 'react-native-reanimated-carousel';
+import Skeleton from '../../components/skeleton';
+
+const width = Dimensions.get('window').width - 40;
 
 const HomeNew = () => {
+  const [banner, setBanner] = useState<{imgUrl: string; id: string}[]>([]);
+  const [loading, setLoading] = useState<{banner: boolean}>({banner: false});
+  const navigation = useNavigation<any>();
+  const dispatch = useAppDispatch();
+
+  const getBannerData = async () => {
+    if (loading.banner) return;
+    try {
+      setLoading(prev => ({...prev, banner: true}));
+
+      const payload = await dispatch(getBanner()).unwrap();
+
+      if (payload.success) {
+        setBanner(payload.bannars);
+      }
+    } catch (error) {
+    } finally {
+      setLoading(prev => ({...prev, banner: false}));
+    }
+  };
+
   return (
     <PageWithHeader rounded={true} scrollHeader>
       {/* HERO BANNER */}
-      <View style={{position: 'relative'}}>
+      <View
+        style={{
+          position: 'relative',
+          borderBottomLeftRadius: scale(16),
+          borderBottomRightRadius: scale(16),
+        }}>
         <Image
           style={{
             position: 'absolute',
-            top: verticalScale(-80),
+            top: verticalScale(-110),
             width: '100%',
             borderBottomLeftRadius: scale(16),
             borderBottomRightRadius: scale(16),
@@ -37,10 +77,22 @@ const HomeNew = () => {
           placeholder="Search for service"
         />
 
-        <Image
-          style={{marginTop: verticalScale(16)}}
-          source={require('../../assets/imgs/home-demo-img.png')}
-        />
+        <View
+          style={{
+            marginTop: verticalScale(16),
+            borderBottomRightRadius: scale(16),
+            borderBottomLeftRadius: scale(16),
+            overflow: 'hidden',
+          }}>
+          <Image
+            source={require('../../assets/imgs/home-demo-img.png')}
+            style={{
+              width: '100%',
+              height: verticalScale(200),
+              resizeMode: 'cover',
+            }}
+          />
+        </View>
       </View>
 
       {/* BOOKING CARD */}
@@ -65,14 +117,18 @@ const HomeNew = () => {
             style={{flex: 1, backgroundColor: COLORS.theme.secondary}}
             textStyle={{color: COLORS.theme.black}}
             title="Online"
-            onPress={() => {}}
+            onPress={() =>
+              navigation.navigate('Bookings', {category: '', mode: 'online'})
+            }
           />
 
           <CustomButton
             style={{flex: 1, backgroundColor: COLORS.theme.white}}
             textStyle={{color: COLORS.theme.black}}
             title="Offline"
-            onPress={() => {}}
+            onPress={() =>
+              navigation.navigate('Bookings', {category: '', mode: 'offline'})
+            }
           />
         </View>
       </View>
@@ -84,7 +140,55 @@ const HomeNew = () => {
           marginTop: verticalScale(28),
           marginBottom: verticalScale(80),
         }}>
-        <Image source={require('../../assets/imgs/banner1.png')} />
+        {loading.banner ? (
+          <View
+            style={{
+              height: verticalScale(120),
+              overflow: 'hidden',
+              borderRadius: scale(24),
+            }}>
+            <Skeleton
+              width={width}
+              height={verticalScale(120)}
+              borderRadius={8}
+            />
+          </View>
+        ) : (
+          banner.length > 0 && (
+            <View style={{}}>
+              <Carousel
+                // ref={ref}
+                height={verticalScale(120)}
+                width={width}
+                data={banner}
+                // onProgressChange={progress}
+                autoPlay={true}
+                scrollAnimationDuration={2000}
+                mode="parallax"
+                modeConfig={{
+                  parallaxScrollingScale: 1,
+                  parallaxScrollingOffset: 10,
+                  parallaxAdjacentItemScale: 0.8,
+                }}
+                renderItem={({index, item}) => (
+                  // <Image
+                  //   source={{uri: item?.imgUrl}}
+                  //   resizeMode="cover"
+                  //   style={{
+                  //     height: verticalScale(120),
+                  //     width: '100%',
+                  //     borderRadius: scale(16),
+                  //   }}
+                  // />
+                  <Image
+                    style={{width: '100%', height: verticalScale(120)}}
+                    source={require('../../assets/imgs/banner1.png')}
+                  />
+                )}
+              />
+            </View>
+          )
+        )}
 
         <View style={{marginTop: verticalScale(28), gap: verticalScale(16)}}>
           {[0, 4, 8].map(start => (
@@ -92,7 +196,10 @@ const HomeNew = () => {
               key={start}
               style={{flexDirection: 'row', justifyContent: 'space-around'}}>
               {categories.slice(start, start + 4).map((item, idx) => (
-                <View
+                <TouchableOpacity
+                  onPress={() =>
+                    navigation.navigate('Bookings', {category: item.title})
+                  }
                   key={idx}
                   style={{flex: 1, alignItems: 'center', paddingHorizontal: 4}}>
                   <View
@@ -116,7 +223,7 @@ const HomeNew = () => {
                     }}>
                     {item.title}
                   </Text>
-                </View>
+                </TouchableOpacity>
               ))}
             </View>
           ))}

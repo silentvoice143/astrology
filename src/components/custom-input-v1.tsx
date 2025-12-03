@@ -11,7 +11,7 @@ import {
   TextInputProps,
   TouchableOpacity,
 } from 'react-native';
-import {themeColors} from '../constants/colors';
+import {COLORS, themeColors} from '../constants/colors';
 
 type CustomInputV1Props = {
   label?: string;
@@ -67,7 +67,7 @@ const CustomInputV1: React.FC<CustomInputV1Props> = ({
 
   const borderColor = borderColorAnim.interpolate({
     inputRange: [0, 1],
-    outputRange: [themeColors.border.primary, themeColors.border.secondary],
+    outputRange: [themeColors.border.primary, COLORS.theme.white],
   });
 
   return (

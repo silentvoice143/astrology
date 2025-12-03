@@ -72,7 +72,7 @@ const Remedies = () => {
   );
 
   return (
-    <PageWithHeader themeMode="light">
+    <PageWithHeader themeMode="light" scrollEnabled={false} title="Remedies">
       <View
         style={{
           flex: 1,

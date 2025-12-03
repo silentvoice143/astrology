@@ -1,20 +1,23 @@
-import {View, Text, ScrollView} from 'react-native';
+import {View, Text, ScrollView, Image} from 'react-native';
 import React from 'react';
-import ScreenLayout from '../components/screen-layout';
+import PageWithHeader from '../../componentsV1/layout/page-with-header';
+import {COLORS} from '../../constants/colors';
 
 const About = () => {
   return (
-    <ScreenLayout>
+    <PageWithHeader title="About AstroSeva">
       <ScrollView
         contentContainerStyle={{
           flexGrow: 1,
           justifyContent: 'center',
           alignItems: 'center',
           padding: 20,
+          backgroundColor: COLORS.theme.white,
         }}>
-        <Text style={{fontSize: 18, fontWeight: 'bold', marginBottom: 10}}>
-          About AstroSeva
-        </Text>
+        <Image
+          style={{marginBottom: 20, height: 100, width: 100}}
+          source={require('../../assets/imgs/logo.png')}
+        />
         <Text style={{fontSize: 16, textAlign: 'center', color: '#555'}}>
           AstroSeva is your personalized astrology companion, bringing ancient
           Vedic wisdom to your fingertips. Explore detailed kundli charts, daily
@@ -28,7 +31,7 @@ const About = () => {
           Version 0.0.1
         </Text>
       </ScrollView>
-    </ScreenLayout>
+    </PageWithHeader>
   );
 };
 

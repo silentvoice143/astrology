@@ -158,7 +158,7 @@ const styles = StyleSheet.create({
     fontWeight: '500',
   },
   listContent: {
-    paddingHorizontal: 16,
+    // paddingHorizontal: 16,
   },
   tag: {
     flexDirection: 'row',

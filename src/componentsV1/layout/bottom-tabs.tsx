@@ -11,6 +11,8 @@ import FeedIcon from '../../assets/svgs/feed-icon';
 import AstrologerIcon from '../../assets/svgs/astrologer-icon';
 import BookingIcon from '../../assets/svgs/booking-icon';
 import RemediesIcon from '../../assets/svgs/remedies-icon';
+import CustomerSupport from '../../screens/customer-support/index';
+import HomeStack from './home-stack';
 
 const Tab = createBottomTabNavigator();
 
@@ -78,6 +80,7 @@ function BottomTabNavigator() {
         tabBarIcon: ({focused, color}) =>
           getTabIcon(route.name, focused, color),
       })}>
+      {/* <Tab.Screen name="Home" component={HomeStack} /> */}
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Feeds" component={Feeds} />
       <Tab.Screen name="Astrologers" component={Astrologers} />

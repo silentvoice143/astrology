@@ -9,22 +9,23 @@ import {
   Switch,
 } from 'react-native';
 import {useNavigation} from '@react-navigation/native';
-import {colors, themeColors} from '../constants/colors';
-import {moderateScale, scale, scaleFont, verticalScale} from '../utils/sizer';
-import {textStyle} from '../constants/text-style';
-import ScreenLayout from '../components/screen-layout';
-import ChevronRightIcon from '../assets/icons/chevron-right';
-import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
+import {colors, themeColors} from '../../constants/colors';
 import {
-  logout,
-  onlineStatus,
-  setAstrologer,
-  setOnline,
-} from '../store/reducer/auth';
-import {clearSession} from '../store/reducer/session';
+  moderateScale,
+  scale,
+  scaleFont,
+  verticalScale,
+} from '../../utils/sizer';
+import {textStyle} from '../../constants/text-style';
+import ScreenLayout from '../../components/screen-layout';
+import ChevronRightIcon from '../../assets/icons/chevron-right';
+import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
+import {logout, onlineStatus} from '../../store/reducer/auth';
+import {clearSession} from '../../store/reducer/session';
 import {useTranslation} from 'react-i18next';
 import Toast from 'react-native-toast-message';
-import {useUserRole} from '../hooks/use-role';
+import {useUserRole} from '../../hooks/use-role';
+import PageWithHeader from '../../componentsV1/layout/page-with-header';
 
 const settingsOptions = [
   {title: 'Language', screen: 'Language'},
@@ -39,17 +40,9 @@ const settingsOptions = [
 const Setting = () => {
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
-  const {user, astrologer_detail} = useAppSelector(state => state.auth);
+  const {user} = useAppSelector(state => state.auth);
   const role = useUserRole();
-  const isChatOnline = useAppSelector(
-    state => state.auth.astrologer_detail?.isChatOnline,
-  );
-  const isAudioOnline = useAppSelector(
-    state => state.auth.astrologer_detail?.isAudioOnline,
-  );
-  const isVideoOnline = useAppSelector(
-    state => state.auth.astrologer_detail?.isVideoOnline,
-  );
+
   const {t} = useTranslation();
 
   const handleLogout = async () => {
@@ -73,49 +66,11 @@ const Setting = () => {
 
   const profileImage =
     user?.gender === 'MALE' || !user?.gender
-      ? require('../assets/imgs/male.jpg')
-      : require('../assets/imgs/female.jpg');
-
-  const handleToggle = async (
-    type: 'CHATONLINE' | 'AUDIOONLINE' | 'VIDEOONLINE',
-    value: boolean,
-  ) => {
-    try {
-      dispatch(setOnline({type, value}));
-      const payload = await dispatch(
-        onlineStatus({onlineType: type, status: value}),
-      ).unwrap();
-      console.log(payload, '----setting payload');
-      if (payload.success) {
-        const astro = payload.astrologer;
-        const astrologerData: any = astro
-          ? {
-              ...astrologer_detail,
-              isAudioOnline:
-                astro.isAudioOnline ?? astrologer_detail?.isAudioOnline,
-              isChatOnline:
-                astro.isChatOnline ?? astrologer_detail?.isChatOnline,
-              isVideoOnline:
-                astro.isVideoOnline ?? astrologer_detail?.isVideoOnline,
-            }
-          : null;
-        dispatch(setAstrologer(astrologerData));
-        Toast.show({
-          type: 'success',
-          text1: 'Online Status changed successfully!',
-        });
-      } else {
-        dispatch(setOnline({type, value: !value}));
-
-        Toast.show({type: 'error', text1: 'Try again later'});
-      }
-    } catch (err) {
-      dispatch(setOnline({type, value: !value}));
-    }
-  };
+      ? require('../../assets/imgs/male.jpg')
+      : require('../../assets/imgs/female.jpg');
 
   return (
-    <ScreenLayout headerBackgroundColor={themeColors.surface.background}>
+    <PageWithHeader title="Settings" themeMode="light">
       <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.header}>
           <View style={{}}>
@@ -144,44 +99,7 @@ const Setting = () => {
             </View>
           </View>
         </View>
-        {role === 'ASTROLOGER' && (
-          <View>
-            <Text
-              style={[
-                textStyle.fs_mont_12_400,
-                {
-                  color: themeColors.text.muted,
-                  paddingHorizontal: scale(10),
-                  marginBottom: verticalScale(12),
-                },
-              ]}>
-              Online Status
-            </Text>
-            <View style={styles.option}>
-              <Text>Chat</Text>
-              <Switch
-                value={isChatOnline}
-                onValueChange={value => handleToggle('CHATONLINE', value)}
-              />
-            </View>
 
-            <View style={styles.option}>
-              <Text>Voice Call</Text>
-              <Switch
-                value={isAudioOnline}
-                onValueChange={value => handleToggle('AUDIOONLINE', value)}
-              />
-            </View>
-
-            <View style={styles.option}>
-              <Text>Video Call</Text>
-              <Switch
-                value={isVideoOnline}
-                onValueChange={value => handleToggle('VIDEOONLINE', value)}
-              />
-            </View>
-          </View>
-        )}
         <View style={[styles.separator, {marginBottom: verticalScale(20)}]} />
         <Text
           style={[
@@ -209,7 +127,7 @@ const Setting = () => {
           </React.Fragment>
         ))}
       </ScrollView>
-    </ScreenLayout>
+    </PageWithHeader>
   );
 };
 
@@ -217,6 +135,7 @@ export default Setting;
 
 const styles = StyleSheet.create({
   container: {
+    flexGrow: 1,
     padding: scale(16),
     backgroundColor: themeColors.surface.background ?? '#F5F5F5',
   },

@@ -9,11 +9,12 @@ import {
   Alert, // Using Alert for a simple confirmation message
 } from 'react-native';
 import ScreenLayout from '../../components/screen-layout';
-import {themeColors} from '../../constants/colors';
+import {COLORS, themeColors} from '../../constants/colors';
 import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
 import {setLanguage} from '../../store/reducer/settings';
 import i18n from '../../../i18n';
 import {useTranslation} from 'react-i18next';
+import PageWithHeader from '../../componentsV1/layout/page-with-header';
 
 const LanguageSetting = () => {
   const selectedLanguage = useAppSelector(
@@ -34,7 +35,7 @@ const LanguageSetting = () => {
   };
 
   return (
-    <ScreenLayout headerBackgroundColor={themeColors.surface.background}>
+    <PageWithHeader title="Language Settings" themeMode="light">
       <ScrollView contentContainerStyle={styles.scrollContainer}>
         <View style={styles.headerContainer}>
           <Text style={styles.headerTitle}>{t('selectLanguage')}</Text>
@@ -65,7 +66,7 @@ const LanguageSetting = () => {
           ))}
         </View>
       </ScrollView>
-    </ScreenLayout>
+    </PageWithHeader>
   );
 };
 
@@ -80,6 +81,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingVertical: 20,
     paddingHorizontal: 15,
+    backgroundColor: COLORS.theme.white,
   },
   headerContainer: {
     marginBottom: 30,

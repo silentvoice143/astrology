@@ -22,8 +22,6 @@ const isProfileComplete = (user: UserDetail): boolean => {
 };
 interface AuthState {
   isAuthenticated: boolean;
-  astrologer_id?: string;
-  astrologer_detail?: AstrologerProfile;
   name: string;
   token: string | null;
   mobile: string | null;
@@ -54,21 +52,6 @@ export interface AstrologerProfile {
 const initialState: AuthState = {
   name: '',
   isAuthenticated: false,
-  astrologer_detail: {
-    id: '',
-    about: null,
-    blocked: false,
-    experienceYears: 0,
-    expertise: '',
-    imgUri: '',
-    languages: '',
-    pricePerMinuteChat: 0,
-    pricePerMinuteVoice: 0,
-    pricePerMinuteVideo: 0,
-    isAudioOnline: false,
-    isChatOnline: false,
-    isVideoOnline: false,
-  },
   token: null,
   mobile: null,
   firstTime: true,
@@ -128,32 +111,9 @@ const authSlice = createSlice({
         state.isProfileModalOpen = false;
       }
     },
-    setAstrologer(state, action) {
-      state.astrologer_detail = {...action.payload};
-    },
+
     setAuthentication(state, action) {
       state.isAuthenticated = action.payload;
-    },
-    setOnline(
-      state,
-      action: PayloadAction<{
-        type: 'VIDEOONLINE' | 'CHATONLINE' | 'AUDIOONLINE';
-        value: boolean;
-      }>,
-    ) {
-      if (!state.astrologer_detail) return;
-
-      switch (action.payload.type) {
-        case 'VIDEOONLINE':
-          state.astrologer_detail.isVideoOnline = action.payload.value;
-          break;
-        case 'CHATONLINE':
-          state.astrologer_detail.isChatOnline = action.payload.value;
-          break;
-        case 'AUDIOONLINE':
-          state.astrologer_detail.isAudioOnline = action.payload.value;
-          break;
-      }
     },
   },
   extraReducers: builder => {
@@ -193,13 +153,11 @@ export const {
   setMobile,
   setFirstTime,
   setUser,
-  setAstrologer,
   setProfileModelToggle,
   setAuthentication,
   setFreeChatModalShown,
   setBalance,
   setFreeChatUsed,
-  setOnline,
 } = authSlice.actions;
 export {loginUser, verifyOtp, onlineStatus, registerDevice, logoutDevice};
 export default authSlice.reducer;

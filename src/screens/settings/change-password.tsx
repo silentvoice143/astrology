@@ -7,12 +7,13 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import React, {useState} from 'react';
-import ScreenLayout from '../components/screen-layout';
-import {textStyle} from '../constants/text-style';
-import {themeColors} from '../constants/colors';
+import ScreenLayout from '../../components/screen-layout';
+import {textStyle} from '../../constants/text-style';
+import {themeColors} from '../../constants/colors';
 import Toast from 'react-native-toast-message';
-import {passwordReset} from '../store/reducer/settings';
-import {useAppDispatch} from '../hooks/redux-hook';
+import {passwordReset} from '../../store/reducer/settings';
+import {useAppDispatch} from '../../hooks/redux-hook';
+import PageWithHeader from '../../componentsV1/layout/page-with-header';
 
 type FormFields = 'currentPassword' | 'newPassword' | 'confirmPassword';
 type PasswordField = 'current' | 'new' | 'confirm';
@@ -204,7 +205,7 @@ const ChangePassword = () => {
   );
 
   return (
-    <ScreenLayout headerBackgroundColor={themeColors.surface.background}>
+    <PageWithHeader title="Change Password" themeMode="light">
       <ScrollView
         contentContainerStyle={{padding: 20, paddingBottom: 40}}
         showsVerticalScrollIndicator={false}>
@@ -307,7 +308,7 @@ const ChangePassword = () => {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </ScreenLayout>
+    </PageWithHeader>
   );
 };
 

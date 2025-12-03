@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
     borderWidth: 2,
   },
   inputContainerError: {
-    borderColor: '#ef4444',
+    borderColor: COLORS.status.error.base,
   },
   inputContainerDisabled: {
     backgroundColor: '#f3f4f6',

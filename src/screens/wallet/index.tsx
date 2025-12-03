@@ -8,24 +8,28 @@ import {
   Alert,
 } from 'react-native';
 import React, {useEffect, useRef, useState} from 'react';
-import ScreenLayout from '../components/screen-layout';
-import {colors, themeColors} from '../constants/colors';
-import {moderateScale, scale, verticalScale} from '../utils/sizer';
-import {textStyle} from '../constants/text-style';
-import CustomButton from '../components/custom-button';
-import AnimatedSearchInput from '../components/custom-searchbox';
-import {Transaction} from '../utils/types';
-import WalletTransactionCard from '../components/wallet/transaction-card';
-import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
-import {RootState} from '../store';
-import {getTransactionHistory} from '../store/reducer/payment';
+import ScreenLayout from '../../components/screen-layout';
+import {COLORS, colors, themeColors} from '../../constants/colors';
+import {moderateScale, scale, verticalScale} from '../../utils/sizer';
+import {textStyle} from '../../constants/text-style';
+import CustomButton from '../../components/custom-button';
+import AnimatedSearchInput from '../../components/custom-searchbox';
+import {Transaction} from '../../utils/types';
+import WalletTransactionCard from '../../components/wallet/transaction-card';
+import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
+import {RootState} from '../../store';
+import {getTransactionHistory} from '../../store/reducer/payment';
 import Toast from 'react-native-toast-message';
-import AboutIcon from '../assets/icons/about-icon';
+import AboutIcon from '../../assets/icons/about-icon';
 import RazorpayCheckout from 'react-native-razorpay';
-import CustomInputV1 from '../components/custom-input-v1';
-import {getWithdrawalRequest, postTopUp} from '../store/reducer/payment/action';
-import {useUserRole} from '../hooks/use-role';
-import {showToast} from '../components/toast';
+import CustomInputV1 from '../../components/custom-input-v1';
+import {
+  getWithdrawalRequest,
+  postTopUp,
+} from '../../store/reducer/payment/action';
+import {useUserRole} from '../../hooks/use-role';
+import PageWithHeader from '../../componentsV1/layout/page-with-header';
+import Input from '../../componentsV1/common/input';
 
 const Wallet = () => {
   const onEndReachedCalledDuringMomentum = useRef(false);
@@ -181,7 +185,7 @@ const Wallet = () => {
   }, []);
 
   return (
-    <ScreenLayout>
+    <PageWithHeader scrollEnabled={false} title="Wallet">
       <View
         style={{
           paddingHorizontal: scale(20),
@@ -190,7 +194,7 @@ const Wallet = () => {
         }}>
         <View
           style={{
-            backgroundColor: colors.primary_surface_2,
+            backgroundColor: COLORS.theme.primary,
             padding: moderateScale(20),
             borderRadius: moderateScale(10),
           }}>
@@ -247,54 +251,9 @@ const Wallet = () => {
               />
             </View>
           )}
-          {role === 'ASTROLOGER' && (
-            <View
-              style={{
-                flexDirection: 'row',
-                alignItems: 'center',
-                marginTop: verticalScale(12),
-              }}>
-              <View style={{flex: 1, marginRight: scale(8)}}>
-                <CustomInputV1
-                  placeholder="Enter amount"
-                  keyboardType="numeric"
-                  value={amount}
-                  onChangeText={setAmount}
-                  inputStyle={{
-                    fontSize: scale(14),
-                    paddingVertical: 6,
-                    color: '#fff',
-                  }}
-                />
-              </View>
-              <CustomButton
-                style={{
-                  backgroundColor: colors.primary_surface,
-                  borderRadius: scale(24),
-                  paddingHorizontal: scale(16),
-                  paddingVertical: verticalScale(10),
-                  marginTop: verticalScale(4),
-                }}
-                textStyle={{color: colors.primaryText, fontWeight: '600'}}
-                title="Withdraw"
-                onPress={() => {
-                  const numericAmount = parseFloat(amount);
-                  handelWithdraw(numericAmount);
-                }}
-              />
-            </View>
-          )}
         </View>
         <View style={{marginTop: verticalScale(24), flex: 1}}>
           <Text style={[textStyle.fs_abyss_20_400]}>Transactions</Text>
-          <View style={[{marginVertical: verticalScale(20)}]}>
-            <AnimatedSearchInput
-              placeholder={'Search for transactions..'}
-              unfocusedBorderColor={colors.primaryText}
-              enableShadow={true}
-              focusedBorderColor={colors.primaryText}
-            />
-          </View>
 
           <View style={{flex: 1}}>
             <FlatList
@@ -339,11 +298,11 @@ const Wallet = () => {
                 !loading ? (
                   <View
                     style={{
-                      height: verticalScale(400),
+                      height: verticalScale(300),
                       justifyContent: 'center',
                       alignItems: 'center',
                     }}>
-                    <AboutIcon color={themeColors.status.info.dark} />
+                    <AboutIcon color={COLORS.theme.primary} />
                     <Text style={[textStyle.fs_mont_16_500]}>
                       No Transaction Yet
                     </Text>
@@ -354,7 +313,7 @@ const Wallet = () => {
           </View>
         </View>
       </View>
-    </ScreenLayout>
+    </PageWithHeader>
   );
 };
 
