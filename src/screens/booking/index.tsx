@@ -7,6 +7,8 @@ import {COLORS} from '../../constants/colors';
 import {useRoute} from '@react-navigation/native';
 import ControlledTagSelector from '../../components/controlled-tag-selector';
 import {set} from 'date-fns';
+import {useAppDispatch} from '../../hooks/redux-hook';
+import {getAllAstrologers} from '../../store/reducer/astrologers';
 
 const TIME_SLOTS = [
   {label: '5 min', value: 5},
@@ -24,6 +26,12 @@ const availabilityTags = [
   {id: 'offline', label: 'Offline', icon: '🔴'},
 ];
 
+const sessionTypeTags = [
+  {id: 'video', label: 'Video', icon: '📹'},
+  {id: 'voice', label: 'Voice', icon: '🎤'},
+  {id: 'chat', label: 'Chat', icon: '💬'},
+];
+
 const Booking = () => {
   const route = useRoute();
   const category =
@@ -36,6 +44,16 @@ const Booking = () => {
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedSlots, setSelectedSlots] = useState<number[]>([]);
   const [bookinType, setBookingType] = useState(mode ? [mode] : ['online']);
+  const [sessionType, setSessionType] = useState(['video']);
+
+  //astrologers fetch state
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
+  const [isFetchingMore, setIsFetchingMore] = useState(false);
+  const [loadingAstrologerData, setLoadingAstrologerData] = useState(false);
+  const [astrologersData, setAstrologersData] = useState<any[]>([]);
+
+  const dispatch = useAppDispatch();
 
   const toggleSlot = (value: number) => {
     if (selectedSlots.includes(value)) {
@@ -57,13 +75,46 @@ const Booking = () => {
   const handleBooking = async () => {
     // Implement booking logic here
     const body = {
-      date: selectedDate,
-      slots: selectedSlots,
-      type: bookinType[0],
+      appointmentDate: selectedDate,
       category: category,
+      astrologerId: '',
+      appointmentDuration: totalMinutes,
+      sessionType: bookinType[0] === 'online' ? sessionType[0] : '',
+      bookinType: bookinType[0],
     };
     console.log('Booking details:', body);
   };
+
+  const fetchAstrologersData = async (
+    pageNumber = 1,
+    append = false,
+    search = '',
+  ) => {
+    if (loadingAstrologerData || isFetchingMore || (!hasMore && append)) return;
+    try {
+      if (append) setIsFetchingMore(true);
+      else setLoadingAstrologerData(true);
+
+      const payload = await dispatch(
+        getAllAstrologers(`?page=${pageNumber}&search=${search}&sort=${''}`),
+      ).unwrap();
+      if (payload.success) {
+        console.log('Fetched astrologers:', payload);
+        const newData = payload.astrologers || [];
+        setAstrologersData(prev => (append ? [...prev, ...newData] : newData));
+        setPage(payload.currentPage);
+        setHasMore(!payload.isLastPage);
+      }
+    } catch (error) {
+    } finally {
+      if (append) setIsFetchingMore(false);
+      else setLoadingAstrologerData(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchAstrologersData(1, false, '');
+  }, []);
 
   return (
     <PageWithHeader themeMode="light" title="Appointment">
@@ -109,8 +160,17 @@ const Booking = () => {
           tags={availabilityTags}
           selectedTags={bookinType}
           onChange={setBookingType}
-          multiSelect={false} // 👉 Only allow one selection
-          label="Select Status"
+          multiSelect={false}
+          label="Select Booking Type"
+        />
+
+        <ControlledTagSelector
+          tags={sessionTypeTags}
+          selectedTags={sessionType}
+          onChange={setSessionType}
+          multiSelect={false}
+          label="Select Session Type"
+          disabled={!bookinType.length || bookinType[0] === 'offline'}
         />
 
         {/* Time Slot Selection */}

@@ -35,6 +35,7 @@ type ControlledTagSelectorProps<T extends ValueType> = {
   labelStyle?: TextStyle;
   contentContainerStyle?: ViewStyle;
   valueType?: T;
+  disabled?: boolean; // <-- NEW PROP
 };
 
 function ControlledTagSelector<T extends ValueType = 'id'>({
@@ -52,6 +53,7 @@ function ControlledTagSelector<T extends ValueType = 'id'>({
   labelStyle,
   contentContainerStyle,
   valueType = 'id' as T,
+  disabled = false, // <-- DEFAULT VALUE
 }: ControlledTagSelectorProps<T>) {
   const selectedIds =
     valueType === 'object'
@@ -67,6 +69,8 @@ function ControlledTagSelector<T extends ValueType = 'id'>({
   };
 
   const toggleSelect = (id: string) => {
+    if (disabled) return; // <-- STOP IF DISABLED
+
     let updated: string[];
 
     if (multiSelect) {
@@ -81,12 +85,21 @@ function ControlledTagSelector<T extends ValueType = 'id'>({
   };
 
   const handleRemove = (id: string) => {
+    if (disabled) return; // <-- STOP IF DISABLED
+
     const updated = selectedIds.filter(tagId => tagId !== id);
     onChange?.(getReturnValue(updated));
   };
 
   return (
-    <View style={[styles.container, containerStyle]}>
+    <View
+      style={[
+        styles.container,
+        containerStyle,
+        disabled && {opacity: 0.5}, // <-- DIM WHEN DISABLED
+      ]}
+      pointerEvents={disabled ? 'none' : 'auto'} // <-- BLOCK TOUCH
+    >
       {label && (
         <Text
           style={[
@@ -157,9 +170,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
     fontWeight: '500',
   },
-  listContent: {
-    // paddingHorizontal: 16,
-  },
+  listContent: {},
   tag: {
     flexDirection: 'row',
     alignItems: 'center',

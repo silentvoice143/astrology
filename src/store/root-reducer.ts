@@ -9,6 +9,7 @@ import generalReducer from './reducer/general';
 import horoscopeReducer from './reducer/horoscope';
 import paymentReducer from './reducer/payment';
 import astrologerReducer from './reducer/astrologers';
+import bookingReducer from './reducer/booking';
 const rootReducer = combineReducers({
   auth: authReducer,
   user: userReducer,
@@ -19,6 +20,7 @@ const rootReducer = combineReducers({
   horoscope: horoscopeReducer,
   payment: paymentReducer,
   astrologer: astrologerReducer,
+  booking: bookingReducer,
 });
 
 export type RootState = ReturnType<typeof rootReducer>;
