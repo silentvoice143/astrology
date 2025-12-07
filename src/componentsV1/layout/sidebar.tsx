@@ -13,8 +13,7 @@ import {
 
 import {COLORS} from '../../constants/colors';
 import HomeIcon from '../../assets/icons/home-icon';
-import HoroscopeIcon from '../../assets/icons/horoscope-icon';
-import KundliBookIcon from '../../assets/icons/kundli-book-icon';
+
 import AstrologerIcon from '../../assets/icons/astrologer-icon';
 import ChatIcon from '../../assets/icons/chat-icon';
 import WalletIcon from '../../assets/icons/walletIcon';
@@ -114,6 +113,11 @@ const Sidebar = forwardRef<SidebarRef, {onLogout?: () => void}>(
       if (href) navigation.navigate(href);
     };
 
+    const profileImage =
+      user?.gender === 'MALE' || !user?.gender
+        ? require('../../assets/imgs/male.jpg')
+        : require('../../assets/imgs/female.jpg');
+
     if (!visible) return null;
 
     return (
@@ -131,10 +135,20 @@ const Sidebar = forwardRef<SidebarRef, {onLogout?: () => void}>(
           <ScrollView contentContainerStyle={styles.scrollContent}>
             {/* User Info */}
             <View style={styles.userSection}>
-              <Image
-                source={require('../../assets/imgs/profile-demo.jpg')}
-                style={styles.avatar}
-              />
+              <TouchableOpacity onPress={() => handleNavigation('Profile')}>
+                {user.imgUri ? (
+                  <Image
+                    source={{
+                      uri:
+                        user?.imgUri ||
+                        'https://www.google.com/url?sa=i&url=https%3A%2F%2Fpixabay.com%2Fimages%2Fsearch%2Fuser%2F&psig=AOvVaw1W1xaGjiVF_9TB2i4QJoO5&ust=1765144303563000&source=images&cd=vfe&opi=89978449&ved=0CBIQjRxqFwoTCKDr2Y75qZEDFQAAAAAdAAAAABAEhttps://via.placeholder.com/150',
+                    }}
+                    style={styles.avatar}
+                  />
+                ) : (
+                  <Image source={profileImage} style={styles.avatar} />
+                )}
+              </TouchableOpacity>
               <View style={{flex: 1}}>
                 <Text style={styles.username}>{user.name}</Text>
                 <Text style={styles.balanceText}>

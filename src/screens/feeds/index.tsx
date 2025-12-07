@@ -6,7 +6,7 @@ import {COLORS} from '../../constants/colors';
 
 const Feeds = () => {
   return (
-    <PageWithHeader themeMode="light">
+    <PageWithHeader themeMode="light" title="Astrosevaa">
       <View style={{paddingBottom: 60, backgroundColor: COLORS.theme.white}}>
         {/* Multiple posts like Instagram */}
 

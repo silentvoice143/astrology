@@ -28,6 +28,7 @@ interface InputProps extends TextInputProps {
   inputStyle?: TextStyle;
   errorStyle?: TextStyle;
   inputContainerStyle?: TextStyle;
+  inputContainerStyleFocused?: TextStyle;
 
   secureTextEntry?: boolean;
   editable?: boolean;
@@ -50,6 +51,7 @@ const Input: React.FC<InputProps> = ({
   inputStyle,
   errorStyle,
   inputContainerStyle,
+  inputContainerStyleFocused,
   secureTextEntry = false,
   editable = true,
   multiline = false,
@@ -75,6 +77,7 @@ const Input: React.FC<InputProps> = ({
           error && styles.inputContainerError,
           !editable && styles.inputContainerDisabled,
           inputContainerStyle,
+          isFocused && inputContainerStyleFocused,
         ]}>
         {leftIcon && <View style={styles.leftIcon}>{leftIcon}</View>}
         {preText && <Text style={styles.preText}>{preText}</Text>}

@@ -33,6 +33,8 @@ import Setting from '../screens/settings';
 import LanguageSetting from '../screens/settings/language-setting';
 import TermsAndConditions from '../screens/settings/terms-conditions';
 import ChangePassword from '../screens/settings/change-password';
+import ProfilePage from '../screens/profile/profile';
+import ProfileEdit from '../screens/profile/pofile-edit';
 
 const Stack = createNativeStackNavigator();
 
@@ -170,7 +172,10 @@ export default function RootNavigator() {
         }
       } else {
         // no token → logout
-        handleLogout();
+        navigation.reset({
+          index: 0,
+          routes: [{name: 'Register'}],
+        });
         setLoading(false);
       }
     };
@@ -211,12 +216,14 @@ export default function RootNavigator() {
 
       {!isAuthenticated ? (
         <>
-          <Stack.Screen name="Login" component={Login} />
           <Stack.Screen name="Register" component={Register} />
+          <Stack.Screen name="Login" component={Login} />
         </>
       ) : (
         <>
           <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
+          <Stack.Screen name="Profile" component={ProfilePage} />
+          <Stack.Screen name="ProfileEdit" component={ProfileEdit} />
           <Stack.Screen name="Call_Chat" component={CallChat} />
           <Stack.Screen name="Wallet" component={Wallet} />
           <Stack.Screen name="About" component={About} />

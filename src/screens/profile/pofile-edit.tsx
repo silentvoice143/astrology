@@ -10,13 +10,12 @@ import {
 import EditIcon from '../../assets/icons/edit-icon';
 import ScreenLayout from '../../components/screen-layout';
 import {scale, verticalScale} from '../../utils/sizer';
-import {themeColors} from '../../constants/colors';
+import {COLORS, themeColors} from '../../constants/colors';
 import {useUserRole} from '../../hooks/use-role';
 import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
 import {textStyle} from '../../constants/text-style';
 import CustomDateTimePicker from '../../components/custom-date-time-picker';
 import ControlledTagSelector from '../../components/controlled-tag-selector';
-import LocationAutoComplete from '../../components/location-input-modal-based';
 import CustomInputV2 from '../../components/custom-input-v2';
 import {useNavigation} from '@react-navigation/native';
 import {UserPersonalDetail} from '../../utils/types';
@@ -26,6 +25,7 @@ import {launchImageLibrary} from 'react-native-image-picker';
 import {postUserDetail, uploadProfileImage} from '../../store/reducer/user';
 import {setUser} from '../../store/reducer/auth';
 import Toast from 'react-native-toast-message';
+import PageWithHeader from '../../componentsV1/layout/page-with-header';
 
 const genderTags = [
   {id: 'MALE', label: 'Male'},
@@ -187,12 +187,16 @@ const UserProfileEdit = () => {
       ? require('../../assets/imgs/male.jpg')
       : require('../../assets/imgs/female.jpg');
   return (
-    <ScreenLayout headerBackgroundColor={themeColors.surface.background}>
+    <PageWithHeader
+      themeMode="light"
+      title="Edit Profile"
+      scrollEnabled={false}>
       <ScrollView showsVerticalScrollIndicator={false}>
         <View
           style={{
             paddingHorizontal: scale(20),
             paddingVertical: verticalScale(20),
+            backgroundColor: COLORS.theme.white,
           }}>
           <View style={{marginBottom: verticalScale(20)}}>
             <View style={{position: 'relative', alignItems: 'center'}}>
@@ -337,7 +341,7 @@ const UserProfileEdit = () => {
           )}
         </View>
       </ScrollView>
-    </ScreenLayout>
+    </PageWithHeader>
   );
 };
 

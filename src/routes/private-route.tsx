@@ -18,7 +18,7 @@ import Call from '../screens/call/call';
 import Setting from '../screens/setting';
 import CustomerSupport from '../screens/customer-support';
 import Remedies from '../screens/remedies';
-import ProfilePage from '../screens/profile';
+import ProfilePage from '../screens/profile/profile';
 import Horoscope from '../screens/horoscope';
 import MatchMaking from '../screens/match-making';
 import Tarot from '../screens/tarot';

@@ -7,7 +7,7 @@ export const bookAppointmentReq = createAsyncThunk<
   {rejectValue: any}
 >('auth/register-via-password', async (payload, {rejectWithValue}) => {
   try {
-    const response = await api.post('/api/v1/booking', payload);
+    const response = await api.post('/api/v1/appointment/booking', payload);
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data || error.message);

@@ -115,7 +115,7 @@ const Login = () => {
             color: COLORS.theme.white,
             marginLeft: scale(20),
           }}>
-          Astroseva
+          Astrosevaa
         </Text>
         <View
           style={{

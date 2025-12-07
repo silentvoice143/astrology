@@ -7,34 +7,37 @@ import {
   StyleSheet,
   TouchableOpacity,
 } from 'react-native';
-import EditIcon from '../assets/icons/edit-icon';
-import HomeIcon from '../assets/icons/home-icon';
-import ChatIcon from '../assets/icons/chat-icon';
-import VideoCallIcon from '../assets/icons/video-call-icon';
-import CallIcon from '../assets/icons/call-icon';
-import ScreenLayout from '../components/screen-layout';
-import {moderateScale, scale, scaleFont, verticalScale} from '../utils/sizer';
-import {themeColors} from '../constants/colors';
-import {useUserRole} from '../hooks/use-role';
+import EditIcon from '../../assets/icons/edit-icon';
+import HomeIcon from '../../assets/icons/home-icon';
+
+import {
+  moderateScale,
+  scale,
+  scaleFont,
+  verticalScale,
+} from '../../utils/sizer';
+import {themeColors} from '../../constants/colors';
+import {useUserRole} from '../../hooks/use-role';
 
 import {useNavigation} from '@react-navigation/native';
 import {useTranslation} from 'react-i18next';
-import {useAppSelector} from '../hooks/redux-hook';
+import {useAppSelector} from '../../hooks/redux-hook';
+import PageWithHeader from '../../componentsV1/layout/page-with-header';
 
 const ProfilePage = () => {
   const role = useUserRole();
   const isAstrologer = role === 'ASTROLOGER';
-  const {user, astrologer_detail} = useAppSelector(state => state.auth);
+  const {user} = useAppSelector(state => state.auth);
   const navigation = useNavigation<any>();
   const {t} = useTranslation();
 
   const profileImage =
     user?.gender === 'MALE' || !user?.gender
-      ? require('../assets/imgs/male.jpg')
-      : require('../assets/imgs/female.jpg');
+      ? require('../../assets/imgs/male.jpg')
+      : require('../../assets/imgs/female.jpg');
 
   return (
-    <ScreenLayout headerBackgroundColor={themeColors.surface.background}>
+    <PageWithHeader themeMode="light" title={t('profile')}>
       <ScrollView style={styles.container}>
         <View style={styles.header}>
           <View style={{}}>
@@ -63,55 +66,25 @@ const ProfilePage = () => {
             <Text style={styles.phone}>{`+91 ${user?.mobile}`}</Text>
           </View>
         </View>
-        {isAstrologer && (
-          <View style={styles.section}>
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>{t('aboutMe')}</Text>
-            </View>
-            <View style={styles.aboutBox}>
-              <Text style={styles.aboutText}>
-                {astrologer_detail?.about ?? '___'}
-              </Text>
-            </View>
-          </View>
-        )}
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>{t('personalDetails')}</Text>
           <Text style={styles.detailText}>
             {t('name')}: {user?.name ? user?.name : '__'}
           </Text>
+          <Text style={styles.detailText}>{t('expertise')}: </Text>
+
           <Text style={styles.detailText}>
-            {t('expertise')}:{' '}
-            {astrologer_detail?.expertise ? astrologer_detail?.expertise : '__'}
+            {t('dob')}: {user?.birthDate ?? '__'}
           </Text>
+
           <Text style={styles.detailText}>
-            {t('experience')}:{' '}
-            {astrologer_detail?.experienceYears
-              ? astrologer_detail?.experienceYears
-              : '__'}{' '}
-            {t('years')}
+            {t('tob')}: {user?.birthTime ?? '__'}
           </Text>
-          {isAstrologer && (
-            <Text style={styles.detailText}>
-              {t('languages')}: {astrologer_detail?.languages}
-            </Text>
-          )}
-          {!isAstrologer && (
-            <Text style={styles.detailText}>
-              {t('dob')}: {user?.birthDate ?? '__'}
-            </Text>
-          )}
-          {!isAstrologer && (
-            <Text style={styles.detailText}>
-              {t('tob')}: {user?.birthTime ?? '__'}
-            </Text>
-          )}
-          {!isAstrologer && (
-            <Text style={styles.detailText}>
-              {t('pob')}: {user?.birthPlace ?? '__'}
-            </Text>
-          )}
+
+          <Text style={styles.detailText}>
+            {t('pob')}: {user?.birthPlace ?? '__'}
+          </Text>
         </View>
         {/* Address */}
         {!isAstrologer && (
@@ -124,44 +97,8 @@ const ProfilePage = () => {
             </View>
           </View>
         )}
-        {/* Services */}
-        {isAstrologer && (
-          <View style={styles.section}>
-            <View style={styles.cardBox}>
-              <Text style={styles.cardTitle}>{t('services')}</Text>
-
-              <View style={styles.serviceItem}>
-                <View style={styles.serviceType}>
-                  <ChatIcon size={14} />
-                  <Text style={styles.serviceText}>{t('chat')}</Text>
-                </View>
-                <Text style={styles.servicePrice}>
-                  {astrologer_detail?.pricePerMinuteChat} {t('perMinute')}
-                </Text>
-              </View>
-              <View style={styles.serviceItem}>
-                <View style={styles.serviceType}>
-                  <CallIcon size={14} />
-                  <Text style={styles.serviceText}>{t('audioCall')}</Text>
-                </View>
-                <Text style={styles.servicePrice}>
-                  {astrologer_detail?.pricePerMinuteVoice} {t('perMinute')}
-                </Text>
-              </View>
-              <View style={styles.serviceItem}>
-                <View style={styles.serviceType}>
-                  <VideoCallIcon size={14} />
-                  <Text style={styles.serviceText}>{t('videoCall')}</Text>
-                </View>
-                <Text style={styles.servicePrice}>
-                  {astrologer_detail?.pricePerMinuteVideo} {t('perMinute')}
-                </Text>
-              </View>
-            </View>
-          </View>
-        )}
       </ScrollView>
-    </ScreenLayout>
+    </PageWithHeader>
   );
 };
 

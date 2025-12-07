@@ -250,7 +250,7 @@ const AppHeader = ({
           </TouchableOpacity>
 
           {/* Profile Icon */}
-          <Pressable onPress={onProfilePress}>
+          {/* <Pressable onPress={onProfilePress}>
             <View
               style={[
                 styles.profileCircle,
@@ -261,7 +261,7 @@ const AppHeader = ({
               ]}>
               <Text style={{color: isLight ? '#333' : '#000'}}>{initials}</Text>
             </View>
-          </Pressable>
+          </Pressable> */}
         </View>
       )}
     </View>

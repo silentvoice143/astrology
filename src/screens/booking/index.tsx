@@ -9,6 +9,9 @@ import ControlledTagSelector from '../../components/controlled-tag-selector';
 import {set} from 'date-fns';
 import {useAppDispatch} from '../../hooks/redux-hook';
 import {getAllAstrologers} from '../../store/reducer/astrologers';
+import {get} from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
+import {bookAppointmentReq} from '../../store/reducer/booking';
+import Toast from 'react-native-toast-message';
 
 const TIME_SLOTS = [
   {label: '5 min', value: 5},
@@ -22,29 +25,30 @@ const TIME_SLOTS = [
 const COST_PER_MINUTE = 20; // Example: ₹20/min
 
 const availabilityTags = [
-  {id: 'online', label: 'Online', icon: '🟢'},
-  {id: 'offline', label: 'Offline', icon: '🔴'},
+  {id: 'ONLINE', label: 'Online', icon: '🟢'},
+  {id: 'OFFLINE', label: 'Offline', icon: '🔴'},
 ];
 
 const sessionTypeTags = [
-  {id: 'video', label: 'Video', icon: '📹'},
-  {id: 'voice', label: 'Voice', icon: '🎤'},
-  {id: 'chat', label: 'Chat', icon: '💬'},
+  {id: 'VIDEO', label: 'Video', icon: '📹'},
+  {id: 'VOICE', label: 'Voice', icon: '🎤'},
+  {id: 'CHAT', label: 'Chat', icon: '💬'},
 ];
 
 const Booking = () => {
   const route = useRoute();
   const category =
-    (route.params as {category: string; mode: 'online' | 'offline'})
-      ?.category || 'General';
+    (route.params as {category: string; mode: 'ONLINE' | 'OFFLINE'})
+      ?.category || 'all';
   const mode =
-    (route.params as {mode: 'online' | 'offline'; category: string})?.mode ||
+    (route.params as {mode: 'ONLINE' | 'OFFLINE'; category: string})?.mode ||
     '';
   console.log('Booking route params:', route.params);
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedSlots, setSelectedSlots] = useState<number[]>([]);
-  const [bookinType, setBookingType] = useState(mode ? [mode] : ['online']);
-  const [sessionType, setSessionType] = useState(['video']);
+  const [bookinType, setBookingType] = useState(mode ? [mode] : ['ONLINE']);
+  const [sessionType, setSessionType] = useState<any>(['VIDEO']);
+  const [loading, setLoading] = useState(false);
 
   //astrologers fetch state
   const [page, setPage] = useState(1);
@@ -63,8 +67,27 @@ const Booking = () => {
     }
   };
 
+  const resetBookingState = () => {
+    setSelectedDate('');
+    setSelectedSlots([]);
+    setBookingType(mode ? [mode] : ['ONLINE']);
+    setSessionType(['VIDEO']);
+    setLoading(false);
+  };
+
   const totalMinutes = selectedSlots.reduce((a, b) => a + b, 0);
-  const totalCost = totalMinutes * COST_PER_MINUTE;
+  const totalCost = totalMinutes * getCostPerMin();
+
+  function getCostPerMin() {
+    // You can modify this function to calculate cost based on different criteria
+    if (sessionType.includes('VIDEO')) {
+      return astrologersData[0]?.pricePerMinuteVideo ?? 0;
+    } else if (sessionType.includes('VOICE')) {
+      return astrologersData[0]?.pricePerMinuteVoice ?? 0;
+    } else {
+      return astrologersData[0]?.pricePerMinuteChat ?? 0;
+    }
+  }
 
   useEffect(() => {
     if (mode) {
@@ -74,15 +97,28 @@ const Booking = () => {
 
   const handleBooking = async () => {
     // Implement booking logic here
-    const body = {
-      appointmentDate: selectedDate,
-      category: category,
-      astrologerId: '',
-      appointmentDuration: totalMinutes,
-      sessionType: bookinType[0] === 'online' ? sessionType[0] : '',
-      bookinType: bookinType[0],
-    };
-    console.log('Booking details:', body);
+    try {
+      setLoading(true);
+      const body = {
+        appointmentDate: selectedDate,
+        reason: category ? category : 'all',
+        astrologerId: astrologersData[0]?.id,
+        appointmentDuration: totalMinutes,
+        sessionType: bookinType[0] === 'ONLINE' ? sessionType[0] : '',
+        bookingType: bookinType[0],
+      };
+      // const payload = await dispatch(bookAppointmentReq(body)).unwrap();
+
+      // console.log('Booking details:', payload, body);
+      Toast.show({
+        type: 'success',
+        text1: 'Appointment booked successfully!',
+      });
+      resetBookingState();
+    } catch (err) {
+    } finally {
+      setLoading(false);
+    }
   };
 
   const fetchAstrologersData = async (
@@ -116,8 +152,17 @@ const Booking = () => {
     fetchAstrologersData(1, false, '');
   }, []);
 
+  console.log(
+    !selectedDate,
+    loading,
+    bookinType[0] === 'ONLINE' && selectedSlots.length === 0,
+  );
+  const isAppointmentDisabled =
+    !selectedDate ||
+    loading ||
+    (bookinType[0] === 'ONLINE' && selectedSlots.length === 0);
   return (
-    <PageWithHeader themeMode="light" title="Appointment">
+    <PageWithHeader themeMode="light" title="Book Appointment">
       <View
         style={{
           paddingHorizontal: scale(20),
@@ -167,62 +212,71 @@ const Booking = () => {
         <ControlledTagSelector
           tags={sessionTypeTags}
           selectedTags={sessionType}
-          onChange={setSessionType}
+          onChange={data => {
+            console.log('Selected session type:', data);
+            setSessionType(data);
+          }}
           multiSelect={false}
           label="Select Session Type"
-          disabled={!bookinType.length || bookinType[0] === 'offline'}
+          disabled={!bookinType.length || bookinType[0] === 'OFFLINE'}
         />
 
         {/* Time Slot Selection */}
-        <Text
-          style={{
-            marginTop: verticalScale(24),
-            fontSize: scaleFont(18),
-            fontWeight: '700',
-          }}>
-          Select Duration
-        </Text>
+        {bookinType[0] === 'ONLINE' && (
+          <View>
+            <Text
+              style={{
+                marginTop: verticalScale(24),
+                fontSize: scaleFont(18),
+                fontWeight: '700',
+              }}>
+              Select Duration
+            </Text>
 
-        <View
-          style={{
-            flexDirection: 'row',
-            flexWrap: 'wrap',
-            gap: scale(10),
-            marginTop: verticalScale(12),
-          }}>
-          {TIME_SLOTS.map(slot => {
-            const isSelected = selectedSlots.includes(slot.value);
-            return (
-              <TouchableOpacity
-                key={slot.value}
-                onPress={() => toggleSlot(slot.value)}
-                style={{
-                  paddingVertical: verticalScale(10),
-                  paddingHorizontal: scale(14),
-                  borderRadius: scale(8),
-                  borderWidth: 1,
-                  borderColor: isSelected
-                    ? COLORS.theme.primary
-                    : COLORS.theme.secondary,
-                  backgroundColor: isSelected
-                    ? COLORS.theme.primary
-                    : COLORS.theme.white,
-                }}>
-                <Text
-                  style={{
-                    fontSize: scaleFont(14),
-                    color: isSelected ? COLORS.theme.white : COLORS.theme.black,
-                    fontWeight: '600',
-                  }}>
-                  {slot.label}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
+            <View
+              style={{
+                flexDirection: 'row',
+                flexWrap: 'wrap',
+                gap: scale(10),
+                marginTop: verticalScale(12),
+              }}>
+              {TIME_SLOTS.map(slot => {
+                const isSelected = selectedSlots.includes(slot.value);
+                return (
+                  <TouchableOpacity
+                    key={slot.value}
+                    onPress={() => toggleSlot(slot.value)}
+                    style={{
+                      paddingVertical: verticalScale(10),
+                      paddingHorizontal: scale(14),
+                      borderRadius: scale(8),
+                      borderWidth: 1,
+                      borderColor: isSelected
+                        ? COLORS.theme.primary
+                        : COLORS.theme.secondary,
+                      backgroundColor: isSelected
+                        ? COLORS.theme.primary
+                        : COLORS.theme.white,
+                    }}>
+                    <Text
+                      style={{
+                        fontSize: scaleFont(14),
+                        color: isSelected
+                          ? COLORS.theme.white
+                          : COLORS.theme.black,
+                        fontWeight: '600',
+                      }}>
+                      {slot.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+          </View>
+        )}
 
         {/* Cost Summary */}
-        {selectedSlots.length > 0 && (
+        {bookinType[0] === 'ONLINE' && selectedSlots.length > 0 && (
           <View
             style={{
               marginTop: verticalScale(30),
@@ -248,13 +302,12 @@ const Booking = () => {
         {/* Button */}
         <TouchableOpacity
           onPress={handleBooking}
-          disabled={selectedSlots.length === 0 || !selectedDate}
+          disabled={isAppointmentDisabled}
           style={{
             marginTop: verticalScale(24),
-            backgroundColor:
-              selectedSlots.length === 0 || !selectedDate
-                ? '#ccc'
-                : COLORS.theme.primary,
+            backgroundColor: isAppointmentDisabled
+              ? '#ccc'
+              : COLORS.theme.primary,
             paddingVertical: verticalScale(14),
             borderRadius: scale(12),
             alignItems: 'center',
@@ -264,12 +317,9 @@ const Booking = () => {
             style={{
               fontSize: scaleFont(16),
               fontWeight: '700',
-              color:
-                selectedSlots.length === 0 || !selectedDate
-                  ? '#666'
-                  : COLORS.theme.white,
+              color: isAppointmentDisabled ? '#666' : COLORS.theme.white,
             }}>
-            Book Appointment
+            {loading ? 'Booking...' : 'Book Appointment'}
           </Text>
         </TouchableOpacity>
       </View>

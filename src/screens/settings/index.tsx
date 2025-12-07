@@ -89,8 +89,8 @@ const Setting = () => {
               alignItems: 'center',
             }}>
             <View>
-              <Text style={styles.name}>{'Hello'}</Text>
-              <Text style={styles.phone}>{'+91 1234567890'}</Text>
+              <Text style={styles.name}>{user.name}</Text>
+              <Text style={styles.phone}>{user.mobile}</Text>
             </View>
             <View style={{justifyContent: 'center'}}>
               <TouchableOpacity onPress={() => navigation.navigate('Profile')}>

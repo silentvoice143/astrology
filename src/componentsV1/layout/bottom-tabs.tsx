@@ -13,6 +13,8 @@ import BookingIcon from '../../assets/svgs/booking-icon';
 import RemediesIcon from '../../assets/svgs/remedies-icon';
 import CustomerSupport from '../../screens/customer-support/index';
 import HomeStack from './home-stack';
+import AllBookings from '../../screens/booking/all-booking';
+import BookingStack from './booking-stack';
 
 const Tab = createBottomTabNavigator();
 
@@ -42,7 +44,7 @@ const getTabIcon = (routeName: string, focused: boolean, color: string) => {
     case 'Astrologers':
       return <AstrologerIcon size={size} color={color} />;
 
-    case 'Bookings':
+    case 'Booking':
       return <BookingIcon size={size} color={color} />;
 
     case 'Remedies':
@@ -84,7 +86,37 @@ function BottomTabNavigator() {
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Feeds" component={Feeds} />
       <Tab.Screen name="Astrologers" component={Astrologers} />
-      <Tab.Screen name="Bookings" component={Booking} />
+      {/* <Tab.Screen name="Bookings" component={AllBookings} /> */}
+      <Tab.Screen
+        name="Booking"
+        component={BookingStack}
+        // listeners={({navigation}) => ({
+        //   tabPress: e => {
+        //     e.preventDefault();
+        //     navigation.navigate('Booking', {
+        //       screen: 'MyBooking',
+        //     });
+        //   },
+        // })}
+        listeners={({navigation}) => ({
+          tabPress: e => {
+            e.preventDefault(); // ✅ Stop default tab behavior
+
+            navigation.reset({
+              index: 0, // ✅ Reset stack index
+              routes: [
+                {
+                  name: 'Booking',
+                  state: {
+                    index: 0,
+                    routes: [{name: 'MyBooking'}], // ✅ Force initial screen
+                  },
+                },
+              ],
+            });
+          },
+        })}
+      />
       <Tab.Screen name="Remedies" component={Remedies} />
     </Tab.Navigator>
   );
