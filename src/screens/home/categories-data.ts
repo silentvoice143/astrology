@@ -77,10 +77,10 @@ export const categories = [
     img: require('../../assets/imgs/category/name-correction.jpeg'),
   },
   {
-    title: 'Numberology',
+    title: 'Court & Case',
     backgroundColor: '#FFC0CB',
     icon: '💞',
     onPress: () => {},
-    img: require('../../assets/imgs/category/numberology.jpeg'),
+    img: require('../../assets/imgs/category/court.jpg'),
   },
 ];

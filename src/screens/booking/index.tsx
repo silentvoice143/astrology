@@ -102,19 +102,19 @@ const Booking = () => {
       const body = {
         appointmentDate: selectedDate,
         reason: category ? category : 'all',
-        astrologerId: astrologersData[0]?.id,
+        astrologerId: astrologersData[0]?.user?.id,
         appointmentDuration: totalMinutes,
-        sessionType: bookinType[0] === 'ONLINE' ? sessionType[0] : '',
+        sessionType: bookinType[0] === 'ONLINE' ? sessionType[0] : 'CHAT',
         bookingType: bookinType[0],
       };
-      // const payload = await dispatch(bookAppointmentReq(body)).unwrap();
-
-      // console.log('Booking details:', payload, body);
-      Toast.show({
-        type: 'success',
-        text1: 'Appointment booked successfully!',
-      });
-      resetBookingState();
+      const payload = await dispatch(bookAppointmentReq(body)).unwrap();
+      if (payload.success) {
+        Toast.show({
+          type: 'success',
+          text1: 'Appointment booked successfully!',
+        });
+        resetBookingState();
+      }
     } catch (err) {
     } finally {
       setLoading(false);

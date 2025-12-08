@@ -9,7 +9,7 @@ import {
   TextStyle,
   Image,
 } from 'react-native';
-import {colors} from '../constants/colors';
+import {COLORS, colors} from '../constants/colors';
 import {scaleFont} from '../utils/sizer';
 
 export type TagItem = {
@@ -101,12 +101,7 @@ function ControlledTagSelector<T extends ValueType = 'id'>({
       pointerEvents={disabled ? 'none' : 'auto'} // <-- BLOCK TOUCH
     >
       {label && (
-        <Text
-          style={[
-            styles.label,
-            {color: selectedIds.length ? '#007BFF' : '#000'},
-            labelStyle,
-          ]}>
+        <Text style={[styles.label, {color: COLORS.theme.black}, labelStyle]}>
           {label}
         </Text>
       )}
@@ -181,7 +176,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   selectedTag: {
-    backgroundColor: '#1c274c',
+    backgroundColor: COLORS.theme.primary,
   },
   tagText: {
     color: '#333',

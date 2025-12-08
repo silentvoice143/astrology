@@ -1,6 +1,6 @@
 import {createSlice, PayloadAction} from '@reduxjs/toolkit';
 
-import {bookAppointmentReq} from './action';
+import {bookAppointmentReq, getMyAppointment} from './action';
 
 interface BookingState {}
 
@@ -14,5 +14,5 @@ const authSlice = createSlice({
 });
 
 export const {} = authSlice.actions;
-export {bookAppointmentReq};
+export {bookAppointmentReq, getMyAppointment};
 export default authSlice.reducer;

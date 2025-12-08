@@ -5,9 +5,25 @@ export const bookAppointmentReq = createAsyncThunk<
   any, // response type as any
   any, // argument type
   {rejectValue: any}
->('auth/register-via-password', async (payload, {rejectWithValue}) => {
+>('appointment/booking', async (payload, {rejectWithValue}) => {
   try {
     const response = await api.post('/api/v1/appointment/booking', payload);
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});
+
+export const getMyAppointment = createAsyncThunk<
+  any, // response type as any
+  any, // argument type
+  {rejectValue: any}
+>('appointment/mybooking', async (payload, {rejectWithValue}) => {
+  try {
+    const response = await api.get(
+      `/api/v1/appointment?page=${payload.page}&size=${payload.limit}`,
+      {},
+    );
     return response.data;
   } catch (error: any) {
     return rejectWithValue(error.response?.data || error.message);

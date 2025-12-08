@@ -180,7 +180,7 @@ const Register = () => {
               placeholder="Enter full name"
               onChangeText={text => handleInputChange('fullName', text)}
               value={formData.fullName}
-              maxLength={10}
+              maxLength={30}
               error={errors.fullName}
             />
             <Input
@@ -198,7 +198,7 @@ const Register = () => {
               placeholder="Enter password"
               onChangeText={text => handleInputChange('password', text)}
               value={formData.password}
-              secureTextEntry
+              secureTextEntry={showPass ? false : true}
               error={errors.password}
               rightIcon={
                 <TouchableOpacity onPress={() => setShowPass(!showPass)}>
@@ -223,7 +223,7 @@ const Register = () => {
                 <TouchableOpacity
                   onPress={() => setShowConfirmPass(!showConfirmPass)}>
                   <TouchableOpacity
-                    onPress={() => setShowConfirmPass(!showPass)}>
+                    onPress={() => setShowConfirmPass(!showConfirmPass)}>
                     {!showConfirmPass ? (
                       <EyeOpenIcon size={20} color={COLORS.theme.gray.text} />
                     ) : (

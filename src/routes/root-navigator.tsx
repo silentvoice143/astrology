@@ -141,35 +141,36 @@ export default function RootNavigator() {
       if (!mounted) return;
 
       if (token) {
-        if (!isAuthenticated) {
-          try {
-            const {payload} = await dispatch(userDetail());
+        // if (!isAuthenticated) {
+        try {
+          const {payload} = await dispatch(userDetail());
 
-            if (payload?.success) {
-              const userDetail: any = payload.user;
-              dispatch(setAuthentication(true));
-              dispatch(setUser(userDetail));
+          if (payload?.success) {
+            const userDetail: any = payload.user;
+            console.log('User Detail fetched in checkAuth:', userDetail);
+            dispatch(setAuthentication(true));
+            dispatch(setUser(userDetail));
 
-              // if (!isConnected) {
-              //   connect();
-              // } else {
-              //   send('/app/online.user');
-              // }
-              console.log('Navigation to MainTabs-----------');
-              // Navigate only once
-            } else {
-              handleLogout();
-            }
-          } catch (err) {
-            console.log('Network error or offline:', err);
-            dispatch(setAuthentication(true)); // keep logged in if offline
-          } finally {
-            setLoading(false);
+            // if (!isConnected) {
+            //   connect();
+            // } else {
+            //   send('/app/online.user');
+            // }
+            console.log('Navigation to MainTabs-----------');
+            // Navigate only once
+          } else {
+            handleLogout();
           }
-        } else {
-          // already authenticated, just show main tab
+        } catch (err) {
+          console.log('Network error or offline:', err);
+          dispatch(setAuthentication(true)); // keep logged in if offline
+        } finally {
           setLoading(false);
         }
+        // } else {
+        //   // already authenticated, just show main tab
+        //   setLoading(false);
+        // }
       } else {
         // no token → logout
         navigation.reset({
