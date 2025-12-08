@@ -142,7 +142,6 @@ const FeedPost = ({
         <Text style={{fontSize: scaleFont(13), marginTop: 4}}>{caption}</Text>
       </View>
 
-      {/* ✅ ✅ ✅ FULL SCREEN IMAGE VIEWER */}
       <ImageViewing
         images={formattedImages}
         imageIndex={activeIndex}

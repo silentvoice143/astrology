@@ -252,7 +252,7 @@ const Register = () => {
               <Pressable
                 onPress={() => {
                   // navigation.navigate('CustomerSupport')
-                  navigation.navigate('HomeNew');
+                  navigation.navigate('CustomerSupport');
                 }}>
                 <Text style={styles.footerLink}> Need Help</Text>
               </Pressable>
