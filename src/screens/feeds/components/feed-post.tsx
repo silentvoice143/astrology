@@ -7,9 +7,10 @@ import {
   FlatList,
   Dimensions,
 } from 'react-native';
-import ImageViewing from 'react-native-image-viewing';
 import {scale, verticalScale, scaleFont} from '../../../utils/sizer';
 import {COLORS} from '../../../constants/colors';
+import ImageViewer from 'react-native-image-zoom-viewer';
+import Modal from 'react-native-modal';
 
 const {width} = Dimensions.get('window');
 
@@ -37,8 +38,15 @@ const FeedPost = ({
     }
   }).current;
 
-  // ✅ Convert require() to URI for full screen
-  const formattedImages = postImages.map(img => Image.resolveAssetSource(img));
+  // ✅ ✅ ✅ SAFE IMAGE FORMATTER (LOCAL + API IMAGES)
+  const formattedImages: any[] = postImages.map(img => {
+    if (typeof img === 'string') {
+      return {url: img}; // ✅ API IMAGE
+    }
+
+    const resolved = Image.resolveAssetSource(img);
+    return {url: resolved.uri}; // ✅ LOCAL IMAGE
+  });
 
   return (
     <View
@@ -93,7 +101,7 @@ const FeedPost = ({
               setIsViewerVisible(true);
             }}>
             <Image
-              source={item}
+              source={typeof item === 'string' ? {uri: item} : item}
               style={{
                 width: width,
                 height: verticalScale(350),
@@ -142,55 +150,73 @@ const FeedPost = ({
         <Text style={{fontSize: scaleFont(13), marginTop: 4}}>{caption}</Text>
       </View>
 
-      <ImageViewing
-        images={formattedImages}
-        imageIndex={activeIndex}
-        visible={isViewerVisible}
-        onRequestClose={() => setIsViewerVisible(false)}
-        /* ✅ TOP USER INFO */
-        HeaderComponent={() => (
-          <View
-            style={{
-              position: 'absolute',
-              top: 40,
-              left: 20,
-              flexDirection: 'row',
-              alignItems: 'center',
-            }}>
-            <Image
-              source={profileImage}
-              style={{
-                width: 36,
-                height: 36,
-                borderRadius: 18,
-                marginRight: 10,
-              }}
-            />
-            <Text style={{color: '#fff', fontSize: 14, fontWeight: '600'}}>
-              {astrologerName}
-            </Text>
-          </View>
-        )}
-        /* ✅ BOTTOM CAPTION */
-        FooterComponent={() => (
-          <View
-            style={{
-              position: 'absolute',
-              bottom: 40,
-              left: 20,
-              right: 20,
-            }}>
-            <Text
-              style={{
-                color: '#fff',
-                fontSize: 14,
-                textAlign: 'center',
-              }}>
-              {caption}
-            </Text>
-          </View>
-        )}
-      />
+      {/* ✅ ✅ ✅ FULLSCREEN IMAGE VIEWER WITH PERSISTENT ZOOM */}
+      <Modal
+        isVisible={isViewerVisible}
+        style={{margin: 0}}
+        onBackdropPress={() => setIsViewerVisible(false)}
+        onBackButtonPress={() => setIsViewerVisible(false)}>
+        <View style={{flex: 1, backgroundColor: 'black'}}>
+          <ImageViewer
+            imageUrls={formattedImages}
+            index={activeIndex}
+            enableSwipeDown
+            onSwipeDown={() => setIsViewerVisible(false)}
+            enablePreload
+            enableImageZoom
+            saveToLocalByLongPress={false}
+            backgroundColor="black"
+            style={{width: '100%', height: '100%'}}
+            /* ✅ TOP USER INFO */
+            renderHeader={() => (
+              <View
+                style={{
+                  position: 'absolute',
+                  top: 50,
+                  left: 20,
+                  flexDirection: 'row',
+                  alignItems: 'center',
+                }}>
+                <Image
+                  source={profileImage}
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: 18,
+                    marginRight: 10,
+                  }}
+                />
+                <Text
+                  style={{
+                    color: '#fff',
+                    fontSize: 14,
+                    fontWeight: '600',
+                  }}>
+                  {astrologerName}
+                </Text>
+              </View>
+            )}
+            /* ✅ ✅ ✅ FIXED FOOTER (NOW IT WILL SHOW PROPERLY) */
+            renderFooter={() => (
+              <View
+                style={{
+                  width: '100%',
+                  paddingHorizontal: 20,
+                  paddingBottom: 40,
+                }}>
+                <Text
+                  style={{
+                    color: '#fff',
+                    fontSize: 14,
+                    textAlign: 'center',
+                  }}>
+                  {caption}
+                </Text>
+              </View>
+            )}
+          />
+        </View>
+      </Modal>
     </View>
   );
 };
