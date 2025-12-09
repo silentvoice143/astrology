@@ -35,6 +35,7 @@ import TermsAndConditions from '../screens/settings/terms-conditions';
 import ChangePassword from '../screens/settings/change-password';
 import ProfilePage from '../screens/profile/profile';
 import ProfileEdit from '../screens/profile/pofile-edit';
+import Notification from '../screens/notification';
 
 const Stack = createNativeStackNavigator();
 
@@ -228,6 +229,7 @@ export default function RootNavigator() {
           <Stack.Screen name="Call_Chat" component={CallChat} />
           <Stack.Screen name="Wallet" component={Wallet} />
           <Stack.Screen name="About" component={About} />
+          <Stack.Screen name="Notification" component={Notification} />
           <Stack.Screen name="Setting" component={Setting} />
           <Stack.Screen name="Language" component={LanguageSetting} />
           <Stack.Screen

@@ -142,12 +142,12 @@ const UserProfileEdit = () => {
 
       if (payload?.success) {
         dispatch(setUser(payload.user));
-        navigation.navigate('Profile');
+        navigation.reset({index: 0, screen: 'Profile'});
       }
-    } catch (err) {
+    } catch (err: any) {
       Toast.show({
         type: 'error',
-        text1: 'Error while saving user data',
+        text1: err?.message || 'Failed to update profile',
       });
     } finally {
       setIsSaving(false);

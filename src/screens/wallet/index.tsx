@@ -191,6 +191,7 @@ const Wallet = () => {
           paddingHorizontal: scale(20),
           paddingVertical: verticalScale(20),
           flex: 1,
+          backgroundColor: COLORS.theme.white,
         }}>
         <View
           style={{

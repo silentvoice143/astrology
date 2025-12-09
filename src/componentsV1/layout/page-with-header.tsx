@@ -66,11 +66,13 @@ const PageWithHeader = ({
         canGoBack={navigation.canGoBack()}
         onBackPress={() => navigation.goBack()}
         title={title}
+        onNotificationPress={() => navigation.navigate('Notification')}
       />
 
       {/* Render ScrollView OR Simple View */}
       {scrollEnabled ? (
         <ScrollView
+          showsVerticalScrollIndicator={false}
           scrollEventThrottle={16}
           onScroll={e => {
             const y = e.nativeEvent.contentOffset.y;

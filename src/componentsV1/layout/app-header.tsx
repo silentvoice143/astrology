@@ -5,6 +5,7 @@ import {COLORS} from '../../constants/colors';
 import MenuIcon from '../../assets/icons/menu-icon';
 import NotificationIcon from '../../assets/icons/notification-icon';
 import BackIcon from '../../assets/icons/back-icon';
+import {useRoute} from '@react-navigation/native';
 
 interface AppHeaderProps {
   scrolled?: boolean;
@@ -32,6 +33,8 @@ const AppHeader = ({
   themeMode = 'dark',
 }: AppHeaderProps) => {
   const isLight = themeMode === 'light';
+  const route = useRoute();
+  console.log('Current Route in AppHeader:', route.name);
 
   return (
     <View
@@ -60,7 +63,7 @@ const AppHeader = ({
         </TouchableOpacity>
       )}
 
-      {canGoBack && (
+      {(canGoBack || route.name !== 'Home') && (
         <View style={styles.titleContainer}>
           <Text
             numberOfLines={1}
@@ -74,7 +77,7 @@ const AppHeader = ({
       )}
 
       {/* RIGHT SIDE: Hide when going back */}
-      {!canGoBack && (
+      {(!canGoBack || route.name === 'Home') && (
         <View style={styles.rightSection}>
           {/* Notification */}
           <TouchableOpacity
