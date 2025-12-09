@@ -304,7 +304,7 @@ const AllBookings = () => {
         </TouchableOpacity>
 
         {/* TAG FILTER */}
-        <View style={{paddingHorizontal: 20, marginBottom: verticalScale(12)}}>
+        {/* <View style={{paddingHorizontal: 20, marginBottom: verticalScale(12)}}>
           <ScrollView horizontal showsHorizontalScrollIndicator={false}>
             {TAGS.map(tag => (
               <TouchableOpacity
@@ -328,9 +328,9 @@ const AllBookings = () => {
               </TouchableOpacity>
             ))}
           </ScrollView>
-        </View>
+        </View> */}
         {/* DATE FILTER WITH BADGE */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={() => setShowCalendar(true)}
           style={{
             margin: 20,
@@ -353,7 +353,7 @@ const AllBookings = () => {
               }}
             />
           )}
-        </TouchableOpacity>
+        </TouchableOpacity> */}
 
         {showCalendar && (
           <DateTimePicker

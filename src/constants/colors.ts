@@ -152,6 +152,7 @@ export const themeColors = {
 export const COLORS = {
   theme: {
     primary: '#CE0404',
+    primaryLight: '#FFC8C8',
     secondary: '#F7B900',
     white: '#ffffff',
     black: '#000000',
