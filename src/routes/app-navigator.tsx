@@ -22,6 +22,8 @@ import {clearSession} from '../store/reducer/session';
 import {getFcmToken} from '../utils/getFcmToken';
 import messaging from '@react-native-firebase/messaging';
 import {useUserRole} from '../hooks/use-role';
+import useFcm from '../hooks/use-fcm';
+import {useZegoAndFCM} from '../hooks/use-zego';
 
 export default function AppNavigator() {
   const dispatch = useAppDispatch();
@@ -33,131 +35,11 @@ export default function AppNavigator() {
   const {connect, isConnected, disconnect, send} = useWebSocket(user?.id);
 
   useSessionEvents(user?.id, isAuthenticated, isConnected);
-
-  async function setupPush() {
-    try {
-      const token = await getFcmToken();
-      if (token) {
-        // send to backend
-        const payload = await dispatch(
-          registerDevice({deviceToken: token}),
-        ).unwrap();
-
-        if (payload.success) {
-          Toast.show({
-            type: 'success',
-            text1: 'Device registered successfully',
-          });
-        }
-      } else {
-        Toast.show({
-          type: 'success',
-          text1: 'No FCM token retrieved',
-        });
-      }
-    } catch (err) {
-      console.error('Error while setting up push notifications:', err);
-    }
-  }
-
-  // useEffect(() => {
-  //   const checkAuth = async () => {
-  //     if (token) {
-  //       try {
-  //         const {payload} = await dispatch(userDetail());
-  //         console.log(payload, '---------payload of user');
-
-  //         if (payload?.success) {
-  //           const userDetail: any = payload.user ?? payload.astrologer?.user!;
-
-  //           const astro = payload.astrologer;
-  //           const astrologer_detail: any = astro
-  //             ? {
-  //                 id: astro.id ?? '',
-  //                 about: astro.about ?? '',
-  //                 blocked: astro.blocked ?? false,
-  //                 experienceYears: astro.experienceYears ?? 0,
-  //                 expertise: astro.expertise ?? '',
-  //                 imgUri: astro.imgUri ?? '',
-  //                 languages: astro.languages ?? '',
-  //                 pricePerMinuteChat: astro.pricePerMinuteChat ?? 0,
-  //                 pricePerMinuteVoice: astro.pricePerMinuteVoice ?? 0,
-  //                 pricePerMinuteVideo: astro.pricePerMinuteVideo ?? 0,
-  //                 isAudioOnline: astro.isAudioOnline ?? false,
-  //                 isChatOnline: astro.isChatOnline ?? false,
-  //                 isVideoOnline: astro.isVideoOnline ?? false,
-  //               }
-  //             : null;
-
-  //           dispatch(setAuthentication(true));
-  //           dispatch(setUser(userDetail));
-  //           if (astrologer_detail) dispatch(setAstrologer(astrologer_detail));
-  //           if (!isConnected) {
-  //             connect();
-  //           } else {
-  //             send('/app/online.user');
-  //           }
-  //         } else {
-  //           dispatch(logout());
-  //         }
-  //       } catch (err) {
-  //         console.log(err);
-  //         dispatch(logout());
-  //       }
-  //     } else {
-  //       dispatch(logout());
-  //     }
-  //     setLoading(false);
-  //   };
-
-  //   checkAuth();
-  // }, [token, dispatch, isConnected]);
-
-  useEffect(() => {
-    // Run push setup once when authenticated
-    if (isAuthenticated) {
-      setupPush();
-    }
-
-    // Foreground notification
-    const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
-      console.log('Foreground Notification:', remoteMessage);
-      Toast.show({
-        type: 'info',
-        text1: remoteMessage.notification?.title ?? 'New Message',
-        text2: remoteMessage.notification?.body ?? '',
-      });
-    });
-
-    // App opened from background
-    const unsubscribeOnNotificationOpened = messaging().onNotificationOpenedApp(
-      remoteMessage => {
-        console.log('App opened from background:', remoteMessage.notification);
-        // Navigate user to specific screen if needed
-      },
-    );
-
-    // App opened from quit state
-    messaging()
-      .getInitialNotification()
-      .then(remoteMessage => {
-        if (remoteMessage) {
-          console.log(
-            'App opened from quit state:',
-            remoteMessage.notification,
-          );
-          // Navigate user here as well
-        }
-      });
-
-    return () => {
-      unsubscribeOnMessage();
-      unsubscribeOnNotificationOpened();
-    };
-  }, [isAuthenticated]);
+  const {fcmToken} = useFcm(isAuthenticated);
+  // console.log(user, '-----------------user');
+  // useZegoAndFCM(user?.id, user?.name, isAuthenticated);
 
   const handleLogout = async () => {
-    console.log('checkauth logout-----------');
     try {
       if (role === 'ASTROLOGER') {
         const payload = await dispatch(logoutDevice()).unwrap();

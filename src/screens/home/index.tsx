@@ -11,7 +11,7 @@ import PageWithHeader from '../../componentsV1/layout/page-with-header';
 import Input from '../../componentsV1/common/input';
 import CustomButton from '../../componentsV1/common/custom-button';
 import {scale, scaleFont, verticalScale} from '../../utils/sizer';
-import {COLORS} from '../../constants/colors';
+import {colors, COLORS} from '../../constants/colors';
 import SearchIcon from '../../assets/icons/search-icon';
 import {categories} from './categories-data'; // Move array into separate file
 import {useNavigation} from '@react-navigation/native';
@@ -236,6 +236,8 @@ const HomeNew = () => {
                         alignItems: 'center',
                         position: 'relative',
                         overflow: 'hidden',
+                        borderWidth: 1,
+                        borderColor: COLORS.theme.primary,
                       }}>
                       {/* <Text style={{fontSize: scaleFont(24)}}>{item.icon}</Text> */}
                       <Image

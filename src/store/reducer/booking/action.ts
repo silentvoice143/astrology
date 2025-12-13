@@ -29,3 +29,19 @@ export const getMyAppointment = createAsyncThunk<
     return rejectWithValue(error.response?.data || error.message);
   }
 });
+
+export const cancelMyAppointment = createAsyncThunk<
+  any, // response type as any
+  any, // argument type
+  {rejectValue: any}
+>('appointment/mybooking-cancel', async (payload, {rejectWithValue}) => {
+  try {
+    const response = await api.patch(
+      `/api/v1/appointment/${payload.id}`,
+      payload.body,
+    );
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});

@@ -16,6 +16,7 @@ const {width} = Dimensions.get('window');
 
 interface FeedPostProps {
   astrologerName?: string;
+  astrologerExpertise?: string;
   profileImage?: any;
   postImages?: any[];
   caption?: string;
@@ -23,6 +24,7 @@ interface FeedPostProps {
 
 const FeedPost = ({
   astrologerName = 'Astro Priya',
+  astrologerExpertise = '',
   profileImage = require('../../../assets/imgs/profile-demo.jpg'),
   postImages = [require('../../../assets/imgs/astrology-feed-demo.jpg')],
   caption = 'Today’s moon transition will bring emotional stability and clarity 💫🌙',
@@ -78,7 +80,8 @@ const FeedPost = ({
           </Text>
           <Text
             style={{fontSize: scaleFont(11), color: COLORS.theme.gray.text}}>
-            Vedic Astrologer • ★ 4.9
+            {astrologerExpertise}
+            {/* • ★ 4.9 */}
           </Text>
         </View>
       </View>

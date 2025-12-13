@@ -36,6 +36,8 @@ import ChangePassword from '../screens/settings/change-password';
 import ProfilePage from '../screens/profile/profile';
 import ProfileEdit from '../screens/profile/pofile-edit';
 import Notification from '../screens/notification';
+import {useZegoAndFCM} from '../hooks/use-zego';
+import useFcm from '../hooks/use-fcm';
 
 const Stack = createNativeStackNavigator();
 
@@ -50,75 +52,8 @@ export default function RootNavigator() {
   const navigation = useNavigation<any>();
 
   useSessionEvents(user?.id, isAuthenticated, isConnected);
-
-  async function setupPush() {
-    try {
-      const token = await getFcmToken();
-      if (token) {
-        // send to backend
-        const payload = await dispatch(
-          registerDevice({deviceToken: token}),
-        ).unwrap();
-
-        if (payload.success) {
-          // Toast.show({
-          //   type: 'success',
-          //   text1: 'Device registered successfully',
-          // });
-        }
-      } else {
-        Toast.show({
-          type: 'error',
-          text1: 'Failed to initialize push notifications',
-        });
-      }
-    } catch (err) {
-      console.error('Error while setting up push notifications:', err);
-    }
-  }
-
-  useEffect(() => {
-    // Run push setup once when authenticated
-    if (isAuthenticated) {
-      setupPush();
-    }
-
-    // Foreground notification
-    const unsubscribeOnMessage = messaging().onMessage(async remoteMessage => {
-      console.log('Foreground Notification:', remoteMessage);
-      Toast.show({
-        type: 'info',
-        text1: remoteMessage.notification?.title ?? 'New Message',
-        text2: remoteMessage.notification?.body ?? '',
-      });
-    });
-
-    // App opened from background
-    const unsubscribeOnNotificationOpened = messaging().onNotificationOpenedApp(
-      remoteMessage => {
-        console.log('App opened from background:', remoteMessage.notification);
-        // Navigate user to specific screen if needed
-      },
-    );
-
-    // App opened from quit state
-    messaging()
-      .getInitialNotification()
-      .then(remoteMessage => {
-        if (remoteMessage) {
-          console.log(
-            'App opened from quit state:',
-            remoteMessage.notification,
-          );
-          // Navigate user here as well
-        }
-      });
-
-    return () => {
-      unsubscribeOnMessage();
-      unsubscribeOnNotificationOpened();
-    };
-  }, [isAuthenticated]);
+  const {fcmToken} = useFcm(isAuthenticated);
+  // useZegoAndFCM(user?.id, user?.name, isAuthenticated);
 
   const handleLogout = async () => {
     console.log('checkauth logout-----------');
