@@ -38,6 +38,11 @@ import ProfileEdit from '../screens/profile/pofile-edit';
 import Notification from '../screens/notification';
 import {useZegoAndFCM} from '../hooks/use-zego';
 import useFcm from '../hooks/use-fcm';
+import {
+  ZegoUIKitPrebuiltCallInCallScreen,
+  ZegoUIKitPrebuiltCallWaitingScreen,
+} from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import {requestAndroidCallPermissions} from '../utils/requestPermission';
 
 const Stack = createNativeStackNavigator();
 
@@ -53,7 +58,7 @@ export default function RootNavigator() {
 
   useSessionEvents(user?.id, isAuthenticated, isConnected);
   const {fcmToken} = useFcm(isAuthenticated);
-  // useZegoAndFCM(user?.id, user?.name, isAuthenticated);
+  useZegoAndFCM(user?.mobile, user?.name, isAuthenticated);
 
   const handleLogout = async () => {
     console.log('checkauth logout-----------');
@@ -72,6 +77,7 @@ export default function RootNavigator() {
 
   useEffect(() => {
     let mounted = true;
+    requestAndroidCallPermissions();
 
     const checkAuth = async () => {
       if (!mounted) return;
@@ -158,6 +164,18 @@ export default function RootNavigator() {
         </>
       ) : (
         <>
+          <Stack.Screen
+            options={{headerShown: false}}
+            // DO NOT change the name
+            name="ZegoUIKitPrebuiltCallWaitingScreen"
+            component={ZegoUIKitPrebuiltCallWaitingScreen}
+          />
+          <Stack.Screen
+            options={{headerShown: false}}
+            // DO NOT change the name
+            name="ZegoUIKitPrebuiltCallInCallScreen"
+            component={ZegoUIKitPrebuiltCallInCallScreen}
+          />
           <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
           <Stack.Screen name="Profile" component={ProfilePage} />
           <Stack.Screen name="ProfileEdit" component={ProfileEdit} />

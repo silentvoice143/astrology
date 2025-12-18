@@ -107,6 +107,7 @@ const Booking = () => {
         sessionType: bookinType[0] === 'ONLINE' ? sessionType[0] : 'CHAT',
         bookingType: bookinType[0],
       };
+      console.log(body, '------booking');
       const payload = await dispatch(bookAppointmentReq(body)).unwrap();
       if (payload.success) {
         Toast.show({
@@ -116,6 +117,7 @@ const Booking = () => {
         resetBookingState();
       }
     } catch (err) {
+      console.log(err);
     } finally {
       setLoading(false);
     }

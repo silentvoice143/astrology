@@ -3,6 +3,10 @@ import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn
 import * as ZIM from 'zego-zim-react-native';
 import * as ZPNs from 'zego-zpns-react-native';
 
+const appID = 2143779193;
+const appSign =
+  'ea994b83474dccbe389acf9387f7420520799fb45f881119e8e092d90a1d923e';
+
 export function useZegoAndFCM(
   userId: string | undefined,
   userName: string | undefined,
@@ -12,6 +16,13 @@ export function useZegoAndFCM(
     let mounted = true;
 
     async function init() {
+      console.log(
+        userId,
+        userName,
+        appID,
+        appSign,
+        '----------this is zego config 1',
+      );
       // guard: only init when user is authenticated and we have ids
       if (!mounted) return;
       if (!isAuthenticated) {
@@ -26,9 +37,13 @@ export function useZegoAndFCM(
         return;
       }
 
-      const appID = 2143779193;
-      const appSign =
-        'ea994b83474dccbe389acf9387f7420520799fb45f881119e8e092d90a1d923e';
+      console.log(
+        userId,
+        userName,
+        appID,
+        appSign,
+        '----------this is zego config',
+      );
 
       try {
         console.log('[Zego] init start', {appID, userId, userName});
@@ -40,8 +55,8 @@ export function useZegoAndFCM(
           [ZIM, ZPNs],
           {
             ringtoneConfig: {
-              incomingCallFileName: 'zego_incoming.mp3',
-              outgoingCallFileName: 'zego_outgoing.mp3',
+              incomingCallFileName: 'notification_sound.mp3',
+              outgoingCallFileName: 'notification_sound.mp3',
             },
             androidNotificationConfig: {
               channelID: 'astrosevaa',

@@ -43,6 +43,7 @@
     "react-native-linear-gradient": "^2.8.3",
     "react-native-localize": "^3.5.1",
     "react-native-modal": "^14.0.0-rc.1",
+    "react-native-permissions": "^5.4.4",
     "react-native-razorpay": "^2.3.0",
     "react-native-reanimated": "^3.18.0",
     "react-native-reanimated-carousel": "^4.0.2",
@@ -58,7 +59,7 @@
     "sockjs-client": "^1.6.1",
     "text-encoding": "^0.7.0",
     "zego-express-engine-reactnative": "^3.22.0",
-    "zego-zim-react-native": "^2.21.1",
+    "zego-zim-react-native": "^2.24.0",
     "zego-zpns-react-native": "^2.8.2"
   },
   "devDependencies": {

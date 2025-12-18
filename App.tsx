@@ -13,6 +13,7 @@ import './i18n';
 import notifee, {AndroidImportance} from '@notifee/react-native';
 import RootNavigator from './src/routes/root-navigator';
 import {NavigationContainer} from '@react-navigation/native';
+import {ZegoCallInvitationDialog} from '@zegocloud/zego-uikit-prebuilt-call-rn';
 
 Object.assign(global, encoding);
 
@@ -62,6 +63,7 @@ function App(): React.JSX.Element {
               <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
               {/* <AppNavigator /> */}
               <NavigationContainer>
+                <ZegoCallInvitationDialog />
                 <RootNavigator />
               </NavigationContainer>
 
