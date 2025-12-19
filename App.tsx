@@ -50,6 +50,7 @@ function App(): React.JSX.Element {
       name: 'High Importance Notifications',
       importance: AndroidImportance.HIGH,
       sound: 'notification_sound',
+      vibration: true,
     });
   }
 
