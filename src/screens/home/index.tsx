@@ -19,6 +19,7 @@ import {useAppDispatch} from '../../hooks/redux-hook';
 import {getBanner} from '../../store/reducer/general';
 import Carousel from 'react-native-reanimated-carousel';
 import Skeleton from '../../components/skeleton';
+import notifee, {AndroidImportance} from '@notifee/react-native';
 
 const width = Dimensions.get('window').width - 40;
 
@@ -136,11 +137,21 @@ const HomeNew = () => {
               style={{flex: 1, backgroundColor: COLORS.theme.white}}
               textStyle={{color: COLORS.theme.black}}
               title="Offline"
-              onPress={() =>
-                navigation.navigate('Booking', {
-                  screen: 'BookAppointment',
-                  params: {category: '', mode: 'OFFLINE'},
-                })
+              onPress={
+                async () =>
+                  navigation.navigate('Booking', {
+                    screen: 'BookAppointment',
+                    params: {category: '', mode: 'OFFLINE'},
+                  })
+                // await notifee.displayNotification({
+                //   title: 'New Message',
+                //   body: 'This is a test message',
+                //   android: {
+                //     channelId: 'high_importance_channel', // make sure channel exists
+                //     smallIcon: 'ic_launcher',
+                //     sound: 'notification_sound', // file in res/raw without extension
+                //   },
+                // })
               }
             />
           </View>

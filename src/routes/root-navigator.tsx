@@ -92,13 +92,14 @@ export default function RootNavigator() {
             console.log('User Detail fetched in checkAuth:', userDetail);
             dispatch(setAuthentication(true));
             dispatch(setUser(userDetail));
+            requestAndroidCallPermissions();
 
             // if (!isConnected) {
             //   connect();
             // } else {
             //   send('/app/online.user');
             // }
-            console.log('Navigation to MainTabs-----------');
+
             // Navigate only once
           } else {
             handleLogout();
