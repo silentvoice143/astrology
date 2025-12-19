@@ -11,6 +11,9 @@ import {scale, verticalScale, scaleFont} from '../../../utils/sizer';
 import {COLORS} from '../../../constants/colors';
 import ImageViewer from 'react-native-image-zoom-viewer';
 import Modal from 'react-native-modal';
+import LikeIcon from '../../../assets/icons/like-icon';
+import CommentIcon from '../../../assets/icons/comment_icon';
+import OutlineHeartIcon from '../../../assets/icons/outlinw-likw-ixon';
 
 const {width} = Dimensions.get('window');
 
@@ -114,6 +117,15 @@ const FeedPost = ({
           </TouchableOpacity>
         )}
       />
+      <View>
+        <TouchableOpacity>
+          {/* <LikeIcon /> */}
+          <OutlineHeartIcon />
+        </TouchableOpacity>
+        <TouchableOpacity>
+          <CommentIcon />
+        </TouchableOpacity>
+      </View>
 
       {/* ✅ DOT INDICATOR */}
       {postImages.length > 1 && (

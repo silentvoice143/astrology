@@ -4,9 +4,9 @@ import {getTokenFromStore} from '../utils/get-token';
 import Toast from 'react-native-toast-message';
 import skipAuthPaths from './skip-path';
 
-const baseUrl = 'https://6ff061cf25e8.ngrok-free.app';
+// const baseUrl = 'https://6ff061cf25e8.ngrok-free.app';
 
-// const baseUrl = 'https://backend.astrosevaa.com';
+const baseUrl = 'https://backend.astrosevaa.com';
 
 // const baseUrl = 'https://f088e6cf3d37.ngrok-free.app';
 // const baseUrl =

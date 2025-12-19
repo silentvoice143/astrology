@@ -152,6 +152,8 @@ import {
 import Toast from 'react-native-toast-message';
 import {useAppDispatch} from '../hooks/redux-hook';
 import {registerDevice} from '../store/reducer/auth';
+import {handleNotificationNavigation} from '../utils/notification-handler';
+import {markNotificationRead} from '../store/reducer/notifications';
 
 export default function useFcm(isAuthenticated: boolean) {
   const dispatch = useAppDispatch();
@@ -207,17 +209,31 @@ export default function useFcm(isAuthenticated: boolean) {
         );
 
         // App opened from background
+        // onOpenedUnsub.current = onNotificationOpenedApp(
+        //   messaging,
+        //   remoteMessage => {
+        //     console.log('Opened from background:', remoteMessage?.notification);
+        //   },
+        // );
         onOpenedUnsub.current = onNotificationOpenedApp(
           messaging,
           remoteMessage => {
-            console.log('Opened from background:', remoteMessage?.notification);
+            if (remoteMessage?.data) {
+              handleNotificationNavigation(remoteMessage.data);
+              dispatch(markNotificationRead(remoteMessage.data.id));
+            }
           },
         );
 
         // App opened from quit state
+        // const initialMessage = await getInitialNotification(messaging);
+        // if (initialMessage) {
+        //   console.log('Opened from quit state:', initialMessage.notification);
+        // }
         const initialMessage = await getInitialNotification(messaging);
-        if (initialMessage) {
-          console.log('Opened from quit state:', initialMessage.notification);
+        if (initialMessage?.data) {
+          handleNotificationNavigation(initialMessage.data);
+          dispatch(markNotificationRead(initialMessage.data.id));
         }
       } catch (err) {
         console.error('useFcm error:', err);

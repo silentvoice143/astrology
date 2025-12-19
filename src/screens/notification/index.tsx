@@ -1,108 +1,122 @@
-import React from 'react';
-import {View, Text, FlatList, TouchableOpacity, StyleSheet} from 'react-native';
+import React, {useEffect, useRef, useCallback, useState} from 'react';
+import {
+  View,
+  Text,
+  FlatList,
+  TouchableOpacity,
+  StyleSheet,
+  ViewToken,
+} from 'react-native';
 import PageWithHeader from '../../componentsV1/layout/page-with-header';
-
-const NOTIFICATION_DATA = [
-  {
-    id: '1',
-    userId: 'u1',
-    title: 'New Message',
-    body: 'Rahul: Hey, are you free?',
-    type: 'CHAT',
-    data: {chatId: 'c22', screen: 'ChatScreen'},
-    isRead: false,
-    isDelivered: true,
-    priority: 'HIGH',
-    createdAt: '10:45 AM',
-  },
-  {
-    id: '2',
-    userId: 'u1',
-    title: 'Missed Call',
-    body: 'You missed a call from Priya',
-    type: 'CALL',
-    data: {callId: 'call55', screen: 'CallScreen'},
-    isRead: false,
-    isDelivered: true,
-    priority: 'HIGH',
-    createdAt: 'Yesterday',
-  },
-  {
-    id: '3',
-    userId: 'u1',
-    title: 'Booking Confirmed',
-    body: 'Your astrologer session is confirmed',
-    type: 'BOOKING',
-    data: {bookingId: 'b12', screen: 'BookingDetail'},
-    isRead: true,
-    isDelivered: true,
-    priority: 'LOW',
-    createdAt: '2 days ago',
-  },
-  {
-    id: '4',
-    userId: 'u1',
-    title: 'Wallet Credited',
-    body: '₹250 added to your wallet',
-    type: 'PAYMENT',
-    data: {},
-    isRead: true,
-    isDelivered: true,
-    priority: 'LOW',
-    createdAt: '3 days ago',
-  },
-];
+import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
+import {
+  getAllNotifications,
+  markNotificationRead,
+} from '../../store/reducer/notifications';
+import {verticalScale} from '../../utils/sizer';
+import {formatNotificationTime} from '../../utils/utils';
 
 const getTypeColor = (type: string) => {
   switch (type) {
-    case 'CHAT':
-      return '#25D366';
-    case 'CALL':
-      return '#2196F3';
-    case 'PAYMENT':
-      return '#FF9800';
-    case 'BOOKING':
+    case 'POST_CREATED':
+      return '#2563EB';
+    case 'BOOKING_APPROVED':
       return '#9C27B0';
+    case 'SESSION_CREATED':
+      return '#059669';
     default:
       return '#607D8B';
   }
 };
 
 const Notification = () => {
-  const renderItem = ({item}: any) => {
+  const dispatch = useAppDispatch();
+
+  const {notifications, currentPage, isLastPage, loading} = useAppSelector(
+    state => state.notifications,
+  );
+  const [refreshing, setRefreshing] = useState(false);
+  const [page, setPage] = useState(1);
+
+  const onRefresh = async () => {
+    try {
+      setRefreshing(true);
+      setPage(1);
+      await dispatch(getAllNotifications({page: 1, limit: 10}));
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+  /** 🔹 Initial load */
+  useEffect(() => {
+    dispatch(getAllNotifications({page: 1, limit: 10}));
+  }, []);
+
+  /** 🔹 Pagination */
+  const loadMore = () => {
+    if (!loading && !isLastPage) {
+      const nextPage = page + 1;
+      setPage(nextPage);
+      dispatch(getAllNotifications({page: nextPage, limit: 10}));
+    }
+  };
+
+  /** 🔹 Mark visible unread notifications as read */
+  const onViewableItemsChanged = useRef(
+    ({viewableItems}: {viewableItems: ViewToken[]}) => {
+      viewableItems.forEach(item => {
+        if (item.item?.read === false) {
+          dispatch(markNotificationRead(item.item.id));
+        }
+      });
+    },
+  ).current;
+
+  const viewabilityConfig = {
+    itemVisiblePercentThreshold: 60,
+  };
+
+  const renderItem = useCallback(({item}: any) => {
     return (
       <TouchableOpacity
+        activeOpacity={0.7}
         style={[
           styles.notificationItem,
-          !item.isRead && styles.unreadNotification,
+          !item.read && styles.unreadNotification,
         ]}>
-        <View
-          style={[
-            styles.typeBadge,
-            {backgroundColor: getTypeColor(item.type)},
-          ]}>
-          <Text style={styles.typeText}>{item.type}</Text>
-        </View>
-
+        {/* CENTER */}
         <View style={styles.centerContainer}>
           <Text style={styles.title}>{item.title}</Text>
           <Text style={styles.body} numberOfLines={2}>
-            {item.body}
+            {item.message}
           </Text>
+          {/* TYPE BADGE */}
+          <View style={{flexDirection: 'row', marginTop: verticalScale(8)}}>
+            <View
+              style={[
+                styles.typeBadge,
+                {backgroundColor: getTypeColor(item.type)},
+              ]}>
+              <Text style={styles.typeText}>{item.type}</Text>
+            </View>
+            <View style={{flex: 1}}></View>
+          </View>
         </View>
 
+        {/* RIGHT */}
         <View style={styles.rightContainer}>
-          <Text style={styles.time}>{item.createdAt}</Text>
+          <Text style={styles.time}>
+            {formatNotificationTime(item.createdAt) ?? 'Just now'}
+          </Text>
 
-          {!item.isRead && <View style={styles.unreadDot} />}
-
-          {item.priority === 'HIGH' && (
-            <Text style={styles.highPriority}>!</Text>
-          )}
+          {!item.read && <View style={styles.unreadDot} />}
         </View>
       </TouchableOpacity>
     );
-  };
+  }, []);
+
+  console.log(notifications, '-----notifications');
 
   return (
     <PageWithHeader
@@ -111,10 +125,18 @@ const Notification = () => {
       scrollEnabled={false}>
       <View style={styles.container}>
         <FlatList
-          data={NOTIFICATION_DATA}
+          data={notifications}
           keyExtractor={item => item.id}
           renderItem={renderItem}
           ItemSeparatorComponent={() => <View style={styles.divider} />}
+          onEndReached={loadMore}
+          onEndReachedThreshold={0.4}
+          viewabilityConfig={viewabilityConfig}
+          onViewableItemsChanged={onViewableItemsChanged}
+          showsVerticalScrollIndicator={false}
+          /* ✅ Pull to refresh */
+          refreshing={refreshing}
+          onRefresh={onRefresh}
         />
       </View>
     </PageWithHeader>

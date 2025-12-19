@@ -31,7 +31,7 @@ const availabilityTags = [
 
 const sessionTypeTags = [
   {id: 'VIDEO', label: 'Video', icon: '📹'},
-  {id: 'VOICE', label: 'Voice', icon: '🎤'},
+  {id: 'AUDIO', label: 'AUDIO', icon: '🎤'},
   {id: 'CHAT', label: 'Chat', icon: '💬'},
 ];
 
@@ -82,8 +82,8 @@ const Booking = () => {
     // You can modify this function to calculate cost based on different criteria
     if (sessionType.includes('VIDEO')) {
       return astrologersData[0]?.pricePerMinuteVideo ?? 0;
-    } else if (sessionType.includes('VOICE')) {
-      return astrologersData[0]?.pricePerMinuteVoice ?? 0;
+    } else if (sessionType.includes('AUDIO')) {
+      return astrologersData[0]?.pricePerMinuteAUDIO ?? 0;
     } else {
       return astrologersData[0]?.pricePerMinuteChat ?? 0;
     }

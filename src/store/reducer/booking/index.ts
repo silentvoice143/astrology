@@ -6,13 +6,13 @@ interface BookingState {}
 
 const initialState: BookingState = {};
 
-const authSlice = createSlice({
+const bookingSlice = createSlice({
   name: 'booking',
   initialState,
   reducers: {},
   extraReducers: builder => {},
 });
 
-export const {} = authSlice.actions;
+export const {} = bookingSlice.actions;
 export {bookAppointmentReq, getMyAppointment};
-export default authSlice.reducer;
+export default bookingSlice.reducer;

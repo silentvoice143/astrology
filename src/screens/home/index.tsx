@@ -236,7 +236,7 @@ const HomeNew = () => {
                         alignItems: 'center',
                         position: 'relative',
                         overflow: 'hidden',
-                        borderWidth: 3,
+                        borderWidth: 2,
                         borderColor: COLORS.theme.primary,
                       }}>
                       {/* <Text style={{fontSize: scaleFont(24)}}>{item.icon}</Text> */}
