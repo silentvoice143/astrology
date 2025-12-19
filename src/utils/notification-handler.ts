@@ -1,26 +1,14 @@
-import {useNavigation} from '@react-navigation/native';
+import {navigate} from './navigation';
 
 export const handleNotificationNavigation = (data: any) => {
-  const navigation = useNavigation<any>();
-  const navigate = navigation.navigate;
   if (!data) return;
 
   switch (data.type) {
     case 'BOOKING_APPROVED':
-      navigate('MainTabs', {
-        screen: 'Booking',
-        params: {
-          screen: 'MyBooking',
-        },
-      });
-      break;
-
     case 'SESSION_CREATED':
       navigate('MainTabs', {
         screen: 'Booking',
-        params: {
-          screen: 'MyBooking',
-        },
+        params: {screen: 'MyBooking'},
       });
       break;
 

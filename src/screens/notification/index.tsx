@@ -64,12 +64,16 @@ const Notification = () => {
 
   /** 🔹 Mark visible unread notifications as read */
   const onViewableItemsChanged = useRef(
-    ({viewableItems}: {viewableItems: ViewToken[]}) => {
-      viewableItems.forEach(item => {
-        if (item.item?.read === false) {
-          dispatch(markNotificationRead(item.item.id));
-        }
-      });
+    async ({viewableItems}: {viewableItems: ViewToken[]}) => {
+      const unreadIds = viewableItems
+        .filter(v => v.item?.read === false)
+        .map(v => v.item.id);
+
+      if (!unreadIds.length) return;
+
+      await Promise.all(
+        unreadIds.map(id => dispatch(markNotificationRead(id)).unwrap()),
+      );
     },
   ).current;
 

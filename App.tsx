@@ -14,6 +14,7 @@ import notifee, {AndroidImportance} from '@notifee/react-native';
 import RootNavigator from './src/routes/root-navigator';
 import {NavigationContainer} from '@react-navigation/native';
 import {ZegoCallInvitationDialog} from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import {navigationRef} from './src/utils/navigation';
 
 Object.assign(global, encoding);
 
@@ -47,13 +48,16 @@ function App(): React.JSX.Element {
     await notifee.createChannel({
       id: 'high_importance_channel',
       name: 'High Importance Notifications',
-      importance: AndroidImportance.HIGH, // 🔥 equivalent to IMPORTANCE_HIGH
-      sound: 'default',
+      importance: AndroidImportance.HIGH,
+      sound: 'notification_sound',
+      vibration: true,
     });
   }
 
   // Call this once when app starts
-  createNotificationChannel();
+  useEffect(() => {
+    createNotificationChannel();
+  }, []);
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
@@ -62,7 +66,7 @@ function App(): React.JSX.Element {
             <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
               <StatusBar barStyle="dark-content" backgroundColor="#ffffff" />
               {/* <AppNavigator /> */}
-              <NavigationContainer>
+              <NavigationContainer ref={navigationRef}>
                 <ZegoCallInvitationDialog />
                 <RootNavigator />
               </NavigationContainer>

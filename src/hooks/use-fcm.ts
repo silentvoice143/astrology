@@ -1,3 +1,4 @@
+import {notifee} from '@notifee/react-native';
 // import {useEffect, useState, useRef} from 'react';
 // import messaging, {
 //   FirebaseMessagingTypes,
@@ -220,7 +221,9 @@ export default function useFcm(isAuthenticated: boolean) {
           remoteMessage => {
             if (remoteMessage?.data) {
               handleNotificationNavigation(remoteMessage.data);
-              dispatch(markNotificationRead(remoteMessage.data.id));
+              if (remoteMessage.data.type !== 'POST_CREATED') {
+                dispatch(markNotificationRead(remoteMessage.data.id));
+              }
             }
           },
         );
@@ -233,7 +236,9 @@ export default function useFcm(isAuthenticated: boolean) {
         const initialMessage = await getInitialNotification(messaging);
         if (initialMessage?.data) {
           handleNotificationNavigation(initialMessage.data);
-          dispatch(markNotificationRead(initialMessage.data.id));
+          if (initialMessage.data.type !== 'POST_CREATED') {
+            dispatch(markNotificationRead(initialMessage.data.id));
+          }
         }
       } catch (err) {
         console.error('useFcm error:', err);
