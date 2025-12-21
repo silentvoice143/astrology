@@ -379,20 +379,18 @@ export const ChatScreen = () => {
         <>
           {session?.status === 'ACTIVE' && timer && <Timer timer={timer} />}
 
-          {session && (
-            <KeyboardAwareFlatList
-              // ref={flatListRef}
-              data={messages}
-              inverted
-              keyExtractor={(item, index) => `${item.timestamp}-${index}`}
-              renderItem={renderMessage}
-              contentContainerStyle={styles.messagesArea}
-              onEndReached={() => getChatMessagesDetails(currentPage + 1)}
-              onEndReachedThreshold={0.2}
-              keyboardShouldPersistTaps="handled"
-              extraScrollHeight={20} // pushes list up when keyboard appears
-            />
-          )}
+          <KeyboardAwareFlatList
+            // ref={flatListRef}
+            data={messages}
+            inverted
+            keyExtractor={(item, index) => `${item.timestamp}-${index}`}
+            renderItem={renderMessage}
+            contentContainerStyle={styles.messagesArea}
+            onEndReached={() => getChatMessagesDetails(currentPage + 1)}
+            onEndReachedThreshold={0.2}
+            keyboardShouldPersistTaps="handled"
+            extraScrollHeight={20} // pushes list up when keyboard appears
+          />
 
           <View style={styles.inputArea}>
             <TouchableOpacity

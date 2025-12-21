@@ -467,6 +467,8 @@ type Booking = {
     name: string;
     imgUri: string | null;
   };
+  chatSession: any;
+  callSession: any;
 };
 
 const LIMIT = 10;
@@ -518,6 +520,7 @@ const AllBookings = () => {
 
         console.log('Booking payload:', payload);
         if (payload?.success) {
+          console.log(payload, '---------payload');
           const newBookings: Booking[] = (payload.appointments || []).map(
             (item: any) => ({
               id: item.id,
@@ -527,8 +530,10 @@ const AllBookings = () => {
               status: item.status ?? 'PENDING',
               bookingType: item.bookingType ?? 'ONLINE',
               sessionType: item.sessionType,
-              chatSessionId: item.chatSessionId,
-              callSessionId: item.callSessionId,
+              chatSessionId: item?.chatSession?.id ?? null,
+              callSessionId: item?.callSession?.id ?? null,
+              chatSession: item?.chatSession,
+              callSession: item?.callSession,
               totalCost: item.totalCost,
               astrologer: {
                 id: item.astrologer?.id ?? '',
@@ -597,7 +602,8 @@ const AllBookings = () => {
 
   const handleJoinSession = (item: Booking) => {
     if (item.sessionType === 'CHAT' && item.chatSessionId) {
-      dispatch(setOtherUser(item.astrologer));
+      dispatch(setSession(item.chatSession));
+      dispatch(setOtherUser(item.chatSession.astrologer));
       navigation.navigate('ChatScreen', {
         sessionId: item.chatSessionId,
       });
@@ -605,6 +611,8 @@ const AllBookings = () => {
       (item.sessionType === 'CALL' || item.sessionType === 'VIDEO') &&
       item.callSessionId
     ) {
+      dispatch(setSession(item.callSession));
+      dispatch(setOtherUser(item.callSession.astrologer));
       navigation.navigate('CallScreen', {
         sessionId: item.callSessionId,
         type: item.sessionType,

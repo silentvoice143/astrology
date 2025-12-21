@@ -132,17 +132,17 @@ export default function RootNavigator() {
     };
   }, [token, dispatch]);
 
-  useEffect(() => {
-    if (isAuthenticated && !isConnected) {
-      connect();
-      setTimeout(() => {
-        navigation.reset({
-          index: 0,
-          routes: [{name: 'MainTabs'}],
-        });
-      }, 3000);
-    }
-  }, [isAuthenticated]);
+  // useEffect(() => {
+  //   if (isAuthenticated && !isConnected) {
+  //     connect();
+  //     setTimeout(() => {
+  //       navigation.reset({
+  //         index: 0,
+  //         routes: [{name: 'MainTabs'}],
+  //       });
+  //     }, 3000);
+  //   }
+  // }, [isAuthenticated]);
 
   // useEffect(() => {
   //   if (isAuthenticated) {
