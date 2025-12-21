@@ -23,17 +23,16 @@ import {
 } from './action';
 
 const initialState: SessionState = {
-  activeSession: null,
   session: null,
-  callSession: null,
+
   user: null,
   otherUser: null,
-  sessionEnded: true,
+  // sessionEnded: true,
   messages: [],
-  queueRequestCount: 0,
-  countRefresh: true,
-  sessionRequest: null,
-  requests: [],
+  // queueRequestCount: 0,
+  // countRefresh: true,
+  // sessionRequest: null,
+  // requests: [],
 };
 
 const sessionSlice = createSlice({
@@ -43,24 +42,24 @@ const sessionSlice = createSlice({
     setSession(state, action: PayloadAction<ChatSession>) {
       state.session = action.payload;
     },
-    setActiveSession(state, action: PayloadAction<ChatSession>) {
-      state.activeSession = action.payload;
-    },
-    setCallSession(state, action: PayloadAction<CallSession>) {
-      state.callSession = action.payload;
-    },
-    setRequest(state, action) {
-      console.log(action.payload, '----paylaod coming');
-      state.sessionRequest = action.payload;
-    },
+    // setActiveSession(state, action: PayloadAction<ChatSession>) {
+    //   state.activeSession = action.payload;
+    // },
+    // setCallSession(state, action: PayloadAction<CallSession>) {
+    //   state.callSession = action.payload;
+    // },
+    // setRequest(state, action) {
+    //   console.log(action.payload, '----paylaod coming');
+    //   state.sessionRequest = action.payload;
+    // },
 
-    clearActiveSession(state) {
-      state.activeSession = null;
-    },
+    // clearActiveSession(state) {
+    //   state.activeSession = null;
+    // },
     setChatUser(state, action) {
       state.user = action.payload;
     },
-    setOtherUser(state, action: PayloadAction<UserDetail | null>) {
+    setOtherUser(state, action: PayloadAction<any>) {
       state.otherUser = action.payload;
     },
     clearSession(state) {
@@ -78,24 +77,24 @@ const sessionSlice = createSlice({
     prependMessages(state, action: PayloadAction<Message[]>) {
       state.messages = [...state.messages, ...action.payload]; // older messages at the start
     },
-    clearCallSession(state) {
-      state.callSession = null;
-    },
-    incrementQueueRequest: state => {
-      state.queueRequestCount += 1;
-    },
-    clearQueueRequestCount: state => {
-      state.queueRequestCount = 0;
-    },
-    setQueueCount: (state, action) => {
-      state.queueRequestCount = action.payload;
-    },
-    toggleCountRefresh: state => {
-      state.countRefresh = !state.countRefresh;
-    },
-    setRequestList: (state, action) => {
-      state.requests = action.payload;
-    },
+    // clearCallSession(state) {
+    //   state.callSession = null;
+    // },
+    // incrementQueueRequest: state => {
+    //   state.queueRequestCount += 1;
+    // },
+    // clearQueueRequestCount: state => {
+    //   state.queueRequestCount = 0;
+    // },
+    // setQueueCount: (state, action) => {
+    //   state.queueRequestCount = action.payload;
+    // },
+    // toggleCountRefresh: state => {
+    //   state.countRefresh = !state.countRefresh;
+    // },
+    // setRequestList: (state, action) => {
+    //   state.requests = action.payload;
+    // },
   },
   extraReducers: builder => {
     builder.addCase(sendSessionRequest.fulfilled, state => {});
@@ -114,21 +113,20 @@ const sessionSlice = createSlice({
 export const {
   setSession,
   clearSession,
-  setRequest,
-  clearActiveSession,
+
   setChatUser,
   setOtherUser,
   addMessage,
   prependMessages,
-  setCallSession,
-  clearCallSession,
+  // setCallSession,
+  // clearCallSession,
   setMessage,
-  setQueueCount,
-  incrementQueueRequest,
-  clearQueueRequestCount,
-  toggleCountRefresh,
-  setActiveSession,
-  setRequestList,
+  // setQueueCount,
+  // incrementQueueRequest,
+  // clearQueueRequestCount,
+  // toggleCountRefresh,
+  // setActiveSession,
+  // setRequestList,
 } = sessionSlice.actions;
 
 export {

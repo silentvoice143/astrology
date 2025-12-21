@@ -4,8 +4,9 @@ import {IMessage, StompSubscription} from '@stomp/stompjs';
 
 // Module-level singleton
 let singletonService: WebSocketService | null = null;
+const socketUrl: string = 'https://backend.astrosevaa.com/ws-chat';
 
-export const useWebSocket = (userId: string, socketUrl?: string) => {
+export const useWebSocket = (userId: string) => {
   const [connected, setConnected] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const cleanupFunctionsRef = useRef<(() => void)[]>([]);
@@ -13,11 +14,9 @@ export const useWebSocket = (userId: string, socketUrl?: string) => {
   // Initialize service
   const initService = useCallback(() => {
     if (!singletonService) {
-      const url =
-        socketUrl ||
-        process.env.BASE_URL ||
-        // 'https://backend.astrosevaa.com/ws-chat';
-        'https://709249b6fda4.ngrok-free.app/ws-chat';
+      const url = socketUrl;
+      // 'https://709249b6fda4.ngrok-free.app/ws-chat';
+      console.log('[useWebSocket] Service initializing with URL:', url, userId);
 
       singletonService = new WebSocketService(userId, url);
       console.log('[useWebSocket] Service initialized with URL:', url);

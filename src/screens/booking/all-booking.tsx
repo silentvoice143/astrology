@@ -447,6 +447,7 @@ import {
 import {useAppDispatch} from '../../hooks/redux-hook';
 import {getMyAppointment} from '../../store/reducer/booking';
 import {cancelMyAppointment} from '../../store/reducer/booking/action';
+import {setOtherUser, setSession} from '../../store/reducer/session';
 
 const TAGS = ['All', 'Pending', 'Confirmed', 'Completed', 'Cancelled'] as const;
 
@@ -586,6 +587,7 @@ const AllBookings = () => {
     if (status === 'CANCELLED') return '#F44336';
     return COLORS.theme.gray.light;
   };
+  console.log(bookings, '===bookings');
 
   const getSessionTypeIcon = (type: Booking['sessionType']) => {
     if (type === 'CHAT') return '💬';
@@ -595,6 +597,7 @@ const AllBookings = () => {
 
   const handleJoinSession = (item: Booking) => {
     if (item.sessionType === 'CHAT' && item.chatSessionId) {
+      dispatch(setOtherUser(item.astrologer));
       navigation.navigate('ChatScreen', {
         sessionId: item.chatSessionId,
       });

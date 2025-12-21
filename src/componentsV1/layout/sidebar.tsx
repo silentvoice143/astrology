@@ -22,7 +22,7 @@ import AboutIcon from '../../assets/icons/about-icon';
 import SettingIcon from '../../assets/icons/setting-icon';
 import LogoutIcon from '../../assets/icons/logout-icon';
 
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {scale} from '../../utils/sizer';
 import {useAppSelector} from '../../hooks/redux-hook';
 
@@ -42,32 +42,60 @@ const Sidebar = forwardRef<SidebarRef, {onLogout?: () => void}>(
     const {user} = useAppSelector((state: any) => state.auth);
 
     const navItems = [
-      {title: 'Home', href: 'Home', icon: <HomeIcon size={20} />},
-      // {
-      //   title: 'Horoscope',
-      //   href: 'Horoscope',
-      //   icon: <HoroscopeIcon size={20} />,
-      // },
-      // {title: 'Kundli', href: 'KundliForm', icon: <KundliBookIcon size={20} />},
       {
-        title: 'Astrologers',
-        href: 'Astrologers',
-        icon: <AstrologerIcon size={20} />,
+        title: 'Home',
+        type: 'reset',
+        route: 'MainTabs',
+        params: {screen: 'Home'},
+        icon: <HomeIcon size={20} />,
+        screen: 'Home',
       },
+      // {
+      //   title: 'Astrologers',
+      //   type: 'navigate',
+      //   route: 'Astrologers',
+      //   icon: <AstrologerIcon size={20} />,
+      // },
       {
         title: 'Chat & Call',
-        href: 'Call_Chat',
+        type: 'navigate',
+        route: 'Call_Chat',
         icon: <ChatIcon size={20} />,
+        screen: 'Call_Chat',
       },
-      {title: 'Wallet', href: 'Wallet', icon: <WalletIcon size={20} />},
+      {
+        title: 'Wallet',
+        type: 'navigate',
+        route: 'Wallet',
+        icon: <WalletIcon size={20} />,
+        screen: 'Wallet',
+      },
       {
         title: 'Customer Support',
-        href: 'CustomerSupport',
+        type: 'navigate',
+        route: 'CustomerSupport',
         icon: <HelpIcon size={20} />,
+        screen: 'CustomerSupport',
       },
-      {title: 'Setting', href: 'Setting', icon: <SettingIcon size={20} />},
-      {title: 'About', href: 'About', icon: <AboutIcon size={20} />},
-      {title: 'Logout', href: '', icon: <LogoutIcon size={20} color="red" />},
+      {
+        title: 'Setting',
+        type: 'navigate',
+        route: 'Setting',
+        icon: <SettingIcon size={20} />,
+        screen: 'Setting',
+      },
+      {
+        title: 'About',
+        type: 'navigate',
+        route: 'About',
+        icon: <AboutIcon size={20} />,
+        screen: 'About',
+      },
+      {
+        title: 'Logout',
+        type: 'logout',
+        icon: <LogoutIcon size={20} color="red" />,
+      },
     ];
 
     useImperativeHandle(ref, () => ({
@@ -108,9 +136,53 @@ const Sidebar = forwardRef<SidebarRef, {onLogout?: () => void}>(
       ]).start(() => setVisible(false));
     };
 
-    const handleNavigation = (href: string) => {
+    // const handleNavigation = (href: string) => {
+    //   close();
+    //   if (href) navigation.navigate(href);
+    // };
+
+    const getCurrentRouteName = () => {
+      const state = navigation.getState();
+      const route = state.routes[state.index];
+
+      // Handle nested navigators (MainTabs)
+      if (route.state) {
+        return route.state.routes[route.state.index].name;
+      }
+
+      return route.name;
+    };
+    const route = useRoute();
+    const handleNavigation = (item: any) => {
+      const currentRoute = route.name;
+
+      if (item.screen === currentRoute) {
+        close();
+        return;
+      }
       close();
-      if (href) navigation.navigate(href);
+
+      switch (item?.type) {
+        case 'navigate':
+          navigation.navigate(item.route, item.params);
+          break;
+
+        case 'reset':
+          navigation.reset({
+            index: 0,
+            routes: [
+              {
+                name: item.route,
+                params: item.params,
+              },
+            ],
+          });
+          break;
+
+        case 'logout':
+          onLogout?.();
+          break;
+      }
     };
 
     const profileImage =
@@ -166,7 +238,7 @@ const Sidebar = forwardRef<SidebarRef, {onLogout?: () => void}>(
                   onPress={() =>
                     item.title === 'Logout'
                       ? onLogout?.()
-                      : handleNavigation(item.href)
+                      : handleNavigation(item)
                   }>
                   {item.icon}
                   <Text style={styles.navText}>{item.title}</Text>

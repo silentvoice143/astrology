@@ -186,21 +186,39 @@ export interface CallSession {
   agoraToken?: string;
 }
 
+export interface UserDetailSession {
+  id: string;
+  name: string;
+  gender?: 'MALE' | 'FEMALE' | 'OTHER';
+  birthDate?: string;
+  birthTime?: string;
+  birthPlace?: string;
+  latitude?: number;
+  longitude?: number;
+  mobile?: string;
+  role?: 'USER' | 'ADMIN' | string;
+  walletBalance?: number;
+  createdAt?: string; // ISO date string
+  updatedAt?: string; // ISO date string
+  imgUri?: any;
+  freeChatUsed?: boolean;
+}
+
 export interface SessionState {
-  activeSession: ChatSession | null;
+  // activeSession: ChatSession | null;
   session: ChatSession | null;
-  callSession: CallSession | null;
-  user: UserDetail | null;
-  otherUser: UserDetail | null;
-  sessionEnded: boolean;
+  // callSession: CallSession | null;
+  user: UserDetailSession | null;
+  otherUser: UserDetailSession | null;
+  // sessionEnded: boolean;
   messages: Message[];
-  queueRequestCount: number;
-  countRefresh: boolean;
-  sessionRequest: {
-    userId: string;
-    type: 'AUDIO' | 'VIDEO' | 'CHAT';
-  } | null;
-  requests: any;
+  // queueRequestCount: number;
+  // countRefresh: boolean;
+  // sessionRequest: {
+  //   userId: string;
+  //   type: 'AUDIO' | 'VIDEO' | 'CHAT';
+  // } | null;
+  // requests: any;
 }
 
 export interface Message {
@@ -219,8 +237,8 @@ export interface ChatSession {
   status: 'ACTIVE' | 'ENDED';
   totalCost: number;
   totalMinutes: number;
-  astrologer: UserDetail;
-  user: UserDetail;
+  astrologer: UserDetailSession;
+  user: UserDetailSession;
 }
 
 // ========================================Wallets===============================

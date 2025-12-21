@@ -46,6 +46,7 @@ const PageWithHeader = ({
       style={{
         paddingTop: verticalScale(80),
         minHeight: '100%',
+        backgroundColor: COLORS.theme.white,
       }}>
       {children}
     </View>

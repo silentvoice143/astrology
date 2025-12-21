@@ -43,6 +43,7 @@ import {
   ZegoUIKitPrebuiltCallWaitingScreen,
 } from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import {requestAndroidCallPermissions} from '../utils/requestPermission';
+import ChatScreen from '../screens/call&chat/chatScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -180,7 +181,20 @@ export default function RootNavigator() {
           <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
           <Stack.Screen name="Profile" component={ProfilePage} />
           <Stack.Screen name="ProfileEdit" component={ProfileEdit} />
-          <Stack.Screen name="Call_Chat" component={CallChat} />
+          <Stack.Screen
+            name="Call_Chat"
+            component={CallChat}
+            options={{
+              animation: 'fade',
+            }}
+          />
+          <Stack.Screen
+            name="ChatScreen"
+            component={ChatScreen}
+            options={{
+              animation: 'slide_from_right',
+            }}
+          />
           <Stack.Screen name="Wallet" component={Wallet} />
           <Stack.Screen name="About" component={About} />
           <Stack.Screen name="Notification" component={Notification} />
