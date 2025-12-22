@@ -479,6 +479,8 @@ const AllBookings = () => {
   const route = useRoute();
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
+  const zegoAudioButtonRef = useRef<any>(null);
+  const zegoVideoButtonRef = useRef<any>(null);
 
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [selectedTag, setSelectedTag] = useState<(typeof TAGS)[number]>('All');
@@ -615,10 +617,13 @@ const AllBookings = () => {
     ) {
       dispatch(setSession(item.callSession));
       dispatch(setOtherUser(item.callSession.astrologer));
-      navigation.navigate('CallScreen', {
-        sessionId: item.callSessionId,
-        type: item.sessionType,
-      });
+      if (item.sessionType === 'AUDIO') {
+        zegoAudioButtonRef?.current?.onPress?.();
+      }
+
+      if (item.sessionType === 'VIDEO') {
+        zegoVideoButtonRef?.current?.onPress?.();
+      }
     }
   };
 
@@ -695,59 +700,66 @@ const AllBookings = () => {
         </Text>
 
         <Text style={{marginTop: 6}}>Reason: {item.reason}</Text>
-        <Text>
+        {/* <Text>
           {item?.callSession?.astrologer?.mobile +
             item?.astrologer?.name?.slice(0, 20)}
-        </Text>
+        </Text> */}
 
         {(item.status === 'APPROVED' ||
           item.status === 'COMPLETED' ||
-          item.status === 'Confirmed') && (
-          <TouchableOpacity
-            disabled={isJoinDisabled}
-            onPress={() => handleJoinSession(item)}
-            style={{
-              marginTop: 14,
-              backgroundColor: isJoinDisabled
-                ? COLORS.theme.gray.light
-                : COLORS.theme.primary,
-              paddingVertical: 10,
-              borderRadius: 10,
-              alignItems: 'center',
-            }}>
-            <Text style={{color: '#fff', fontWeight: '600'}}>
-              {isJoinDisabled
-                ? 'Waiting for Session'
-                : `Join ${item.sessionType}`}
-            </Text>
-          </TouchableOpacity>
-        )}
+          item.status === 'Confirmed') &&
+          item.sessionType === 'CHAT' && (
+            <TouchableOpacity
+              disabled={isJoinDisabled}
+              onPress={() => handleJoinSession(item)}
+              style={{
+                marginTop: 14,
+                backgroundColor: isJoinDisabled
+                  ? COLORS.theme.gray.light
+                  : COLORS.theme.primary,
+                paddingVertical: 10,
+                borderRadius: 10,
+                alignItems: 'center',
+              }}>
+              <Text style={{color: '#fff', fontWeight: '600'}}>
+                {isJoinDisabled
+                  ? 'Waiting for Session'
+                  : `Join ${item.sessionType}`}
+              </Text>
+            </TouchableOpacity>
+          )}
 
-        {item.sessionType === 'AUDIO' && item.status === 'APPROVED' && (
-          <ZegoSendCallInvitationButton
-            invitees={[
-              {
-                userID: item?.callSession?.astrologer?.mobile,
-                userName: item?.astrologer?.name?.slice(0, 20),
-              },
-            ]}
-            isVideoCall={false}
-            resourceID={'astrosevaa'}
-          />
-        )}
+        <View style={{marginTop: verticalScale(8)}}>
+          {item.sessionType === 'AUDIO' && item.status === 'APPROVED' && (
+            <ZegoSendCallInvitationButton
+              ref={zegoAudioButtonRef}
+              invitees={[
+                {
+                  userID: item?.callSession?.astrologer?.mobile,
+                  userName: item?.astrologer?.name?.slice(0, 20),
+                },
+              ]}
+              isVideoCall={false}
+              resourceID={'astrosevaa'}
+              style={{width: 0, height: 0}}
+            />
+          )}
 
-        {item.sessionType === 'VIDEO' && item.status === 'APPROVED' && (
-          <ZegoSendCallInvitationButton
-            invitees={[
-              {
-                userID: item?.callSession?.astrologer?.mobile,
-                userName: item?.astrologer?.name?.slice(0, 20),
-              },
-            ]}
-            isVideoCall={true}
-            resourceID={'astrosevaa'}
-          />
-        )}
+          {item.sessionType === 'VIDEO' && item.status === 'APPROVED' && (
+            <ZegoSendCallInvitationButton
+              ref={zegoVideoButtonRef}
+              invitees={[
+                {
+                  userID: item?.callSession?.astrologer?.mobile,
+                  userName: item?.astrologer?.name?.slice(0, 20),
+                },
+              ]}
+              isVideoCall={true}
+              resourceID={'astrosevaa'}
+              style={{width: 0, height: 0}}
+            />
+          )}
+        </View>
 
         {item.status === 'PENDING' && (
           <TouchableOpacity

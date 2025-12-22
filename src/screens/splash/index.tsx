@@ -25,12 +25,12 @@ export default function SplashScreen({}) {
         duration: 500,
         useNativeDriver: true,
       }).start(() => {
-        isAuthenticated
-          ? navigation.reset({
-              index: 0,
-              routes: [{name: 'MainTabs'}],
-            })
-          : '';
+        // isAuthenticated
+        //   ? navigation.reset({
+        //       index: 0,
+        //       routes: [{name: 'MainTabs'}],
+        //     })
+        //   : '';
       });
     }, 2000); // Animation duration
   }, []);

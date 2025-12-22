@@ -161,12 +161,16 @@ export default function RootNavigator() {
   //   }
   // }, [isConnected, isAuthenticated]);
 
+  if (loading) {
+    return <SplashScreen />;
+  }
+
   return (
     <Stack.Navigator
       screenOptions={{headerShown: false}}
-      initialRouteName="Splash">
+      initialRouteName={isAuthenticated ? 'MainTabs' : 'Register'}>
       {/* Public screens (no bottom tabs) */}
-      <Stack.Screen name="Splash" component={SplashScreen} />
+      {/* <Stack.Screen name="Splash" component={SplashScreen} /> */}
 
       {!isAuthenticated ? (
         <>
