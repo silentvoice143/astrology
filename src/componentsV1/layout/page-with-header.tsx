@@ -8,6 +8,7 @@ import {useWebSocket} from '../../hooks/use-socket-new';
 import {logout} from '../../store/reducer/auth';
 import {useNavigation} from '@react-navigation/native';
 import {COLORS} from '../../constants/colors';
+import {useScrollToTopOnFocus} from '../../hooks/useScrollToTopOnFocus';
 
 interface PageWithHeaderProps {
   children: React.ReactNode;
@@ -27,6 +28,7 @@ const PageWithHeader = ({
   title = '',
 }: PageWithHeaderProps) => {
   const [scrolled, setScrolled] = React.useState(true);
+  const scrollRef = useScrollToTopOnFocus<ScrollView>();
   const sidebarRef = useRef<SidebarRef>(null);
   const dispatch = useAppDispatch();
   const {user} = useAppSelector((state: any) => state.auth);
@@ -73,6 +75,7 @@ const PageWithHeader = ({
       {/* Render ScrollView OR Simple View */}
       {scrollEnabled ? (
         <ScrollView
+          ref={scrollRef}
           showsVerticalScrollIndicator={false}
           scrollEventThrottle={16}
           onScroll={e => {

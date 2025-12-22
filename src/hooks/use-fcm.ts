@@ -155,6 +155,7 @@ import {useAppDispatch} from '../hooks/redux-hook';
 import {registerDevice} from '../store/reducer/auth';
 import {handleNotificationNavigation} from '../utils/notification-handler';
 import {markNotificationRead} from '../store/reducer/notifications';
+import {setOtherUser, setSession} from '../store/reducer/session';
 
 export default function useFcm(isAuthenticated: boolean) {
   const dispatch = useAppDispatch();
@@ -201,6 +202,7 @@ export default function useFcm(isAuthenticated: boolean) {
           messaging,
           async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
             console.log('Foreground message:', remoteMessage);
+
             Toast.show({
               type: 'info',
               text1: remoteMessage.notification?.title ?? 'New Message',
@@ -218,8 +220,15 @@ export default function useFcm(isAuthenticated: boolean) {
         // );
         onOpenedUnsub.current = onNotificationOpenedApp(
           messaging,
-          remoteMessage => {
+          (remoteMessage: any) => {
             if (remoteMessage?.data) {
+              console.log(
+                remoteMessage?.data,
+                '----------------------------------------------------------------------------------------caht message',
+              );
+              const decodedData = JSON.parse(remoteMessage?.data?.session);
+              dispatch(setOtherUser(decodedData.astrologer));
+              dispatch(setSession(decodedData));
               handleNotificationNavigation(remoteMessage.data);
               if (remoteMessage.data.type !== 'POST_CREATED') {
                 dispatch(markNotificationRead(remoteMessage.data.id));
@@ -233,7 +242,8 @@ export default function useFcm(isAuthenticated: boolean) {
         // if (initialMessage) {
         //   console.log('Opened from quit state:', initialMessage.notification);
         // }
-        const initialMessage = await getInitialNotification(messaging);
+        const initialMessage: any = await getInitialNotification(messaging);
+
         if (initialMessage?.data) {
           handleNotificationNavigation(initialMessage.data);
           if (initialMessage.data.type !== 'POST_CREATED') {

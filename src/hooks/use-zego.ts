@@ -55,7 +55,7 @@ export function useZegoAndFCM(
           [ZIM, ZPNs],
           {
             ringtoneConfig: {
-              incomingCallFileName: 'notification_sound.mp3',
+              incomingCallFileName: 'zego_incoming.mp3',
               outgoingCallFileName: 'notification_sound.mp3',
             },
             androidNotificationConfig: {

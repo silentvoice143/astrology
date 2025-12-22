@@ -9,7 +9,7 @@ import {
   ScrollView,
 } from 'react-native';
 import {scale, verticalScale} from '../utils/sizer';
-import {colors, themeColors} from '../constants/colors';
+import {COLORS, colors, themeColors} from '../constants/colors';
 
 type TabOption = {
   key: string;
@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   activeTab: {
-    backgroundColor: themeColors.surface.primarySurface,
+    backgroundColor: COLORS.theme.primary,
     shadowColor: colors.secondarybtn,
     shadowOffset: {width: 0, height: 2},
     shadowOpacity: 0.25,

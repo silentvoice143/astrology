@@ -6,15 +6,19 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
+import React, {useCallback, useEffect, useRef, useState} from 'react';
 import ChatHistoryCard from '../../components/ChatHistoryCard';
 import CallHistoryCard from '../../components/CallHistoryCard';
 import {scale, verticalScale} from '../../utils/sizer';
 import {COLORS, colors, themeColors} from '../../constants/colors';
 import {textStyle} from '../../constants/text-style';
 import Tab from '../../components/tab';
-import {useIsFocused, useNavigation, useRoute} from '@react-navigation/native';
-import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
+import {
+  useFocusEffect,
+  useIsFocused,
+  useNavigation,
+} from '@react-navigation/native';
+import {useAppDispatch} from '../../hooks/redux-hook';
 import {
   getCallHistory,
   getChatHistory,
@@ -22,96 +26,131 @@ import {
   setSession,
 } from '../../store/reducer/session';
 import {useUserRole} from '../../hooks/use-role';
-import {CallSession, ChatSession, UserDetail} from '../../utils/types';
+import {CallSession, ChatSession} from '../../utils/types';
 import AboutIcon from '../../assets/icons/about-icon';
 import PageWithHeader from '../../componentsV1/layout/page-with-header';
 
 const CallChat = () => {
-  const onEndReachedCalledDuringMomentum = useRef(false);
-  const [search, setSearch] = useState('');
-  const [headerBgColor] = useState(colors.background);
-  const [activeTab, setActiveTab] = useState('chat');
   const navigation = useNavigation<any>();
-  const [messageItems, setMessageItems] = useState<ChatSession[]>([]);
-  const [callItems, setCallItems] = useState<CallSession[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [hasMore, setHasMore] = useState(true);
-  const [initialLoadDone, setInitialLoadDone] = useState(false);
   const role = useUserRole();
-
   const dispatch = useAppDispatch();
   const isFocused = useIsFocused();
 
-  const resetPagination = () => {
+  const [activeTab, setActiveTab] = useState<'chat' | 'call'>('chat');
+
+  // Chat states
+  const [chatItems, setChatItems] = useState<ChatSession[]>([]);
+  const [chatPage, setChatPage] = useState(1);
+  const [chatLoading, setChatLoading] = useState(false);
+  const [chatHasMore, setChatHasMore] = useState(true);
+  const [chatInitialLoadDone, setChatInitialLoadDone] = useState(false);
+
+  // Call states
+  const [callItems, setCallItems] = useState<CallSession[]>([]);
+  const [callPage, setCallPage] = useState(1);
+  const [callLoading, setCallLoading] = useState(false);
+  const [callHasMore, setCallHasMore] = useState(true);
+  const [callInitialLoadDone, setCallInitialLoadDone] = useState(false);
+
+  // Momentum refs to avoid multiple pagination calls
+  const chatMomentumRef = useRef(false);
+  const callMomentumRef = useRef(false);
+
+  // Reset pagination when tab changes
+  const resetTabPagination = (tab: 'chat' | 'call') => {
+    // if (tab === 'chat') {
+    //   setChatItems([]);
+    //   setChatPage(1);
+    //   setChatHasMore(true);
+    //   setChatInitialLoadDone(false);
+    // } else {
+    //   setCallItems([]);
+    //   setCallPage(1);
+    //   setCallHasMore(true);
+    //   setCallInitialLoadDone(false);
+    // }
+    setChatItems([]);
+    setChatPage(1);
+    setChatHasMore(true);
+    setChatInitialLoadDone(false);
     setCallItems([]);
-    setMessageItems([]);
-    setCurrentPage(1);
-    setHasMore(true);
+    setCallPage(1);
+    setCallHasMore(true);
+    setCallInitialLoadDone(false);
   };
 
   const getChatHistoryDetail = async (page: number) => {
-    if (loading || !hasMore) return;
+    if (chatLoading || !chatHasMore) return;
     try {
-      setLoading(true);
+      setChatLoading(true);
       const payload = await dispatch(
-        getChatHistory(`?page=${page}&limit=${5}`),
+        getChatHistory(`?page=${page}&limit=10`),
       ).unwrap();
-      console.log('bpdyy----', payload);
       if (payload.success) {
-        setMessageItems(prev => [...prev, ...payload.chatHistory]);
-        setCurrentPage(payload.currentPage);
-        setHasMore(!payload.isLastPage);
-        if (page === 1) {
-          setInitialLoadDone(true);
-        }
+        setChatItems(prev =>
+          page === 1 ? payload.chatHistory : [...prev, ...payload.chatHistory],
+        );
+        setChatPage(payload.currentPage);
+        setChatHasMore(!payload.isLastPage);
+        if (page === 1) setChatInitialLoadDone(true);
       } else {
-        setMessageItems([]);
+        setChatItems([]);
       }
     } catch (err) {
+      console.log('Chat history error', err);
     } finally {
-      setLoading(false);
+      setChatLoading(false);
     }
   };
 
   const getCallHistoryDetail = async (page: number) => {
-    if (loading || !hasMore) return;
+    if (callLoading || !callHasMore) return;
     try {
-      setLoading(true);
+      setCallLoading(true);
       const payload = await dispatch(
-        getCallHistory(`?page=${page}&limit=${5}`),
+        getCallHistory(`?page=${page}&limit=10`),
       ).unwrap();
-
+      console.log(payload, '-------call history data');
       if (payload.success) {
-        setCallItems(prev => [...prev, ...payload.chatHistory]);
-        setCurrentPage(payload.currentPage);
-        setHasMore(!payload.isLastPage);
-        if (page === 1) {
-          setInitialLoadDone(true);
-        }
+        // Make sure to use correct field
+        const history = payload.callHistory || payload.chatHistory || [];
+        setCallItems(prev => (page === 1 ? history : [...prev, ...history]));
+        setCallPage(payload.currentPage);
+        setCallHasMore(!payload.isLastPage);
+        if (page === 1) setCallInitialLoadDone(true);
       } else {
         setCallItems([]);
       }
     } catch (err) {
+      console.log('Call history error', err);
     } finally {
-      setLoading(false);
+      setCallLoading(false);
     }
   };
 
-  useEffect(() => {
-    if (isFocused) {
-      resetPagination();
+  // Fetch data when screen focused or tab changes
+  // useEffect(() => {
+  //   if (isFocused) {
+  //     resetTabPagination(activeTab);
+  //     if (activeTab === 'chat') {
+  //       getChatHistoryDetail(1);
+  //     } else {
+  //       getCallHistoryDetail(1);
+  //     }
+  //   }
+  // }, [isFocused, activeTab]);
 
-      // Delay fetching to let reset happen cleanly
-      setTimeout(() => {
-        if (activeTab === 'chat') {
-          getChatHistoryDetail(1);
-        } else {
-          getCallHistoryDetail(1);
-        }
-      }, 50);
-    }
-  }, [isFocused, activeTab]);
+  useFocusEffect(
+    useCallback(() => {
+      // Reset pagination and fetch data for active tab
+      resetTabPagination(activeTab);
+      if (activeTab === 'chat') {
+        getChatHistoryDetail(1);
+      } else {
+        getCallHistoryDetail(1);
+      }
+    }, [activeTab]),
+  );
 
   const renderMessageItem = ({item}: {item: ChatSession}) => {
     const data = item.astrologer;
@@ -133,25 +172,22 @@ const CallChat = () => {
     </TouchableOpacity>
   );
 
-  const getPlaceholderText = () => {
-    return activeTab === 'messages'
-      ? 'Search for messages...'
-      : 'Search for calls...';
+  const onEndReachedChat = () => {
+    if (!chatMomentumRef.current && chatHasMore) {
+      getChatHistoryDetail(chatPage + 1);
+      chatMomentumRef.current = true;
+    }
+  };
+
+  const onEndReachedCall = () => {
+    if (!callMomentumRef.current && callHasMore) {
+      getCallHistoryDetail(callPage + 1);
+      callMomentumRef.current = true;
+    }
   };
 
   return (
     <PageWithHeader title={'History'} scrollEnabled={false}>
-      {/* <View style={{paddingTop: verticalScale(20)}}>
-        <View style={{paddingHorizontal: scale(24)}}>
-          <AnimatedSearchInput
-            placeholder={getPlaceholderText()}
-            unfocusedBorderColor={themeColors.border.secondary}
-            enableShadow={true}
-            focusedBorderColor={themeColors.border.secondary}
-          />
-        </View>
-      </View> */}
-
       {/* Tab */}
       <View>
         <Tab
@@ -159,56 +195,36 @@ const CallChat = () => {
             {key: 'chat', label: 'Chat'},
             {key: 'call', label: 'Call'},
           ]}
-          onTabChange={tab => setActiveTab(tab)}
+          onTabChange={(tab: 'chat' | 'call') => setActiveTab(tab)}
           initialTab="chat"
         />
       </View>
 
-      {/* Chat Tab */}
+      {/* Chat or Call List */}
       {activeTab === 'chat' ? (
         <FlatList
-          data={messageItems}
+          data={chatItems}
           renderItem={renderMessageItem}
           keyExtractor={(item, index) =>
             `${item.id}-${item.startedAt}-${index}`
           }
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
-          onEndReached={() => {
-            if (
-              !onEndReachedCalledDuringMomentum.current &&
-              initialLoadDone &&
-              hasMore
-            ) {
-              getChatHistoryDetail(currentPage + 1);
-              onEndReachedCalledDuringMomentum.current = true;
-            }
-          }}
+          onEndReached={onEndReachedChat}
           onMomentumScrollBegin={() => {
-            onEndReachedCalledDuringMomentum.current = false;
+            chatMomentumRef.current = false;
           }}
           onEndReachedThreshold={0.2}
           ListFooterComponent={
-            loading ? (
-              <View
-                style={{
-                  flex: 1,
-                  minHeight: 400,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
+            chatLoading ? (
+              <View style={styles.loader}>
                 <ActivityIndicator size="small" style={{marginVertical: 10}} />
               </View>
             ) : null
           }
           ListEmptyComponent={
-            !loading && initialLoadDone ? (
-              <View
-                style={{
-                  height: verticalScale(400),
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
+            !chatLoading && chatInitialLoadDone ? (
+              <View style={styles.empty}>
                 <AboutIcon color={themeColors.status.info.dark} />
                 <Text style={[textStyle.fs_mont_16_500]}>No Chat History</Text>
               </View>
@@ -224,41 +240,21 @@ const CallChat = () => {
           }
           contentContainerStyle={styles.listContent}
           showsVerticalScrollIndicator={false}
-          onEndReached={() => {
-            if (
-              !onEndReachedCalledDuringMomentum.current &&
-              initialLoadDone &&
-              hasMore
-            ) {
-              getChatHistoryDetail(currentPage + 1);
-              onEndReachedCalledDuringMomentum.current = true;
-            }
-          }}
+          onEndReached={onEndReachedCall}
           onMomentumScrollBegin={() => {
-            onEndReachedCalledDuringMomentum.current = false;
+            callMomentumRef.current = false;
           }}
           onEndReachedThreshold={0.2}
           ListFooterComponent={
-            loading ? (
-              <View
-                style={{
-                  flex: 1,
-                  minHeight: 400,
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
+            callLoading ? (
+              <View style={styles.loader}>
                 <ActivityIndicator size="small" style={{marginVertical: 10}} />
               </View>
             ) : null
           }
           ListEmptyComponent={
-            !loading && initialLoadDone ? (
-              <View
-                style={{
-                  height: verticalScale(400),
-                  justifyContent: 'center',
-                  alignItems: 'center',
-                }}>
+            !callLoading && callInitialLoadDone ? (
+              <View style={styles.empty}>
                 <AboutIcon color={themeColors.status.info.dark} />
                 <Text style={[textStyle.fs_mont_16_500]}>No Call History</Text>
               </View>
@@ -276,6 +272,17 @@ const styles = StyleSheet.create({
   listContent: {
     paddingTop: verticalScale(16),
     paddingHorizontal: scale(16),
-    paddingBottom: verticalScale(12),
+    paddingBottom: verticalScale(80),
+  },
+  loader: {
+    flex: 1,
+    minHeight: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  empty: {
+    height: verticalScale(400),
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });

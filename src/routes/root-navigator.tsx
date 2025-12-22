@@ -45,7 +45,7 @@ import {
 import {requestAndroidCallPermissions} from '../utils/requestPermission';
 import ChatScreen from '../screens/call&chat/chatScreen';
 
-const Stack = createNativeStackNavigator();
+const Stack = createNativeStackNavigator<any>();
 
 export default function RootNavigator() {
   const dispatch = useAppDispatch();
@@ -126,10 +126,10 @@ export default function RootNavigator() {
         // }
       } else {
         // no token → logout
-        navigation.reset({
-          index: 0,
-          routes: [{name: 'Register'}],
-        });
+        // navigation.reset({
+        //   index: 0,
+        //   routes: [{name: 'Register'}],
+        // });
         setLoading(false);
       }
     };

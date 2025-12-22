@@ -29,7 +29,7 @@ import {RootState} from '../../store';
 import Avatar from '../../components/avatar';
 import {textStyle} from '../../constants/text-style';
 import {moderateScale, scale, verticalScale} from '../../utils/sizer';
-import {colors, themeColors} from '../../constants/colors';
+import {COLORS, colors, themeColors} from '../../constants/colors';
 import KundliIcon from '../../assets/icons/kundli-icon-2';
 import SendIcon from '../../assets/icons/sendIcon';
 import SessionKundliModal from '../../components/session/modals/kundli-modal';
@@ -304,7 +304,10 @@ export const ChatScreen = () => {
               resizeMode="cover"
             />
           ) : (
-            <Text>{item.message}</Text>
+            <Text
+              style={{color: isMine ? COLORS.theme.white : COLORS.theme.black}}>
+              {item.message}
+            </Text>
           )}
           {/* <Text style={styles.timestamp}>
             {isMine
@@ -515,9 +518,23 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     backgroundColor: themeColors.surface.secondarySurface,
   },
-  message: {padding: 10, marginVertical: 4, borderRadius: 10, maxWidth: '75%'},
-  myMessage: {alignSelf: 'flex-end', backgroundColor: '#DCF8C6'},
-  otherMessage: {alignSelf: 'flex-start', backgroundColor: '#FFF'},
+  message: {
+    paddingVertical: 10,
+    paddingHorizontal: scale(16),
+    marginVertical: 4,
+    borderRadius: scale(20),
+    maxWidth: '75%',
+  },
+  myMessage: {
+    alignSelf: 'flex-end',
+    backgroundColor: COLORS.theme.primary,
+    borderTopRightRadius: 0,
+  },
+  otherMessage: {
+    alignSelf: 'flex-start',
+    backgroundColor: '#FFF',
+    borderTopLeftRadius: 0,
+  },
   timestamp: {fontSize: 10, color: '#555', marginTop: 4, textAlign: 'right'},
   inputArea: {
     flexDirection: 'row',
