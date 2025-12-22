@@ -59,7 +59,16 @@ export default function RootNavigator() {
 
   useSessionEvents(user?.id, isAuthenticated, isConnected);
   const {fcmToken} = useFcm(isAuthenticated);
-  useZegoAndFCM(user?.mobile, user?.name, isAuthenticated);
+  console.log(
+    user?.mobile,
+    user?.name?.slice(0, 20) || 'Guest',
+    '-----------------this is zego user',
+  );
+  useZegoAndFCM(
+    user?.mobile,
+    user?.name?.slice(0, 20) || 'Guest',
+    isAuthenticated,
+  );
 
   const handleLogout = async () => {
     console.log('checkauth logout-----------');

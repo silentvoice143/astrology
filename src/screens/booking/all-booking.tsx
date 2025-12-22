@@ -448,6 +448,7 @@ import {useAppDispatch} from '../../hooks/redux-hook';
 import {getMyAppointment} from '../../store/reducer/booking';
 import {cancelMyAppointment} from '../../store/reducer/booking/action';
 import {setOtherUser, setSession} from '../../store/reducer/session';
+import {ZegoSendCallInvitationButton} from '@zegocloud/zego-uikit-prebuilt-call-rn';
 
 const TAGS = ['All', 'Pending', 'Confirmed', 'Completed', 'Cancelled'] as const;
 
@@ -458,7 +459,7 @@ type Booking = {
   reason: string;
   status: 'PENDING' | 'APPROVED' | 'COMPLETED' | 'CANCELLED' | string;
   bookingType: 'ONLINE' | 'OFFLINE';
-  sessionType: 'CHAT' | 'VIDEO' | 'CALL';
+  sessionType: 'CHAT' | 'VIDEO' | 'AUDIO';
   chatSessionId: string | null;
   callSessionId: string | null;
   totalCost: number;
@@ -466,6 +467,7 @@ type Booking = {
     id: string;
     name: string;
     imgUri: string | null;
+    mobile: string;
   };
   chatSession: any;
   callSession: any;
@@ -608,7 +610,7 @@ const AllBookings = () => {
         sessionId: item.chatSessionId,
       });
     } else if (
-      (item.sessionType === 'CALL' || item.sessionType === 'VIDEO') &&
+      (item.sessionType === 'AUDIO' || item.sessionType === 'VIDEO') &&
       item.callSessionId
     ) {
       dispatch(setSession(item.callSession));
@@ -635,11 +637,12 @@ const AllBookings = () => {
       console.error('cancel booking error', err);
     }
   };
+  console.log(bookings, '--------bookings');
 
   const renderBookingCard = ({item}: {item: Booking}) => {
     const isJoinDisabled =
       (item.sessionType === 'CHAT' && !item.chatSessionId) ||
-      ((item.sessionType === 'CALL' || item.sessionType === 'VIDEO') &&
+      ((item.sessionType === 'AUDIO' || item.sessionType === 'VIDEO') &&
         !item.callSessionId);
 
     return (
@@ -692,6 +695,10 @@ const AllBookings = () => {
         </Text>
 
         <Text style={{marginTop: 6}}>Reason: {item.reason}</Text>
+        <Text>
+          {item?.callSession?.astrologer?.mobile +
+            item?.astrologer?.name?.slice(0, 20)}
+        </Text>
 
         {(item.status === 'APPROVED' ||
           item.status === 'COMPLETED' ||
@@ -714,6 +721,32 @@ const AllBookings = () => {
                 : `Join ${item.sessionType}`}
             </Text>
           </TouchableOpacity>
+        )}
+
+        {item.sessionType === 'AUDIO' && item.status === 'APPROVED' && (
+          <ZegoSendCallInvitationButton
+            invitees={[
+              {
+                userID: item?.callSession?.astrologer?.mobile,
+                userName: item?.astrologer?.name?.slice(0, 20),
+              },
+            ]}
+            isVideoCall={false}
+            resourceID={'astrosevaa'}
+          />
+        )}
+
+        {item.sessionType === 'VIDEO' && item.status === 'APPROVED' && (
+          <ZegoSendCallInvitationButton
+            invitees={[
+              {
+                userID: item?.callSession?.astrologer?.mobile,
+                userName: item?.astrologer?.name?.slice(0, 20),
+              },
+            ]}
+            isVideoCall={true}
+            resourceID={'astrosevaa'}
+          />
         )}
 
         {item.status === 'PENDING' && (

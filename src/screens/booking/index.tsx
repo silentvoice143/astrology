@@ -163,6 +163,8 @@ const Booking = () => {
     !selectedDate ||
     loading ||
     (bookinType[0] === 'ONLINE' && selectedSlots.length === 0);
+
+  const today = new Date().toISOString().split('T')[0];
   return (
     <PageWithHeader themeMode="light" title="Book Appointment">
       <View
@@ -175,6 +177,7 @@ const Booking = () => {
         }}>
         {/* Calendar */}
         <Calendar
+          minDate={today}
           style={{
             borderWidth: 1,
             borderColor: COLORS.theme.secondary,
