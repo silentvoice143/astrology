@@ -22,6 +22,7 @@ const Feeds = () => {
   const [loading, setLoading] = useState(false); // loading for initial / more
   const [refreshing, setRefreshing] = useState(false);
   const [isLastPage, setIsLastPage] = useState(false);
+  console.log(posts, 'postssss----');
 
   // prevent multiple onEndReached triggers
   const onEndReachedCalledDuringMomentum = useRef(true);
@@ -150,6 +151,10 @@ const Feeds = () => {
               postImages={item.postImages}
               caption={item.caption}
               astrologerExpertise={item.astrologerExpertise}
+              postId={item.id}
+              initialCommentCount={item.raw.commentCount}
+              initialLikesCount={item.raw.likeCount}
+              initialLiked={!item.raw.liked}
             />
           )}
           onEndReachedThreshold={0.5}
