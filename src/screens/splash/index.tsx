@@ -8,14 +8,19 @@ import {
   StatusBar,
 } from 'react-native';
 import LottieView from 'lottie-react-native';
-import {useNavigation} from '@react-navigation/native';
+import {useNavigation, useRoute} from '@react-navigation/native';
 import {useAppSelector} from '../../hooks/redux-hook';
 import {COLORS} from '../../constants/colors';
 const {height, width} = Dimensions.get('window');
 export default function SplashScreen({}) {
-  const navigation = useNavigation<any>();
+  // const route = useRoute();
+  // const navigation = useNavigation<any>();
   const opacity = useRef(new Animated.Value(1)).current;
   const {isAuthenticated} = useAppSelector((state: any) => state.auth);
+  const publicRoute = ['Login', 'Register'];
+  const isPublic = (route: string) => {
+    return publicRoute.includes(route);
+  };
 
   useEffect(() => {
     // Run animation then fade out
@@ -25,7 +30,7 @@ export default function SplashScreen({}) {
         duration: 500,
         useNativeDriver: true,
       }).start(() => {
-        // isAuthenticated
+        // isAuthenticated && isPublic(route?.name)
         //   ? navigation.reset({
         //       index: 0,
         //       routes: [{name: 'MainTabs'}],

@@ -84,6 +84,12 @@ const Login = () => {
       const response = await dispatch(loginUserPassword(payload)).unwrap();
       console.log('Login response:', response);
       if (response.success) {
+        setTimeout(() => {
+          navigation.reset({
+            index: 0,
+            routes: [{name: 'Maintabs'}],
+          });
+        }, 2000);
       }
     } catch (err: any) {
       // Toast.show({type: 'error', text1: err?.message || 'Login failed'});

@@ -172,25 +172,13 @@ export default function RootNavigator() {
       {/* Public screens (no bottom tabs) */}
       {/* <Stack.Screen name="Splash" component={SplashScreen} /> */}
 
-      {!isAuthenticated ? (
+      {!token ? (
         <>
           <Stack.Screen name="Register" component={Register} />
           <Stack.Screen name="Login" component={Login} />
         </>
       ) : (
         <>
-          <Stack.Screen
-            options={{headerShown: false}}
-            // DO NOT change the name
-            name="ZegoUIKitPrebuiltCallWaitingScreen"
-            component={ZegoUIKitPrebuiltCallWaitingScreen}
-          />
-          <Stack.Screen
-            options={{headerShown: false}}
-            // DO NOT change the name
-            name="ZegoUIKitPrebuiltCallInCallScreen"
-            component={ZegoUIKitPrebuiltCallInCallScreen}
-          />
           <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
           <Stack.Screen name="Profile" component={ProfilePage} />
           <Stack.Screen name="ProfileEdit" component={ProfileEdit} />
@@ -207,6 +195,18 @@ export default function RootNavigator() {
             options={{
               animation: 'slide_from_right',
             }}
+          />
+          <Stack.Screen
+            options={{headerShown: false}}
+            // DO NOT change the name
+            name="ZegoUIKitPrebuiltCallWaitingScreen"
+            component={ZegoUIKitPrebuiltCallWaitingScreen}
+          />
+          <Stack.Screen
+            options={{headerShown: false}}
+            // DO NOT change the name
+            name="ZegoUIKitPrebuiltCallInCallScreen"
+            component={ZegoUIKitPrebuiltCallInCallScreen}
           />
           <Stack.Screen name="Wallet" component={Wallet} />
           <Stack.Screen name="About" component={About} />
