@@ -61,7 +61,7 @@ export const ChatScreen = () => {
       : useAppSelector((state: RootState) => state.session.session?.astrologer);
   const otherUserId = !session ? tempOtherUser?.id : otherUser?.id;
 
-  const {subscribe, send, unsubscribe} = useWebSocket(userId);
+  const {subscribe, send, unsubscribe, isConnected} = useWebSocket(userId);
   const [timer, setTimer] = useState<string>('');
   const {messages} = useAppSelector(state => state.session);
 
@@ -380,7 +380,17 @@ export const ChatScreen = () => {
         behavior={Platform.select({ios: 'padding', android: 'height'})}
         keyboardVerticalOffset={isKeyboardOpen ? 32 : 0}>
         <>
-          {session?.status === 'ACTIVE' && timer && <Timer timer={timer} />}
+          {!isConnected && (
+            <View
+              style={{
+                backgroundColor: COLORS.status.error.light,
+                alignItems: 'center',
+              }}>
+              <Text style={{color: COLORS.status.success.base}}>
+                Connecting...
+              </Text>
+            </View>
+          )}
 
           <KeyboardAwareFlatList
             // ref={flatListRef}
@@ -428,7 +438,7 @@ export const ChatScreen = () => {
             <View style={{flexDirection: 'row', gap: scale(8)}}>
               <TouchableOpacity
                 onPress={
-                  !!session && session.status === 'ACTIVE'
+                  !!session && session.status === 'ACTIVE' && isConnected
                     ? handleSend
                     : () => {}
                 }

@@ -2,10 +2,14 @@ import {useEffect} from 'react';
 import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import * as ZIM from 'zego-zim-react-native';
 import * as ZPNs from 'zego-zpns-react-native';
+import Config from 'react-native-config';
 
-const appID = 2143779193;
-const appSign =
-  'ea994b83474dccbe389acf9387f7420520799fb45f881119e8e092d90a1d923e';
+// const appID = 2143779193;
+// const appSign =
+//   'ea994b83474dccbe389acf9387f7420520799fb45f881119e8e092d90a1d923e';
+
+const appID = Number(Config.ZEGO_APP_ID);
+const appSign = Config.ZEGO_APP_SIGN;
 
 export function useZegoAndFCM(
   userId: string | undefined,
@@ -59,8 +63,8 @@ export function useZegoAndFCM(
               outgoingCallFileName: 'notification_sound.mp3',
             },
             androidNotificationConfig: {
-              channelID: 'astrosevaa',
-              channelName: 'astrosevaa',
+              channelID: Config.ZEGO_CHANNEl_ID,
+              channelName: Config.ZEGO_CHANNEl_NAME,
             },
           },
         );

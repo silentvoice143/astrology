@@ -6,6 +6,7 @@ import {
   TouchableOpacity,
   StyleSheet,
   ViewToken,
+  ActivityIndicator,
 } from 'react-native';
 import PageWithHeader from '../../componentsV1/layout/page-with-header';
 import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
@@ -36,50 +37,76 @@ const Notification = () => {
     state => state.notifications,
   );
   const [refreshing, setRefreshing] = useState(false);
-  const [page, setPage] = useState(1);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  // Track if we're currently fetching to prevent duplicate requests
+  const isFetchingRef = useRef(false);
 
   const onRefresh = async () => {
+    if (isFetchingRef.current) return;
+
     try {
       setRefreshing(true);
-      setPage(1);
-      await dispatch(getAllNotifications({page: 1, limit: 10}));
+      isFetchingRef.current = true;
+      await dispatch(getAllNotifications({page: 1, limit: 10})).unwrap();
+    } catch (error) {
+      console.error('Refresh error:', error);
     } finally {
       setRefreshing(false);
+      isFetchingRef.current = false;
     }
   };
 
   /** 🔹 Initial load */
   useEffect(() => {
-    dispatch(getAllNotifications({page: 1, limit: 10}));
+    if (!isFetchingRef.current) {
+      isFetchingRef.current = true;
+      dispatch(getAllNotifications({page: 1, limit: 10})).finally(() => {
+        isFetchingRef.current = false;
+      });
+    }
   }, []);
 
-  /** 🔹 Pagination */
-  const loadMore = () => {
-    if (!loading && !isLastPage) {
-      const nextPage = page + 1;
-      setPage(nextPage);
-      dispatch(getAllNotifications({page: nextPage, limit: 10}));
+  /** 🔹 Pagination - Fixed to use currentPage from Redux */
+  const loadMore = useCallback(async () => {
+    // Prevent multiple simultaneous requests
+    if (isFetchingRef.current || loading || isLastPage || refreshing) {
+      return;
     }
-  };
+
+    try {
+      setLoadingMore(true);
+      isFetchingRef.current = true;
+      const nextPage = currentPage + 1;
+      await dispatch(getAllNotifications({page: nextPage, limit: 10})).unwrap();
+    } catch (error) {
+      console.error('Load more error:', error);
+    } finally {
+      setLoadingMore(false);
+      isFetchingRef.current = false;
+    }
+  }, [dispatch, loading, isLastPage, currentPage, refreshing]);
 
   /** 🔹 Mark visible unread notifications as read */
   const onViewableItemsChanged = useRef(
-    async ({viewableItems}: {viewableItems: ViewToken[]}) => {
+    ({viewableItems}: {viewableItems: ViewToken[]}) => {
       const unreadIds = viewableItems
         .filter(v => v.item?.read === false)
         .map(v => v.item.id);
 
       if (!unreadIds.length) return;
 
-      await Promise.all(
-        unreadIds.map(id => dispatch(markNotificationRead(id)).unwrap()),
-      );
+      // Fire and forget - don't wait for these to complete
+      unreadIds.forEach(id => {
+        dispatch(markNotificationRead(id));
+      });
     },
   ).current;
 
-  const viewabilityConfig = {
+  const viewabilityConfig = useRef({
     itemVisiblePercentThreshold: 60,
-  };
+    minimumViewTime: 500, // Wait 500ms before marking as viewed
+  }).current;
 
   const renderItem = useCallback(({item}: any) => {
     return (
@@ -120,7 +147,31 @@ const Notification = () => {
     );
   }, []);
 
-  console.log(notifications, '-----notifications');
+  const renderFooter = useCallback(() => {
+    if (!loadingMore) return null;
+
+    return (
+      <View style={styles.footerLoader}>
+        <ActivityIndicator size="small" color="#2563EB" />
+      </View>
+    );
+  }, [loadingMore]);
+
+  const renderEmpty = useCallback(() => {
+    if (loading) {
+      return (
+        <View style={styles.emptyContainer}>
+          <ActivityIndicator size="large" color="#2563EB" />
+        </View>
+      );
+    }
+
+    return (
+      <View style={styles.emptyContainer}>
+        <Text style={styles.emptyText}>No notifications yet</Text>
+      </View>
+    );
+  }, [loading]);
 
   return (
     <PageWithHeader
@@ -130,17 +181,24 @@ const Notification = () => {
       <View style={styles.container}>
         <FlatList
           data={notifications}
-          keyExtractor={item => item.id}
+          keyExtractor={(item, idx) => `${item.id}-${idx}`}
           renderItem={renderItem}
           ItemSeparatorComponent={() => <View style={styles.divider} />}
+          ListFooterComponent={renderFooter}
+          ListEmptyComponent={renderEmpty}
           onEndReached={loadMore}
-          onEndReachedThreshold={0.4}
+          onEndReachedThreshold={0.3} // Trigger slightly earlier
           viewabilityConfig={viewabilityConfig}
           onViewableItemsChanged={onViewableItemsChanged}
           showsVerticalScrollIndicator={false}
-          /* ✅ Pull to refresh */
           refreshing={refreshing}
           onRefresh={onRefresh}
+          // Performance optimizations
+          removeClippedSubviews={true}
+          maxToRenderPerBatch={10}
+          updateCellsBatchingPeriod={50}
+          initialNumToRender={10}
+          windowSize={10}
         />
       </View>
     </PageWithHeader>
@@ -224,5 +282,22 @@ const styles = StyleSheet.create({
     height: 0.5,
     backgroundColor: '#e5e5e5',
     marginLeft: 70,
+  },
+
+  footerLoader: {
+    paddingVertical: 20,
+    alignItems: 'center',
+  },
+
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingVertical: 60,
+  },
+
+  emptyText: {
+    fontSize: 16,
+    color: '#888',
   },
 });

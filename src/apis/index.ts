@@ -3,10 +3,11 @@ import axios from 'axios';
 import {getTokenFromStore} from '../utils/get-token';
 import Toast from 'react-native-toast-message';
 import skipAuthPaths from './skip-path';
+import Config from 'react-native-config';
 
-// const baseUrl = 'https://89dcba806c8e.ngrok-free.app';
+// const baseUrl = 'https://fbcef6c26e2b.ngrok-free.app';
 
-const baseUrl = 'https://backend.astrosevaa.com';
+const baseUrl = Config.BASE_URL;
 
 // const baseUrl = 'https://f088e6cf3d37.ngrok-free.app';
 // const baseUrl =

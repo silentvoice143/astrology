@@ -1,10 +1,11 @@
 import {useCallback, useEffect, useState, useRef} from 'react';
 import {WebSocketService} from '../services/socket-service-new'; // Make sure this path is correct
 import {IMessage, StompSubscription} from '@stomp/stompjs';
+import Config from 'react-native-config';
 
 // Module-level singleton
 let singletonService: WebSocketService | null = null;
-const socketUrl: string = 'https://backend.astrosevaa.com/ws-chat';
+const socketUrl: string = `${Config.BASE_URL}/ws-chat`;
 
 export const useWebSocket = (userId: string) => {
   const [connected, setConnected] = useState(false);

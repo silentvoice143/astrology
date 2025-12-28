@@ -1,4 +1,3 @@
-import {notifee} from '@notifee/react-native';
 // import {useEffect, useState, useRef} from 'react';
 // import messaging, {
 //   FirebaseMessagingTypes,
@@ -245,6 +244,11 @@ export default function useFcm(isAuthenticated: boolean) {
         const initialMessage: any = await getInitialNotification(messaging);
 
         if (initialMessage?.data) {
+          const decodedData = JSON.parse(initialMessage?.data?.session);
+          if (initialMessage?.data?.type === 'CHAT_MESSAGE') {
+            dispatch(setOtherUser(decodedData.astrologer));
+            dispatch(setSession(decodedData));
+          }
           handleNotificationNavigation(initialMessage.data);
           if (initialMessage.data.type !== 'POST_CREATED') {
             dispatch(markNotificationRead(initialMessage.data.id));
