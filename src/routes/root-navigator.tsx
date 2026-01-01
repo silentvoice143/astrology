@@ -57,13 +57,13 @@ export default function RootNavigator() {
   const {connect, isConnected, disconnect, send} = useWebSocket(user?.id);
   const navigation = useNavigation<any>();
 
-  useSessionEvents(user?.id, isAuthenticated, isConnected);
-  const {fcmToken} = useFcm(isAuthenticated);
-  console.log(
-    user?.mobile,
-    user?.name?.slice(0, 20) || 'Guest',
-    '-----------------this is zego user',
-  );
+  // useSessionEvents(user?.id, isAuthenticated, isConnected);
+  // const {fcmToken} = useFcm(isAuthenticated);
+  // console.log(
+  //   user?.mobile,
+  //   user?.name?.slice(0, 20) || 'Guest',
+  //   '-----------------this is zego user',
+  // );
   useZegoAndFCM(
     user?.mobile,
     user?.name?.slice(0, 20) || 'Guest',
@@ -102,6 +102,7 @@ export default function RootNavigator() {
             console.log('User Detail fetched in checkAuth:', userDetail);
             dispatch(setAuthentication(true));
             dispatch(setUser(userDetail));
+
             requestAndroidCallPermissions();
 
             // if (!isConnected) {

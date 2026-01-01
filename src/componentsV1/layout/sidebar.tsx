@@ -1,4 +1,10 @@
-import React, {useRef, useState, useImperativeHandle, forwardRef} from 'react';
+import React, {
+  useRef,
+  useState,
+  useImperativeHandle,
+  forwardRef,
+  useEffect,
+} from 'react';
 import {
   View,
   Animated,
@@ -24,7 +30,10 @@ import LogoutIcon from '../../assets/icons/logout-icon';
 
 import {useNavigation, useRoute} from '@react-navigation/native';
 import {scale} from '../../utils/sizer';
-import {useAppSelector} from '../../hooks/redux-hook';
+import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
+import {getTransactionHistory} from '../../store/reducer/payment';
+import {setBalance} from '../../store/reducer/auth';
+import Toast from 'react-native-toast-message';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -40,6 +49,9 @@ const Sidebar = forwardRef<SidebarRef, {onLogout?: () => void}>(
     const overlayAnim = useRef(new Animated.Value(0)).current;
     const navigation = useNavigation<any>();
     const {user} = useAppSelector((state: any) => state.auth);
+    const dispatch = useAppDispatch();
+    const [loading, setLoading] = useState(false);
+    const [balance, setBalanceState] = useState(0);
 
     const navItems = [
       {
@@ -185,10 +197,54 @@ const Sidebar = forwardRef<SidebarRef, {onLogout?: () => void}>(
       }
     };
 
+    const getTransactionDetails = async () => {
+      try {
+        setLoading(true);
+        const payload = await dispatch(
+          getTransactionHistory({userId: user, query: `?page=1`}),
+        ).unwrap();
+        console.log('Transaction Payload: ', payload);
+
+        if (payload.success) {
+          setBalanceState(
+            (((payload?.wallet?.balance ?? 0) as number) -
+              (payload?.wallet?.lockedBalance ?? 0)) as number,
+          );
+          dispatch(
+            setBalance({
+              balance: payload?.wallet?.balance ?? 0,
+            }),
+          );
+        } else {
+          Toast.show({
+            type: 'error',
+            text1: 'Failed to get transactions',
+          });
+        }
+      } catch (err) {
+        console.log(err);
+        Toast.show({
+          type: 'error',
+          text1: 'Failed to get transactions',
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
     const profileImage =
       user?.gender === 'MALE' || !user?.gender
         ? require('../../assets/imgs/male.jpg')
         : require('../../assets/imgs/female.jpg');
+
+    useEffect(() => {
+      if (visible) {
+        const timer = setTimeout(() => {
+          getTransactionDetails();
+        }, 50); // small delay to avoid insertion phase
+        return () => clearTimeout(timer);
+      }
+    }, [visible]);
 
     if (!visible) return null;
 
@@ -224,7 +280,7 @@ const Sidebar = forwardRef<SidebarRef, {onLogout?: () => void}>(
               <View style={{flex: 1}}>
                 <Text style={styles.username}>{user.name}</Text>
                 <Text style={styles.balanceText}>
-                  Balance: ₹ {user?.walletBalance.toFixed(2) ?? 0}
+                  Balance: ₹ {balance.toFixed(2) ?? 0}
                 </Text>
               </View>
             </View>

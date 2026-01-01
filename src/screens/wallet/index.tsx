@@ -52,7 +52,10 @@ const Wallet = () => {
       ).unwrap();
 
       if (payload.success) {
-        setWalletBalance(payload?.wallet?.balance.toFixed(2) ?? 0);
+        setWalletBalance(
+          (((payload?.wallet?.balance ?? 0) as number) -
+            (payload?.wallet?.lockedBalance ?? 0)) as number,
+        );
         if (page === 1) {
           setTransations(payload?.wallet?.transactions);
         } else {
