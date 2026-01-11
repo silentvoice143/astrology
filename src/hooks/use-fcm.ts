@@ -185,12 +185,16 @@ export default function useFcm(isAuthenticated: boolean) {
         }
 
         const token = await getToken(messaging);
+        console.log('FCM Token:', token);
         if (mounted) setFcmToken(token);
 
         if (token) {
           setRegistering(true);
           try {
-            await dispatch(registerDevice({deviceToken: token})).unwrap();
+            const res = await dispatch(
+              registerDevice({deviceToken: token}),
+            ).unwrap();
+            console.log('Device registration response:', res);
           } finally {
             setRegistering(false);
           }
@@ -226,10 +230,12 @@ export default function useFcm(isAuthenticated: boolean) {
                 '----------------------------------------------------------------------------------------caht message',
               );
               const decodedData = JSON.parse(remoteMessage?.data?.session);
-              dispatch(setOtherUser(decodedData.astrologer));
-              dispatch(setSession(decodedData));
+              if (initialMessage?.data?.type === 'CHAT_MESSAGE') {
+                dispatch(setOtherUser(decodedData.astrologer));
+                dispatch(setSession(decodedData));
+              }
               handleNotificationNavigation(remoteMessage.data);
-              if (remoteMessage.data.type !== 'POST_CREATED') {
+              if (remoteMessage.data.id) {
                 dispatch(markNotificationRead(remoteMessage.data.id));
               }
             }
@@ -237,10 +243,6 @@ export default function useFcm(isAuthenticated: boolean) {
         );
 
         // App opened from quit state
-        // const initialMessage = await getInitialNotification(messaging);
-        // if (initialMessage) {
-        //   console.log('Opened from quit state:', initialMessage.notification);
-        // }
         const initialMessage: any = await getInitialNotification(messaging);
 
         if (initialMessage?.data) {
@@ -250,7 +252,7 @@ export default function useFcm(isAuthenticated: boolean) {
             dispatch(setSession(decodedData));
           }
           handleNotificationNavigation(initialMessage.data);
-          if (initialMessage.data.type !== 'POST_CREATED') {
+          if (initialMessage.data.id) {
             dispatch(markNotificationRead(initialMessage.data.id));
           }
         }

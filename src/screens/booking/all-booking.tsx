@@ -679,9 +679,15 @@ const AllBookings = () => {
             <Text style={[textStyle.fs_mont_16_600]}>
               {item.astrologer.name}
             </Text>
-            <Text style={{fontSize: scaleFont(12), marginTop: 2}}>
-              {getSessionTypeIcon(item.sessionType)} {item.sessionType}
-            </Text>
+            {item.bookingType === 'ONLINE' ? (
+              <Text style={{fontSize: scaleFont(12), marginTop: 2}}>
+                {getSessionTypeIcon(item.sessionType)} {item.sessionType}
+              </Text>
+            ) : (
+              <Text style={{fontSize: scaleFont(12), marginTop: 2}}>
+                🏠 Offline Appointment
+              </Text>
+            )}
           </View>
 
           <View
@@ -696,7 +702,9 @@ const AllBookings = () => {
         </View>
 
         <Text style={{marginTop: 10}}>
-          📅 {item.appointmentDate} ⏱️ {item.appointmentDuration} mins
+          📅 {item.appointmentDate}{' '}
+          {item.bookingType === 'ONLINE' &&
+            `⏱️ ${item.appointmentDuration} mins`}
         </Text>
 
         <Text style={{marginTop: 6}}>Reason: {item.reason}</Text>
@@ -705,7 +713,7 @@ const AllBookings = () => {
             item?.astrologer?.name?.slice(0, 20)}
         </Text> */}
 
-        {(item.status === 'APPROVED' ||
+        {((item.bookingType === 'ONLINE' && item.status === 'APPROVED') ||
           item.status === 'COMPLETED' ||
           item.status === 'Confirmed') &&
           item.sessionType === 'CHAT' && (

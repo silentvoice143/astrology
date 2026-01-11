@@ -54,9 +54,9 @@ const ChatHistoryCard: React.FC<ChatHistoryCardProps> = ({data, active}) => {
           </Text>
         </View>
       </View>
-      <Text style={[styles.time, textStyle.fs_mont_12_400]}>
+      {/* <Text style={[styles.time, textStyle.fs_mont_12_400]}>
         {formatRelativeDate(data.startedAt)}
-      </Text>
+      </Text> */}
     </View>
   );
 };

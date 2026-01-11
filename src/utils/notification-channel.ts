@@ -1,13 +1,6 @@
 import notifee, {AndroidImportance} from '@notifee/react-native';
 
 export const NOTIFICATION_CHANNELS = {
-  //   CALLS: {
-  //     id: 'incoming_calls',
-  //     name: 'Incoming Calls',
-  //     sound: 'zego_incoming',
-  //     importance: AndroidImportance.HIGH,
-  //     vibration: true,
-  //   },
   HIGH: {
     id: 'high_importance_channel',
     name: 'High Importance Notifications',

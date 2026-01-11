@@ -162,45 +162,58 @@ export function getFormattedDate() {
   };
 }
 
+const parseLocalDate = (dateString: string): Date => {
+  const [date, time] = dateString.split('T');
+  const [year, month, day] = date.split('-').map(Number);
+  const [hour, minute, second] = time.split(':');
+
+  return new Date(
+    year,
+    month - 1,
+    day,
+    Number(hour),
+    Number(minute),
+    Math.floor(Number(second)), // handles milliseconds safely
+  );
+};
+
+import dayjs from 'dayjs';
+import utc from 'dayjs/plugin/utc';
+dayjs.extend(utc);
+
 export const formatNotificationTime = (dateString: string | null): string => {
+  console.log('Formatting date string:', dateString, '----------------');
   if (!dateString) return 'Just now';
 
-  const date = new Date(dateString);
-  const now = new Date();
+  // ✅ Parse as LOCAL time (NO utc(), NO Z)
+  const date = dayjs.utc(dateString).local();
+  const now = dayjs();
 
-  const diffMs = now.getTime() - date.getTime();
-  const diffMinutes = Math.floor(diffMs / (1000 * 60));
-  const diffHours = Math.floor(diffMinutes / 60);
-  const diffDays = Math.floor(diffHours / 24);
+  if (date.isAfter(now)) return 'Just now';
+
+  const diffMinutes = now.diff(date, 'minute');
+  const diffDays = now.diff(date, 'day');
 
   // 🟢 Just now
-  if (diffMinutes < 1) {
-    return 'Just now';
-  }
+  if (diffMinutes < 1) return 'Just now';
 
   // 🟢 Minutes ago
-  if (diffMinutes < 60) {
-    return `${diffMinutes} min ago`;
-  }
+  if (diffMinutes < 60) return `${diffMinutes} min ago`;
 
   // 🟢 Today
-  if (diffDays === 0) {
-    return date.toLocaleTimeString([], {
-      hour: '2-digit',
-      minute: '2-digit',
-    });
+  if (date.isSame(now, 'day')) {
+    return date.format('hh:mm A'); // 12-hour format
+    // use 'HH:mm' for 24-hour
   }
 
   // 🟢 Yesterday
-  if (diffDays === 1) {
+  if (date.isSame(now.subtract(1, 'day'), 'day')) {
     return 'Yesterday';
   }
 
   // 🟢 Last 7 days
-  if (diffDays < 7) {
-    return `${diffDays} days ago`;
-  }
+  if (diffDays < 7) return `${diffDays} days ago`;
 
-  // 🟢 Older dates
-  return date.toLocaleDateString('en-GB'); // DD/MM/YYYY
+  // 🟢 Older
+  return date.format('DD/MM/YYYY');
 };

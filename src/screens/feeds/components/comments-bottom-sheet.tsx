@@ -19,6 +19,7 @@ import {
 } from '../../../store/reducer/posts';
 
 import TrashIcon from '../../../assets/icons/TrashIcon';
+import {COLORS} from '../../../constants/colors';
 
 interface Props {
   visible: boolean;
@@ -86,6 +87,7 @@ const CommentsBottomSheet = ({visible, onClose, postId}: Props) => {
       ).unwrap();
 
       const {comments: newComments, last} = payload.data;
+      // console.log(newComments, 'fetched comments');
 
       if (!newComments || newComments.length === 0) {
         setHasMore(false);
@@ -170,19 +172,37 @@ const CommentsBottomSheet = ({visible, onClose, postId}: Props) => {
           alignItems: 'center',
           marginBottom: 16,
         }}>
-        <Image
-          source={
-            item.user?.imgUri
-              ? {uri: item.user.imgUri}
-              : require('../../../assets/imgs/profile-demo.jpg')
-          }
-          style={{
-            width: 36,
-            height: 36,
-            borderRadius: 18,
-            marginRight: 10,
-          }}
-        />
+        {item.user.imgUri ? (
+          <Image
+            source={{uri: item.user.imgUri}}
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 18,
+              marginRight: 10,
+            }}
+          />
+        ) : (
+          <View
+            style={{
+              marginRight: 10,
+              width: 40,
+              height: 40,
+              borderRadius: 20,
+              backgroundColor: COLORS.theme.secondary, // any color
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}>
+            <Text
+              style={{
+                color: '#fff',
+                fontSize: 18,
+                fontWeight: 'bold',
+              }}>
+              {item.user?.name?.charAt(0)?.toUpperCase() || 'U'}
+            </Text>
+          </View>
+        )}
 
         <View style={{flex: 1}}>
           <Text style={{fontWeight: '600'}}>{item.user?.name || 'User'}</Text>

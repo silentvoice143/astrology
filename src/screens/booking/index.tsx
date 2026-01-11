@@ -6,12 +6,11 @@ import {scale, verticalScale, scaleFont} from '../../utils/sizer';
 import {COLORS} from '../../constants/colors';
 import {useRoute} from '@react-navigation/native';
 import ControlledTagSelector from '../../components/controlled-tag-selector';
-import {set} from 'date-fns';
 import {useAppDispatch} from '../../hooks/redux-hook';
 import {getAllAstrologers} from '../../store/reducer/astrologers';
-import {get} from 'react-native/Libraries/TurboModule/TurboModuleRegistry';
 import {bookAppointmentReq} from '../../store/reducer/booking';
 import Toast from 'react-native-toast-message';
+import dayjs from 'dayjs';
 
 const TIME_SLOTS = [
   {label: '5 min', value: 5},
@@ -43,7 +42,7 @@ const Booking = () => {
   const mode =
     (route.params as {mode: 'ONLINE' | 'OFFLINE'; category: string})?.mode ||
     '';
-  console.log('Booking route params:', route.params);
+
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedSlots, setSelectedSlots] = useState<number[]>([]);
   const [bookinType, setBookingType] = useState(mode ? [mode] : ['ONLINE']);
@@ -83,7 +82,7 @@ const Booking = () => {
     if (sessionType.includes('VIDEO')) {
       return astrologersData[0]?.pricePerMinuteVideo ?? 0;
     } else if (sessionType.includes('AUDIO')) {
-      return astrologersData[0]?.pricePerMinuteAUDIO ?? 0;
+      return astrologersData[0]?.pricePerMinuteVoice ?? 0;
     } else {
       return astrologersData[0]?.pricePerMinuteChat ?? 0;
     }
@@ -107,7 +106,7 @@ const Booking = () => {
         sessionType: bookinType[0] === 'ONLINE' ? sessionType[0] : 'CHAT',
         bookingType: bookinType[0],
       };
-      console.log(body, '------booking');
+
       const payload = await dispatch(bookAppointmentReq(body)).unwrap();
       if (payload.success) {
         Toast.show({
@@ -164,7 +163,7 @@ const Booking = () => {
     loading ||
     (bookinType[0] === 'ONLINE' && selectedSlots.length === 0);
 
-  const today = new Date().toISOString().split('T')[0];
+  const today = dayjs().format('YYYY-MM-DD');
   return (
     <PageWithHeader themeMode="light" title="Book Appointment">
       <View

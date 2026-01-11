@@ -52,6 +52,7 @@ const Feeds = () => {
           const mapped = fetchedPosts.map(p => {
             const astrologerName = p?.astrologer?.user?.name ?? 'Astrologer';
             const astrologerExpertise = p?.astrologer?.expertise;
+            const astrologerProfileImage = p?.astrologer?.user?.imgUri ?? null;
             const postImages =
               Array.isArray(p.images) && p.images.length > 0
                 ? p.images.map(img => img.imagUrl) // remote urls from API
@@ -65,6 +66,7 @@ const Feeds = () => {
               postImages,
               caption,
               raw: p, // keep original if you need it later
+              astrologerProfileImage,
             };
           });
 
@@ -147,6 +149,7 @@ const Feeds = () => {
           contentContainerStyle={{paddingBottom: 60}}
           renderItem={({item}: any) => (
             <FeedPost
+              profileImage={item.astrologerProfileImage ?? ''}
               astrologerName={item.astrologerName}
               postImages={item.postImages}
               caption={item.caption}

@@ -217,7 +217,7 @@ const FeedPost = ({
   postId,
   astrologerName = 'Astro Priya',
   astrologerExpertise = '',
-  profileImage = require('../../../assets/imgs/profile-demo.jpg'),
+  profileImage,
   postImages = [require('../../../assets/imgs/astrology-feed-demo.jpg')],
   caption = 'Today’s moon transition will bring emotional clarity ✨',
   initialLiked = false,
@@ -225,6 +225,7 @@ const FeedPost = ({
   initialCommentCount = 0,
 }: FeedPostProps) => {
   /* ---------------- STATE ---------------- */
+  const tempImg = require('../../../assets/imgs/male.jpg');
 
   const dispatch = useAppDispatch();
 
@@ -277,7 +278,7 @@ const FeedPost = ({
           padding: scale(16),
         }}>
         <Image
-          source={profileImage}
+          source={profileImage ? {uri: profileImage} : tempImg}
           style={{
             width: scale(40),
             height: scale(40),

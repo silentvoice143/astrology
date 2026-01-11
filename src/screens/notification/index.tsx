@@ -15,7 +15,9 @@ import {
   markNotificationRead,
 } from '../../store/reducer/notifications';
 import {verticalScale} from '../../utils/sizer';
-import {formatNotificationTime} from '../../utils/utils';
+import {formatNotificationTime, formatRelativeDate} from '../../utils/utils';
+import {handleNotificationNavigation} from '../../utils/notification-handler';
+import {setOtherUser, setSession} from '../../store/reducer/session';
 
 const getTypeColor = (type: string) => {
   switch (type) {
@@ -109,8 +111,17 @@ const Notification = () => {
   }).current;
 
   const renderItem = useCallback(({item}: any) => {
+    console.log('Rendering notification item:', item);
     return (
       <TouchableOpacity
+        onPress={() => {
+          if (item.type === 'CHAT_MESSAGE') {
+            if (!item?.metadata?.session) return;
+            dispatch(setOtherUser(item?.metadata?.session?.astrologer));
+            dispatch(setSession(item?.metadata?.session));
+          }
+          handleNotificationNavigation(item);
+        }}
         activeOpacity={0.7}
         style={[
           styles.notificationItem,

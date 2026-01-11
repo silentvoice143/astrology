@@ -52,7 +52,7 @@ const notificationSlice = createSlice({
       })
       .addCase(getAllNotifications.fulfilled, (state, action) => {
         const {notifications, currentPage, isLastPage} = action.payload;
-
+        console.log('Fetched notifications:', notifications);
         state.loading = false;
         state.currentPage = currentPage;
         state.isLastPage = isLastPage;

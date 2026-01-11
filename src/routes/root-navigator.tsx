@@ -58,7 +58,7 @@ export default function RootNavigator() {
   const navigation = useNavigation<any>();
 
   // useSessionEvents(user?.id, isAuthenticated, isConnected);
-  // const {fcmToken} = useFcm(isAuthenticated);
+  const {fcmToken} = useFcm(isAuthenticated);
   // console.log(
   //   user?.mobile,
   //   user?.name?.slice(0, 20) || 'Guest',

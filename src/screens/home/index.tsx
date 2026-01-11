@@ -46,6 +46,20 @@ const HomeNew = () => {
     }
   };
 
+  async function showTestNotification() {
+    await notifee.displayNotification({
+      title: 'Test Notification',
+      body: 'This is a test notification 🔔',
+      android: {
+        channelId: 'high_importance_channel',
+        smallIcon: 'ic_launcher', // must exist in android/app/src/main/res
+        pressAction: {
+          id: 'default',
+        },
+      },
+    });
+  }
+
   useEffect(() => {
     getBannerData();
   }, []);
@@ -121,6 +135,12 @@ const HomeNew = () => {
           </Text>
 
           <View style={{flexDirection: 'row', gap: scale(16)}}>
+            {/* <CustomButton
+              style={{flex: 1, backgroundColor: COLORS.theme.secondary}}
+              textStyle={{color: COLORS.theme.black}}
+              title="Test"
+              onPress={() => showTestNotification()}
+            /> */}
             <CustomButton
               style={{flex: 1, backgroundColor: COLORS.theme.secondary}}
               textStyle={{color: COLORS.theme.black}}

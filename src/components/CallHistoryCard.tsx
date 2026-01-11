@@ -49,9 +49,9 @@ const CallHistoryCard: React.FC<CallHistoryCardProps> = ({data}) => {
       </View>
 
       <View style={styles.rightSection}>
-        <Text style={[styles.time, textStyle.fs_mont_12_400]}>
+        {/* <Text style={[styles.time, textStyle.fs_mont_12_400]}>
           {formatRelativeDate(data.startedAt)}
-        </Text>
+        </Text> */}
         <View style={styles.callInfo}>
           <Text style={[styles.callIcon]}>
             {getCallIcon(data?.sessionType)}

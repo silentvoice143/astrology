@@ -16,6 +16,7 @@ import {NavigationContainer} from '@react-navigation/native';
 import {ZegoCallInvitationDialog} from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import {navigationRef} from './src/utils/navigation';
 import {createNotificationChannels} from './src/utils/notification-channel';
+import {requestAndroidCallPermissions} from './src/utils/requestPermission';
 
 Object.assign(global, encoding);
 
@@ -45,19 +46,20 @@ function App(): React.JSX.Element {
   //   // Send token to your backend to store per user
   // }
 
-  // async function createNotificationChannel() {
-  //   await notifee.createChannel({
-  //     id: 'high_importance_channel',
-  //     name: 'High Importance Notifications',
-  //     importance: AndroidImportance.HIGH,
-  //     sound: 'notification_sound',
-  //     vibration: true,
-  //   });
-  // }
+  async function createNotificationChannel() {
+    await notifee.createChannel({
+      id: 'high_importance_channel',
+      name: 'High Importance Notifications',
+      importance: AndroidImportance.HIGH,
+      sound: 'notification_sound',
+      vibration: true,
+    });
+  }
 
   // Call this once when app starts
   useEffect(() => {
-    createNotificationChannels();
+    createNotificationChannel();
+    requestAndroidCallPermissions();
   }, []);
 
   return (
