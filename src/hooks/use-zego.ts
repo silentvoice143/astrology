@@ -67,7 +67,16 @@ export function useZegoAndFCM(
               channelName: Config.ZEGO_CHANNEl_NAME,
             },
           },
-        );
+        ).then(() => {
+          // /////////////////////////
+          ZegoUIKitPrebuiltCallService.requestSystemAlertWindow({
+            message:
+              'We need your consent for the following permissions in order to use the offline call function properly',
+            allow: 'Allow',
+            deny: 'Deny',
+          });
+          // /////////////////////////
+        });
         console.log('[Zego] init success');
       } catch (err) {
         // show a clean error so you can see the real exception in logs

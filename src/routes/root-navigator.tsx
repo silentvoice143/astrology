@@ -42,7 +42,10 @@ import {
   ZegoUIKitPrebuiltCallInCallScreen,
   ZegoUIKitPrebuiltCallWaitingScreen,
 } from '@zegocloud/zego-uikit-prebuilt-call-rn';
-import {requestAndroidCallPermissions} from '../utils/requestPermission';
+import {
+  requestAndroidCallPermissions,
+  requestOverlayPermission,
+} from '../utils/requestPermission';
 import ChatScreen from '../screens/call&chat/chatScreen';
 
 const Stack = createNativeStackNavigator<any>();
@@ -88,6 +91,7 @@ export default function RootNavigator() {
   useEffect(() => {
     let mounted = true;
     requestAndroidCallPermissions();
+    requestOverlayPermission();
 
     const checkAuth = async () => {
       if (!mounted) return;
@@ -162,14 +166,14 @@ export default function RootNavigator() {
   //   }
   // }, [isConnected, isAuthenticated]);
 
-  if (loading) {
+  if (loading && !token) {
     return <SplashScreen />;
   }
 
   return (
     <Stack.Navigator
       screenOptions={{headerShown: false}}
-      initialRouteName={isAuthenticated ? 'MainTabs' : 'Register'}>
+      initialRouteName={token ? 'MainTabs' : 'Register'}>
       {/* Public screens (no bottom tabs) */}
       {/* <Stack.Screen name="Splash" component={SplashScreen} /> */}
 
@@ -180,6 +184,18 @@ export default function RootNavigator() {
         </>
       ) : (
         <>
+          <Stack.Screen
+            options={{headerShown: false}}
+            // DO NOT change the name
+            name="ZegoUIKitPrebuiltCallWaitingScreen"
+            component={ZegoUIKitPrebuiltCallWaitingScreen}
+          />
+          <Stack.Screen
+            options={{headerShown: false}}
+            // DO NOT change the name
+            name="ZegoUIKitPrebuiltCallInCallScreen"
+            component={ZegoUIKitPrebuiltCallInCallScreen}
+          />
           <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
           <Stack.Screen name="Profile" component={ProfilePage} />
           <Stack.Screen name="ProfileEdit" component={ProfileEdit} />
@@ -197,18 +213,7 @@ export default function RootNavigator() {
               animation: 'slide_from_right',
             }}
           />
-          <Stack.Screen
-            options={{headerShown: false}}
-            // DO NOT change the name
-            name="ZegoUIKitPrebuiltCallWaitingScreen"
-            component={ZegoUIKitPrebuiltCallWaitingScreen}
-          />
-          <Stack.Screen
-            options={{headerShown: false}}
-            // DO NOT change the name
-            name="ZegoUIKitPrebuiltCallInCallScreen"
-            component={ZegoUIKitPrebuiltCallInCallScreen}
-          />
+
           <Stack.Screen name="Wallet" component={Wallet} />
           <Stack.Screen name="About" component={About} />
           <Stack.Screen name="Notification" component={Notification} />

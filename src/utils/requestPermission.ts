@@ -1,4 +1,6 @@
 import {PermissionsAndroid, Platform} from 'react-native';
+import {Linking} from 'react-native';
+import {check, PERMISSIONS, RESULTS} from 'react-native-permissions';
 
 export async function requestAndroidCallPermissions() {
   if (Platform.OS !== 'android') return true;
@@ -41,3 +43,14 @@ export async function requestAndroidCallPermissions() {
   // All permissions already granted
   return true;
 }
+
+export const requestOverlayPermission = async () => {
+  if (Platform.OS !== 'android') return true;
+
+  const status = await check(PERMISSIONS.ANDROID.SYSTEM_ALERT_WINDOW);
+
+  if (status === RESULTS.GRANTED) return true;
+
+  await Linking.openSettings(); // opens overlay settings page
+  return false;
+};

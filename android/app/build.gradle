@@ -86,8 +86,8 @@ android {
         applicationId "com.insapimarketing.astrosevaa2"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 13
-        versionName "13.0"
+        versionCode 14
+        versionName "14.0"
     }
     
     signingConfigs {
@@ -124,6 +124,7 @@ dependencies {
     implementation("com.facebook.react:react-android")
     implementation platform('com.google.firebase:firebase-bom:33.1.0')
     implementation 'com.google.firebase:firebase-messaging'
+    implementation 'im.zego:zpns-fcm:2.8.0'
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")

@@ -16,7 +16,10 @@ import {NavigationContainer} from '@react-navigation/native';
 import {ZegoCallInvitationDialog} from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import {navigationRef} from './src/utils/navigation';
 import {createNotificationChannels} from './src/utils/notification-channel';
-import {requestAndroidCallPermissions} from './src/utils/requestPermission';
+import {
+  requestAndroidCallPermissions,
+  requestOverlayPermission,
+} from './src/utils/requestPermission';
 
 Object.assign(global, encoding);
 

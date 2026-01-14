@@ -229,8 +229,9 @@ export default function useFcm(isAuthenticated: boolean) {
                 remoteMessage?.data,
                 '----------------------------------------------------------------------------------------caht message',
               );
-              const decodedData = JSON.parse(remoteMessage?.data?.session);
+
               if (initialMessage?.data?.type === 'CHAT_MESSAGE') {
+                const decodedData = JSON.parse(remoteMessage?.data?.session);
                 dispatch(setOtherUser(decodedData.astrologer));
                 dispatch(setSession(decodedData));
               }
@@ -246,8 +247,8 @@ export default function useFcm(isAuthenticated: boolean) {
         const initialMessage: any = await getInitialNotification(messaging);
 
         if (initialMessage?.data) {
-          const decodedData = JSON.parse(initialMessage?.data?.session);
           if (initialMessage?.data?.type === 'CHAT_MESSAGE') {
+            const decodedData = JSON.parse(initialMessage?.data?.session);
             dispatch(setOtherUser(decodedData.astrologer));
             dispatch(setSession(decodedData));
           }

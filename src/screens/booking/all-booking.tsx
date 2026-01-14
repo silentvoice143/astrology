@@ -449,6 +449,7 @@ import {getMyAppointment} from '../../store/reducer/booking';
 import {cancelMyAppointment} from '../../store/reducer/booking/action';
 import {setOtherUser, setSession} from '../../store/reducer/session';
 import {ZegoSendCallInvitationButton} from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import Config from 'react-native-config';
 
 const TAGS = ['All', 'Pending', 'Confirmed', 'Completed', 'Cancelled'] as const;
 
@@ -748,7 +749,7 @@ const AllBookings = () => {
                 },
               ]}
               isVideoCall={false}
-              resourceID={'astrosevaa'}
+              resourceID={Config.ZEGO_RESOURCE_ID || 'astrosevaa'}
               style={{width: 0, height: 0}}
             />
           )}
@@ -763,7 +764,7 @@ const AllBookings = () => {
                 },
               ]}
               isVideoCall={true}
-              resourceID={'astrosevaa'}
+              resourceID={Config.ZEGO_RESOURCE_ID || 'astrosevaa'}
               style={{width: 0, height: 0}}
             />
           )}
