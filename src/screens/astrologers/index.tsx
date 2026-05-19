@@ -1,13 +1,15 @@
-import {View, Text, Image, TouchableOpacity} from 'react-native';
-import React, {useEffect, useState} from 'react';
+import { View, Text, Image, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
 import PageWithHeader from '../../componentsV1/layout/page-with-header';
-import {scale, verticalScale, scaleFont} from '../../utils/sizer';
-import {COLORS} from '../../constants/colors';
-import {useAppDispatch} from '../../hooks/redux-hook';
-import {getAllAstrologers} from '../../store/reducer/astrologers';
-import {useNavigation} from '@react-navigation/native';
+import { scale, verticalScale, scaleFont } from '../../utils/sizer';
+import { COLORS } from '../../constants/colors';
+import { useAppDispatch } from '../../hooks/redux-hook';
+import { getAllAstrologerById, getAllAstrologers } from '../../store/reducer/astrologers';
+import { useNavigation } from '@react-navigation/native';
 
-const Astrologers = () => {
+const Astrologers = ({ route }: any) => {
+  console.log("I am on this page")
+  const { id } = route.params;
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
@@ -28,14 +30,14 @@ const Astrologers = () => {
       else setLoadingAstrologerData(true);
 
       const payload = await dispatch(
-        getAllAstrologers(`?page=${pageNumber}&search=${search}&sort=${''}`),
+        getAllAstrologerById({ id: id }),
       ).unwrap();
+      console.log(payload, '---------------payload')
 
       if (payload.success) {
-        const newData = payload.astrologers || [];
-        setAstrologersData(prev => (append ? [...prev, ...newData] : newData));
-        setPage(payload.currentPage);
-        setHasMore(!payload.isLastPage);
+        const newData = payload.astrologer;
+        setAstrologersData(newData);
+
       }
     } finally {
       setIsFetchingMore(false);
@@ -47,7 +49,7 @@ const Astrologers = () => {
     fetchAstrologersData(1, false, '');
   }, []);
 
-  const astrologer = astrologersData[0]; // ✅ Showing first astrologer for now
+  const astrologer: any = astrologersData;
 
   return (
     <PageWithHeader themeMode="light" title="Astrologer">
@@ -59,7 +61,7 @@ const Astrologers = () => {
           flex: 1,
         }}>
         {/* ✅ PROFILE IMAGE */}
-        <View style={{alignItems: 'center', marginTop: verticalScale(20)}}>
+        <View style={{ alignItems: 'center', marginTop: verticalScale(20) }}>
           <Image
             source={{
               uri:
@@ -77,12 +79,12 @@ const Astrologers = () => {
         </View>
 
         {/* ✅ NAME & EXPERTISE */}
-        <View style={{alignItems: 'center', marginTop: verticalScale(14)}}>
-          <Text style={{fontSize: scaleFont(22), fontWeight: '700'}}>
+        <View style={{ alignItems: 'center', marginTop: verticalScale(14) }}>
+          <Text style={{ fontSize: scaleFont(22), fontWeight: '700' }}>
             {astrologer?.user?.name || 'Astrologer'}
           </Text>
 
-          <Text style={{marginTop: 6, fontSize: scaleFont(14), color: '#666'}}>
+          <Text style={{ marginTop: 6, fontSize: scaleFont(14), color: '#666' }}>
             {astrologer?.expertise || 'Astrology'} •{' '}
             {astrologer?.experienceYears || 0} yrs experience
           </Text>
@@ -104,8 +106,8 @@ const Astrologers = () => {
         </View> */}
 
         {/* ✅ ABOUT */}
-        <View style={{marginTop: verticalScale(22)}}>
-          <Text style={{fontSize: scaleFont(18), fontWeight: '700'}}>
+        <View style={{ marginTop: verticalScale(22) }}>
+          <Text style={{ fontSize: scaleFont(18), fontWeight: '700' }}>
             About
           </Text>
           <Text
@@ -127,9 +129,9 @@ const Astrologers = () => {
             backgroundColor: COLORS.theme.secondary,
             borderRadius: scale(12),
           }}>
-          <Text style={{fontSize: scaleFont(14), fontWeight: '700'}}>
+          <Text style={{ fontSize: scaleFont(14), fontWeight: '700' }}>
             Experience:{' '}
-            <Text style={{fontWeight: '400'}}>
+            <Text style={{ fontWeight: '400' }}>
               {astrologer?.experienceYears || 0} years
             </Text>
           </Text>
@@ -141,7 +143,7 @@ const Astrologers = () => {
               fontWeight: '700',
             }}>
             Languages:{' '}
-            <Text style={{fontWeight: '400'}}>
+            <Text style={{ fontWeight: '400' }}>
               {astrologer?.languages || 'Hindi, English'}
             </Text>
           </Text>
@@ -157,19 +159,19 @@ const Astrologers = () => {
             borderWidth: 1,
             borderColor: COLORS.theme.gray.light,
           }}>
-          <Text style={{fontSize: scaleFont(15), fontWeight: '700'}}>
+          <Text style={{ fontSize: scaleFont(15), fontWeight: '700' }}>
             Pricing Per Minute
           </Text>
 
-          <Text style={{marginTop: 6}}>
+          <Text style={{ marginTop: 6 }}>
             💬 Chat: ₹{astrologer?.pricePerMinuteChat || 0}
           </Text>
 
-          <Text style={{marginTop: 4}}>
+          <Text style={{ marginTop: 4 }}>
             📞 Voice: ₹{astrologer?.pricePerMinuteVoice || 0}
           </Text>
 
-          <Text style={{marginTop: 4}}>
+          <Text style={{ marginTop: 4 }}>
             📹 Video: ₹{astrologer?.pricePerMinuteVideo || 0}
           </Text>
         </View>
@@ -193,9 +195,9 @@ const Astrologers = () => {
               alignItems: 'center',
             }}
             onPress={() =>
-              navigation.navigate('Booking', {
+              navigation.navigate('Astrologers', {
                 screen: 'BookAppointment',
-                params: {category: '', mode: 'ONLINE'},
+                params: { category: '', mode: 'ONLINE', id: id },
               })
             }>
             <Text
@@ -209,7 +211,7 @@ const Astrologers = () => {
           </TouchableOpacity>
 
           {/* OFFLINE BOOKING */}
-          <TouchableOpacity
+          {/* <TouchableOpacity
             style={{
               flex: 1,
               backgroundColor: COLORS.theme.white,
@@ -222,7 +224,7 @@ const Astrologers = () => {
             onPress={() =>
               navigation.navigate('Booking', {
                 screen: 'BookAppointment',
-                params: {category: '', mode: 'ONLINE'},
+                params: { category: '', mode: 'ONLINE' },
               })
             }>
             <Text
@@ -233,7 +235,7 @@ const Astrologers = () => {
               }}>
               Book Offline
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </View>
     </PageWithHeader>

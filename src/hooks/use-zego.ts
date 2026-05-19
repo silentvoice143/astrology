@@ -1,4 +1,4 @@
-import {useEffect} from 'react';
+import {useEffect, useState} from 'react';
 import ZegoUIKitPrebuiltCallService from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import * as ZIM from 'zego-zim-react-native';
 import * as ZPNs from 'zego-zpns-react-native';
@@ -16,6 +16,7 @@ export function useZegoAndFCM(
   userName: string | undefined,
   isAuthenticated: boolean,
 ) {
+  const [zegoInitialized, setzegoInitialized] = useState(false);
   useEffect(() => {
     let mounted = true;
 
@@ -68,6 +69,7 @@ export function useZegoAndFCM(
             },
           },
         ).then(() => {
+          setzegoInitialized(true);
           // /////////////////////////
           ZegoUIKitPrebuiltCallService.requestSystemAlertWindow({
             message:
@@ -97,4 +99,5 @@ export function useZegoAndFCM(
     };
     // include userName so effect reruns when it becomes available
   }, [userId, userName, isAuthenticated]);
+  return zegoInitialized;
 }

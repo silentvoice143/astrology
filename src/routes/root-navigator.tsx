@@ -67,7 +67,7 @@ export default function RootNavigator() {
   //   user?.name?.slice(0, 20) || 'Guest',
   //   '-----------------this is zego user',
   // );
-  useZegoAndFCM(
+  const zegoInitialized = useZegoAndFCM(
     user?.mobile,
     user?.name?.slice(0, 20) || 'Guest',
     isAuthenticated,
@@ -184,18 +184,22 @@ export default function RootNavigator() {
         </>
       ) : (
         <>
-          <Stack.Screen
-            options={{headerShown: false}}
-            // DO NOT change the name
-            name="ZegoUIKitPrebuiltCallWaitingScreen"
-            component={ZegoUIKitPrebuiltCallWaitingScreen}
-          />
-          <Stack.Screen
-            options={{headerShown: false}}
-            // DO NOT change the name
-            name="ZegoUIKitPrebuiltCallInCallScreen"
-            component={ZegoUIKitPrebuiltCallInCallScreen}
-          />
+          {zegoInitialized && (
+            <>
+              <Stack.Screen
+                options={{headerShown: false}}
+                // DO NOT change the name
+                name="ZegoUIKitPrebuiltCallWaitingScreen"
+                component={ZegoUIKitPrebuiltCallWaitingScreen}
+              />
+              <Stack.Screen
+                options={{headerShown: false}}
+                // DO NOT change the name
+                name="ZegoUIKitPrebuiltCallInCallScreen"
+                component={ZegoUIKitPrebuiltCallInCallScreen}
+              />
+            </>
+          )}
           <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
           <Stack.Screen name="Profile" component={ProfilePage} />
           <Stack.Screen name="ProfileEdit" component={ProfileEdit} />

@@ -1,21 +1,21 @@
-import React, {useEffect, useRef} from 'react';
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import React, { useEffect, useRef } from 'react';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Home from '../screens/home';
-import Astrologers from '../screens/astrologers';
+// import Astrologers from '../screens/astrologers';
 import Kundli from '../screens/kundli';
 import DetailsProfile from '../screens/DetailsProfile';
 import ChatHistory from '../screens/ChatHistory';
 import Wallet from '../screens/wallet';
-import {ChatScreenDemo} from '../screens/chat.';
+import { ChatScreenDemo } from '../screens/chat.';
 import RequestScreen from '../screens/request';
 import KundliForm from '../screens/kundli-form';
-import {useAppSelector} from '../hooks/redux-hook';
-import {useNavigation} from '@react-navigation/native';
-import {useUserRole} from '../hooks/use-role';
-import {useSessionEvents} from '../hooks/use-session-events';
+import { useAppSelector } from '../hooks/redux-hook';
+import { useNavigation } from '@react-navigation/native';
+import { useUserRole } from '../hooks/use-role';
+import { useSessionEvents } from '../hooks/use-session-events';
 import About from '../screens/about';
 import Call from '../screens/call/call';
-import Setting from '../screens/setting';
+
 import CustomerSupport from '../screens/customer-support';
 import Remedies from '../screens/remedies';
 import ProfilePage from '../screens/profile/profile';
@@ -24,15 +24,19 @@ import MatchMaking from '../screens/match-making';
 import Tarot from '../screens/tarot';
 import LanguageSetting from '../screens/settings/language-setting';
 import TermsAndConditions from '../screens/settings/terms-conditions';
-import PofileEdit from '../screens/pofile-edit';
-import ProfileEdit from '../screens/pofile-edit';
-import {useQueueCountOnResume} from '../hooks/use-queue-count';
-import ChangePassword from '../screens/change-password';
+
+import { useQueueCountOnResume } from '../hooks/use-queue-count';
+import ChangePassword from '../screens/settings/change-password';
+import Setting from '../screens/settings';
+import UserProfileEdit from '../screens/profile/pofile-edit';
+import Astrologers from '../screens/astrologer-list/astrologers.tsx';
+import AstrologersList from '../screens/astrologer-list/astrologers.tsx';
+
 
 const Stack = createNativeStackNavigator();
 
 export default function PrivateRoutes() {
-  const {user, isAuthenticated} = useAppSelector((state: any) => state.auth);
+  const { user, isAuthenticated } = useAppSelector((state: any) => state.auth);
   const role = useUserRole();
   useSessionEvents(user?.id, isAuthenticated);
   useQueueCountOnResume(isAuthenticated, role);
@@ -45,8 +49,8 @@ export default function PrivateRoutes() {
       }}>
       <Stack.Screen name="Home" component={Home} />
       <Stack.Screen name="Profile" component={ProfilePage} />
-      <Stack.Screen name="ProfileEdit" component={ProfileEdit} />
-      <Stack.Screen name="Astrologers" component={Astrologers} />
+      <Stack.Screen name="ProfileEdit" component={UserProfileEdit} />
+      <Stack.Screen name="Astrologers" component={AstrologersList} />
       <Stack.Screen name="Kundli" component={Kundli} />
       <Stack.Screen name="KundliForm" component={KundliForm} />
       <Stack.Screen name="DetailsProfile" component={DetailsProfile} />

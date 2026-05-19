@@ -1,46 +1,49 @@
-import {View, Text, TouchableOpacity} from 'react-native';
-import React, {useEffect, useState} from 'react';
-import {Calendar} from 'react-native-calendars';
+import { View, Text, TouchableOpacity } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Calendar } from 'react-native-calendars';
 import PageWithHeader from '../../componentsV1/layout/page-with-header';
-import {scale, verticalScale, scaleFont} from '../../utils/sizer';
-import {COLORS} from '../../constants/colors';
-import {useRoute} from '@react-navigation/native';
+import { scale, verticalScale, scaleFont } from '../../utils/sizer';
+import { COLORS } from '../../constants/colors';
+import { useRoute } from '@react-navigation/native';
 import ControlledTagSelector from '../../components/controlled-tag-selector';
-import {useAppDispatch} from '../../hooks/redux-hook';
-import {getAllAstrologers} from '../../store/reducer/astrologers';
-import {bookAppointmentReq} from '../../store/reducer/booking';
+import { useAppDispatch } from '../../hooks/redux-hook';
+import { getAllAstrologerById, getAllAstrologers } from '../../store/reducer/astrologers';
+import { bookAppointmentReq } from '../../store/reducer/booking';
 import Toast from 'react-native-toast-message';
 import dayjs from 'dayjs';
 
 const TIME_SLOTS = [
-  {label: '5 min', value: 5},
-  {label: '10 min', value: 10},
-  {label: '15 min', value: 15},
-  {label: '30 min', value: 30},
-  {label: '45 min', value: 45},
-  {label: '1 hr', value: 60},
+  { label: '5 min', value: 5 },
+  { label: '10 min', value: 10 },
+  { label: '15 min', value: 15 },
+  { label: '30 min', value: 30 },
+  { label: '45 min', value: 45 },
+  { label: '1 hr', value: 60 },
 ];
 
 const COST_PER_MINUTE = 20; // Example: ₹20/min
 
 const availabilityTags = [
-  {id: 'ONLINE', label: 'Online', icon: '🟢'},
-  {id: 'OFFLINE', label: 'Offline', icon: '🔴'},
+  { id: 'ONLINE', label: 'Online', icon: '🟢' },
+  // {id: 'OFFLINE', label: 'Offline', icon: '🔴'},
 ];
 
 const sessionTypeTags = [
-  {id: 'VIDEO', label: 'Video', icon: '📹'},
-  {id: 'AUDIO', label: 'AUDIO', icon: '🎤'},
-  {id: 'CHAT', label: 'Chat', icon: '💬'},
+  { id: 'VIDEO', label: 'Video', icon: '📹' },
+  { id: 'AUDIO', label: 'AUDIO', icon: '🎤' },
+  { id: 'CHAT', label: 'Chat', icon: '💬' },
 ];
 
 const Booking = () => {
   const route = useRoute();
   const category =
-    (route.params as {category: string; mode: 'ONLINE' | 'OFFLINE'})
+    (route.params as { category: string; mode: 'ONLINE' | 'OFFLINE', id: string })
       ?.category || 'all';
   const mode =
-    (route.params as {mode: 'ONLINE' | 'OFFLINE'; category: string})?.mode ||
+    (route.params as { mode: 'ONLINE' | 'OFFLINE'; category: string, id: string })?.mode ||
+    '';
+  const id =
+    (route.params as { mode: 'ONLINE' | 'OFFLINE'; category: string, id: string })?.id ||
     '';
 
   const [selectedDate, setSelectedDate] = useState('');
@@ -54,7 +57,7 @@ const Booking = () => {
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [loadingAstrologerData, setLoadingAstrologerData] = useState(false);
-  const [astrologersData, setAstrologersData] = useState<any[]>([]);
+  const [astrologersData, setAstrologersData] = useState<any>(null);
 
   const dispatch = useAppDispatch();
 
@@ -80,11 +83,11 @@ const Booking = () => {
   function getCostPerMin() {
     // You can modify this function to calculate cost based on different criteria
     if (sessionType.includes('VIDEO')) {
-      return astrologersData[0]?.pricePerMinuteVideo ?? 0;
+      return astrologersData?.pricePerMinuteVideo ?? 0;
     } else if (sessionType.includes('AUDIO')) {
-      return astrologersData[0]?.pricePerMinuteVoice ?? 0;
+      return astrologersData?.pricePerMinuteVoice ?? 0;
     } else {
-      return astrologersData[0]?.pricePerMinuteChat ?? 0;
+      return astrologersData?.pricePerMinuteChat ?? 0;
     }
   }
 
@@ -131,16 +134,18 @@ const Booking = () => {
     try {
       if (append) setIsFetchingMore(true);
       else setLoadingAstrologerData(true);
+      if (!id) return
 
       const payload = await dispatch(
-        getAllAstrologers(`?page=${pageNumber}&search=${search}&sort=${''}`),
+        getAllAstrologerById({ id: id }),
       ).unwrap();
+
+      console.log(payload, "payload")
       if (payload.success) {
         console.log('Fetched astrologers:', payload);
-        const newData = payload.astrologers || [];
-        setAstrologersData(prev => (append ? [...prev, ...newData] : newData));
-        setPage(payload.currentPage);
-        setHasMore(!payload.isLastPage);
+        const newData = payload.astrologer;
+        setAstrologersData(newData);
+
       }
     } catch (error) {
     } finally {
@@ -153,11 +158,7 @@ const Booking = () => {
     fetchAstrologersData(1, false, '');
   }, []);
 
-  console.log(
-    !selectedDate,
-    loading,
-    bookinType[0] === 'ONLINE' && selectedSlots.length === 0,
-  );
+
   const isAppointmentDisabled =
     !selectedDate ||
     loading ||
@@ -206,6 +207,7 @@ const Booking = () => {
         ) : null}
 
         <ControlledTagSelector
+          disabled={loadingAstrologerData}
           tags={availabilityTags}
           selectedTags={bookinType}
           onChange={setBookingType}
@@ -214,6 +216,7 @@ const Booking = () => {
         />
 
         <ControlledTagSelector
+
           tags={sessionTypeTags}
           selectedTags={sessionType}
           onChange={data => {
@@ -222,7 +225,7 @@ const Booking = () => {
           }}
           multiSelect={false}
           label="Select Session Type"
-          disabled={!bookinType.length || bookinType[0] === 'OFFLINE'}
+          disabled={!bookinType.length || bookinType[0] === 'OFFLINE' || loadingAstrologerData}
         />
 
         {/* Time Slot Selection */}
@@ -288,7 +291,7 @@ const Booking = () => {
               backgroundColor: COLORS.theme.secondary,
               borderRadius: scale(12),
             }}>
-            <Text style={{fontSize: scaleFont(16), fontWeight: '700'}}>
+            <Text style={{ fontSize: scaleFont(16), fontWeight: '700' }}>
               Total Duration: {totalMinutes} minutes
             </Text>
             <Text

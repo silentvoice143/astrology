@@ -1,4 +1,4 @@
-import React, {useEffect, useRef, useState} from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -10,29 +10,29 @@ import {
 import PageWithHeader from '../../componentsV1/layout/page-with-header';
 import Input from '../../componentsV1/common/input';
 import CustomButton from '../../componentsV1/common/custom-button';
-import {scale, scaleFont, verticalScale} from '../../utils/sizer';
-import {colors, COLORS} from '../../constants/colors';
+import { scale, scaleFont, verticalScale } from '../../utils/sizer';
+import { colors, COLORS } from '../../constants/colors';
 import SearchIcon from '../../assets/icons/search-icon';
-import {categories} from './categories-data'; // Move array into separate file
-import {useNavigation} from '@react-navigation/native';
-import {useAppDispatch} from '../../hooks/redux-hook';
-import {getBanner} from '../../store/reducer/general';
+import { categories } from './categories-data'; // Move array into separate file
+import { useNavigation } from '@react-navigation/native';
+import { useAppDispatch } from '../../hooks/redux-hook';
+import { getBanner } from '../../store/reducer/general';
 import Carousel from 'react-native-reanimated-carousel';
 import Skeleton from '../../components/skeleton';
-import notifee, {AndroidImportance} from '@notifee/react-native';
+import notifee, { AndroidImportance } from '@notifee/react-native';
 
 const width = Dimensions.get('window').width - 40;
 
 const HomeNew = () => {
-  const [banner, setBanner] = useState<{imgUrl: string; id: string}[]>([]);
-  const [loading, setLoading] = useState<{banner: boolean}>({banner: false});
+  const [banner, setBanner] = useState<{ imgUrl: string; id: string }[]>([]);
+  const [loading, setLoading] = useState<{ banner: boolean }>({ banner: false });
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
 
   const getBannerData = async () => {
     if (loading.banner) return;
     try {
-      setLoading(prev => ({...prev, banner: true}));
+      setLoading(prev => ({ ...prev, banner: true }));
 
       const payload = await dispatch(getBanner()).unwrap();
 
@@ -42,7 +42,7 @@ const HomeNew = () => {
       }
     } catch (error) {
     } finally {
-      setLoading(prev => ({...prev, banner: false}));
+      setLoading(prev => ({ ...prev, banner: false }));
     }
   };
 
@@ -67,7 +67,7 @@ const HomeNew = () => {
   return (
     <PageWithHeader rounded={true} scrollHeader>
       {/* HERO BANNER */}
-      <View style={{flex: 1, backgroundColor: COLORS.theme.white}}>
+      <View style={{ flex: 1, backgroundColor: COLORS.theme.white }}>
         <View
           style={{
             position: 'relative',
@@ -127,14 +127,14 @@ const HomeNew = () => {
             borderRadius: scale(12),
             gap: verticalScale(8),
           }}>
-          <Text style={{fontSize: scaleFont(24), color: COLORS.theme.white}}>
+          <Text style={{ fontSize: scaleFont(24), color: COLORS.theme.white }}>
             Book an Appointment
           </Text>
-          <Text style={{fontSize: scaleFont(14), color: COLORS.theme.white}}>
+          <Text style={{ fontSize: scaleFont(14), color: COLORS.theme.white }}>
             Connect with expert astrologers at your preferred time.
           </Text>
 
-          <View style={{flexDirection: 'row', gap: scale(16)}}>
+          <View style={{ flexDirection: 'column', gap: scale(16) }}>
             {/* <CustomButton
               style={{flex: 1, backgroundColor: COLORS.theme.secondary}}
               textStyle={{color: COLORS.theme.black}}
@@ -142,26 +142,26 @@ const HomeNew = () => {
               onPress={() => showTestNotification()}
             /> */}
             <CustomButton
-              style={{flex: 1, backgroundColor: COLORS.theme.secondary}}
-              textStyle={{color: COLORS.theme.black}}
-              title="Online"
+              style={{ flex: 1, backgroundColor: COLORS.theme.secondary }}
+              textStyle={{ color: COLORS.theme.black }}
+              title="Chat with Astrologer"
               onPress={() =>
-                navigation.navigate('Booking', {
-                  screen: 'BookAppointment',
-                  params: {category: '', mode: 'ONLINE'},
+                navigation.navigate('Astrologers', {
+                  screen: 'AstrologerList',
+
                 })
               }
             />
 
             <CustomButton
-              style={{flex: 1, backgroundColor: COLORS.theme.white}}
-              textStyle={{color: COLORS.theme.black}}
-              title="Offline"
+              style={{ flex: 1, backgroundColor: COLORS.theme.white }}
+              textStyle={{ color: COLORS.theme.black }}
+              title="Call with Astrologer"
               onPress={
                 async () =>
-                  navigation.navigate('Booking', {
-                    screen: 'BookAppointment',
-                    params: {category: '', mode: 'OFFLINE'},
+                  navigation.navigate('Astrologers', {
+                    screen: 'AstrologerList',
+
                   })
                 // await notifee.displayNotification({
                 //   title: 'New Message',
@@ -214,9 +214,9 @@ const HomeNew = () => {
                     parallaxScrollingOffset: 10,
                     parallaxAdjacentItemScale: 0.8,
                   }}
-                  renderItem={({index, item}) => (
+                  renderItem={({ index, item }) => (
                     <Image
-                      source={{uri: item?.imgUrl}}
+                      source={{ uri: item?.imgUrl }}
                       resizeMode="cover"
                       style={{
                         height: verticalScale(120),
@@ -237,18 +237,19 @@ const HomeNew = () => {
               </View>
             )
           )}
+          <View><Text>Hello</Text></View>
 
-          <View style={{marginTop: verticalScale(28), gap: verticalScale(16)}}>
+          <View style={{ marginTop: verticalScale(28), gap: verticalScale(16) }}>
             {[0, 4, 8].map(start => (
               <View
                 key={start}
-                style={{flexDirection: 'row', justifyContent: 'space-around'}}>
+                style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
                 {categories.slice(start, start + 4).map((item, idx) => (
                   <TouchableOpacity
                     onPress={() =>
                       navigation.navigate('Booking', {
                         screen: 'BookAppointment',
-                        params: {category: item.title, mode: 'ONLINE'},
+                        params: { category: item.title, mode: 'ONLINE' },
                       })
                     }
                     key={idx}

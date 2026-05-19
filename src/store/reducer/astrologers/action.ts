@@ -1,4 +1,4 @@
-import {createAsyncThunk} from '@reduxjs/toolkit';
+import { createAsyncThunk } from '@reduxjs/toolkit';
 import api from '../../../apis';
 
 type UserResponse = any;
@@ -10,7 +10,7 @@ export const getAllAstrologers = createAsyncThunk<
   UserResponse,
   string,
   ThunkApiConfig
->('astrologers/getAllAstrologers', async (params, {rejectWithValue}) => {
+>('astrologers/getAllAstrologers', async (params, { rejectWithValue }) => {
   try {
     const response = await api.get(`/api/v1/astrologers${params}`);
     return response.data;
@@ -20,10 +20,11 @@ export const getAllAstrologers = createAsyncThunk<
 });
 export const getAllAstrologerById = createAsyncThunk<
   UserResponse,
-  {id: string},
+  { id: string },
   ThunkApiConfig
->('astrologers/getAllAstrologersById', async (id, {rejectWithValue}) => {
+>('astrologers/getAllAstrologersById', async (id, { rejectWithValue }) => {
   try {
+    console.log(`/api/v1/astrologers/${id.id}`);
     const response = await api.get(`/api/v1/astrologers/${id.id}`);
 
     return response.data;
@@ -36,7 +37,7 @@ export const getOnlineAstrologer = createAsyncThunk<
   UserResponse,
   void,
   ThunkApiConfig
->('astrologers/getOnlineAstrologer', async (_, {rejectWithValue}) => {
+>('astrologers/getOnlineAstrologer', async (_, { rejectWithValue }) => {
   try {
     const response = await api.get(`/api/v1/astrologers/online/list`);
 

@@ -1,7 +1,7 @@
-import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
-import {View, Text} from 'react-native';
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { View, Text } from 'react-native';
 import Home from '../../screens/home/index';
-import {COLORS} from '../../constants/colors';
+import { COLORS } from '../../constants/colors';
 import Feeds from '../../screens/feeds';
 import Astrologers from '../../screens/astrologers/index';
 import Booking from '../../screens/booking';
@@ -15,10 +15,12 @@ import CustomerSupport from '../../screens/customer-support/index';
 import HomeStack from './home-stack';
 import AllBookings from '../../screens/booking/all-booking';
 import BookingStack from './booking-stack';
+import AstrologersList from '../../screens/astrologers';
+import AstrologerStack from './astrologer-stack';
 
 const Tab = createBottomTabNavigator();
 
-function DummyIcon({focused}) {
+function DummyIcon({ focused }) {
   return (
     <View
       style={{
@@ -58,7 +60,7 @@ const getTabIcon = (routeName: string, focused: boolean, color: string) => {
 function BottomTabNavigator() {
   return (
     <Tab.Navigator
-      screenOptions={({route}) => ({
+      screenOptions={({ route }) => ({
         headerShown: false,
         tabBarShowLabel: true, // show text
         tabBarActiveTintColor: COLORS.theme.secondary,
@@ -79,13 +81,30 @@ function BottomTabNavigator() {
           alignItems: 'center',
         },
 
-        tabBarIcon: ({focused, color}) =>
+        tabBarIcon: ({ focused, color }) =>
           getTabIcon(route.name, focused, color),
       })}>
       {/* <Tab.Screen name="Home" component={HomeStack} /> */}
       <Tab.Screen name="Home" component={Home} />
       <Tab.Screen name="Feeds" component={Feeds} />
-      <Tab.Screen name="Astrologers" component={Astrologers} />
+      <Tab.Screen name="Astrologers" component={AstrologerStack} listeners={({ navigation }) => ({
+        tabPress: e => {
+          e.preventDefault(); // ✅ Stop default tab behavior
+
+          navigation.reset({
+            index: 0,
+            routes: [
+              {
+                name: 'Astrologers',
+                state: {
+                  index: 0,
+                  routes: [{ name: 'AstrologersList' }], // ✅ Force initial screen
+                },
+              },
+            ],
+          });
+        },
+      })} />
       {/* <Tab.Screen name="Bookings" component={AllBookings} /> */}
       <Tab.Screen
         name="Booking"
@@ -98,7 +117,7 @@ function BottomTabNavigator() {
         //     });
         //   },
         // })}
-        listeners={({navigation}) => ({
+        listeners={({ navigation }) => ({
           tabPress: e => {
             e.preventDefault(); // ✅ Stop default tab behavior
 
@@ -109,7 +128,7 @@ function BottomTabNavigator() {
                   name: 'Booking',
                   state: {
                     index: 0,
-                    routes: [{name: 'MyBooking'}], // ✅ Force initial screen
+                    routes: [{ name: 'MyBooking' }], // ✅ Force initial screen
                   },
                 },
               ],

@@ -1,13 +1,24 @@
-export type RootStackParamList = {
-  Home: undefined;
-  DetailsProfile: {id: string};
-  Astrologers: {sort: string; initialSearch: string};
-  chat: undefined;
-  // Add other screens here
+import { NavigatorScreenParams } from '@react-navigation/native';
+
+export type AstrologerStackParamList = {
+  AstrologersList: undefined;
+  AstrologerDetails: { id: string };
 };
 
-import {useNavigation} from '@react-navigation/native';
-import {NativeStackNavigationProp} from '@react-navigation/native-stack';
+export type RootStackParamList = {
+  Home: undefined;
+
+  DetailsProfile: {
+    id: string;
+  };
+
+  Astrologers: NavigatorScreenParams<AstrologerStackParamList>;
+
+  chat: undefined;
+};
+
+import { useNavigation } from '@react-navigation/native';
+import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 type TypedNavigation = NativeStackNavigationProp<RootStackParamList>;
 
