@@ -222,19 +222,19 @@ const AstrologersList = () => {
 
   console.log(sortedAstrologers, '---astrologer data');
 
-  if (loading) {
-    return (
-      <PageWithHeader>
-        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-          <ActivityIndicator size={20} />
-          <Text
-            style={[textStyle.fs_mont_14_400, { marginTop: verticalScale(10) }]}>
-            Fetching astrologer data
-          </Text>
-        </View>
-      </PageWithHeader>
-    );
-  }
+  // if (loading) {
+  //   return (
+  //     <PageWithHeader>
+  //       <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
+  //         <ActivityIndicator size={20} />
+  //         <Text
+  //           style={[textStyle.fs_mont_14_400, { marginTop: verticalScale(10) }]}>
+  //           Fetching astrologer data
+  //         </Text>
+  //       </View>
+  //     </PageWithHeader>
+  //   );
+  // }
   return (
     <PageWithHeader scrollEnabled={false} themeMode="light" title="Astrologers">
       <View
@@ -272,76 +272,108 @@ const AstrologersList = () => {
         multiSelect={false}
       />
 
-      <FlatList
-        showsVerticalScrollIndicator={false}
-        data={sortedAstrologers}
-        keyExtractor={item => `card-astrologer-${item.id}`}
-        contentContainerStyle={{ paddingBottom: verticalScale(200) }}
-        onEndReached={() => {
-          if (hasMore && !isFetchingMore && !loading) {
-            fetchAstrologersData(page + 1, true, debouncedSearch);
-          }
-        }}
-        onEndReachedThreshold={0.5}
-        ListFooterComponent={
-          isFetchingMore ? (
-            <View style={{ paddingVertical: 10 }}>
-              <ActivityIndicator />
-              <Text style={[textStyle.fs_mont_12_400, { textAlign: 'center' }]}>
-                Loading more astrologers...
-              </Text>
-            </View>
-          ) : null
-        }
-        renderItem={({ item }) => (
-          <Pressable
-            onPress={() => navigation.navigate('Astrologers', {
-              screen: 'AstrologerDetails',
-              params: { id: item.id },
-            })}
-            style={{ marginHorizontal: scale(10) }}
-            key={`card-astrologer-${item.id}`}>
-            <AstrologerCard
-              id={item.id}
-              online={
-                item.isChatOnline || item.isVideoOnline || item.isAudioOnline
-              }
-              isChatAvailable={item.isChatOnline}
-              isVideoAvailable={item.isVideoOnline}
-              isAudioAvailable={item.isAudioOnline}
-              pricePerMinuteChat={item.pricePerMinuteChat}
-              pricePerMinuteVideo={item.pricePerMinuteVideo}
-              pricePerMinuteVoice={item.pricePerMinuteVoice}
-              expertise={item.expertise}
-              name={item?.user?.name}
-              rate={''}
-              rating={4}
-              experience={item?.experienceYears.toString()}
-              languages={item?.languages}
-              imageUri={item?.user?.imgUri}
-              freeChatAvailable={!freeChatUsed}
-              onSessionPress={sessionType => {
-                handleSessionStart(item, sessionType);
-              }}
-            />
-          </Pressable>
-        )}
-        ListEmptyComponent={
-          <View
-            style={{
-              height: verticalScale(200),
+      {loading ? (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <ActivityIndicator size="large" />
 
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            {
-              <Text style={[textStyle.fs_mont_12_400, { textAlign: 'center' }]}>
+          <Text
+            style={[
+              textStyle.fs_mont_12_400,
+              {
+                marginTop: verticalScale(10),
+                textAlign: 'center',
+              },
+            ]}>
+            Loading astrologers...
+          </Text>
+        </View>
+      ) : (
+        <FlatList
+          showsVerticalScrollIndicator={false}
+          data={sortedAstrologers}
+          keyExtractor={item => `card-astrologer-${item.id}`}
+          contentContainerStyle={{ paddingBottom: verticalScale(200) }}
+          onEndReached={() => {
+            if (hasMore && !isFetchingMore && !loading) {
+              fetchAstrologersData(page + 1, true, debouncedSearch);
+            }
+          }}
+          onEndReachedThreshold={0.5}
+          ListFooterComponent={
+            isFetchingMore ? (
+              <View style={{ paddingVertical: 10 }}>
+                <ActivityIndicator />
+
+                <Text
+                  style={[
+                    textStyle.fs_mont_12_400,
+                    { textAlign: 'center' },
+                  ]}>
+                  Loading more astrologers...
+                </Text>
+              </View>
+            ) : null
+          }
+          renderItem={({ item }) => (
+            <Pressable
+              onPress={() =>
+                navigation.navigate('Astrologers', {
+                  screen: 'AstrologerDetails',
+                  params: { id: item.id },
+                })
+              }
+              style={{ marginHorizontal: scale(10) }}
+              key={`card-astrologer-${item.id}`}>
+              <AstrologerCard
+                id={item.id}
+                online={
+                  item.isChatOnline ||
+                  item.isVideoOnline ||
+                  item.isAudioOnline
+                }
+                isChatAvailable={item.isChatOnline}
+                isVideoAvailable={item.isVideoOnline}
+                isAudioAvailable={item.isAudioOnline}
+                pricePerMinuteChat={item.pricePerMinuteChat}
+                pricePerMinuteVideo={item.pricePerMinuteVideo}
+                pricePerMinuteVoice={item.pricePerMinuteVoice}
+                expertise={item.expertise}
+                name={item?.user?.name}
+                rate={''}
+                rating={4}
+                experience={item?.experienceYears.toString()}
+                languages={item?.languages}
+                imageUri={item?.user?.imgUri}
+                freeChatAvailable={!freeChatUsed}
+                onSessionPress={sessionType => {
+                  handleSessionStart(item, sessionType);
+                }}
+              />
+            </Pressable>
+          )}
+          ListEmptyComponent={
+            <View
+              style={{
+                height: verticalScale(200),
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <Text
+                style={[
+                  textStyle.fs_mont_12_400,
+                  { textAlign: 'center' },
+                ]}>
                 No astrologers found.
               </Text>
-            }
-          </View>
-        }
-      />
+            </View>
+          }
+        />
+      )}
 
       {/* <ScrollView showsVerticalScrollIndicator={false}>
           <View
