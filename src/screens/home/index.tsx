@@ -15,19 +15,48 @@ import { colors, COLORS } from '../../constants/colors';
 import SearchIcon from '../../assets/icons/search-icon';
 import { categories } from './categories-data'; // Move array into separate file
 import { useNavigation } from '@react-navigation/native';
-import { useAppDispatch } from '../../hooks/redux-hook';
+import { useAppDispatch, useAppSelector } from '../../hooks/redux-hook';
 import { getBanner } from '../../store/reducer/general';
 import Carousel from 'react-native-reanimated-carousel';
 import Skeleton from '../../components/skeleton';
 import notifee, { AndroidImportance } from '@notifee/react-native';
+import SlidingCard from '../../components/home/card-carosel';
+import SkeletonItem from '../../components/skeleton';
+import { getOnlineAstrologer } from '../../store/reducer/astrologers';
+import { Astrologers as AstrologersType, UserDetail } from '../../utils/types';
+import { textStyle } from '../../constants/text-style';
+
 
 const width = Dimensions.get('window').width - 40;
 
 const HomeNew = () => {
   const [banner, setBanner] = useState<{ imgUrl: string; id: string }[]>([]);
-  const [loading, setLoading] = useState<{ banner: boolean }>({ banner: false });
+  // const [loading, setLoading] = useState<{ banner: boolean }>({ banner: false });
+  const [loading, setLoading] = useState<{
+    banner: boolean;
+    astrologer: boolean;
+    onlineAstrologer: boolean;
+  }>({
+    banner: false,
+    astrologer: false,
+    onlineAstrologer: false,
+  });
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
+
+  const [hasFetchedInitialData, setHasFetchedInitialData] = useState(false);
+  const { onlineAstrologerDetails } = useAppSelector(state => state.astrologer);
+  const [onlineAstrologerDetailsApi, setOnlineAstrologerDetailApi] = useState<
+    {
+      name: string;
+      expertise: string;
+      about: string;
+      imgUri: string;
+      id: string;
+      userId: string;
+      online: boolean;
+    }[]
+  >([]);
 
   const getBannerData = async () => {
     if (loading.banner) return;
@@ -60,9 +89,75 @@ const HomeNew = () => {
     });
   }
 
+  const fetchOnlineAstrologersData = async () => {
+    if (loading.astrologer) return;
+    try {
+      setLoading(prev => ({ ...prev, onlineAstrologer: true }));
+
+      const payload = await dispatch(getOnlineAstrologer()).unwrap();
+      console.log(payload, '---------online astrologers');
+      if (payload.success) {
+        const newData =
+          payload.astrologers.map((item: AstrologersType) => ({
+            name: item?.user?.name,
+            expertise: item?.expertise,
+            about: item?.about,
+            id: item?.id,
+            imgUri: item?.user?.imgUri,
+            userId: item?.user?.id,
+            online: item?.online,
+          })) || [];
+        setOnlineAstrologerDetailApi(newData);
+      }
+    } catch (error) {
+    } finally {
+      setLoading(prev => ({ ...prev, onlineAstrologer: false }));
+    }
+  };
+
+
+
+  const finalAstrologerList = React.useMemo(() => {
+    // 1. Use socket data if it exists and initial data has been fetched
+    if (
+      hasFetchedInitialData &&
+      onlineAstrologerDetails &&
+      onlineAstrologerDetails.length > 0
+    ) {
+      return onlineAstrologerDetails.map(item => ({
+        name: item?.user?.name,
+        expertise: item?.expertise,
+        about: item?.about,
+        id: item?.id,
+        imgUri: item?.user?.imgUri,
+        userId: item?.user?.id,
+        online: item?.online,
+      }));
+    }
+
+    // 2. Use API's online astrologers if available
+    if (onlineAstrologerDetailsApi && onlineAstrologerDetailsApi.length > 0) {
+      return onlineAstrologerDetailsApi;
+    }
+    return []
+
+  }, [
+    onlineAstrologerDetails,
+    onlineAstrologerDetailsApi,
+    hasFetchedInitialData,
+  ]);
+
   useEffect(() => {
     getBannerData();
   }, []);
+
+  useEffect(() => {
+    if (!hasFetchedInitialData) {
+      fetchOnlineAstrologersData();
+      getBannerData();
+      setHasFetchedInitialData(true);
+    }
+  }, [hasFetchedInitialData]);
 
   return (
     <PageWithHeader rounded={true} scrollHeader>
@@ -176,6 +271,43 @@ const HomeNew = () => {
             />
           </View>
         </View>
+
+        {/* Our Astrologer  */}
+        {finalAstrologerList.length > 0 && <View style={{}}>
+          <Text
+            style={[
+              textStyle.fs_mont_20_700,
+              {
+                fontSize: scaleFont(18),
+                fontWeight: '600',
+                color: colors.primaryText,
+              },
+              {
+                marginBottom: verticalScale(20),
+                fontWeight: 600,
+                textAlign: 'center',
+              },
+            ]}>
+            Live Astrologers
+          </Text>
+          {loading?.astrologer ? (
+            <View
+              style={{
+                paddingHorizontal: scale(20),
+                marginVertical: verticalScale(20),
+                justifyContent: 'center',
+                alignItems: 'center',
+              }}>
+              <SkeletonItem
+                height={verticalScale(300)}
+                width={width * 0.7}
+                borderRadius={8}
+              />
+            </View>
+          ) : (
+            <SlidingCard data={finalAstrologerList} />
+          )}
+        </View>}
 
         {/* CATEGORY GRID */}
         <View

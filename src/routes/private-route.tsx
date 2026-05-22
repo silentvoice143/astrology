@@ -36,6 +36,7 @@ import AstrologersList from '../screens/astrologer-list/astrologers.tsx';
 const Stack = createNativeStackNavigator();
 
 export default function PrivateRoutes() {
+  console.log("Privare route............")
   const { user, isAuthenticated } = useAppSelector((state: any) => state.auth);
   const role = useUserRole();
   useSessionEvents(user?.id, isAuthenticated);

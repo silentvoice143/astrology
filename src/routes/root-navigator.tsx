@@ -1,14 +1,14 @@
-import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import Login from '../screens/auth/login';
 
 import BottomTabNavigator from '../componentsV1/layout/bottom-tabs';
 import Register from '../screens/auth/registerV1';
-import {Text, View} from 'react-native';
-import {clearSession} from '../store/reducer/session';
+import { Text, View } from 'react-native';
+import { clearSession } from '../store/reducer/session';
 import Toast from 'react-native-toast-message';
-import {use, useEffect, useState} from 'react';
-import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
-import {userDetail} from '../store/reducer/user';
+import { use, useEffect, useState } from 'react';
+import { useAppDispatch, useAppSelector } from '../hooks/redux-hook';
+import { userDetail } from '../store/reducer/user';
 import {
   logout,
   logoutDevice,
@@ -16,16 +16,12 @@ import {
   setAuthentication,
   setUser,
 } from '../store/reducer/auth';
-import {useWebSocket} from '../hooks/use-socket-new';
-import {useSessionEvents} from '../hooks/use-session-events';
-
-import {getFcmToken} from '../utils/getFcmToken';
-import messaging from '@react-native-firebase/messaging';
-import {useUserRole} from '../hooks/use-role';
+import { useWebSocket } from '../hooks/use-socket-new';
+import { useUserRole } from '../hooks/use-role';
 import CustomerSupport from '../screens/customer-support/index';
 import SplashScreen from '../screens/splash';
-import {useNavigation} from '@react-navigation/native';
-import {set} from 'date-fns';
+import { useNavigation } from '@react-navigation/native';
+import { set } from 'date-fns';
 import CallChat from '../screens/call&chat';
 import Wallet from '../screens/wallet';
 import About from '../screens/about';
@@ -36,7 +32,7 @@ import ChangePassword from '../screens/settings/change-password';
 import ProfilePage from '../screens/profile/profile';
 import ProfileEdit from '../screens/profile/pofile-edit';
 import Notification from '../screens/notification';
-import {useZegoAndFCM} from '../hooks/use-zego';
+import { useZegoAndFCM } from '../hooks/use-zego';
 import useFcm from '../hooks/use-fcm';
 import {
   ZegoUIKitPrebuiltCallInCallScreen,
@@ -47,21 +43,22 @@ import {
   requestOverlayPermission,
 } from '../utils/requestPermission';
 import ChatScreen from '../screens/call&chat/chatScreen';
+import { useSessionEvents } from '../hooks/use-session-events';
 
 const Stack = createNativeStackNavigator<any>();
 
 export default function RootNavigator() {
   const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(true);
-  const {user, isAuthenticated, token} = useAppSelector(
+  const { user, isAuthenticated, token } = useAppSelector(
     (state: any) => state.auth,
   );
   const role = useUserRole();
-  const {connect, isConnected, disconnect, send} = useWebSocket(user?.id);
+  const { connect, isConnected, disconnect, send } = useWebSocket(user?.id);
   const navigation = useNavigation<any>();
 
-  // useSessionEvents(user?.id, isAuthenticated, isConnected);
-  const {fcmToken} = useFcm(isAuthenticated);
+  useSessionEvents(user?.id, isAuthenticated, isConnected);
+  const { fcmToken } = useFcm(isAuthenticated);
   // console.log(
   //   user?.mobile,
   //   user?.name?.slice(0, 20) || 'Guest',
@@ -82,10 +79,10 @@ export default function RootNavigator() {
       setTimeout(() => {
         navigation.reset({
           index: 0,
-          routes: [{name: 'Login'}],
+          routes: [{ name: 'Login' }],
         });
       }, 5000);
-    } catch (err) {}
+    } catch (err) { }
   };
 
   useEffect(() => {
@@ -99,7 +96,7 @@ export default function RootNavigator() {
       if (token) {
         // if (!isAuthenticated) {
         try {
-          const {payload} = await dispatch(userDetail());
+          const { payload } = await dispatch(userDetail());
 
           if (payload?.success) {
             const userDetail: any = payload.user;
@@ -172,7 +169,7 @@ export default function RootNavigator() {
 
   return (
     <Stack.Navigator
-      screenOptions={{headerShown: false}}
+      screenOptions={{ headerShown: false }}
       initialRouteName={token ? 'MainTabs' : 'Register'}>
       {/* Public screens (no bottom tabs) */}
       {/* <Stack.Screen name="Splash" component={SplashScreen} /> */}
@@ -187,13 +184,13 @@ export default function RootNavigator() {
           {zegoInitialized && (
             <>
               <Stack.Screen
-                options={{headerShown: false}}
+                options={{ headerShown: false }}
                 // DO NOT change the name
                 name="ZegoUIKitPrebuiltCallWaitingScreen"
                 component={ZegoUIKitPrebuiltCallWaitingScreen}
               />
               <Stack.Screen
-                options={{headerShown: false}}
+                options={{ headerShown: false }}
                 // DO NOT change the name
                 name="ZegoUIKitPrebuiltCallInCallScreen"
                 component={ZegoUIKitPrebuiltCallInCallScreen}
