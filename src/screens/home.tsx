@@ -243,6 +243,8 @@ const Home = () => {
     hasFetchedInitialData,
   ]);
 
+
+
   return (
     <ScreenLayout>
       {isFirstChatModalOpen && (
@@ -471,7 +473,7 @@ const Home = () => {
           left: 20,
           backgroundColor: colors.primarybtn,
         }}
-        leftIcon={<CallIcon colors={['#000000']} height={20} width={20} />}
+        leftIcon={<CallIcon color={'#000000'} size={20} />}
         textStyle={{ color: colors.primaryText }}
         onPress={() => {
           navigation.navigate('Astrologers');
@@ -486,7 +488,7 @@ const Home = () => {
           right: 20,
           backgroundColor: colors.tertiary_btn,
         }}
-        leftIcon={<ChatIcon colors={['#ffffff']} height={20} width={20} />}
+        leftIcon={<ChatIcon color={'#ffffff'} size={20} />}
         onPress={() => {
           navigation.navigate('Astrologers');
         }}

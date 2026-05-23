@@ -104,7 +104,7 @@ const Booking = () => {
       const body = {
         appointmentDate: selectedDate,
         reason: category ? category : 'all',
-        astrologerId: astrologersData[0]?.user?.id,
+        astrologerId: astrologersData?.user?.id,
         appointmentDuration: totalMinutes,
         sessionType: bookinType[0] === 'ONLINE' ? sessionType[0] : 'CHAT',
         bookingType: bookinType[0],

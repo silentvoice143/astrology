@@ -14,17 +14,17 @@ import Animated, {
   useAnimatedStyle,
   useSharedValue,
 } from 'react-native-reanimated';
-import {moderateScale, scale, verticalScale} from '../../utils/sizer';
+import { moderateScale, scale, verticalScale } from '../../utils/sizer';
 import LinearGradient from 'react-native-linear-gradient';
-import {colors, themeColors} from '../../constants/colors';
+import { COLORS, colors, themeColors } from '../../constants/colors';
 import Avatar from '../avatar';
-import {textStyle} from '../../constants/text-style';
+import { textStyle } from '../../constants/text-style';
 import ChatIcon from '../../assets/icons/chat-icon';
 import CallIcon from '../../assets/icons/call-icon';
-import {useNavigation} from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
-const {width} = Dimensions.get('screen');
-const _cardWidth = width * 0.6;
+const { width } = Dimensions.get('screen');
+const _cardWidth = width * 0.9;
 const _cardHeight = _cardWidth * 1.4;
 const _spacing = 12;
 
@@ -36,6 +36,7 @@ function Card({
   item: any;
   index: number;
   scrollX: SharedValue<number>;
+
 }) {
   const stylez = useAnimatedStyle(() => ({
     transform: [
@@ -48,25 +49,34 @@ function Card({
       },
     ],
   }));
+
+  console.log(item, "rendering the astrologe in card")
   return (
     <Animated.View
       style={[
         {
+          backgroundColor: COLORS.theme.secondary,
+          padding: verticalScale(20),
           width: _cardWidth,
           overflow: 'hidden',
           borderRadius: 24,
-          minHeight: verticalScale(320),
+          minHeight: verticalScale(100),
+          height: verticalScale(180),
+          alignItems: 'flex-start',
+          justifyContent: 'center'
+
         },
         stylez,
       ]}>
-      <LinearGradient
-        style={{flex: 1, padding: moderateScale(20)}}
-        colors={[
-          colors.tertiary_card,
-          colors.secondary_Card,
-          colors.primary_card,
-        ]}>
-        <View style={{justifyContent: 'center', alignItems: 'center'}}>
+
+      <View
+        style={{
+          flexDirection: 'row',
+          gap: scale(20),
+          alignItems: 'flex-start',
+        }}>
+
+        <View>
           <Avatar
             borderColor={
               !item.online
@@ -77,77 +87,57 @@ function Card({
               height: moderateScale(80),
               width: moderateScale(80),
             }}
-            image={{uri: item.imgUri}}
-            fallbackText={item?.name?.charAt(0)}
+            image={{ uri: item?.user?.imgUri }}
+            fallbackText={item?.user?.name?.charAt(0)}
           />
+        </View>
+
+        {/* TEXT CONTAINER */}
+        <View
+          style={{
+            flex: 1,
+            paddingRight: scale(10),
+          }}>
+
           <Text
+            numberOfLines={1}
             style={[
-              textStyle.fs_mont_16_600,
+              textStyle.fs_mont_16_700,
               {
-                color: colors.whiteText,
-                marginTop: verticalScale(8),
+                color: COLORS.theme.primary,
+                marginBottom: verticalScale(8),
               },
             ]}>
-            {item.name}
+            {item?.user?.name}
           </Text>
+
           <Text
+            numberOfLines={3}
             style={[
               textStyle.fs_mont_14_400,
               {
-                color: colors.whiteText,
-                marginTop: verticalScale(8),
-                marginBottom: verticalScale(20),
-                textAlign: 'center',
+                color: COLORS.theme.primary,
+                marginBottom: verticalScale(12),
+                lineHeight: verticalScale(20),
+                marginRight: 55
               },
             ]}>
-            {item.about.length > 60
-              ? item.about.slice(0, 60) + '...'
-              : item.about}
+            {item?.about}
           </Text>
+
           <Text
+            numberOfLines={1}
             style={[
-              textStyle.fs_mont_16_600,
+              textStyle.fs_mont_14_700,
               {
-                color: colors.whiteText,
+                color: COLORS.theme.primary,
               },
             ]}>
-            {item.expertise.length > 20
-              ? item.expertise.slice(0, 20) + '...'
-              : item.expertise}
+            {item?.expertise}
           </Text>
         </View>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            marginTop: verticalScale(24),
-            flex: 1,
-            alignItems: 'flex-end',
-          }}>
-          <TouchableOpacity
-            style={{
-              height: moderateScale(40),
-              width: moderateScale(40),
-              backgroundColor: colors.primary_surface,
-              borderRadius: moderateScale(30),
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            <ChatIcon colors={['#000']} height={scale(24)} width={scale(24)} />
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={{
-              height: moderateScale(40),
-              width: moderateScale(40),
-              backgroundColor: colors.primary_surface,
-              borderRadius: moderateScale(30),
-              justifyContent: 'center',
-              alignItems: 'center',
-            }}>
-            <CallIcon colors={['#000']} height={scale(24)} width={scale(24)} />
-          </TouchableOpacity>
-        </View>
-      </LinearGradient>
+      </View>
+
     </Animated.View>
   );
 }
@@ -186,10 +176,10 @@ const SlidingCard = ({
           gap: _spacing,
           paddingHorizontal: (width - _cardWidth) / 2,
         }}
-        renderItem={({item, index}) => (
+        renderItem={({ item, index }) => (
           <Pressable
             onPress={() =>
-              navigation.navigate('DetailsProfile', {id: item.id})
+              navigation.navigate("Astrologers", { screen: "AstrologerDetails", params: { id: item.id } })
             }>
             <Card item={item} index={index} scrollX={scrollX} />
           </Pressable>

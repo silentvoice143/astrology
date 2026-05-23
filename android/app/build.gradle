@@ -89,6 +89,8 @@ android {
         versionCode 15
         versionName "15.0"
     }
+
+    
     
     signingConfigs {
         debug {
@@ -104,6 +106,13 @@ android {
         keyPassword MYAPP_UPLOAD_KEY_PASSWORD
     }
     }
+    applicationVariants.all { variant ->
+        variant.outputs.all {
+
+            def date = new Date().format("yyyy-MM-dd_HH-mm-ss")
+            outputFileName = "astroseva-${date}.apk"
+        }
+    }
     buildTypes {
         debug {
             signingConfig signingConfigs.debug
@@ -118,6 +127,8 @@ android {
         }
     }
 }
+
+
 
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin

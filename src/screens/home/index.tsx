@@ -22,9 +22,11 @@ import Skeleton from '../../components/skeleton';
 import notifee, { AndroidImportance } from '@notifee/react-native';
 import SlidingCard from '../../components/home/card-carosel';
 import SkeletonItem from '../../components/skeleton';
-import { getOnlineAstrologer } from '../../store/reducer/astrologers';
+import { getAllAstrologers, getOnlineAstrologer, setOnlineAstrologerDetails } from '../../store/reducer/astrologers';
 import { Astrologers as AstrologersType, UserDetail } from '../../utils/types';
 import { textStyle } from '../../constants/text-style';
+import { useWebSocket } from '../../hooks/use-socket-new';
+import SlidingAstrologerCard from '../../components/home/card-carosel-astrologer';
 
 
 const width = Dimensions.get('window').width - 40;
@@ -43,20 +45,27 @@ const HomeNew = () => {
   });
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
+  const { user, isAuthenticated, token } = useAppSelector(
+    (state: any) => state.auth,
+  );
+  const { isConnected } = useWebSocket(user?.id)
 
   const [hasFetchedInitialData, setHasFetchedInitialData] = useState(false);
   const { onlineAstrologerDetails } = useAppSelector(state => state.astrologer);
   const [onlineAstrologerDetailsApi, setOnlineAstrologerDetailApi] = useState<
-    {
-      name: string;
-      expertise: string;
-      about: string;
-      imgUri: string;
-      id: string;
-      userId: string;
-      online: boolean;
-    }[]
+    any[]
   >([]);
+
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    isLastPage: false,
+  })
+
+  const [astrologerData, setAstrologerData] = useState<any[]>([])
+  const [loadingMore, setLoadingMore] =
+    useState(false);
 
   const getBannerData = async () => {
     if (loading.banner) return;
@@ -89,25 +98,58 @@ const HomeNew = () => {
     });
   }
 
+  const fetchAllAstrologer = async (
+    page: number = 1,
+    limit: number = 1,
+  ) => {
+    try {
+      if (pagination.isLastPage || loadingMore) return;
+      setLoadingMore(true);
+      const params = `?page=${page}&limit=${limit}`;
+
+      const response = await dispatch(
+        getAllAstrologers(params),
+      ).unwrap();
+
+      console.log(
+        response.astrologers,
+        '----all astrologers',
+      );
+
+      if (response?.success) {
+        setAstrologerData((prev) => [...prev, ...(response?.astrologers || [])])
+        setPagination({
+          currentPage: response.currentPage,
+          totalPages: response.totalPages,
+          totalItems: response.totalItems,
+          isLastPage: response.isLastPage,
+        })
+      }
+    } catch (error) {
+      console.log(
+        error,
+        '----fetch astrologer error',
+      );
+    } finally {
+      setLoadingMore(false)
+    }
+  };
+
   const fetchOnlineAstrologersData = async () => {
     if (loading.astrologer) return;
     try {
       setLoading(prev => ({ ...prev, onlineAstrologer: true }));
 
       const payload = await dispatch(getOnlineAstrologer()).unwrap();
-      console.log(payload, '---------online astrologers');
+
       if (payload.success) {
-        const newData =
-          payload.astrologers.map((item: AstrologersType) => ({
-            name: item?.user?.name,
-            expertise: item?.expertise,
-            about: item?.about,
-            id: item?.id,
-            imgUri: item?.user?.imgUri,
-            userId: item?.user?.id,
-            online: item?.online,
-          })) || [];
-        setOnlineAstrologerDetailApi(newData);
+
+        setOnlineAstrologerDetailApi(payload?.astrologers);
+        dispatch(
+          setOnlineAstrologerDetails(
+            payload?.astrologers || [],
+          ),
+        );
       }
     } catch (error) {
     } finally {
@@ -124,15 +166,7 @@ const HomeNew = () => {
       onlineAstrologerDetails &&
       onlineAstrologerDetails.length > 0
     ) {
-      return onlineAstrologerDetails.map(item => ({
-        name: item?.user?.name,
-        expertise: item?.expertise,
-        about: item?.about,
-        id: item?.id,
-        imgUri: item?.user?.imgUri,
-        userId: item?.user?.id,
-        online: item?.online,
-      }));
+      return onlineAstrologerDetails
     }
 
     // 2. Use API's online astrologers if available
@@ -147,17 +181,18 @@ const HomeNew = () => {
     hasFetchedInitialData,
   ]);
 
-  useEffect(() => {
-    getBannerData();
-  }, []);
+
 
   useEffect(() => {
     if (!hasFetchedInitialData) {
       fetchOnlineAstrologersData();
       getBannerData();
+      fetchAllAstrologer()
       setHasFetchedInitialData(true);
     }
   }, [hasFetchedInitialData]);
+
+
 
   return (
     <PageWithHeader rounded={true} scrollHeader>
@@ -273,7 +308,7 @@ const HomeNew = () => {
         </View>
 
         {/* Our Astrologer  */}
-        {finalAstrologerList.length > 0 && <View style={{}}>
+        {isConnected && finalAstrologerList.length > 0 && <View style={{ marginTop: verticalScale(24) }}>
           <Text
             style={[
               textStyle.fs_mont_20_700,
@@ -290,23 +325,40 @@ const HomeNew = () => {
             ]}>
             Live Astrologers
           </Text>
-          {loading?.astrologer ? (
-            <View
-              style={{
-                paddingHorizontal: scale(20),
-                marginVertical: verticalScale(20),
-                justifyContent: 'center',
-                alignItems: 'center',
-              }}>
-              <SkeletonItem
-                height={verticalScale(300)}
-                width={width * 0.7}
-                borderRadius={8}
-              />
-            </View>
-          ) : (
-            <SlidingCard data={finalAstrologerList} />
-          )}
+
+          <SlidingCard data={finalAstrologerList} />
+
+        </View>}
+
+        {astrologerData.length > 0 && <View style={{ marginTop: verticalScale(24) }}>
+          <Text
+            style={[
+              textStyle.fs_mont_20_700,
+              {
+                fontSize: scaleFont(18),
+                fontWeight: '600',
+                color: colors.primaryText,
+              },
+              {
+                marginBottom: verticalScale(20),
+                fontWeight: 600,
+                textAlign: 'center',
+              },
+            ]}>
+            Our Astrologers
+          </Text>
+
+
+          <SlidingAstrologerCard
+            data={astrologerData}
+            pagination={pagination}
+            loadingMore={loadingMore}
+            fetchAllAstrologer={
+              fetchAllAstrologer
+            }
+          />
+
+
         </View>}
 
         {/* CATEGORY GRID */}
@@ -369,7 +421,7 @@ const HomeNew = () => {
               </View>
             )
           )}
-          <View><Text>Hello</Text></View>
+
 
           <View style={{ marginTop: verticalScale(28), gap: verticalScale(16) }}>
             {[0, 4, 8].map(start => (
