@@ -6,27 +6,27 @@ import {
   TouchableOpacity,
   ActivityIndicator,
 } from 'react-native';
-import React, {useCallback, useEffect, useRef, useState} from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import ChatHistoryCard from '../../components/ChatHistoryCard';
 import CallHistoryCard from '../../components/CallHistoryCard';
-import {scale, verticalScale} from '../../utils/sizer';
-import {COLORS, colors, themeColors} from '../../constants/colors';
-import {textStyle} from '../../constants/text-style';
+import { scale, verticalScale } from '../../utils/sizer';
+import { COLORS, colors, themeColors } from '../../constants/colors';
+import { textStyle } from '../../constants/text-style';
 import Tab from '../../components/tab';
 import {
   useFocusEffect,
   useIsFocused,
   useNavigation,
 } from '@react-navigation/native';
-import {useAppDispatch} from '../../hooks/redux-hook';
+import { useAppDispatch } from '../../hooks/redux-hook';
 import {
   getCallHistory,
   getChatHistory,
   setOtherUser,
   setSession,
 } from '../../store/reducer/session';
-import {useUserRole} from '../../hooks/use-role';
-import {CallSession, ChatSession} from '../../utils/types';
+import { useUserRole } from '../../hooks/use-role';
+import { CallSession, ChatSession } from '../../utils/types';
 import AboutIcon from '../../assets/icons/about-icon';
 import PageWithHeader from '../../componentsV1/layout/page-with-header';
 
@@ -87,6 +87,7 @@ const CallChat = () => {
         getChatHistory(`?page=${page}&limit=10`),
       ).unwrap();
       if (payload.success) {
+        console.log(payload.chatHistory, "---caht details")
         setChatItems(prev =>
           page === 1 ? payload.chatHistory : [...prev, ...payload.chatHistory],
         );
@@ -152,7 +153,7 @@ const CallChat = () => {
     }, [activeTab]),
   );
 
-  const renderMessageItem = ({item}: {item: ChatSession}) => {
+  const renderMessageItem = ({ item }: { item: ChatSession }) => {
     const data = item.astrologer;
     return (
       <TouchableOpacity
@@ -166,7 +167,7 @@ const CallChat = () => {
     );
   };
 
-  const renderCallItem = ({item}: {item: CallSession}) => (
+  const renderCallItem = ({ item }: { item: CallSession }) => (
     <TouchableOpacity>
       <CallHistoryCard data={item} />
     </TouchableOpacity>
@@ -192,8 +193,8 @@ const CallChat = () => {
       <View>
         <Tab
           tabs={[
-            {key: 'chat', label: 'Chat'},
-            {key: 'call', label: 'Call'},
+            { key: 'chat', label: 'Chat' },
+            { key: 'call', label: 'Call' },
           ]}
           onTabChange={(tab: 'chat' | 'call') => setActiveTab(tab)}
           initialTab="chat"
@@ -218,7 +219,7 @@ const CallChat = () => {
           ListFooterComponent={
             chatLoading ? (
               <View style={styles.loader}>
-                <ActivityIndicator size="small" style={{marginVertical: 10}} />
+                <ActivityIndicator size="small" style={{ marginVertical: 10 }} />
               </View>
             ) : null
           }
@@ -248,7 +249,7 @@ const CallChat = () => {
           ListFooterComponent={
             callLoading ? (
               <View style={styles.loader}>
-                <ActivityIndicator size="small" style={{marginVertical: 10}} />
+                <ActivityIndicator size="small" style={{ marginVertical: 10 }} />
               </View>
             ) : null
           }

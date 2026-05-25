@@ -307,18 +307,20 @@ const HomeNew = () => {
           </View>
         </View>
 
+        <View style={{ paddingHorizontal: scale(20), marginVertical: verticalScale(20), justifyContent: 'center', alignItems: "center" }}><View style={{ height: 1, width: "80%", backgroundColor: COLORS.theme.primaryLight }}></View></View>
+
         {/* Our Astrologer  */}
         {isConnected && finalAstrologerList.length > 0 && <View style={{ marginTop: verticalScale(24) }}>
           <Text
             style={[
-              textStyle.fs_mont_20_700,
+
               {
                 fontSize: scaleFont(18),
-                fontWeight: '600',
+                fontWeight: '700',
                 color: colors.primaryText,
               },
               {
-                marginBottom: verticalScale(20),
+                marginBottom: verticalScale(24),
                 fontWeight: 600,
                 textAlign: 'center',
               },
@@ -330,7 +332,7 @@ const HomeNew = () => {
 
         </View>}
 
-        {astrologerData.length > 0 && <View style={{ marginTop: verticalScale(24) }}>
+        {/* {astrologerData.length > 0 && <View style={{ marginTop: verticalScale(24) }}>
           <Text
             style={[
               textStyle.fs_mont_20_700,
@@ -359,7 +361,7 @@ const HomeNew = () => {
           />
 
 
-        </View>}
+        </View>} */}
 
         {/* CATEGORY GRID */}
         <View
@@ -431,9 +433,9 @@ const HomeNew = () => {
                 {categories.slice(start, start + 4).map((item, idx) => (
                   <TouchableOpacity
                     onPress={() =>
-                      navigation.navigate('Booking', {
-                        screen: 'BookAppointment',
-                        params: { category: item.title, mode: 'ONLINE' },
+                      navigation.navigate('Astrologers', {
+                        screen: 'AstrologerList',
+
                       })
                     }
                     key={idx}

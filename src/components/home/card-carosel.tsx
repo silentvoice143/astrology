@@ -24,8 +24,8 @@ import CallIcon from '../../assets/icons/call-icon';
 import { useNavigation } from '@react-navigation/native';
 
 const { width } = Dimensions.get('screen');
-const _cardWidth = width * 0.9;
-const _cardHeight = _cardWidth * 1.4;
+const _cardWidth = 180;
+
 const _spacing = 12;
 
 function Card({
@@ -52,92 +52,35 @@ function Card({
 
   console.log(item, "rendering the astrologe in card")
   return (
-    <Animated.View
-      style={[
-        {
-          backgroundColor: COLORS.theme.secondary,
-          padding: verticalScale(20),
-          width: _cardWidth,
-          overflow: 'hidden',
-          borderRadius: 24,
-          minHeight: verticalScale(100),
-          height: verticalScale(180),
-          alignItems: 'flex-start',
-          justifyContent: 'center'
+    <Animated.View style={{ justifyContent: 'center', alignItems: 'center' }}>
+      <Avatar
+        size={70}
+        borderColor={
+          !item.online
+            ? themeColors.status.error.base
+            : themeColors.status.success.base
+        }
+        containerStyle={{
+          height: moderateScale(70),
+          width: moderateScale(70),
+        }}
+        image={{ uri: item?.user?.imgUri }}
+        fallbackText={item?.user?.name?.charAt(0)}
+      />
 
-        },
-        stylez,
-      ]}>
+      <Text
+        numberOfLines={1}
+        ellipsizeMode="tail"
+        style={[
 
-      <View
-        style={{
-          flexDirection: 'row',
-          gap: scale(20),
-          alignItems: 'flex-start',
-        }}>
-
-        <View>
-          <Avatar
-            borderColor={
-              !item.online
-                ? themeColors.status.error.base
-                : themeColors.status.success.base
-            }
-            containerStyle={{
-              height: moderateScale(80),
-              width: moderateScale(80),
-            }}
-            image={{ uri: item?.user?.imgUri }}
-            fallbackText={item?.user?.name?.charAt(0)}
-          />
-        </View>
-
-        {/* TEXT CONTAINER */}
-        <View
-          style={{
-            flex: 1,
-            paddingRight: scale(10),
-          }}>
-
-          <Text
-            numberOfLines={1}
-            style={[
-              textStyle.fs_mont_16_700,
-              {
-                color: COLORS.theme.primary,
-                marginBottom: verticalScale(8),
-              },
-            ]}>
-            {item?.user?.name}
-          </Text>
-
-          <Text
-            numberOfLines={3}
-            style={[
-              textStyle.fs_mont_14_400,
-              {
-                color: COLORS.theme.primary,
-                marginBottom: verticalScale(12),
-                lineHeight: verticalScale(20),
-                marginRight: 55
-              },
-            ]}>
-            {item?.about}
-          </Text>
-
-          <Text
-            numberOfLines={1}
-            style={[
-              textStyle.fs_mont_14_700,
-              {
-                color: COLORS.theme.primary,
-              },
-            ]}>
-            {item?.expertise}
-          </Text>
-        </View>
-      </View>
-
+          {
+            fontWeight: '500',
+            textAlign: 'center',
+            width: moderateScale(90),
+          },
+        ]}>
+        {item?.user?.name}
+      </Text>
     </Animated.View>
   );
 }
@@ -174,7 +117,7 @@ const SlidingCard = ({
         decelerationRate={'fast'}
         contentContainerStyle={{
           gap: _spacing,
-          paddingHorizontal: (width - _cardWidth) / 2,
+          // paddingHorizontal: (width - _cardWidth) / 2,
         }}
         renderItem={({ item, index }) => (
           <Pressable
