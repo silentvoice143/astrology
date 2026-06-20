@@ -61,7 +61,7 @@ export function useZegoAndFCM(
           {
             ringtoneConfig: {
               incomingCallFileName: 'zego_incoming.mp3',
-              outgoingCallFileName: 'notification_sound.mp3',
+              outgoingCallFileName: 'zego_outgoing.mp3',
             },
             androidNotificationConfig: {
               channelID: Config.ZEGO_CHANNEl_ID,

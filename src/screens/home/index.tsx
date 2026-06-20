@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, {useEffect, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -10,48 +10,54 @@ import {
 import PageWithHeader from '../../componentsV1/layout/page-with-header';
 import Input from '../../componentsV1/common/input';
 import CustomButton from '../../componentsV1/common/custom-button';
-import { scale, scaleFont, verticalScale } from '../../utils/sizer';
-import { colors, COLORS } from '../../constants/colors';
+import {scale, scaleFont, verticalScale} from '../../utils/sizer';
+import {colors, COLORS} from '../../constants/colors';
 import SearchIcon from '../../assets/icons/search-icon';
-import { categories } from './categories-data'; // Move array into separate file
-import { useNavigation } from '@react-navigation/native';
-import { useAppDispatch, useAppSelector } from '../../hooks/redux-hook';
-import { getBanner } from '../../store/reducer/general';
+import {categories} from './categories-data'; // Move array into separate file
+import {useNavigation} from '@react-navigation/native';
+import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
+import {getBanner, getTopBanner} from '../../store/reducer/general';
 import Carousel from 'react-native-reanimated-carousel';
 import Skeleton from '../../components/skeleton';
-import notifee, { AndroidImportance } from '@notifee/react-native';
+import notifee, {AndroidImportance} from '@notifee/react-native';
 import SlidingCard from '../../components/home/card-carosel';
 import SkeletonItem from '../../components/skeleton';
-import { getAllAstrologers, getOnlineAstrologer, setOnlineAstrologerDetails } from '../../store/reducer/astrologers';
-import { Astrologers as AstrologersType, UserDetail } from '../../utils/types';
-import { textStyle } from '../../constants/text-style';
-import { useWebSocket } from '../../hooks/use-socket-new';
+import {
+  getAllAstrologers,
+  getOnlineAstrologer,
+  setOnlineAstrologerDetails,
+} from '../../store/reducer/astrologers';
+import {Astrologers as AstrologersType, UserDetail} from '../../utils/types';
+import {textStyle} from '../../constants/text-style';
+import {useWebSocket} from '../../hooks/use-socket-new';
 import SlidingAstrologerCard from '../../components/home/card-carosel-astrologer';
-
 
 const width = Dimensions.get('window').width - 40;
 
 const HomeNew = () => {
-  const [banner, setBanner] = useState<{ imgUrl: string; id: string }[]>([]);
+  const [banner, setBanner] = useState<{imgUrl: string; id: string}[]>([]);
+  const [topBanner, setTopBanner] = useState<{imgUrl: string; id: string}>();
   // const [loading, setLoading] = useState<{ banner: boolean }>({ banner: false });
   const [loading, setLoading] = useState<{
     banner: boolean;
     astrologer: boolean;
     onlineAstrologer: boolean;
+    topbanner: boolean;
   }>({
+    topbanner: false,
     banner: false,
     astrologer: false,
     onlineAstrologer: false,
   });
   const navigation = useNavigation<any>();
   const dispatch = useAppDispatch();
-  const { user, isAuthenticated, token } = useAppSelector(
+  const {user, isAuthenticated, token} = useAppSelector(
     (state: any) => state.auth,
   );
-  const { isConnected } = useWebSocket(user?.id)
+  const {isConnected} = useWebSocket(user?.id);
 
   const [hasFetchedInitialData, setHasFetchedInitialData] = useState(false);
-  const { onlineAstrologerDetails } = useAppSelector(state => state.astrologer);
+  const {onlineAstrologerDetails} = useAppSelector(state => state.astrologer);
   const [onlineAstrologerDetailsApi, setOnlineAstrologerDetailApi] = useState<
     any[]
   >([]);
@@ -61,16 +67,31 @@ const HomeNew = () => {
     totalPages: 1,
     totalItems: 0,
     isLastPage: false,
-  })
+  });
 
-  const [astrologerData, setAstrologerData] = useState<any[]>([])
-  const [loadingMore, setLoadingMore] =
-    useState(false);
+  const [astrologerData, setAstrologerData] = useState<any[]>([]);
+  const [loadingMore, setLoadingMore] = useState(false);
+
+  const getTopBannerData = async () => {
+    if (loading.topbanner) return;
+    try {
+      setLoading(prev => ({...prev, topbanner: true}));
+
+      const payload = await dispatch(getTopBanner()).unwrap();
+
+      if (payload.success) {
+        setTopBanner(payload.bannar);
+      }
+    } catch (error) {
+    } finally {
+      setLoading(prev => ({...prev, topbanner: false}));
+    }
+  };
 
   const getBannerData = async () => {
     if (loading.banner) return;
     try {
-      setLoading(prev => ({ ...prev, banner: true }));
+      setLoading(prev => ({...prev, banner: true}));
 
       const payload = await dispatch(getBanner()).unwrap();
 
@@ -80,7 +101,7 @@ const HomeNew = () => {
       }
     } catch (error) {
     } finally {
-      setLoading(prev => ({ ...prev, banner: false }));
+      setLoading(prev => ({...prev, banner: false}));
     }
   };
 
@@ -98,66 +119,48 @@ const HomeNew = () => {
     });
   }
 
-  const fetchAllAstrologer = async (
-    page: number = 1,
-    limit: number = 1,
-  ) => {
+  const fetchAllAstrologer = async (page: number = 1, limit: number = 1) => {
     try {
       if (pagination.isLastPage || loadingMore) return;
       setLoadingMore(true);
       const params = `?page=${page}&limit=${limit}`;
 
-      const response = await dispatch(
-        getAllAstrologers(params),
-      ).unwrap();
+      const response = await dispatch(getAllAstrologers(params)).unwrap();
 
-      console.log(
-        response.astrologers,
-        '----all astrologers',
-      );
+      console.log(response.astrologers, '----all astrologers');
 
       if (response?.success) {
-        setAstrologerData((prev) => [...prev, ...(response?.astrologers || [])])
+        setAstrologerData(prev => [...prev, ...(response?.astrologers || [])]);
         setPagination({
           currentPage: response.currentPage,
           totalPages: response.totalPages,
           totalItems: response.totalItems,
           isLastPage: response.isLastPage,
-        })
+        });
       }
     } catch (error) {
-      console.log(
-        error,
-        '----fetch astrologer error',
-      );
+      console.log(error, '----fetch astrologer error');
     } finally {
-      setLoadingMore(false)
+      setLoadingMore(false);
     }
   };
 
   const fetchOnlineAstrologersData = async () => {
     if (loading.astrologer) return;
     try {
-      setLoading(prev => ({ ...prev, onlineAstrologer: true }));
+      setLoading(prev => ({...prev, onlineAstrologer: true}));
 
       const payload = await dispatch(getOnlineAstrologer()).unwrap();
 
       if (payload.success) {
-
         setOnlineAstrologerDetailApi(payload?.astrologers);
-        dispatch(
-          setOnlineAstrologerDetails(
-            payload?.astrologers || [],
-          ),
-        );
+        dispatch(setOnlineAstrologerDetails(payload?.astrologers || []));
       }
     } catch (error) {
     } finally {
-      setLoading(prev => ({ ...prev, onlineAstrologer: false }));
+      setLoading(prev => ({...prev, onlineAstrologer: false}));
     }
   };
-
-
 
   const finalAstrologerList = React.useMemo(() => {
     // 1. Use socket data if it exists and initial data has been fetched
@@ -166,38 +169,34 @@ const HomeNew = () => {
       onlineAstrologerDetails &&
       onlineAstrologerDetails.length > 0
     ) {
-      return onlineAstrologerDetails
+      return onlineAstrologerDetails;
     }
 
     // 2. Use API's online astrologers if available
     if (onlineAstrologerDetailsApi && onlineAstrologerDetailsApi.length > 0) {
       return onlineAstrologerDetailsApi;
     }
-    return []
-
+    return [];
   }, [
     onlineAstrologerDetails,
     onlineAstrologerDetailsApi,
     hasFetchedInitialData,
   ]);
 
-
-
   useEffect(() => {
     if (!hasFetchedInitialData) {
       fetchOnlineAstrologersData();
       getBannerData();
-      fetchAllAstrologer()
+      getTopBannerData();
+      fetchAllAstrologer();
       setHasFetchedInitialData(true);
     }
   }, [hasFetchedInitialData]);
 
-
-
   return (
     <PageWithHeader rounded={true} scrollHeader>
       {/* HERO BANNER */}
-      <View style={{ flex: 1, backgroundColor: COLORS.theme.white }}>
+      <View style={{flex: 1, backgroundColor: COLORS.theme.white}}>
         <View
           style={{
             position: 'relative',
@@ -208,8 +207,9 @@ const HomeNew = () => {
           <Image
             style={{
               position: 'absolute',
-              top: verticalScale(-110),
+              top: verticalScale(-100),
               width: '100%',
+              height: verticalScale(190),
               borderBottomLeftRadius: scale(16),
               borderBottomRightRadius: scale(16),
             }}
@@ -219,7 +219,7 @@ const HomeNew = () => {
           <Input
             containerStyle={{
               marginHorizontal: scale(20),
-              marginTop: verticalScale(20),
+              // marginTop: verticalScale(20),
             }}
             inputContainerStyle={{
               borderRadius: scale(80),
@@ -231,17 +231,17 @@ const HomeNew = () => {
 
           <View
             style={{
-              marginTop: verticalScale(16),
-              borderBottomRightRadius: scale(16),
-              borderBottomLeftRadius: scale(16),
+              // marginTop: verticalScale(16),
+              // borderBottomRightRadius: scale(16),
+              // borderBottomLeftRadius: scale(16),
               overflow: 'hidden',
             }}>
             <Image
-              source={require('../../assets/imgs/banner-home.jpeg')}
+              source={{uri: topBanner?.imgUrl}}
               style={{
                 width: '100%',
                 height: verticalScale(200),
-                resizeMode: 'cover',
+                // resizeMode: 'cover',
               }}
             />
           </View>
@@ -250,120 +250,84 @@ const HomeNew = () => {
         {/* BOOKING CARD */}
         <View
           style={{
-            marginTop: verticalScale(48),
+            marginTop: verticalScale(20),
             padding: scale(16),
             marginHorizontal: 20,
             backgroundColor: COLORS.theme.primary,
             borderRadius: scale(12),
             gap: verticalScale(8),
           }}>
-          <Text style={{ fontSize: scaleFont(24), color: COLORS.theme.white }}>
+          <Text style={{fontSize: scaleFont(24), color: COLORS.theme.white}}>
             Book an Appointment
           </Text>
-          <Text style={{ fontSize: scaleFont(14), color: COLORS.theme.white }}>
+          <Text style={{fontSize: scaleFont(14), color: COLORS.theme.white}}>
             Connect with expert astrologers at your preferred time.
           </Text>
 
-          <View style={{ flexDirection: 'column', gap: scale(16) }}>
-            {/* <CustomButton
+          <View style={{flexDirection: 'column', gap: scale(16)}}>
+            <CustomButton
               style={{flex: 1, backgroundColor: COLORS.theme.secondary}}
               textStyle={{color: COLORS.theme.black}}
-              title="Test"
-              onPress={() => showTestNotification()}
-            /> */}
-            <CustomButton
-              style={{ flex: 1, backgroundColor: COLORS.theme.secondary }}
-              textStyle={{ color: COLORS.theme.black }}
               title="Chat with Astrologer"
               onPress={() =>
                 navigation.navigate('Astrologers', {
                   screen: 'AstrologerList',
-
                 })
               }
             />
 
             <CustomButton
-              style={{ flex: 1, backgroundColor: COLORS.theme.white }}
-              textStyle={{ color: COLORS.theme.black }}
+              style={{flex: 1, backgroundColor: COLORS.theme.white}}
+              textStyle={{color: COLORS.theme.black}}
               title="Call with Astrologer"
-              onPress={
-                async () =>
-                  navigation.navigate('Astrologers', {
-                    screen: 'AstrologerList',
-
-                  })
-                // await notifee.displayNotification({
-                //   title: 'New Message',
-                //   body: 'This is a test message',
-                //   android: {
-                //     channelId: 'high_importance_channel', // make sure channel exists
-                //     smallIcon: 'ic_launcher',
-                //     sound: 'notification_sound', // file in res/raw without extension
-                //   },
-                // })
+              onPress={async () =>
+                navigation.navigate('Astrologers', {
+                  screen: 'AstrologerList',
+                })
               }
             />
           </View>
         </View>
 
-        <View style={{ paddingHorizontal: scale(20), marginVertical: verticalScale(20), justifyContent: 'center', alignItems: "center" }}><View style={{ height: 1, width: "80%", backgroundColor: COLORS.theme.primaryLight }}></View></View>
+        <View
+          style={{
+            paddingHorizontal: scale(20),
+            marginVertical: verticalScale(10),
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <View
+            style={{
+              height: 1,
+              width: '80%',
+              backgroundColor: COLORS.theme.primaryLight,
+            }}></View>
+        </View>
 
         {/* Our Astrologer  */}
-        {isConnected && finalAstrologerList.length > 0 && <View style={{ marginTop: verticalScale(24) }}>
-          <Text
-            style={[
+        {finalAstrologerList.length > 0 && (
+          <View>
+            <Text
+              style={[
+                {
+                  fontSize: scaleFont(18),
+                  fontWeight: '700',
+                  color: colors.primaryText,
+                },
+                {
+                  marginBottom: verticalScale(24),
+                  fontWeight: 600,
+                  textAlign: 'center',
+                },
+              ]}>
+              Live Astrologers
+            </Text>
 
-              {
-                fontSize: scaleFont(18),
-                fontWeight: '700',
-                color: colors.primaryText,
-              },
-              {
-                marginBottom: verticalScale(24),
-                fontWeight: 600,
-                textAlign: 'center',
-              },
-            ]}>
-            Live Astrologers
-          </Text>
+            <SlidingCard data={finalAstrologerList} />
+          </View>
+        )}
 
-          <SlidingCard data={finalAstrologerList} />
-
-        </View>}
-
-        {/* {astrologerData.length > 0 && <View style={{ marginTop: verticalScale(24) }}>
-          <Text
-            style={[
-              textStyle.fs_mont_20_700,
-              {
-                fontSize: scaleFont(18),
-                fontWeight: '600',
-                color: colors.primaryText,
-              },
-              {
-                marginBottom: verticalScale(20),
-                fontWeight: 600,
-                textAlign: 'center',
-              },
-            ]}>
-            Our Astrologers
-          </Text>
-
-
-          <SlidingAstrologerCard
-            data={astrologerData}
-            pagination={pagination}
-            loadingMore={loadingMore}
-            fetchAllAstrologer={
-              fetchAllAstrologer
-            }
-          />
-
-
-        </View>} */}
-
-        {/* CATEGORY GRID */}
+        {/* Banner*/}
         <View
           style={{
             paddingHorizontal: scale(20),
@@ -400,9 +364,9 @@ const HomeNew = () => {
                     parallaxScrollingOffset: 10,
                     parallaxAdjacentItemScale: 0.8,
                   }}
-                  renderItem={({ index, item }) => (
+                  renderItem={({index, item}) => (
                     <Image
-                      source={{ uri: item?.imgUrl }}
+                      source={{uri: item?.imgUrl}}
                       resizeMode="cover"
                       style={{
                         height: verticalScale(120),
@@ -410,32 +374,22 @@ const HomeNew = () => {
                         borderRadius: scale(16),
                       }}
                     />
-                    // <Image
-                    //   style={{
-                    //     width: '100%',
-                    //     height: verticalScale(120),
-                    //     borderRadius: scale(16),
-                    //   }}
-                    //   source={require('../../assets/imgs/banner1.png')}
-                    // />
                   )}
                 />
               </View>
             )
           )}
 
-
-          <View style={{ marginTop: verticalScale(28), gap: verticalScale(16) }}>
+          <View style={{marginTop: verticalScale(28), gap: verticalScale(16)}}>
             {[0, 4, 8].map(start => (
               <View
                 key={start}
-                style={{ flexDirection: 'row', justifyContent: 'space-around' }}>
+                style={{flexDirection: 'row', justifyContent: 'space-around'}}>
                 {categories.slice(start, start + 4).map((item, idx) => (
                   <TouchableOpacity
                     onPress={() =>
                       navigation.navigate('Astrologers', {
                         screen: 'AstrologerList',
-
                       })
                     }
                     key={idx}

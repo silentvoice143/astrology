@@ -20,6 +20,7 @@ import {
   requestAndroidCallPermissions,
   requestOverlayPermission,
 } from './src/utils/requestPermission';
+import Config from 'react-native-config';
 
 Object.assign(global, encoding);
 
@@ -59,9 +60,19 @@ function App(): React.JSX.Element {
     });
   }
 
+  async function createZegoChannel() {
+    await notifee.createChannel({
+      id: Config.ZEGO_CHANNEl_ID!,
+      name: Config.ZEGO_CHANNEl_NAME!,
+      importance: AndroidImportance.HIGH,
+      sound: 'zego_incoming', // without .mp3
+    });
+  }
+
   // Call this once when app starts
   useEffect(() => {
     createNotificationChannel();
+    createZegoChannel();
     requestAndroidCallPermissions();
   }, []);
 

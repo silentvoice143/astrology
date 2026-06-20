@@ -1,50 +1,52 @@
-import { View, Text, TouchableOpacity } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { Calendar } from 'react-native-calendars';
+import {View, Text, TouchableOpacity} from 'react-native';
+import React, {useEffect, useState} from 'react';
+import {Calendar} from 'react-native-calendars';
 import PageWithHeader from '../../componentsV1/layout/page-with-header';
-import { scale, verticalScale, scaleFont } from '../../utils/sizer';
-import { COLORS } from '../../constants/colors';
-import { useRoute } from '@react-navigation/native';
+import {scale, verticalScale, scaleFont} from '../../utils/sizer';
+import {COLORS} from '../../constants/colors';
+import {useRoute} from '@react-navigation/native';
 import ControlledTagSelector from '../../components/controlled-tag-selector';
-import { useAppDispatch } from '../../hooks/redux-hook';
-import { getAllAstrologerById, getAllAstrologers } from '../../store/reducer/astrologers';
-import { bookAppointmentReq } from '../../store/reducer/booking';
+import {useAppDispatch} from '../../hooks/redux-hook';
+import {
+  getAllAstrologerById,
+  getAllAstrologers,
+} from '../../store/reducer/astrologers';
+import {bookAppointmentReq} from '../../store/reducer/booking';
 import Toast from 'react-native-toast-message';
 import dayjs from 'dayjs';
 
 const TIME_SLOTS = [
-  { label: '5 min', value: 5 },
-  { label: '10 min', value: 10 },
-  { label: '15 min', value: 15 },
-  { label: '30 min', value: 30 },
-  { label: '45 min', value: 45 },
-  { label: '1 hr', value: 60 },
+  {label: '5 min', value: 5},
+  {label: '10 min', value: 10},
+  {label: '15 min', value: 15},
+  {label: '30 min', value: 30},
+  {label: '45 min', value: 45},
+  {label: '1 hr', value: 60},
 ];
 
 const COST_PER_MINUTE = 20; // Example: ₹20/min
 
 const availabilityTags = [
-  { id: 'ONLINE', label: 'Online', icon: '🟢' },
+  {id: 'ONLINE', label: 'Online', icon: '🟢'},
   // {id: 'OFFLINE', label: 'Offline', icon: '🔴'},
 ];
 
-const sessionTypeTags = [
-  { id: 'VIDEO', label: 'Video', icon: '📹' },
-  { id: 'AUDIO', label: 'AUDIO', icon: '🎤' },
-  { id: 'CHAT', label: 'Chat', icon: '💬' },
-];
-
 const Booking = () => {
+  const [sessionTypeTags, setSessionTypeTags] = useState([
+    {id: 'VIDEO', label: 'Video', icon: '📹', disabled: false},
+    {id: 'AUDIO', label: 'AUDIO', icon: '🎤', disabled: false},
+    {id: 'CHAT', label: 'Chat', icon: '💬', disabled: false},
+  ]);
   const route = useRoute();
   const category =
-    (route.params as { category: string; mode: 'ONLINE' | 'OFFLINE', id: string })
+    (route.params as {category: string; mode: 'ONLINE' | 'OFFLINE'; id: string})
       ?.category || 'all';
   const mode =
-    (route.params as { mode: 'ONLINE' | 'OFFLINE'; category: string, id: string })?.mode ||
-    '';
+    (route.params as {mode: 'ONLINE' | 'OFFLINE'; category: string; id: string})
+      ?.mode || '';
   const id =
-    (route.params as { mode: 'ONLINE' | 'OFFLINE'; category: string, id: string })?.id ||
-    '';
+    (route.params as {mode: 'ONLINE' | 'OFFLINE'; category: string; id: string})
+      ?.id || '';
 
   const [selectedDate, setSelectedDate] = useState('');
   const [selectedSlots, setSelectedSlots] = useState<number[]>([]);
@@ -134,18 +136,37 @@ const Booking = () => {
     try {
       if (append) setIsFetchingMore(true);
       else setLoadingAstrologerData(true);
-      if (!id) return
+      if (!id) return;
 
-      const payload = await dispatch(
-        getAllAstrologerById({ id: id }),
-      ).unwrap();
+      const payload = await dispatch(getAllAstrologerById({id: id})).unwrap();
 
-      console.log(payload, "payload")
+      console.log(payload, 'payload');
       if (payload.success) {
         console.log('Fetched astrologers:', payload);
         const newData = payload.astrologer;
+        const astrologer = payload.astrologer;
+        const sessionTypeTags = [
+          {
+            id: 'VIDEO',
+            label: 'Video',
+            icon: '📹',
+            disabled: !astrologer.isVideoOnline,
+          },
+          {
+            id: 'AUDIO',
+            label: 'Audio',
+            icon: '🎤',
+            disabled: !astrologer.isAudioOnline,
+          },
+          {
+            id: 'CHAT',
+            label: 'Chat',
+            icon: '💬',
+            disabled: !astrologer.isChatOnline,
+          },
+        ];
+        setSessionTypeTags(sessionTypeTags);
         setAstrologersData(newData);
-
       }
     } catch (error) {
     } finally {
@@ -157,7 +178,6 @@ const Booking = () => {
   useEffect(() => {
     fetchAstrologersData(1, false, '');
   }, []);
-
 
   const isAppointmentDisabled =
     !selectedDate ||
@@ -216,7 +236,6 @@ const Booking = () => {
         />
 
         <ControlledTagSelector
-
           tags={sessionTypeTags}
           selectedTags={sessionType}
           onChange={data => {
@@ -225,7 +244,11 @@ const Booking = () => {
           }}
           multiSelect={false}
           label="Select Session Type"
-          disabled={!bookinType.length || bookinType[0] === 'OFFLINE' || loadingAstrologerData}
+          disabled={
+            !bookinType.length ||
+            bookinType[0] === 'OFFLINE' ||
+            loadingAstrologerData
+          }
         />
 
         {/* Time Slot Selection */}
@@ -291,7 +314,7 @@ const Booking = () => {
               backgroundColor: COLORS.theme.secondary,
               borderRadius: scale(12),
             }}>
-            <Text style={{ fontSize: scaleFont(16), fontWeight: '700' }}>
+            <Text style={{fontSize: scaleFont(16), fontWeight: '700'}}>
               Total Duration: {totalMinutes} minutes
             </Text>
             <Text

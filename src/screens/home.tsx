@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   View,
   Text,
@@ -13,27 +13,27 @@ import AnimatedSearchInput from '../components/custom-searchbox';
 import CustomButton from '../components/custom-button';
 import ChatIcon from '../assets/icons/chat-icon';
 import CallIcon from '../assets/icons/call-icon';
-import { textStyle } from '../constants/text-style';
-import { scale, scaleFont, verticalScale } from '../utils/sizer';
-import { colors } from '../constants/colors';
+import {textStyle} from '../constants/text-style';
+import {scale, scaleFont, verticalScale} from '../utils/sizer';
+import {colors} from '../constants/colors';
 import LinearGradient from 'react-native-linear-gradient';
 import SlidingCard from '../components/home/card-carosel';
-import { useNavigation } from '@react-navigation/native';
-import { useAppDispatch, useAppSelector } from '../hooks/redux-hook';
+import {useNavigation} from '@react-navigation/native';
+import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
 
 import QuickNavigation from '../components/home/quick-navigation';
 import FirstChatFreePopup from '../components/free-chat-popup';
-import { setFreeChatModalShown } from '../store/reducer/auth';
+import {setFreeChatModalShown} from '../store/reducer/auth';
 import {
   getAllAstrologers,
   getOnlineAstrologer,
 } from '../store/reducer/astrologers';
-import { Astrologers as AstrologersType, UserDetail } from '../utils/types';
-import Carousel, { ICarouselInstance } from 'react-native-reanimated-carousel';
-import { useSharedValue } from 'react-native-reanimated';
+import {Astrologers as AstrologersType, UserDetail} from '../utils/types';
+import Carousel, {ICarouselInstance} from 'react-native-reanimated-carousel';
+import {useSharedValue} from 'react-native-reanimated';
 import IntroCard from '../components/home/intro-card';
-import { getBanner } from '../store/reducer/general';
-import { useUserRole } from '../hooks/use-role';
+import {getBanner} from '../store/reducer/general';
+import {useUserRole} from '../hooks/use-role';
 import SkeletonItem from '../components/skeleton';
 
 const width = Dimensions.get('window').width - 40;
@@ -41,13 +41,13 @@ const data = [...new Array(6).keys()];
 
 const Home = () => {
   const [search, setSearch] = useState('');
-  const [banner, setBanner] = useState<{ imgUrl: string; id: string }[]>([]);
+  const [banner, setBanner] = useState<{imgUrl: string; id: string}[]>([]);
   const navigation = useNavigation<any>();
   const [isFirstChatModalOpen, setIsFirstChatModalOpen] = useState(false);
-  const { freeChatUsed } = useAppSelector(state => state.auth.user);
-  const { freeChatModalShown } = useAppSelector(state => state.auth);
+  const {freeChatUsed} = useAppSelector(state => state.auth.user);
+  const {freeChatModalShown} = useAppSelector(state => state.auth);
   const [hasFetchedInitialData, setHasFetchedInitialData] = useState(false);
-  const { onlineAstrologerDetails } = useAppSelector(state => state.astrologer);
+  const {onlineAstrologerDetails} = useAppSelector(state => state.astrologer);
   const [onlineAstrologerDetailsApi, setOnlineAstrologerDetailApi] = useState<
     {
       name: string;
@@ -89,7 +89,7 @@ const Home = () => {
   const fetchAstrologersData = async (pageNumber = 1, append = false) => {
     if (loading.astrologer) return;
     try {
-      setLoading(prev => ({ ...prev, astrologer: true }));
+      setLoading(prev => ({...prev, astrologer: true}));
 
       const payload = await dispatch(getAllAstrologers(`?page=1`)).unwrap();
 
@@ -108,14 +108,14 @@ const Home = () => {
       }
     } catch (error) {
     } finally {
-      setLoading(prev => ({ ...prev, astrologer: false }));
+      setLoading(prev => ({...prev, astrologer: false}));
     }
   };
 
   const fetchOnlineAstrologersData = async () => {
     if (loading.astrologer) return;
     try {
-      setLoading(prev => ({ ...prev, onlineAstrologer: true }));
+      setLoading(prev => ({...prev, onlineAstrologer: true}));
 
       const payload = await dispatch(getOnlineAstrologer()).unwrap();
       // console.log(payload, '---------online astrologers');
@@ -134,14 +134,14 @@ const Home = () => {
       }
     } catch (error) {
     } finally {
-      setLoading(prev => ({ ...prev, onlineAstrologer: false }));
+      setLoading(prev => ({...prev, onlineAstrologer: false}));
     }
   };
 
   const getBannerData = async () => {
     if (loading.banner) return;
     try {
-      setLoading(prev => ({ ...prev, banner: true }));
+      setLoading(prev => ({...prev, banner: true}));
 
       const payload = await dispatch(getBanner()).unwrap();
 
@@ -150,7 +150,7 @@ const Home = () => {
       }
     } catch (error) {
     } finally {
-      setLoading(prev => ({ ...prev, banner: false }));
+      setLoading(prev => ({...prev, banner: false}));
     }
   };
 
@@ -174,10 +174,10 @@ const Home = () => {
         navigation.navigate('KundliForm');
         break;
       case 'match-making':
-        navigation.navigate('Astrologers', { sort: 'marriage' });
+        navigation.navigate('Astrologers', {sort: 'marriage'});
         break;
       case 'tarot':
-        navigation.navigate('Astrologers', { sort: 'tarot' });
+        navigation.navigate('Astrologers', {sort: 'tarot'});
         break;
     }
   };
@@ -243,8 +243,6 @@ const Home = () => {
     hasFetchedInitialData,
   ]);
 
-
-
   return (
     <ScreenLayout>
       {isFirstChatModalOpen && (
@@ -286,7 +284,7 @@ const Home = () => {
               value={search}
               onChangeText={handleSearchChange}
               iconPosition="left"
-              containerStyle={{ width: '100%' }}
+              containerStyle={{width: '100%'}}
               inputContainerStyle={HomeStyle.searchInput}
               onSubmitEditing={handleSearchSubmit}
             />
@@ -313,7 +311,7 @@ const Home = () => {
           </View>
 
           {/* banner */}
-          {loading.banner ? (
+          {/* {loading.banner ? (
             <View
               style={{
                 paddingHorizontal: scale(20),
@@ -363,9 +361,7 @@ const Home = () => {
                 />
               </View>
             )
-          )}
-
-
+          )} */}
 
           {/* Our Astrologer  */}
           <View style={{}}>
@@ -444,7 +440,7 @@ const Home = () => {
                   parallaxScrollingOffset: 10,
                   parallaxAdjacentItemScale: 0.8,
                 }}
-                renderItem={({ item, index }) => (
+                renderItem={({item, index}) => (
                   <View
                     style={{
                       flex: 1,
@@ -474,7 +470,7 @@ const Home = () => {
           backgroundColor: colors.primarybtn,
         }}
         leftIcon={<CallIcon color={'#000000'} size={20} />}
-        textStyle={{ color: colors.primaryText }}
+        textStyle={{color: colors.primaryText}}
         onPress={() => {
           navigation.navigate('Astrologers');
         }}
@@ -582,7 +578,7 @@ const HomeStyle = StyleSheet.create({
     borderRadius: scale(15),
 
     shadowColor: colors.glow_shadow, // yellow
-    shadowOffset: { width: 0, height: 0 },
+    shadowOffset: {width: 0, height: 0},
     shadowOpacity: 0.9,
     shadowRadius: 10,
     // Android shadow (limited control)

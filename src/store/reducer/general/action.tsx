@@ -34,3 +34,18 @@ export const getBanner = createAsyncThunk<
     return rejectWithValue(error.response?.data || error.message);
   }
 });
+
+export const getTopBanner = createAsyncThunk<
+  any, // response type
+  void, // payload must be FormData
+  {rejectValue: any}
+>('banner-get-top', async (formData, {rejectWithValue}) => {
+  console.log(formData, 'this api hits,....');
+  try {
+    const response = await api.get('/api/v1/bannar/top');
+
+    return response.data;
+  } catch (error: any) {
+    return rejectWithValue(error.response?.data || error.message);
+  }
+});

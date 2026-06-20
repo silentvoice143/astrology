@@ -155,6 +155,7 @@ import {registerDevice} from '../store/reducer/auth';
 import {handleNotificationNavigation} from '../utils/notification-handler';
 import {markNotificationRead} from '../store/reducer/notifications';
 import {setOtherUser, setSession} from '../store/reducer/session';
+import {getCurrentRouteName} from '../utils/navigation';
 
 export default function useFcm(isAuthenticated: boolean) {
   const dispatch = useAppDispatch();
@@ -205,7 +206,13 @@ export default function useFcm(isAuthenticated: boolean) {
           messaging,
           async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
             console.log('Foreground message:', remoteMessage);
-
+            const currentRoute = getCurrentRouteName();
+            if (
+              currentRoute === 'ChatScreen' &&
+              remoteMessage?.data?.type === 'CHAT_MESSAGE'
+            ) {
+              return;
+            }
             Toast.show({
               type: 'info',
               text1: remoteMessage.notification?.title ?? 'New Message',
@@ -225,11 +232,6 @@ export default function useFcm(isAuthenticated: boolean) {
           messaging,
           (remoteMessage: any) => {
             if (remoteMessage?.data) {
-              console.log(
-                remoteMessage?.data,
-                '----------------------------------------------------------------------------------------caht message',
-              );
-
               if (initialMessage?.data?.type === 'CHAT_MESSAGE') {
                 const decodedData = JSON.parse(remoteMessage?.data?.session);
                 dispatch(setOtherUser(decodedData.astrologer));

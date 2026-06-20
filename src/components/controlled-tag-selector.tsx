@@ -16,6 +16,7 @@ export type TagItem = {
   id: string;
   label: string;
   icon?: string;
+  disabled?: boolean;
 };
 
 type ValueType = 'id' | 'object';
@@ -116,6 +117,7 @@ function ControlledTagSelector<T extends ValueType = 'id'>({
           const isSelected = selectedIds.includes(item.id);
           return (
             <TouchableOpacity
+              disabled={item?.disabled}
               style={[
                 styles.tag,
                 tagStyle,
