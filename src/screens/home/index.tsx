@@ -14,7 +14,7 @@ import {scale, scaleFont, verticalScale} from '../../utils/sizer';
 import {colors, COLORS} from '../../constants/colors';
 import SearchIcon from '../../assets/icons/search-icon';
 import {categories} from './categories-data'; // Move array into separate file
-import {useNavigation} from '@react-navigation/native';
+import {CommonActions, useNavigation} from '@react-navigation/native';
 import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
 import {getBanner, getTopBanner} from '../../store/reducer/general';
 import Carousel from 'react-native-reanimated-carousel';
@@ -270,9 +270,20 @@ const HomeNew = () => {
               textStyle={{color: COLORS.theme.black}}
               title="Chat with Astrologer"
               onPress={() =>
-                navigation.navigate('Astrologers', {
-                  screen: 'AstrologerList',
-                })
+                navigation.dispatch(
+                  CommonActions.reset({
+                    index: 0,
+                    routes: [
+                      {
+                        name: 'Astrologers',
+                        state: {
+                          index: 0,
+                          routes: [{name: 'AstrologerList'}],
+                        },
+                      },
+                    ],
+                  }),
+                )
               }
             />
 
@@ -281,9 +292,20 @@ const HomeNew = () => {
               textStyle={{color: COLORS.theme.black}}
               title="Call with Astrologer"
               onPress={async () =>
-                navigation.navigate('Astrologers', {
-                  screen: 'AstrologerList',
-                })
+                navigation.dispatch(
+                  CommonActions.reset({
+                    index: 0,
+                    routes: [
+                      {
+                        name: 'Astrologers',
+                        state: {
+                          index: 0,
+                          routes: [{name: 'AstrologerList'}],
+                        },
+                      },
+                    ],
+                  }),
+                )
               }
             />
           </View>
@@ -388,9 +410,20 @@ const HomeNew = () => {
                 {categories.slice(start, start + 4).map((item, idx) => (
                   <TouchableOpacity
                     onPress={() =>
-                      navigation.navigate('Astrologers', {
-                        screen: 'AstrologerList',
-                      })
+                      navigation.dispatch(
+                        CommonActions.reset({
+                          index: 0,
+                          routes: [
+                            {
+                              name: 'Astrologers',
+                              state: {
+                                index: 0,
+                                routes: [{name: 'AstrologerList'}],
+                              },
+                            },
+                          ],
+                        }),
+                      )
                     }
                     key={idx}
                     style={{

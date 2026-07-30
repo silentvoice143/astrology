@@ -6,7 +6,7 @@ import {scale, verticalScale, scaleFont} from '../../utils/sizer';
 import {COLORS} from '../../constants/colors';
 import {useRoute} from '@react-navigation/native';
 import ControlledTagSelector from '../../components/controlled-tag-selector';
-import {useAppDispatch} from '../../hooks/redux-hook';
+import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
 import {
   getAllAstrologerById,
   getAllAstrologers,
@@ -14,6 +14,10 @@ import {
 import {bookAppointmentReq} from '../../store/reducer/booking';
 import Toast from 'react-native-toast-message';
 import dayjs from 'dayjs';
+import {navigate} from '../../utils/navigation';
+import {setWalletBalance} from '../../store/reducer/user';
+import {setBalance} from '../../store/reducer/auth';
+import {getTransactionHistory} from '../../store/reducer/payment';
 
 const TIME_SLOTS = [
   {label: '5 min', value: 5},
@@ -62,6 +66,7 @@ const Booking = () => {
   const [astrologersData, setAstrologersData] = useState<any>(null);
 
   const dispatch = useAppDispatch();
+  const user = useAppSelector(state => state.user);
 
   const toggleSlot = (value: number) => {
     if (selectedSlots.includes(value)) {
@@ -99,6 +104,46 @@ const Booking = () => {
     }
   }, [route.params]);
 
+  const getTransactionDetails = async () => {
+    try {
+      setLoading(true);
+      console.log('Transaction getting');
+      const payload = await dispatch(
+        getTransactionHistory({query: `?page=1`}),
+      ).unwrap();
+      console.log('Transaction Payload: ', payload);
+
+      if (payload.success) {
+        dispatch(
+          setBalance({
+            balance: (((payload?.wallet?.balance ?? 0) as number) -
+              (payload?.wallet?.lockedBalance ?? 0)) as number,
+          }),
+        );
+
+        dispatch(
+          setWalletBalance(
+            (((payload?.wallet?.balance ?? 0) as number) -
+              (payload?.wallet?.lockedBalance ?? 0)) as number,
+          ),
+        );
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Failed to get transactions',
+        });
+      }
+    } catch (err) {
+      console.log(err);
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to get transactions',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleBooking = async () => {
     // Implement booking logic here
     try {
@@ -119,11 +164,13 @@ const Booking = () => {
           text1: 'Appointment booked successfully!',
         });
         resetBookingState();
+        getTransactionDetails();
       }
     } catch (err) {
       console.log(err);
     } finally {
       setLoading(false);
+      getTransactionDetails();
     }
   };
 
@@ -165,6 +212,11 @@ const Booking = () => {
             disabled: !astrologer.isChatOnline,
           },
         ];
+        const availableSession = sessionTypeTags.find(
+          session => !session.disabled,
+        );
+
+        setSessionType(availableSession?.id ? [availableSession?.id] : []);
         setSessionTypeTags(sessionTypeTags);
         setAstrologersData(newData);
       }
@@ -185,6 +237,7 @@ const Booking = () => {
     (bookinType[0] === 'ONLINE' && selectedSlots.length === 0);
 
   const today = dayjs().format('YYYY-MM-DD');
+  console.log(bookinType, '---booking type');
   return (
     <PageWithHeader themeMode="light" title="Book Appointment">
       <View
@@ -330,7 +383,7 @@ const Booking = () => {
         )}
 
         {/* Button */}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={handleBooking}
           disabled={isAppointmentDisabled}
           style={{
@@ -351,7 +404,53 @@ const Booking = () => {
             }}>
             {loading ? 'Booking...' : 'Book Appointment'}
           </Text>
-        </TouchableOpacity>
+        </TouchableOpacity> */}
+        {user.walletBalance! < totalCost ? (
+          <TouchableOpacity
+            onPress={() => navigate('Wallet')}
+            style={{
+              marginTop: verticalScale(24),
+              backgroundColor: isAppointmentDisabled
+                ? '#ccc'
+                : COLORS.theme.primary,
+              paddingVertical: verticalScale(14),
+              borderRadius: scale(12),
+              alignItems: 'center',
+              marginBottom: verticalScale(80),
+            }}>
+            <Text
+              style={{
+                fontSize: scaleFont(16),
+                fontWeight: '700',
+                color: isAppointmentDisabled ? '#666' : COLORS.theme.white,
+              }}>
+              Recharge
+            </Text>
+          </TouchableOpacity>
+        ) : (
+          <TouchableOpacity
+            onPress={handleBooking}
+            disabled={isAppointmentDisabled}
+            style={{
+              marginTop: verticalScale(24),
+              backgroundColor: isAppointmentDisabled
+                ? '#ccc'
+                : COLORS.theme.primary,
+              paddingVertical: verticalScale(14),
+              borderRadius: scale(12),
+              alignItems: 'center',
+              marginBottom: verticalScale(80),
+            }}>
+            <Text
+              style={{
+                fontSize: scaleFont(16),
+                fontWeight: '700',
+                color: isAppointmentDisabled ? '#666' : COLORS.theme.white,
+              }}>
+              {loading ? 'Booking...' : 'Book Appointment'}
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
     </PageWithHeader>
   );

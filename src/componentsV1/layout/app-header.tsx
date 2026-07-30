@@ -1,11 +1,14 @@
 import React from 'react';
 import {View, Text, TouchableOpacity, StyleSheet} from 'react-native';
 import {scale, verticalScale} from '../../utils/sizer';
-import {COLORS} from '../../constants/colors';
+import {COLORS, themeColors} from '../../constants/colors';
 import MenuIcon from '../../assets/icons/menu-icon';
 import NotificationIcon from '../../assets/icons/notification-icon';
 import BackIcon from '../../assets/icons/back-icon';
 import {useRoute} from '@react-navigation/native';
+import WalletIcon from '../../assets/icons/walletIcon';
+import {navigate} from '../../utils/navigation';
+import {useAppSelector} from '../../hooks/redux-hook';
 
 interface AppHeaderProps {
   scrolled?: boolean;
@@ -34,7 +37,8 @@ const AppHeader = ({
 }: AppHeaderProps) => {
   const isLight = themeMode === 'light';
   const route = useRoute();
-  console.log('Current Route in AppHeader:', route.name);
+  const {user} = useAppSelector(state => state.auth);
+  const data = useAppSelector(state => state.user);
 
   return (
     <View
@@ -79,6 +83,24 @@ const AppHeader = ({
       {/* RIGHT SIDE: Hide when going back */}
       {(!canGoBack || route.name === 'Home') && (
         <View style={styles.rightSection}>
+          {/* Wallet  */}
+          <TouchableOpacity
+            style={[
+              styles.notification,
+              {backgroundColor: isLight ? '#F2F2F2' : COLORS.theme.white},
+            ]}
+            onPress={() => navigate('Wallet')}>
+            <WalletIcon
+              size={16}
+              color={
+                user.walletBalance <= 10
+                  ? themeColors.status.error.base
+                  : isLight
+                  ? '#444'
+                  : undefined
+              }
+            />
+          </TouchableOpacity>
           {/* Notification */}
           <TouchableOpacity
             style={[
@@ -147,7 +169,7 @@ const styles = StyleSheet.create({
   rightSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: scale(16),
+    gap: scale(8),
   },
 
   notification: {

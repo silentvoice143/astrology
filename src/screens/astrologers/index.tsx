@@ -1,15 +1,24 @@
-import { View, Text, Image, TouchableOpacity } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  ActivityIndicator,
+} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import PageWithHeader from '../../componentsV1/layout/page-with-header';
-import { scale, verticalScale, scaleFont } from '../../utils/sizer';
-import { COLORS } from '../../constants/colors';
-import { useAppDispatch } from '../../hooks/redux-hook';
-import { getAllAstrologerById, getAllAstrologers } from '../../store/reducer/astrologers';
-import { useNavigation } from '@react-navigation/native';
+import {scale, verticalScale, scaleFont} from '../../utils/sizer';
+import {colors, COLORS, themeColors} from '../../constants/colors';
+import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
+import {
+  getAllAstrologerById,
+  getAllAstrologers,
+} from '../../store/reducer/astrologers';
+import {useNavigation} from '@react-navigation/native';
 
-const Astrologers = ({ route }: any) => {
-  console.log("I am on this page")
-  const { id } = route.params;
+const Astrologers = ({route}: any) => {
+  console.log('I am on this page', route?.params);
+  const {id} = route.params;
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
@@ -29,27 +38,39 @@ const Astrologers = ({ route }: any) => {
       if (append) setIsFetchingMore(true);
       else setLoadingAstrologerData(true);
 
-      const payload = await dispatch(
-        getAllAstrologerById({ id: id }),
-      ).unwrap();
-      console.log(payload, '---------------payload')
+      const payload = await dispatch(getAllAstrologerById({id: id})).unwrap();
 
       if (payload.success) {
         const newData = payload.astrologer;
         setAstrologersData(newData);
-
       }
     } finally {
       setIsFetchingMore(false);
-      setLoadingAstrologerData(false);
+      setTimeout(() => {
+        setLoadingAstrologerData(false);
+      }, 500);
     }
   };
 
   useEffect(() => {
     fetchAstrologersData(1, false, '');
-  }, []);
+  }, [id]);
 
   const astrologer: any = astrologersData;
+
+  if (loadingAstrologerData) {
+    return (
+      <View
+        style={{
+          flex: 1,
+          justifyContent: 'center',
+          alignItems: 'center',
+          backgroundColor: themeColors.surface.background,
+        }}>
+        <ActivityIndicator size="small" color={themeColors.text.tertiary} />
+      </View>
+    );
+  }
 
   return (
     <PageWithHeader themeMode="light" title="Astrologer">
@@ -61,7 +82,7 @@ const Astrologers = ({ route }: any) => {
           flex: 1,
         }}>
         {/* ✅ PROFILE IMAGE */}
-        <View style={{ alignItems: 'center', marginTop: verticalScale(20) }}>
+        <View style={{alignItems: 'center', marginTop: verticalScale(20)}}>
           <Image
             source={{
               uri:
@@ -79,12 +100,12 @@ const Astrologers = ({ route }: any) => {
         </View>
 
         {/* ✅ NAME & EXPERTISE */}
-        <View style={{ alignItems: 'center', marginTop: verticalScale(14) }}>
-          <Text style={{ fontSize: scaleFont(22), fontWeight: '700' }}>
+        <View style={{alignItems: 'center', marginTop: verticalScale(14)}}>
+          <Text style={{fontSize: scaleFont(22), fontWeight: '700'}}>
             {astrologer?.user?.name || 'Astrologer'}
           </Text>
 
-          <Text style={{ marginTop: 6, fontSize: scaleFont(14), color: '#666' }}>
+          <Text style={{marginTop: 6, fontSize: scaleFont(14), color: '#666'}}>
             {astrologer?.expertise || 'Astrology'} •{' '}
             {astrologer?.experienceYears || 0} yrs experience
           </Text>
@@ -106,8 +127,8 @@ const Astrologers = ({ route }: any) => {
         </View> */}
 
         {/* ✅ ABOUT */}
-        <View style={{ marginTop: verticalScale(22) }}>
-          <Text style={{ fontSize: scaleFont(18), fontWeight: '700' }}>
+        <View style={{marginTop: verticalScale(22)}}>
+          <Text style={{fontSize: scaleFont(18), fontWeight: '700'}}>
             About
           </Text>
           <Text
@@ -129,9 +150,9 @@ const Astrologers = ({ route }: any) => {
             backgroundColor: COLORS.theme.secondary,
             borderRadius: scale(12),
           }}>
-          <Text style={{ fontSize: scaleFont(14), fontWeight: '700' }}>
+          <Text style={{fontSize: scaleFont(14), fontWeight: '700'}}>
             Experience:{' '}
-            <Text style={{ fontWeight: '400' }}>
+            <Text style={{fontWeight: '400'}}>
               {astrologer?.experienceYears || 0} years
             </Text>
           </Text>
@@ -143,7 +164,7 @@ const Astrologers = ({ route }: any) => {
               fontWeight: '700',
             }}>
             Languages:{' '}
-            <Text style={{ fontWeight: '400' }}>
+            <Text style={{fontWeight: '400'}}>
               {astrologer?.languages || 'Hindi, English'}
             </Text>
           </Text>
@@ -159,19 +180,19 @@ const Astrologers = ({ route }: any) => {
             borderWidth: 1,
             borderColor: COLORS.theme.gray.light,
           }}>
-          <Text style={{ fontSize: scaleFont(15), fontWeight: '700' }}>
+          <Text style={{fontSize: scaleFont(15), fontWeight: '700'}}>
             Pricing Per Minute
           </Text>
 
-          <Text style={{ marginTop: 6 }}>
+          <Text style={{marginTop: 6}}>
             💬 Chat: ₹{astrologer?.pricePerMinuteChat || 0}
           </Text>
 
-          <Text style={{ marginTop: 4 }}>
+          <Text style={{marginTop: 4}}>
             📞 Voice: ₹{astrologer?.pricePerMinuteVoice || 0}
           </Text>
 
-          <Text style={{ marginTop: 4 }}>
+          <Text style={{marginTop: 4}}>
             📹 Video: ₹{astrologer?.pricePerMinuteVideo || 0}
           </Text>
         </View>
@@ -197,7 +218,7 @@ const Astrologers = ({ route }: any) => {
             onPress={() =>
               navigation.navigate('Astrologers', {
                 screen: 'BookAppointment',
-                params: { category: '', mode: 'ONLINE', id: id },
+                params: {category: '', mode: 'ONLINE', id: id},
               })
             }>
             <Text

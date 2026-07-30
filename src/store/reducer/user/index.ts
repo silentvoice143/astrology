@@ -30,6 +30,9 @@ const userSlice = createSlice({
     setInitialUserData: () => {
       return initialState;
     },
+    setWalletBalance: (state, action: PayloadAction<number>) => {
+      state.walletBalance = action.payload;
+    },
   },
   extraReducers: builder => {
     builder
@@ -40,6 +43,6 @@ const userSlice = createSlice({
   },
 });
 
-export const {setInitialUserData} = userSlice.actions;
+export const {setInitialUserData, setWalletBalance} = userSlice.actions;
 export {userDetail, postUserDetail, uploadProfileImage, editAstrologerUser};
 export default userSlice.reducer;

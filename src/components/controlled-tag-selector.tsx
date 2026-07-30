@@ -9,7 +9,7 @@ import {
   TextStyle,
   Image,
 } from 'react-native';
-import {COLORS, colors} from '../constants/colors';
+import {COLORS, colors, themeColors} from '../constants/colors';
 import {scaleFont} from '../utils/sizer';
 
 export type TagItem = {
@@ -138,6 +138,7 @@ function ControlledTagSelector<T extends ValueType = 'id'>({
                   tagTextStyle,
                   isSelected && styles.selectedTagText,
                   isSelected && selectedTagTextStyle,
+                  item?.disabled && styles.disabled,
                 ]}>
                 {item.label}
               </Text>
@@ -203,5 +204,8 @@ const styles = StyleSheet.create({
   emoji: {
     fontSize: 16,
     marginRight: 6,
+  },
+  disabled: {
+    color: themeColors.text.faint,
   },
 });

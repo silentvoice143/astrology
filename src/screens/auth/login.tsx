@@ -19,6 +19,7 @@ import {useAppDispatch} from '../../hooks/redux-hook';
 import {loginUserPassword} from '../../store/reducer/auth/action';
 import EyeOpenIcon from '../../assets/svgs/eye-open-icon';
 import EyeCloseIcon from '../../assets/svgs/eye-close-icon';
+import Toast from 'react-native-toast-message';
 
 const Login = () => {
   const navigation = useNavigation<any>();
@@ -84,12 +85,16 @@ const Login = () => {
       const response = await dispatch(loginUserPassword(payload)).unwrap();
       console.log('Login response:', response);
       if (response.success) {
-        setTimeout(() => {
-          navigation.reset({
-            index: 0,
-            routes: [{name: 'Maintabs'}],
-          });
-        }, 2000);
+        if (response?.user?.role === 'USER') {
+          setTimeout(() => {
+            navigation.reset({
+              index: 0,
+              routes: [{name: 'Maintabs'}],
+            });
+          }, 2000);
+        } else {
+          Toast.show({type: 'error', text1: 'Unauthorized user'});
+        }
       }
     } catch (err: any) {
       // Toast.show({type: 'error', text1: err?.message || 'Login failed'});

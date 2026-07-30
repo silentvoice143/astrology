@@ -34,6 +34,7 @@ import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
 import {getTransactionHistory} from '../../store/reducer/payment';
 import {setBalance} from '../../store/reducer/auth';
 import Toast from 'react-native-toast-message';
+import {setWalletBalance} from '../../store/reducer/user';
 
 const SCREEN_WIDTH = Dimensions.get('window').width;
 
@@ -200,8 +201,9 @@ const Sidebar = forwardRef<SidebarRef, {onLogout?: () => void}>(
     const getTransactionDetails = async () => {
       try {
         setLoading(true);
+        console.log('Transaction getting');
         const payload = await dispatch(
-          getTransactionHistory({userId: user, query: `?page=1`}),
+          getTransactionHistory({query: `?page=1`}),
         ).unwrap();
         console.log('Transaction Payload: ', payload);
 
@@ -212,8 +214,16 @@ const Sidebar = forwardRef<SidebarRef, {onLogout?: () => void}>(
           );
           dispatch(
             setBalance({
-              balance: payload?.wallet?.balance ?? 0,
+              balance: (((payload?.wallet?.balance ?? 0) as number) -
+                (payload?.wallet?.lockedBalance ?? 0)) as number,
             }),
+          );
+
+          dispatch(
+            setWalletBalance(
+              (((payload?.wallet?.balance ?? 0) as number) -
+                (payload?.wallet?.lockedBalance ?? 0)) as number,
+            ),
           );
         } else {
           Toast.show({

@@ -8,12 +8,13 @@ import {clearSession} from '../store/reducer/session';
 import Toast from 'react-native-toast-message';
 import {use, useEffect, useState} from 'react';
 import {useAppDispatch, useAppSelector} from '../hooks/redux-hook';
-import {userDetail} from '../store/reducer/user';
+import {setWalletBalance, userDetail} from '../store/reducer/user';
 import {
   logout,
   logoutDevice,
   registerDevice,
   setAuthentication,
+  setBalance,
   setUser,
 } from '../store/reducer/auth';
 import {useWebSocket} from '../hooks/use-socket-new';
@@ -44,6 +45,7 @@ import {
 } from '../utils/requestPermission';
 import ChatScreen from '../screens/call&chat/chatScreen';
 import {useSessionEvents} from '../hooks/use-session-events';
+import {getTransactionHistory} from '../store/reducer/payment';
 
 const Stack = createNativeStackNavigator<any>();
 
@@ -71,7 +73,6 @@ export default function RootNavigator() {
   );
 
   const handleLogout = async () => {
-    console.log('checkauth logout-----------');
     try {
       // dispatch(clearSession());
       disconnect();
@@ -83,6 +84,43 @@ export default function RootNavigator() {
         });
       }, 5000);
     } catch (err) {}
+  };
+
+  const getTransactionDetails = async () => {
+    try {
+      setLoading(true);
+      const payload = await dispatch(
+        getTransactionHistory({query: `?page=1`}),
+      ).unwrap();
+      console.log('Transaction Payload: ', payload);
+
+      if (payload.success) {
+        dispatch(
+          setBalance({
+            balance: payload?.wallet?.balance - payload?.wallet?.lockedBalance,
+          }),
+        );
+        dispatch(
+          setWalletBalance(
+            ((payload?.wallet?.balance as number) -
+              payload?.wallet?.lockedBalance) as number,
+          ),
+        );
+      } else {
+        Toast.show({
+          type: 'error',
+          text1: 'Failed to get transactions',
+        });
+      }
+    } catch (err) {
+      console.log(err);
+      Toast.show({
+        type: 'error',
+        text1: 'Failed to get transactions',
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -103,7 +141,7 @@ export default function RootNavigator() {
             console.log('User Detail fetched in checkAuth:', userDetail);
             dispatch(setAuthentication(true));
             dispatch(setUser(userDetail));
-
+            getTransactionDetails();
             requestAndroidCallPermissions();
 
             // if (!isConnected) {

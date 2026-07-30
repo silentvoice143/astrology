@@ -30,6 +30,14 @@ import {
 import {useUserRole} from '../../hooks/use-role';
 import PageWithHeader from '../../componentsV1/layout/page-with-header';
 import Input from '../../componentsV1/common/input';
+import ControlledTagSelector from '../../components/controlled-tag-selector';
+
+const ammountPills = [
+  {id: '200', label: '200', value: 200},
+  {id: '300', label: '300', value: 300},
+  {id: '500', label: '500', value: 500},
+  {id: '1000', label: '1000', value: 1000},
+];
 
 const Wallet = () => {
   const onEndReachedCalledDuringMomentum = useRef(false);
@@ -131,14 +139,31 @@ const Wallet = () => {
             })
             .catch((error: any) => {
               console.log('Razorpay Error:', error);
+
+              const isCancelled =
+                error?.code === 0 ||
+                error?.description?.toLowerCase()?.includes('cancel');
+
+              if (isCancelled) {
+                Toast.show({
+                  type: 'info',
+                  text1: 'Payment Cancelled',
+                  text2: 'You cancelled the payment.',
+                });
+
+                // Don't treat cancellation as payment failure
+                getTransactionDetails(1);
+                return;
+              }
+
               Toast.show({
                 type: 'error',
                 text1: 'Payment Failed',
-                text2: `${error?.code || 'No Code'} | ${
-                  error?.description || 'No Description'
-                }`,
+                text2:
+                  error?.description ||
+                  'Something went wrong while processing the payment.',
               });
-              setAmount('');
+
               getTransactionDetails(1);
             });
         } catch (error) {
@@ -209,7 +234,7 @@ const Wallet = () => {
             </Text>
             <Text
               style={[textStyle.fs_abyss_24_400, {color: colors.whiteText}]}>
-              ₹{Math.abs(walletBalance).toFixed(2)}
+              ₹{Number(walletBalance).toFixed(2)}
             </Text>
           </View>
           {role === 'USER' && (
@@ -255,6 +280,20 @@ const Wallet = () => {
               />
             </View>
           )}
+        </View>
+        <View style={{marginTop: verticalScale(24)}}>
+          <Text style={[textStyle.fs_abyss_20_400]}>Select Ammount</Text>
+          <ControlledTagSelector
+            tags={ammountPills}
+            selectedTags={amount ? [amount] : []}
+            onChange={data => {
+              console.log('Selected session type:', data[0]);
+              const amt = ammountPills.filter(item => item.id === data[0]);
+              setAmount(amt[0]?.value.toString() ?? '');
+            }}
+            multiSelect={false}
+            // label="Select Ammount"
+          />
         </View>
         <View style={{marginTop: verticalScale(24), flex: 1}}>
           <Text style={[textStyle.fs_abyss_20_400]}>Transactions</Text>

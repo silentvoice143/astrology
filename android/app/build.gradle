@@ -86,8 +86,8 @@ android {
         applicationId "com.insapimarketing.astrosevaa2"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 16
-        versionName "16.0"
+        versionCode 18
+        versionName "18.0"
     }
 
     

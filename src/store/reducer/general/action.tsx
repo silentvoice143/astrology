@@ -25,7 +25,6 @@ export const getBanner = createAsyncThunk<
   void, // payload must be FormData
   {rejectValue: any}
 >('banner-get', async (formData, {rejectWithValue}) => {
-  console.log(formData, 'this api hits,....');
   try {
     const response = await api.get('/api/v1/bannar');
 
@@ -40,7 +39,6 @@ export const getTopBanner = createAsyncThunk<
   void, // payload must be FormData
   {rejectValue: any}
 >('banner-get-top', async (formData, {rejectWithValue}) => {
-  console.log(formData, 'this api hits,....');
   try {
     const response = await api.get('/api/v1/bannar/top');
 

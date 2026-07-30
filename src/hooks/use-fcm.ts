@@ -213,6 +213,7 @@ export default function useFcm(isAuthenticated: boolean) {
             ) {
               return;
             }
+            handleNotificationNavigation(remoteMessage.data);
             Toast.show({
               type: 'info',
               text1: remoteMessage.notification?.title ?? 'New Message',

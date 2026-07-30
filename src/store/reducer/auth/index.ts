@@ -133,7 +133,7 @@ const authSlice = createSlice({
         }
       })
       .addCase(loginUserPassword.fulfilled, (state, {payload}) => {
-        if (payload?.success) {
+        if (payload?.success && payload?.user?.role === 'USER') {
           state.token = payload.token;
           state.mobile = payload?.user?.mobile;
           state.user = {...payload?.user};
