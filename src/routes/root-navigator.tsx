@@ -33,12 +33,9 @@ import ChangePassword from '../screens/settings/change-password';
 import ProfilePage from '../screens/profile/profile';
 import ProfileEdit from '../screens/profile/pofile-edit';
 import Notification from '../screens/notification';
-import {useZegoAndFCM} from '../hooks/use-zego';
+
 import useFcm from '../hooks/use-fcm';
-import {
-  ZegoUIKitPrebuiltCallInCallScreen,
-  ZegoUIKitPrebuiltCallWaitingScreen,
-} from '@zegocloud/zego-uikit-prebuilt-call-rn';
+
 import {
   requestAndroidCallPermissions,
   requestOverlayPermission,
@@ -46,6 +43,7 @@ import {
 import ChatScreen from '../screens/call&chat/chatScreen';
 import {useSessionEvents} from '../hooks/use-session-events';
 import {getTransactionHistory} from '../store/reducer/payment';
+import CallScreen from '../screens/call';
 
 const Stack = createNativeStackNavigator<any>();
 
@@ -66,11 +64,11 @@ export default function RootNavigator() {
   //   user?.name?.slice(0, 20) || 'Guest',
   //   '-----------------this is zego user',
   // );
-  const zegoInitialized = useZegoAndFCM(
-    user?.mobile,
-    user?.name?.slice(0, 20) || 'Guest',
-    isAuthenticated,
-  );
+  // const zegoInitialized = useZegoAndFCM(
+  //   user?.mobile,
+  //   user?.name?.slice(0, 20) || 'Guest',
+  //   isAuthenticated,
+  // );
 
   const handleLogout = async () => {
     try {
@@ -199,7 +197,7 @@ export default function RootNavigator() {
         </>
       ) : (
         <>
-          {zegoInitialized && (
+          {/* {zegoInitialized && (
             <>
               <Stack.Screen
                 options={{headerShown: false}}
@@ -214,10 +212,12 @@ export default function RootNavigator() {
                 component={ZegoUIKitPrebuiltCallInCallScreen}
               />
             </>
-          )}
+          )} */}
+
           <Stack.Screen name="MainTabs" component={BottomTabNavigator} />
           <Stack.Screen name="Profile" component={ProfilePage} />
           <Stack.Screen name="ProfileEdit" component={ProfileEdit} />
+          <Stack.Screen name="CallScreen" component={CallScreen} />
           <Stack.Screen
             name="Call_Chat"
             component={CallChat}

@@ -1,4 +1,5 @@
 import messaging from '@react-native-firebase/messaging';
+import notifee from '@notifee/react-native';
 
 /**
  * Get FCM token for push notifications
@@ -6,6 +7,7 @@ import messaging from '@react-native-firebase/messaging';
  */
 export async function getFcmToken(): Promise<string | null> {
   try {
+    await notifee.requestPermission();
     // Request permission
     const authStatus = await messaging().requestPermission();
     const enabled =

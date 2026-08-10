@@ -1,29 +1,24 @@
-import { useEffect, useRef } from 'react';
-import { AppState, AppStateStatus } from 'react-native';
-import { useWebSocket } from './use-socket-new';
-import {
-
-  setSession,
-
-} from '../store/reducer/session';
-import { useAppDispatch, useAppSelector } from './redux-hook';
-import { decodeMessageBody } from '../utils/utils';
-import { useUserRole } from './use-role';
+import {useEffect, useRef} from 'react';
+import {AppState, AppStateStatus} from 'react-native';
+import {useWebSocket} from './use-socket-new';
+import {setSession} from '../store/reducer/session';
+import {useAppDispatch, useAppSelector} from './redux-hook';
+import {decodeMessageBody} from '../utils/utils';
+import {useUserRole} from './use-role';
 import Toast from 'react-native-toast-message';
 import {
   setOnlineAstrologer,
   setOnlineAstrologerDetails,
 } from '../store/reducer/astrologers';
-import { setBalance } from '../store/reducer/auth';
-import { getTransactionHistory } from '../store/reducer/payment';
+import {setBalance} from '../store/reducer/auth';
+import {getTransactionHistory} from '../store/reducer/payment';
 
 export const useSessionEvents = (
   userId: string = '',
   isAuthenticated: boolean = false,
   isConnected: boolean = false,
 ) => {
-
-  const { subscribe, unsubscribe } = useWebSocket(userId);
+  const {subscribe, unsubscribe} = useWebSocket(userId);
   const dispatch = useAppDispatch();
   const role = useUserRole();
   const subscriptionsRef = useRef<string[]>([]);
@@ -31,11 +26,11 @@ export const useSessionEvents = (
   const getTransactionDetails = async () => {
     try {
       const payload = await dispatch(
-        getTransactionHistory({ userId: userId, query: `?page=1` }),
+        getTransactionHistory({userId: userId, query: `?page=1`}),
       ).unwrap();
 
       if (payload.success) {
-        dispatch(setBalance({ balance: payload?.wallet?.balance ?? 0 }));
+        dispatch(setBalance({balance: payload?.wallet?.balance ?? 0}));
       } else {
         Toast.show({
           type: 'error',
@@ -71,7 +66,19 @@ export const useSessionEvents = (
       activeSessionDest,
       onlineAstrologerDest,
     ];
+    subscribe(callSessionDest, msg => {
+      try {
+        const data = JSON.parse(decodeMessageBody(msg));
+        console.log(
+          'Online astrologer full details---------------------------:',
+          data,
+        );
 
+        dispatch(setOnlineAstrologerDetails(data));
+      } catch (err) {
+        console.log('Failed to parse online astrologer list:', err);
+      }
+    });
 
     subscribe(onlineAstrologerDest, msg => {
       try {

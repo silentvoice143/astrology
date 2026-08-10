@@ -156,6 +156,11 @@ import {handleNotificationNavigation} from '../utils/notification-handler';
 import {markNotificationRead} from '../store/reducer/notifications';
 import {setOtherUser, setSession} from '../store/reducer/session';
 import {getCurrentRouteName} from '../utils/navigation';
+import {
+  CALL_NOTIFICATION_TYPE,
+  cancelIncomingCallNotification,
+  showIncomingCallNotification,
+} from '../services/call-notification';
 
 export default function useFcm(isAuthenticated: boolean) {
   const dispatch = useAppDispatch();
@@ -185,7 +190,17 @@ export default function useFcm(isAuthenticated: boolean) {
           });
         }
 
-        const token = await getToken(messaging);
+        let token;
+        try {
+          token = await getToken(messaging);
+          console.log('FCM Token:', token);
+          if (mounted) setFcmToken(token);
+        } catch (tokenError) {
+          console.warn(
+            'Failed to fetch FCM Token (Check Google Play Services / Network):',
+            tokenError,
+          );
+        }
         console.log('FCM Token:', token);
         if (mounted) setFcmToken(token);
 
@@ -202,18 +217,69 @@ export default function useFcm(isAuthenticated: boolean) {
         }
 
         // Foreground messages
+        // onMessageUnsub.current = onMessage(
+        //   messaging,
+        //   async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
+        //     console.log('Foreground message:', remoteMessage);
+        //     const currentRoute = getCurrentRouteName();
+        //     if (
+        //       currentRoute === 'ChatScreen' &&
+        //       remoteMessage?.data?.type === 'CHAT_MESSAGE'
+        //     ) {
+        //       return;
+        //     }
+        //     handleNotificationNavigation(remoteMessage.data);
+        //     Toast.show({
+        //       type: 'info',
+        //       text1: remoteMessage.notification?.title ?? 'New Message',
+        //       text2: remoteMessage.notification?.body ?? '',
+        //     });
+        //   },
+        // );
+
         onMessageUnsub.current = onMessage(
           messaging,
           async (remoteMessage: FirebaseMessagingTypes.RemoteMessage) => {
             console.log('Foreground message:', remoteMessage);
-            const currentRoute = getCurrentRouteName();
-            if (
-              currentRoute === 'ChatScreen' &&
-              remoteMessage?.data?.type === 'CHAT_MESSAGE'
-            ) {
+
+            const data = remoteMessage.data;
+
+            if (!data) {
               return;
             }
-            handleNotificationNavigation(remoteMessage.data);
+
+            if (data.type === CALL_NOTIFICATION_TYPE.INCOMING_CALL) {
+              await showIncomingCallNotification({
+                callId: String(data?.callId),
+                roomId: String(data?.roomId),
+                callerId: String(data?.callerId),
+                callerName: String(data?.callerName),
+                sessionType: data.sessionType as any,
+              });
+
+              return;
+            }
+
+            if (data.type === CALL_NOTIFICATION_TYPE.CALL_CANCELLED) {
+              if (data.callId) {
+                await cancelIncomingCallNotification(String(data.callId));
+              }
+
+              return;
+            }
+
+            /* =========================================
+       NORMAL NOTIFICATIONS
+    ========================================= */
+
+            const currentRoute = getCurrentRouteName();
+
+            if (currentRoute === 'ChatScreen' && data.type === 'CHAT_MESSAGE') {
+              return;
+            }
+
+            handleNotificationNavigation(data);
+
             Toast.show({
               type: 'info',
               text1: remoteMessage.notification?.title ?? 'New Message',

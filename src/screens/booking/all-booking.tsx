@@ -423,7 +423,7 @@
 
 // export default AllBookings;
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react';
 import {
   View,
   Text,
@@ -433,10 +433,10 @@ import {
   Image,
   RefreshControl,
 } from 'react-native';
-import { scale, scaleFont, verticalScale } from '../../utils/sizer';
-import { COLORS } from '../../constants/colors';
+import {scale, scaleFont, verticalScale} from '../../utils/sizer';
+import {COLORS} from '../../constants/colors';
 import PageWithHeader from '../../componentsV1/layout/page-with-header';
-import { textStyle } from '../../constants/text-style';
+import {textStyle} from '../../constants/text-style';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import CalendarIcon from '../../assets/svgs/calendar-icon';
 import {
@@ -444,12 +444,17 @@ import {
   useNavigation,
   useRoute,
 } from '@react-navigation/native';
-import { useAppDispatch } from '../../hooks/redux-hook';
-import { getMyAppointment } from '../../store/reducer/booking';
-import { cancelMyAppointment } from '../../store/reducer/booking/action';
-import { setOtherUser, setSession } from '../../store/reducer/session';
-import { ZegoSendCallInvitationButton } from '@zegocloud/zego-uikit-prebuilt-call-rn';
+import {useAppDispatch} from '../../hooks/redux-hook';
+import {getMyAppointment} from '../../store/reducer/booking';
+import {
+  cancelMyAppointment,
+  startCall,
+} from '../../store/reducer/booking/action';
+import {setOtherUser, setSession} from '../../store/reducer/session';
+import {ZegoSendCallInvitationButton} from '@zegocloud/zego-uikit-prebuilt-call-rn';
 import Config from 'react-native-config';
+import {handleApiError} from '../../utils/handle-api-error';
+import {showIncomingCallNotification} from '../../services/call-notification';
 
 const TAGS = ['All', 'Pending', 'Confirmed', 'Completed', 'Cancelled'] as const;
 
@@ -520,12 +525,10 @@ const AllBookings = () => {
         }
 
         const payload = await dispatch(
-          getMyAppointment({ page: pageNumber, limit: LIMIT }),
+          getMyAppointment({page: pageNumber, limit: LIMIT}),
         ).unwrap();
 
-        console.log('Booking payload:', payload);
         if (payload?.success) {
-          console.log(payload, '---------payload');
           const newBookings: Booking[] = (payload.appointments || []).map(
             (item: any) => ({
               id: item.id,
@@ -597,7 +600,6 @@ const AllBookings = () => {
     if (status === 'CANCELLED') return '#F44336';
     return COLORS.theme.gray.light;
   };
-  console.log(bookings, '===bookings');
 
   const getSessionTypeIcon = (type: Booking['sessionType']) => {
     if (type === 'CHAT') return '💬';
@@ -630,22 +632,61 @@ const AllBookings = () => {
 
   const handleCancelBooking = async (id: string) => {
     try {
-      const { payload } = await dispatch(
-        cancelMyAppointment({ id, body: { status: 'CANCELLED', otp: null } }),
+      const {payload} = await dispatch(
+        cancelMyAppointment({id, body: {status: 'CANCELLED', otp: null}}),
       );
       console.log(payload, '------canceled');
       if (payload?.success) {
         setBookings(prev =>
-          prev.map(it => (it.id === id ? { ...it, status: 'CANCELLED' } : it)),
+          prev.map(it => (it.id === id ? {...it, status: 'CANCELLED'} : it)),
         );
       }
     } catch (err) {
       console.error('cancel booking error', err);
     }
   };
-  console.log(bookings, '--------bookings');
+  const handleStartCall = async (item: any) => {
+    try {
+      const {payload} = await dispatch(
+        startCall({
+          receiverId: item.astrologer.id,
+          sessionType: item.sessionType,
+        }),
+      );
+      console.log(payload, '---response');
+      if (payload?.success) {
+        const roomId = payload?.roomId;
 
-  const renderBookingCard = ({ item }: { item: Booking }) => {
+        // await showIncomingCallNotification({
+        //   callId: '123',
+        //   roomId: 'room_abc',
+        //   callerId: 'user_123',
+        //   callerName: 'Satyam',
+        //   sessionType: 'VIDEO',
+        // });
+
+        navigation.navigate('CallScreen', {
+          roomId,
+          sessionId: item.callSessionId,
+          callType: item.sessionType,
+
+          astrologer: {
+            id: item.astrologer.id,
+            name: item.astrologer.name,
+            imageUri: item.astrologer.imgUri,
+          },
+
+          isAstrologer: false,
+        });
+      }
+    } catch (err) {
+      handleApiError(err, 'Unable to start call...');
+    }
+  };
+
+  // console.log(bookings);
+
+  const renderBookingCard = ({item}: {item: Booking}) => {
     const isJoinDisabled =
       (item.sessionType === 'CHAT' && !item.chatSessionId) ||
       ((item.sessionType === 'AUDIO' || item.sessionType === 'VIDEO') &&
@@ -661,7 +702,7 @@ const AllBookings = () => {
           borderWidth: 1,
           borderColor: COLORS.theme.gray.light,
         }}>
-        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
           <Image
             source={{
               uri:
@@ -676,16 +717,16 @@ const AllBookings = () => {
             }}
           />
 
-          <View style={{ flex: 1 }}>
+          <View style={{flex: 1}}>
             <Text style={[textStyle.fs_mont_16_600]}>
               {item.astrologer.name}
             </Text>
             {item.bookingType === 'ONLINE' ? (
-              <Text style={{ fontSize: scaleFont(12), marginTop: 2 }}>
+              <Text style={{fontSize: scaleFont(12), marginTop: 2}}>
                 {getSessionTypeIcon(item.sessionType)} {item.sessionType}
               </Text>
             ) : (
-              <Text style={{ fontSize: scaleFont(12), marginTop: 2 }}>
+              <Text style={{fontSize: scaleFont(12), marginTop: 2}}>
                 🏠 Offline Appointment
               </Text>
             )}
@@ -698,17 +739,17 @@ const AllBookings = () => {
               paddingVertical: verticalScale(4),
               borderRadius: scale(12),
             }}>
-            <Text style={{ color: '#fff' }}>{item.status}</Text>
+            <Text style={{color: '#fff'}}>{item.status}</Text>
           </View>
         </View>
 
-        <Text style={{ marginTop: 10 }}>
+        <Text style={{marginTop: 10}}>
           📅 {item.appointmentDate}{' '}
           {item.bookingType === 'ONLINE' &&
             `⏱️ ${item.appointmentDuration} mins`}
         </Text>
 
-        <Text style={{ marginTop: 6 }}>Reason: {item.reason}</Text>
+        <Text style={{marginTop: 6}}>Reason: {item.reason}</Text>
         {/* <Text>
           {item?.callSession?.astrologer?.mobile +
             item?.astrologer?.name?.slice(0, 20)}
@@ -730,7 +771,7 @@ const AllBookings = () => {
                 borderRadius: 10,
                 alignItems: 'center',
               }}>
-              <Text style={{ color: '#fff', fontWeight: '600' }}>
+              <Text style={{color: '#fff', fontWeight: '600'}}>
                 {isJoinDisabled
                   ? 'Waiting for Session'
                   : `Join ${item.sessionType}`}
@@ -738,8 +779,8 @@ const AllBookings = () => {
             </TouchableOpacity>
           )}
 
-        <View style={{ marginTop: verticalScale(8) }}>
-          {item.sessionType === 'AUDIO' && item.status === 'APPROVED' && (
+        <View style={{marginTop: verticalScale(8)}}>
+          {/* {item.sessionType === 'AUDIO' && item.status === 'APPROVED' && (
             <ZegoSendCallInvitationButton
               ref={zegoAudioButtonRef}
               invitees={[
@@ -767,7 +808,32 @@ const AllBookings = () => {
               resourceID={Config.ZEGO_RESOURCE_ID || 'astrosevaa'}
               style={{ width: 0, height: 0 }}
             />
-          )}
+          )} */}
+
+          {(item.sessionType === 'AUDIO' || item.sessionType === 'VIDEO') &&
+            item.status === 'APPROVED' && (
+              <TouchableOpacity
+                onPress={() => handleStartCall(item)}
+                style={{
+                  marginTop: verticalScale(8),
+                  backgroundColor: COLORS.theme.primary,
+                  paddingVertical: verticalScale(10),
+                  borderRadius: scale(10),
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}>
+                <Text
+                  style={{
+                    color: '#fff',
+                    fontWeight: '600',
+                    fontSize: scaleFont(14),
+                  }}>
+                  {item.sessionType === 'VIDEO'
+                    ? 'Start Video Call'
+                    : 'Start Audio Call'}
+                </Text>
+              </TouchableOpacity>
+            )}
         </View>
 
         {item.status === 'PENDING' && (
@@ -780,7 +846,7 @@ const AllBookings = () => {
               borderRadius: 10,
               alignItems: 'center',
             }}>
-            <Text style={{ color: '#fff' }}>Cancel Booking</Text>
+            <Text style={{color: '#fff'}}>Cancel Booking</Text>
           </TouchableOpacity>
         )}
       </View>
@@ -804,11 +870,11 @@ const AllBookings = () => {
       title={'My Bookings'}
       themeMode="light"
       scrollEnabled={false}>
-      <View style={{ flex: 1, backgroundColor: COLORS.theme.white }}>
+      <View style={{flex: 1, backgroundColor: COLORS.theme.white}}>
         <TouchableOpacity
           onPress={() =>
             navigation.navigate('Astrologers', {
-              screen: "AstrologersList"
+              screen: 'AstrologersList',
             })
           }
           style={{
@@ -818,7 +884,7 @@ const AllBookings = () => {
             borderRadius: 12,
             alignItems: 'center',
           }}>
-          <Text style={{ color: '#fff' }}>+ Book Appointment</Text>
+          <Text style={{color: '#fff'}}>+ Book Appointment</Text>
         </TouchableOpacity>
 
         {showCalendar && (
@@ -850,13 +916,13 @@ const AllBookings = () => {
             paddingBottom: verticalScale(80),
           }}
           ListEmptyComponent={
-            <Text style={{ textAlign: 'center', marginTop: 40 }}>
+            <Text style={{textAlign: 'center', marginTop: 40}}>
               No bookings found
             </Text>
           }
           ListFooterComponent={
             isLoadingMore ? (
-              <View style={{ padding: 12, alignItems: 'center' }}>
+              <View style={{padding: 12, alignItems: 'center'}}>
                 <ActivityIndicator />
               </View>
             ) : null
