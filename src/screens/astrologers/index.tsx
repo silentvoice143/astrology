@@ -1,23 +1,57 @@
-import { View, Text, Image, TouchableOpacity } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import {View, Text, Image, TouchableOpacity} from 'react-native';
+import React, {useEffect, useState} from 'react';
 import PageWithHeader from '../../componentsV1/layout/page-with-header';
-import { scale, verticalScale, scaleFont } from '../../utils/sizer';
-import { COLORS } from '../../constants/colors';
-import { useAppDispatch } from '../../hooks/redux-hook';
-import { getAllAstrologerById, getAllAstrologers } from '../../store/reducer/astrologers';
-import { useNavigation } from '@react-navigation/native';
+import {scale, verticalScale, scaleFont} from '../../utils/sizer';
+import {COLORS} from '../../constants/colors';
+import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
+import {
+  getAllAstrologerById,
+  getAllAstrologers,
+} from '../../store/reducer/astrologers';
+import {useNavigation} from '@react-navigation/native';
+import {bookAppointmentReq} from '../../store/reducer/booking';
+import Toast from 'react-native-toast-message';
 
-const Astrologers = ({ route }: any) => {
-  console.log("I am on this page")
-  const { id } = route.params;
+const Astrologers = ({route}: any) => {
+  console.log('I am on this page');
+  const {id} = route.params;
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [loadingAstrologerData, setLoadingAstrologerData] = useState(false);
-  const [astrologersData, setAstrologersData] = useState<any[]>([]);
-
+  const [astrologersData, setAstrologersData] = useState<any>({});
+  const {freeChatUsed} = useAppSelector(state => state.auth.user);
   const dispatch = useAppDispatch();
   const navigation = useNavigation<any>();
+  const [loading, setLoading] = useState(false);
+  console.log(astrologersData, '------------------id');
+  const handleBooking = async (id: string) => {
+    // Implement booking logic here
+    try {
+      setLoading(true);
+      const body = {
+        appointmentDate: new Date().toISOString().split('T')[0],
+        reason: 'all',
+        astrologerId: id,
+        appointmentDuration: 2,
+        sessionType: 'CHAT',
+        bookingType: 'ONLINE',
+        isFreeBooking: true,
+      };
+
+      const payload = await dispatch(bookAppointmentReq(body)).unwrap();
+      if (payload.success) {
+        Toast.show({
+          type: 'success',
+          text1: 'Appointment booked successfully!',
+        });
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchAstrologersData = async (
     pageNumber = 1,
@@ -29,15 +63,13 @@ const Astrologers = ({ route }: any) => {
       if (append) setIsFetchingMore(true);
       else setLoadingAstrologerData(true);
 
-      const payload = await dispatch(
-        getAllAstrologerById({ id: id }),
-      ).unwrap();
-      console.log(payload, '---------------payload')
+      const payload = await dispatch(getAllAstrologerById({id: id})).unwrap();
+      console.log(payload, '---------------payload');
 
       if (payload.success) {
         const newData = payload.astrologer;
-        setAstrologersData(newData);
 
+        setAstrologersData(newData);
       }
     } finally {
       setIsFetchingMore(false);
@@ -61,7 +93,7 @@ const Astrologers = ({ route }: any) => {
           flex: 1,
         }}>
         {/* ✅ PROFILE IMAGE */}
-        <View style={{ alignItems: 'center', marginTop: verticalScale(20) }}>
+        <View style={{alignItems: 'center', marginTop: verticalScale(20)}}>
           <Image
             source={{
               uri:
@@ -79,12 +111,12 @@ const Astrologers = ({ route }: any) => {
         </View>
 
         {/* ✅ NAME & EXPERTISE */}
-        <View style={{ alignItems: 'center', marginTop: verticalScale(14) }}>
-          <Text style={{ fontSize: scaleFont(22), fontWeight: '700' }}>
+        <View style={{alignItems: 'center', marginTop: verticalScale(14)}}>
+          <Text style={{fontSize: scaleFont(22), fontWeight: '700'}}>
             {astrologer?.user?.name || 'Astrologer'}
           </Text>
 
-          <Text style={{ marginTop: 6, fontSize: scaleFont(14), color: '#666' }}>
+          <Text style={{marginTop: 6, fontSize: scaleFont(14), color: '#666'}}>
             {astrologer?.expertise || 'Astrology'} •{' '}
             {astrologer?.experienceYears || 0} yrs experience
           </Text>
@@ -106,8 +138,8 @@ const Astrologers = ({ route }: any) => {
         </View> */}
 
         {/* ✅ ABOUT */}
-        <View style={{ marginTop: verticalScale(22) }}>
-          <Text style={{ fontSize: scaleFont(18), fontWeight: '700' }}>
+        <View style={{marginTop: verticalScale(22)}}>
+          <Text style={{fontSize: scaleFont(18), fontWeight: '700'}}>
             About
           </Text>
           <Text
@@ -129,9 +161,9 @@ const Astrologers = ({ route }: any) => {
             backgroundColor: COLORS.theme.secondary,
             borderRadius: scale(12),
           }}>
-          <Text style={{ fontSize: scaleFont(14), fontWeight: '700' }}>
+          <Text style={{fontSize: scaleFont(14), fontWeight: '700'}}>
             Experience:{' '}
-            <Text style={{ fontWeight: '400' }}>
+            <Text style={{fontWeight: '400'}}>
               {astrologer?.experienceYears || 0} years
             </Text>
           </Text>
@@ -143,7 +175,7 @@ const Astrologers = ({ route }: any) => {
               fontWeight: '700',
             }}>
             Languages:{' '}
-            <Text style={{ fontWeight: '400' }}>
+            <Text style={{fontWeight: '400'}}>
               {astrologer?.languages || 'Hindi, English'}
             </Text>
           </Text>
@@ -159,19 +191,19 @@ const Astrologers = ({ route }: any) => {
             borderWidth: 1,
             borderColor: COLORS.theme.gray.light,
           }}>
-          <Text style={{ fontSize: scaleFont(15), fontWeight: '700' }}>
+          <Text style={{fontSize: scaleFont(15), fontWeight: '700'}}>
             Pricing Per Minute
           </Text>
 
-          <Text style={{ marginTop: 6 }}>
+          <Text style={{marginTop: 6}}>
             💬 Chat: ₹{astrologer?.pricePerMinuteChat || 0}
           </Text>
 
-          <Text style={{ marginTop: 4 }}>
+          <Text style={{marginTop: 4}}>
             📞 Voice: ₹{astrologer?.pricePerMinuteVoice || 0}
           </Text>
 
-          <Text style={{ marginTop: 4 }}>
+          <Text style={{marginTop: 4}}>
             📹 Video: ₹{astrologer?.pricePerMinuteVideo || 0}
           </Text>
         </View>
@@ -195,10 +227,12 @@ const Astrologers = ({ route }: any) => {
               alignItems: 'center',
             }}
             onPress={() =>
-              navigation.navigate('Astrologers', {
-                screen: 'BookAppointment',
-                params: { category: '', mode: 'ONLINE', id: id },
-              })
+              freeChatUsed
+                ? navigation.navigate('Astrologers', {
+                    screen: 'BookAppointment',
+                    params: {category: '', mode: 'ONLINE', id: id},
+                  })
+                : handleBooking(astrologersData.user?.id)
             }>
             <Text
               style={{
@@ -206,7 +240,7 @@ const Astrologers = ({ route }: any) => {
                 color: COLORS.theme.white,
                 fontWeight: '700',
               }}>
-              Book Online
+              Book Online {!freeChatUsed && '(Free Chat)'}
             </Text>
           </TouchableOpacity>
 

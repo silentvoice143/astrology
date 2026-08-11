@@ -97,7 +97,7 @@ export default function RootNavigator() {
         // if (!isAuthenticated) {
         try {
           const {payload} = await dispatch(userDetail());
-
+          console.log('userPayload', payload);
           if (payload?.success) {
             const userDetail: any = payload.user;
             console.log('User Detail fetched in checkAuth:', userDetail);

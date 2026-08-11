@@ -6,29 +6,29 @@ import {
   ActivityIndicator,
   FlatList,
 } from 'react-native';
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import AstrologerCard from '../../components/astrologers/astrologer-card';
-import { colors } from '../../constants/colors';
+import {colors} from '../../constants/colors';
 import TagSelector from '../../components/tag-selector';
 import AnimatedSearchInput from '../../components/custom-searchbox';
-import { scale, verticalScale } from '../../utils/sizer';
-import { useAppDispatch, useAppSelector } from '../../hooks/redux-hook';
-import { getAllAstrologers } from '../../store/reducer/astrologers';
-import { useTypedNavigation } from '../../hooks/navigation';
-import { setFreeChatUsed, setProfileModelToggle } from '../../store/reducer/auth';
+import {scale, verticalScale} from '../../utils/sizer';
+import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
+import {getAllAstrologers} from '../../store/reducer/astrologers';
+import {useTypedNavigation} from '../../hooks/navigation';
+import {setFreeChatUsed, setProfileModelToggle} from '../../store/reducer/auth';
 import RequestSessionModal from '../../components/session/modals/request-session-modal';
-import { shuffleArray } from '../../utils/utils';
-import { textStyle } from '../../constants/text-style';
-import { Astrologers as AstrologersType, UserDetail } from '../../utils/types';
-import { RouteProp, useRoute } from '@react-navigation/native';
+import {shuffleArray} from '../../utils/utils';
+import {textStyle} from '../../constants/text-style';
+import {Astrologers as AstrologersType, UserDetail} from '../../utils/types';
+import {RouteProp, useRoute} from '@react-navigation/native';
 import {
   sendSessionRequest,
   setOtherUser,
   setSession,
 } from '../../store/reducer/session';
-import { useDebounce } from '../../hooks/use-debounce';
+import {useDebounce} from '../../hooks/use-debounce';
 import Toast from 'react-native-toast-message';
-import { useWebSocket } from '../../hooks/use-socket-new';
+import {useWebSocket} from '../../hooks/use-socket-new';
 import PageWithHeader from '../../componentsV1/layout/page-with-header';
 
 type SessionType = 'chat' | 'audio' | 'video'; // NEW
@@ -41,10 +41,10 @@ interface AstrologerWithPricing extends UserDetail {
 }
 
 const tags = [
-  { id: 'all', label: 'All', icon: '✨' },
-  { id: 'love', label: 'Love', icon: '❤️' },
-  { id: 'career', label: 'Career', icon: '💼' },
-  { id: 'health', label: 'Health', icon: '💊' },
+  {id: 'all', label: 'All', icon: '✨'},
+  {id: 'love', label: 'Love', icon: '❤️'},
+  {id: 'career', label: 'Career', icon: '💼'},
+  {id: 'health', label: 'Health', icon: '💊'},
   {
     id: 'custom',
     label: 'Custom',
@@ -58,13 +58,13 @@ type AstrologersRouteParams = {
 };
 
 type AstrologersScreenRouteProp = RouteProp<
-  { Astrologers: AstrologersRouteParams },
+  {Astrologers: AstrologersRouteParams},
   'Astrologers'
 >;
 
 const AstrologersList = () => {
   const route = useRoute<AstrologersScreenRouteProp>(); // Use useRoute hook to access params
-  const { initialSearch = '', sort = '' } = route.params || {};
+  const {initialSearch = '', sort = ''} = route.params || {};
   const [search, setSearch] = useState(initialSearch);
   const debouncedSearch = useDebounce(search, 500);
   const [selected, setSelected] = useState<string[]>(['all']);
@@ -75,18 +75,18 @@ const AstrologersList = () => {
   const [astrologersData, setAstrologersData] = useState<AstrologersType[]>([]);
   const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const { isProfileComplete } = useAppSelector(state => state.auth);
+  const {isProfileComplete} = useAppSelector(state => state.auth);
   const dispatch = useAppDispatch();
   const navigation = useTypedNavigation();
-  const { freeChatUsed } = useAppSelector(state => state.auth.user);
+  const {freeChatUsed} = useAppSelector(state => state.auth.user);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
 
   const activeSession = useAppSelector(state => state.session.session);
-  const { onlineAstrologerDetails } = useAppSelector(state => state.astrologer);
-  const { user } = useAppSelector(state => state.auth);
-  const { send } = useWebSocket(user.id);
+  const {onlineAstrologerDetails} = useAppSelector(state => state.astrologer);
+  const {user} = useAppSelector(state => state.auth);
+  const {send} = useWebSocket(user.id);
 
   const fetchAstrologersData = async (
     pageNumber = 1,
@@ -120,7 +120,7 @@ const AstrologersList = () => {
       navigation.navigate('chat');
     }
     try {
-      const body = { astrologerId: astrologer?.id, duration: 2 };
+      const body = {astrologerId: astrologer?.id, duration: 2};
       const payload = await dispatch(sendSessionRequest(body)).unwrap();
 
       if (payload.success) {
@@ -135,7 +135,7 @@ const AstrologersList = () => {
           text1: 'Failed to send request',
         });
       }
-    } catch (err) { }
+    } catch (err) {}
   };
 
   // CHANGED: Handle session start with session type and pricing
@@ -176,7 +176,7 @@ const AstrologersList = () => {
   }, [selected]);
 
   useEffect(() => {
-    send('/app/session.active', {}, JSON.stringify({ astrologerId: user?.id }));
+    send('/app/session.active', {}, JSON.stringify({astrologerId: user?.id}));
     send('/app/online.user');
     fetchAstrologersData(1, false, debouncedSearch);
   }, [debouncedSearch, sort]);
@@ -199,19 +199,19 @@ const AstrologersList = () => {
         const onlineAstro = onlineMap.get(a.user.id);
         return onlineAstro
           ? {
-            ...a,
-            isChatOnline: onlineAstro.isChatOnline,
-            isAudioOnline: onlineAstro.isAudioOnline,
-            isVideoOnline: onlineAstro.isVideoOnline,
-            online: onlineAstro.online, // keep global online status too
-          }
+              ...a,
+              isChatOnline: onlineAstro.isChatOnline,
+              isAudioOnline: onlineAstro.isAudioOnline,
+              isVideoOnline: onlineAstro.isVideoOnline,
+              online: onlineAstro.online, // keep global online status too
+            }
           : {
-            ...a,
-            isChatOnline: false,
-            isAudioOnline: false,
-            isVideoOnline: false,
-            online: false,
-          };
+              ...a,
+              isChatOnline: false,
+              isAudioOnline: false,
+              isVideoOnline: false,
+              online: false,
+            };
       }),
     );
   }, [onlineAstrologerDetails, loading, isFetchingMore]);
@@ -241,7 +241,7 @@ const AstrologersList = () => {
         style={{
           paddingTop: verticalScale(20),
         }}>
-        <View style={{ paddingHorizontal: scale(24) }}>
+        <View style={{paddingHorizontal: scale(24)}}>
           <AnimatedSearchInput
             value={search}
             onChangeText={text => setSearch(text)}
@@ -297,7 +297,7 @@ const AstrologersList = () => {
           showsVerticalScrollIndicator={false}
           data={sortedAstrologers}
           keyExtractor={item => `card-astrologer-${item.id}`}
-          contentContainerStyle={{ paddingBottom: verticalScale(200) }}
+          contentContainerStyle={{paddingBottom: verticalScale(200)}}
           onEndReached={() => {
             if (hasMore && !isFetchingMore && !loading) {
               fetchAstrologersData(page + 1, true, debouncedSearch);
@@ -306,35 +306,29 @@ const AstrologersList = () => {
           onEndReachedThreshold={0.5}
           ListFooterComponent={
             isFetchingMore ? (
-              <View style={{ paddingVertical: 10 }}>
+              <View style={{paddingVertical: 10}}>
                 <ActivityIndicator />
 
-                <Text
-                  style={[
-                    textStyle.fs_mont_12_400,
-                    { textAlign: 'center' },
-                  ]}>
+                <Text style={[textStyle.fs_mont_12_400, {textAlign: 'center'}]}>
                   Loading more astrologers...
                 </Text>
               </View>
             ) : null
           }
-          renderItem={({ item }) => (
+          renderItem={({item}) => (
             <Pressable
               onPress={() =>
                 navigation.navigate('Astrologers', {
                   screen: 'AstrologerDetails',
-                  params: { id: item.id },
+                  params: {id: item.id},
                 })
               }
-              style={{ marginHorizontal: scale(10) }}
+              style={{marginHorizontal: scale(10)}}
               key={`card-astrologer-${item.id}`}>
               <AstrologerCard
                 id={item.id}
                 online={
-                  item.isChatOnline ||
-                  item.isVideoOnline ||
-                  item.isAudioOnline
+                  item.isChatOnline || item.isVideoOnline || item.isAudioOnline
                 }
                 isChatAvailable={item.isChatOnline}
                 isVideoAvailable={item.isVideoOnline}
@@ -363,11 +357,7 @@ const AstrologersList = () => {
                 justifyContent: 'center',
                 alignItems: 'center',
               }}>
-              <Text
-                style={[
-                  textStyle.fs_mont_12_400,
-                  { textAlign: 'center' },
-                ]}>
+              <Text style={[textStyle.fs_mont_12_400, {textAlign: 'center'}]}>
                 No astrologers found.
               </Text>
             </View>
