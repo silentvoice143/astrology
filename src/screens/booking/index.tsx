@@ -155,6 +155,7 @@ const Booking = () => {
         appointmentDuration: totalMinutes,
         sessionType: bookinType[0] === 'ONLINE' ? sessionType[0] : 'CHAT',
         bookingType: bookinType[0],
+        isFreeBooking: false,
       };
 
       const payload = await dispatch(bookAppointmentReq(body)).unwrap();

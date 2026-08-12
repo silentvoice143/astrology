@@ -242,7 +242,12 @@ const Home = () => {
     sortedAstrologerData,
     hasFetchedInitialData,
   ]);
-
+  console.log(
+    isFirstChatModalOpen,
+    freeChatModalShown,
+    freeChatUsed,
+    '-----------------modal start',
+  );
   return (
     <ScreenLayout>
       {isFirstChatModalOpen && (

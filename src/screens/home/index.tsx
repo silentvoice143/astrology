@@ -31,7 +31,9 @@ import {Astrologers as AstrologersType, UserDetail} from '../../utils/types';
 import {textStyle} from '../../constants/text-style';
 import {useWebSocket} from '../../hooks/use-socket-new';
 import SlidingAstrologerCard from '../../components/home/card-carosel-astrologer';
-
+import FirstChatFreePopup from '../../components/free-chat-popup';
+import {setFreeChatModalShown} from '../../store/reducer/auth';
+import {useUserRole} from '../../hooks/use-role';
 const width = Dimensions.get('window').width - 40;
 
 const HomeNew = () => {
@@ -71,6 +73,31 @@ const HomeNew = () => {
 
   const [astrologerData, setAstrologerData] = useState<any[]>([]);
   const [loadingMore, setLoadingMore] = useState(false);
+
+  const [isFirstChatModalOpen, setIsFirstChatModalOpen] = useState(false);
+  const role = useUserRole();
+
+  const {freeChatModalShown} = useAppSelector(state => state.auth);
+
+  const freeChatUsed = user?.freeChatUsed;
+
+  useEffect(() => {
+    if (
+      freeChatUsed ||
+      isFirstChatModalOpen ||
+      freeChatModalShown ||
+      role === 'ASTROLOGER'
+    ) {
+      return;
+    }
+
+    const timeout = setTimeout(() => {
+      setIsFirstChatModalOpen(true);
+      dispatch(setFreeChatModalShown());
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [freeChatUsed, isFirstChatModalOpen, freeChatModalShown, role, dispatch]);
 
   const getTopBannerData = async () => {
     if (loading.topbanner) return;
@@ -192,9 +219,25 @@ const HomeNew = () => {
       setHasFetchedInitialData(true);
     }
   }, [hasFetchedInitialData]);
-
+  console.log(
+    isFirstChatModalOpen,
+    freeChatModalShown,
+    freeChatUsed,
+    '-----------------modal start',
+  );
   return (
     <PageWithHeader rounded={true} scrollHeader>
+      {isFirstChatModalOpen && (
+        <FirstChatFreePopup
+          isOpen={isFirstChatModalOpen}
+          onClose={() => {
+            setIsFirstChatModalOpen(false);
+          }}
+          onClaimPress={() => {
+            navigation.navigate('Astrologers');
+          }}
+        />
+      )}
       {/* HERO BANNER */}
       <View style={{flex: 1, backgroundColor: COLORS.theme.white}}>
         <View

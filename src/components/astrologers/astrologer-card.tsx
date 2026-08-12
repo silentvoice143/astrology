@@ -1,19 +1,19 @@
-import React, { use, useEffect } from 'react';
-import { View, Text, StyleSheet, Image, TouchableOpacity } from 'react-native';
-import { scale, verticalScale, moderateScale } from '../../utils/sizer';
-import { colors, themeColors } from '../../constants/colors';
+import React, {use, useEffect} from 'react';
+import {View, Text, StyleSheet, Image, TouchableOpacity} from 'react-native';
+import {scale, verticalScale, moderateScale} from '../../utils/sizer';
+import {colors, themeColors} from '../../constants/colors';
 import LikeIcon from '../../assets/icons/like-icon';
 import StarIcon from '../../assets/icons/star-icon';
 import CallIcon from '../../assets/icons/call-icon';
 import VideoCallIcon from '../../assets/icons/video-call-icon';
 import ChatIcon from '../../assets/icons/chat-icon';
-import { textStyle } from '../../constants/text-style';
-import { formatPrice } from '../../utils/utils';
+import {textStyle} from '../../constants/text-style';
+import {formatPrice} from '../../utils/utils';
 import Avatar from '../avatar';
-import { useWebSocket } from '../../hooks/use-socket-new';
-import { useAppSelector } from '../../hooks/redux-hook';
+import {useWebSocket} from '../../hooks/use-socket-new';
+import {useAppSelector} from '../../hooks/redux-hook';
 import Toast from 'react-native-toast-message';
-import { useTypedNavigation } from '../../hooks/navigation';
+import {useTypedNavigation} from '../../hooks/navigation';
 
 type SessionType = 'chat' | 'audio' | 'video';
 
@@ -63,23 +63,23 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
   isChatAvailable,
   isAudioAvailable,
 }) => {
-  const { user } = useAppSelector(state => state.auth);
-  const { isConnected, send } = useWebSocket(user?.id);
-  const navigation = useTypedNavigation()
+  const {user} = useAppSelector(state => state.auth);
+  const {isConnected, send} = useWebSocket(user?.id);
+  const navigation = useTypedNavigation();
 
   // NEW: Handle session press with type
   const handleSessionPress = (sessionType: SessionType) => {
     navigation.navigate('Astrologers', {
       screen: 'AstrologerDetails',
-      params: { id: id },
-    })
+      params: {id: id},
+    });
     return;
     if (!isConnected) {
-      Toast.show({ type: 'info', text1: 'Wait for connection, please.' });
+      Toast.show({type: 'info', text1: 'Wait for connection, please.'});
       return;
     }
     if (onSessionPress) {
-      onSessionPress(sessionType ?? "audio");
+      onSessionPress(sessionType ?? 'audio');
     } else {
       // Fallback to old handlers for backward compatibility
       switch (sessionType) {
@@ -97,7 +97,7 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
   };
 
   useEffect(() => {
-    send('/app/session.active', {}, JSON.stringify({ astrologerId: user?.id }));
+    send('/app/session.active', {}, JSON.stringify({astrologerId: user?.id}));
   }, [id]);
 
   return (
@@ -117,7 +117,7 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
               backgroundColor: online ? colors.success.base : colors.error.base,
             }}></View>
           <Avatar
-            image={{ uri: imageUri }}
+            image={{uri: imageUri}}
             fallbackText={name.charAt(0).toUpperCase()}
             containerStyle={{
               borderWidth: 1,
@@ -127,7 +127,7 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
           />
         </View>
 
-        <View style={{ flex: 1, marginLeft: scale(12) }}>
+        <View style={{flex: 1, marginLeft: scale(12)}}>
           <View style={styles.nameRow}>
             <Text style={styles.name}>{name}</Text>
             {/* <LikeIcon /> */}
@@ -224,11 +224,7 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
               }}>
               <ChatIcon
                 size={16}
-                color={
-                  false
-                    ? themeColors.text.primary
-                    : colors.whiteText
-                }
+                color={false ? themeColors.text.primary : colors.whiteText}
               />
             </View>
 
@@ -241,7 +237,7 @@ const AstrologerCard: React.FC<AstrologerCardProps> = ({
                     : themeColors.text.primary,
                 },
               ]}>
-              {false
+              {freeChatAvailable
                 ? 'Free Chat'
                 : formatPrice(pricePerMinuteChat, 'min')}
             </Text>
@@ -263,7 +259,7 @@ const styles = StyleSheet.create({
     marginVertical: verticalScale(10),
     shadowColor: '#000',
     shadowOpacity: 0.1,
-    shadowOffset: { width: 0, height: 2 },
+    shadowOffset: {width: 0, height: 2},
     shadowRadius: 6,
     elevation: 4,
   },

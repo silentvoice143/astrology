@@ -9,24 +9,56 @@ import React, {useEffect, useState} from 'react';
 import PageWithHeader from '../../componentsV1/layout/page-with-header';
 import {scale, verticalScale, scaleFont} from '../../utils/sizer';
 import {colors, COLORS, themeColors} from '../../constants/colors';
+
 import {useAppDispatch, useAppSelector} from '../../hooks/redux-hook';
 import {
   getAllAstrologerById,
   getAllAstrologers,
 } from '../../store/reducer/astrologers';
 import {useNavigation} from '@react-navigation/native';
+import {bookAppointmentReq} from '../../store/reducer/booking';
+import Toast from 'react-native-toast-message';
 
 const Astrologers = ({route}: any) => {
-  console.log('I am on this page', route?.params);
+  console.log('I am on this page');
   const {id} = route.params;
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [isFetchingMore, setIsFetchingMore] = useState(false);
   const [loadingAstrologerData, setLoadingAstrologerData] = useState(false);
-  const [astrologersData, setAstrologersData] = useState<any[]>([]);
-
+  const [astrologersData, setAstrologersData] = useState<any>({});
+  const {freeChatUsed} = useAppSelector(state => state.auth.user);
   const dispatch = useAppDispatch();
   const navigation = useNavigation<any>();
+  const [loading, setLoading] = useState(false);
+  console.log(astrologersData, '------------------id');
+  const handleBooking = async (id: string) => {
+    // Implement booking logic here
+    try {
+      setLoading(true);
+      const body = {
+        appointmentDate: new Date().toISOString().split('T')[0],
+        reason: 'all',
+        astrologerId: id,
+        appointmentDuration: 2,
+        sessionType: 'CHAT',
+        bookingType: 'ONLINE',
+        isFreeBooking: true,
+      };
+
+      const payload = await dispatch(bookAppointmentReq(body)).unwrap();
+      if (payload.success) {
+        Toast.show({
+          type: 'success',
+          text1: 'Appointment booked successfully!',
+        });
+      }
+    } catch (err) {
+      console.log(err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchAstrologersData = async (
     pageNumber = 1,
@@ -216,10 +248,12 @@ const Astrologers = ({route}: any) => {
               alignItems: 'center',
             }}
             onPress={() =>
-              navigation.navigate('Astrologers', {
-                screen: 'BookAppointment',
-                params: {category: '', mode: 'ONLINE', id: id},
-              })
+              freeChatUsed
+                ? navigation.navigate('Astrologers', {
+                    screen: 'BookAppointment',
+                    params: {category: '', mode: 'ONLINE', id: id},
+                  })
+                : handleBooking(astrologersData.user?.id)
             }>
             <Text
               style={{
@@ -227,7 +261,7 @@ const Astrologers = ({route}: any) => {
                 color: COLORS.theme.white,
                 fontWeight: '700',
               }}>
-              Book Online
+              Book Online {!freeChatUsed && '(Free Chat)'}
             </Text>
           </TouchableOpacity>
 
